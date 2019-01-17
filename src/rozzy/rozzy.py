@@ -1,12 +1,19 @@
-from typing import Optional, Dict
+__all__ = ['Rozzy']
+
+from typing import Optional, Dict, Iterator
+from uuid import uuid4
 import os
 import pathlib
 import logging
 import contextlib
+import shutil
 
 import bugzoo
+from bugzoo import Bug as BugZooSnapshot
+from bugzoo import Container as BugZooContainer
 
 from .exceptions import RozzyException
+from .container import Container
 
 logger = logging.getLogger(__name__)  # type: logging.Logger
 logger.setLevel(logging.DEBUG)
@@ -53,3 +60,44 @@ class Rozzy(object):
         The BugZoo daemon used by Rozzy.
         """
         return self.__bugzoo
+
+    @contextlib.contextmanager
+    def launch(self) -> Iterator[Container]:
+        # fetch the BugZoo snapshot
+        bz = self.bugzoo
+        name_snapshot = 'robust:942eb3b'
+        snapshot = bz.bugs[name_snapshot]
+
+        # generate a unique identifier for the container
+        uuid = uuid4()
+        logger.debug("UUID for container: %s", uuid)
+        dir_host = os.path.join(self.workspace, 'containers', uuid.hex)
+        dir_container = '/.rozzy'
+        volumes = {dir_host: {'bind': dir_host, 'mode': 'rw'}}
+        bz_container = None  # type: Optional[BugZooContainer]
+
+        try:
+            logger.debug("creating container directory: %s", dir_host)
+            os.makedirs(dir_host, exist_ok=True)
+            logger.debug("created container directory: %s", dir_host)
+
+            # FIXME launch as user
+            logger.debug("launching docker container")
+            bz_container = bz.containers.provision(
+                snapshot,
+                volumes=volumes)
+            logger.debug("launched docker container")
+            container = Container(bz, bz_container, uuid)
+            yield container
+
+        finally:
+            if bz_container:
+                bzid = bz_container.id
+                logger.debug("destroying docker container: %s", bzid)
+                del bz.containers[bzid]
+                logger.debug("destroyed docker container: %s", bzid)
+
+            logger.debug("destroying container directory: %s", dir_host)
+            if os.path.exists(dir_host):
+                shutil.rmtree(dir_host)
+            logger.debug("destroyed container directory: %s", dir_host)
