@@ -1,5 +1,6 @@
 # rozzy
 
+[![Build Status](https://travis-ci.com/ChrisTimperley/rozzy.svg?token=NEepgzkwf1KGUTphtdZ4&branch=master)](https://travis-ci.com/ChrisTimperley/rozzy)
 
 ## Features
 
