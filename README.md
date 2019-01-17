@@ -11,3 +11,10 @@
 * Plugin-based simulator support.
 * Modular oracles.
 * Trace collection and streaming.
+
+
+## Applications
+
+* Property-based testing
+* Blackbox fuzzing
+* Model discovery
