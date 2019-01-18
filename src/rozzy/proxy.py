@@ -53,6 +53,18 @@ class ParameterServerProxy(object):
         self.__caller_id = '/rozzy'
         self.__connection = connection
 
+    def __contains__(self, key: str) -> bool:
+        """
+        Determines whether the parameter server contains a given parameter
+        or tree with a given key.
+        """
+        conn = self.__connection
+        code, msg, result = conn.hasParam(self.__caller_id, key)
+        if code != 1:
+            raise RozzyException("bad API call!")
+        assert isinstance(result, bool)
+        return result
+
     def __iter__(self) -> Iterator[str]:
         """
         Returns an iterator over the names of the parameters stored on the server.
