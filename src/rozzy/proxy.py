@@ -86,6 +86,16 @@ class ParameterServerProxy(object):
             raise KeyError(key)
         return result
 
+    def __setitem__(self, key: str, value: Any) -> None:
+        """
+        Sets the value of a parameter on the server. If the value is a
+        dictionary, it will be treated as a parameter tree.
+        """
+        conn = self.__connection
+        code, msg, result = conn.setParam(self.__caller_id, key, value)
+        if code != 1:
+            raise RozzyException("bad API call!")
+
     def __delitem__(self, key: str) -> None:
         """
         Deletes a given parameter (or parameter tree) from the server.
