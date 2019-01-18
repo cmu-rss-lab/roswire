@@ -83,6 +83,23 @@ class ParameterServerProxy(object):
             raise KeyError(key)
         return result
 
+    def __delitem__(self, key: str) -> None:
+        """
+        Deletes a given parameter (or parameter tree) from the server.
+
+        Parameters:
+            key: the key for the parameter or parameter tree.
+
+        Raises:
+            KeyError: if no parameter or parameter tree is found with the
+                given key on the server.
+        """
+        conn = self.__connection
+        code, msg, result = conn.deleteParam(self.__caller_id, key)
+        # FIXME check for a specific code
+        if code != 1:
+            raise KeyError(key)
+
 
 class ROSProxy(object):
     """
