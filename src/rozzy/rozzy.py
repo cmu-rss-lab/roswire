@@ -65,8 +65,12 @@ class Rozzy(object):
     def launch(self) -> Iterator[Container]:
         # fetch the BugZoo snapshot
         bz = self.bugzoo
-        name_snapshot = 'robust:942eb3b'
+        name_snapshot = 'brass'
         snapshot = bz.bugs[name_snapshot]
+
+        # TODO allocate a random host port for ROS communications
+        # FIXME even better, interact with the ROS master directly
+        port_host = 8080
 
         # generate a unique identifier for the container
         uuid = uuid4()
@@ -85,9 +89,10 @@ class Rozzy(object):
             logger.debug("launching docker container")
             bz_container = bz.containers.provision(
                 snapshot,
-                volumes=volumes)
+                volumes=volumes,
+                ports={11311: port_host})
             logger.debug("launched docker container")
-            container = Container(bz, bz_container, uuid)
+            container = Container(bz, bz_container, uuid, port_host)
             yield container
 
         finally:

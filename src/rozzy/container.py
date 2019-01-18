@@ -15,16 +15,23 @@ class Container(object):
     def __init__(self,
                  daemon_bugzoo: BugZooDaemon,
                  container_bugzoo: BugZooContainer,
-                 uuid: UUID
+                 uuid: UUID,
+                 port_host: int
                  ) -> None:
+        assert port_host > 1023
         self.__daemon_bugzoo = daemon_bugzoo
         self.__container_bugzoo = container_bugzoo
         self.__uuid = uuid
         self.__shell = ShellProxy(daemon_bugzoo, container_bugzoo)
+        self.__port_host = port_host
 
     @property
     def uuid(self) -> UUID:
         return self.__uuid
+
+    @property
+    def port_host(self) -> int:
+        return self.__port_host
 
     @property
     def ip_address(self) -> str:
@@ -41,13 +48,15 @@ class Container(object):
         return self.__shell
 
     @contextlib.contextmanager
-    def roscore(self, port: int = 13111) -> Iterator[ROSProxy]:
-        assert port > 0
-        cmd = "roscore {} &> /dev/null &".format(port)
-        self.shell.execute(cmd)
+    def roscore(self) -> Iterator[ROSProxy]:
+        # http://wiki.ros.org/ROS/NetworkSetup
+        # http://ros-users.122217.n3.nabble.com/Current-best-practice-for-multiple-interfaces-td4019355.html
+        # https://answers.ros.org/question/297713/localhost-vs-0000/
+        self.shell.non_blocking_execute("roscore -p 11311")
         try:
             yield ROSProxy(shell=self.shell,
-                           ip_address=self.ip_address,
-                           port=port)
+                           # ip_address=self.ip_address,  # FIXME
+                           ip_address='127.0.0.1',
+                           port=self.port_host)
         finally:
             self.shell.execute("pkill roscore")
