@@ -1,6 +1,6 @@
 __all__ = ['ShellProxy', 'ROSProxy']
 
-from typing import Tuple, Dict, Optional
+from typing import Tuple, Dict, Optional, Iterator
 import os
 import xmlrpc.client
 import logging
@@ -41,6 +41,26 @@ class ShellProxy(object):
         return r
 
 
+class ParameterServerProxy(object):
+    def __init__(self, connection: xmlrpc.client.ServerProxy) -> None:
+        """
+        Constructs a new parameter server proxy using an XML-RPC server proxy
+        for a given ROS master.
+        """
+        self.__caller_id = '/rozzy'
+        self.__connection = connection
+
+    def __iter__(self) -> Iterator[str]:
+        """
+        Returns an iterator over the names of the parameters stored on the server.
+        """
+        conn = self.__connection
+        code, msg, result = conn.getParamNames(self.__caller_id)
+        if code != 1:
+            raise RozzyException("bad API call!")
+        yield from result
+
+
 class ROSProxy(object):
     """
     Provides access to a remote ROS master via XML-RPC.
@@ -57,11 +77,8 @@ class ROSProxy(object):
         self.__uri = "http://{}:{}".format(ip_address, port)
         logger.debug("connecting to ROS Master: %s", self.__uri)
         self.__connection = xmlrpc.client.ServerProxy(self.__uri)
-
-        # FIXME #1
-        time.sleep(5)
-
-        # self.__parameters = ParameterServerProxy()
+        time.sleep(5)  # FIXME #1
+        self.__parameters = ParameterServerProxy(self.__connection)
 
     # TODO ability to kill nodes
     @property
@@ -70,6 +87,13 @@ class ROSProxy(object):
         The URI of the ROS Master.
         """
         return self.__uri
+
+    @property
+    def parameters(self) -> ParameterServerProxy:
+        """
+        Provides access to the parameter server for this ROS Master.
+        """
+        return self.__parameters
 
     @property
     def connection(self) -> xmlrpc.client.ServerProxy:
@@ -104,13 +128,6 @@ class ROSProxy(object):
         return result
 
     """
-    @property
-    def parameters(self) -> ParameterServerProxy:
-        return self.__parameters
-
-        # publishers, subscribers, services
-        # nodes
-
     def launch(self) -> None:
         pass
 
