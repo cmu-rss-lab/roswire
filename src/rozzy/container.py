@@ -2,6 +2,7 @@ __all__ = ['Container']
 
 from typing import Iterator
 from uuid import UUID
+import contextlib
 
 from bugzoo import BugZoo as BugZooDaemon
 from bugzoo import Container as BugZooContainer
@@ -38,3 +39,13 @@ class Container(object):
     @property
     def shell(self) -> ShellProxy:
         return self.__shell
+
+    @contextlib.contextmanager
+    def roscore(self, port: int = 13111) -> Iterator[ROSProxy]:
+        self.shell.execute("roscore &> /dev/null &")
+        try:
+            yield ROSProxy(shell=self.shell,
+                           ip_address=self.ip_address,
+                           port=port)
+        finally:
+            self.shell.execute("killall roscore")
