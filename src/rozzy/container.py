@@ -5,6 +5,7 @@ from uuid import UUID
 
 from bugzoo import BugZoo as BugZooDaemon
 from bugzoo import Container as BugZooContainer
+from bugzoo.cmd import PendingExecResponse
 
 
 class ShellProxy(object):
@@ -15,19 +16,18 @@ class ShellProxy(object):
         self.__daemon_bugzoo = daemon_bugzoo
         self.__container_bugzoo = container_bugzoo
 
-    def execute(self,
-                command: str,
-                context: Optional[str] = None,
-                stdout: bool = True,
-                stderr: bool = False
-                ) -> Tuple[int, str, float]:
+    def execute(self, command: str, **kwargs) -> Tuple[int, str, float]:
         mgr = self.__daemon_bugzoo.containers
-        r = mgr.command(self.__container_bugzoo,
-                        command,
-                        context=context,
-                        stdout=stdout,
-                        stderr=stderr)
-        return (r.code, r.output, r.duration)
+        r = mgr.command(self.__container_bugzoo, command, **kwargs)
+        return r.code, r.output, r.duration
+
+    def non_blocking_execute(self,
+                             command: str,
+                             **kwargs
+                             ) -> PendingExecResponse:
+        mgr = self.__daemon_bugzoo.containers
+        r = mgr.command(self.__container_bugzoo, command, block=False, **kwargs)
+        return r
 
 
 class Container(object):
@@ -42,5 +42,4 @@ class Container(object):
 
     @property
     def shell(self) -> ShellProxy:
-        return ShellProxy(self.__daemon_bugzoo,
-                          self.__container_bugzoo)
+        return ShellProxy(self.__daemon_bugzoo, self.__container_bugzoo)
