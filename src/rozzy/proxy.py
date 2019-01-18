@@ -42,6 +42,9 @@ class ShellProxy(object):
 
 
 class ParameterServerProxy(object):
+    """
+    See: http://wiki.ros.org/ROS/Parameter%20Server%20API
+    """
     def __init__(self, connection: xmlrpc.client.ServerProxy) -> None:
         """
         Constructs a new parameter server proxy using an XML-RPC server proxy
