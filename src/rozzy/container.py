@@ -41,14 +41,13 @@ class Container(object):
         return self.__shell
 
     @contextlib.contextmanager
-    def roscore(self) -> Iterator[ROSProxy]:
-        # http://wiki.ros.org/ROS/NetworkSetup
-        # http://ros-users.122217.n3.nabble.com/Current-best-practice-for-multiple-interfaces-td4019355.html
-        # https://answers.ros.org/question/297713/localhost-vs-0000/
-        self.shell.non_blocking_execute("roscore -p 11311")
+    def roscore(self, port: int = 11311) -> Iterator[ROSProxy]:
+        assert port > 1023
+        cmd = "roscore -p {}".format(port)
+        self.shell.non_blocking_execute(cmd)
         try:
             yield ROSProxy(shell=self.shell,
                            ip_address=self.ip_address,
-                           port=11311)
+                           port=port)
         finally:
             self.shell.execute("pkill roscore")
