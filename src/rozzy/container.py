@@ -42,10 +42,12 @@ class Container(object):
 
     @contextlib.contextmanager
     def roscore(self, port: int = 13111) -> Iterator[ROSProxy]:
-        self.shell.execute("roscore &> /dev/null &")
+        assert port > 0
+        cmd = "roscore {} &> /dev/null &".format(port)
+        self.shell.execute(cmd)
         try:
             yield ROSProxy(shell=self.shell,
                            ip_address=self.ip_address,
                            port=port)
         finally:
-            self.shell.execute("killall roscore")
+            self.shell.execute("pkill roscore")
