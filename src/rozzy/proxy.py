@@ -3,12 +3,17 @@ __all__ = ['ShellProxy', 'ROSProxy']
 from typing import Tuple, Dict
 import os
 import xmlrpc.client
+import logging
+import time
 
 from bugzoo import BugZoo as BugZooDaemon
 from bugzoo import Container as BugZooContainer
 from bugzoo.cmd import PendingExecResponse
 
 from .exceptions import RozzyException
+
+logger = logging.getLogger(__name__)  # type: logging.Logger
+logger.setLevel(logging.DEBUG)
 
 
 class ShellProxy(object):
@@ -50,7 +55,12 @@ class ROSProxy(object):
         self.__port = port
         self.__ip_address = ip_address
         self.__uri = "http://{}:{}".format(ip_address, port)
+        logger.debug("connecting to ROS Master: %s", self.__uri)
         self.__connection = xmlrpc.client.ServerProxy(self.__uri)
+
+        # FIXME #1
+        time.sleep(5)
+
         # self.__parameters = ParameterServerProxy()
 
     # TODO ability to kill nodes
