@@ -55,8 +55,7 @@ class Container(object):
         self.shell.non_blocking_execute("roscore -p 11311")
         try:
             yield ROSProxy(shell=self.shell,
-                           # ip_address=self.ip_address,  # FIXME
-                           ip_address='127.0.0.1',
-                           port=self.port_host)
+                           ip_address=self.ip_address,
+                           port=11311)
         finally:
             self.shell.execute("pkill roscore")
