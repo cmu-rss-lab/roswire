@@ -1,6 +1,6 @@
 __all__ = ['ShellProxy', 'ROSProxy']
 
-from typing import Tuple, Dict, Optional, Iterator
+from typing import Tuple, Dict, Optional, Iterator, Any
 import os
 import xmlrpc.client
 import logging
@@ -59,6 +59,29 @@ class ParameterServerProxy(object):
         if code != 1:
             raise RozzyException("bad API call!")
         yield from result
+
+    def __getitem__(self, key: str) -> Any:
+        """
+        Fetches the value of a given parameter from the server.
+        If the provided key is a namespace, then the contents of that
+        namespace will be returned as a dictionary.
+
+        Parameters:
+            key: the name of the parameter (or namespace).
+
+        Returns:
+            The value of the parameter or the contents of the given namespace.
+
+        Raises:
+            KeyError: if no parameter with the given key is found on the
+                parameter server.
+        """
+        conn = self.__connection
+        code, msg, result = conn.getParam(self.__caller_id, key)
+        # FIXME check for a specific code
+        if code != 1:
+            raise KeyError(key)
+        return result
 
 
 class ROSProxy(object):
