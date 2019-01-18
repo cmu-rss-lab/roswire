@@ -68,10 +68,6 @@ class Rozzy(object):
         name_snapshot = 'brass'
         snapshot = bz.bugs[name_snapshot]
 
-        # TODO allocate a random host port for ROS communications
-        # FIXME even better, interact with the ROS master directly
-        port_host = 8080
-
         # generate a unique identifier for the container
         uuid = uuid4()
         logger.debug("UUID for container: %s", uuid)
@@ -89,10 +85,9 @@ class Rozzy(object):
             logger.debug("launching docker container")
             bz_container = bz.containers.provision(
                 snapshot,
-                volumes=volumes,
-                ports={11311: port_host})
+                volumes=volumes)
             logger.debug("launched docker container")
-            container = Container(bz, bz_container, uuid, port_host)
+            container = Container(bz, bz_container, uuid)
             yield container
 
         finally:

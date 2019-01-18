@@ -15,23 +15,16 @@ class Container(object):
     def __init__(self,
                  daemon_bugzoo: BugZooDaemon,
                  container_bugzoo: BugZooContainer,
-                 uuid: UUID,
-                 port_host: int
+                 uuid: UUID
                  ) -> None:
-        assert port_host > 1023
         self.__daemon_bugzoo = daemon_bugzoo
         self.__container_bugzoo = container_bugzoo
         self.__uuid = uuid
         self.__shell = ShellProxy(daemon_bugzoo, container_bugzoo)
-        self.__port_host = port_host
 
     @property
     def uuid(self) -> UUID:
         return self.__uuid
-
-    @property
-    def port_host(self) -> int:
-        return self.__port_host
 
     @property
     def ip_address(self) -> str:
