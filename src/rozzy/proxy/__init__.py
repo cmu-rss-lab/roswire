@@ -10,7 +10,7 @@ from bugzoo import BugZoo as BugZooDaemon
 from bugzoo import Container as BugZooContainer
 from bugzoo.cmd import PendingExecResponse
 
-from .exceptions import RozzyException
+from ..exceptions import RozzyException
 
 logger = logging.getLogger(__name__)  # type: logging.Logger
 logger.setLevel(logging.DEBUG)
