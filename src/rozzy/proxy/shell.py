@@ -28,5 +28,6 @@ class ShellProxy:
                              **kwargs
                              ) -> PendingExecResponse:
         mgr = self.__daemon_bugzoo.containers
-        r = mgr.command(self.__container_bugzoo, command, block=False, **kwargs)
+        r = mgr.command(self.__container_bugzoo, command, block=False,
+                        **kwargs)
         return r

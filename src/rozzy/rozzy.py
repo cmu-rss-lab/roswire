@@ -8,7 +8,7 @@ import logging
 import contextlib
 import shutil
 
-import bugzoo
+from bugzoo import BugZoo as BugZooDaemon
 from bugzoo import Bug as BugZooSnapshot
 from bugzoo import Container as BugZooContainer
 
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)  # type: logging.Logger
 logger.setLevel(logging.DEBUG)
 
 
-class Rozzy(object):
+class Rozzy:
     def __init__(self,
                  dir_workspace: Optional[str] = None,
                  daemon_bugzoo: Optional[bugzoo.BugZoo] = None
@@ -42,7 +42,7 @@ class Rozzy(object):
 
         if not daemon_bugzoo:
             logger.debug("no bugzoo daemon provided; creating one instead")
-            self.__bugzoo = bugzoo.BugZoo()
+            self.__bugzoo = BugZooDaemon()
         else:
             logger.debug("using provided bugzoo daemon")
             self.__bugzoo = daemon_bugzoo
@@ -55,7 +55,7 @@ class Rozzy(object):
         return self.__dir_workspace
 
     @property
-    def bugzoo(self) -> bugzoo.BugZoo:
+    def bugzoo(self) -> BugZooDaemon:
         """
         The BugZoo daemon used by Rozzy.
         """
@@ -64,7 +64,7 @@ class Rozzy(object):
     @contextlib.contextmanager
     def launch(self) -> Iterator[Container]:
         # fetch the BugZoo snapshot
-        bz = self.bugzoo
+        bz = self.bugzoo  # type: BugZooDaemon
         name_snapshot = 'brass'
         snapshot = bz.bugs[name_snapshot]
 

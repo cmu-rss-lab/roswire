@@ -36,7 +36,8 @@ class ParameterServerProxy:
 
     def __iter__(self) -> Iterator[str]:
         """
-        Returns an iterator over the names of the parameters stored on the server.
+        Returns an iterator over the names of the parameters stored on the
+        server.
         """
         conn = self.__connection
         code, msg, result = conn.getParamNames(self.__caller_id)
@@ -93,6 +94,3 @@ class ParameterServerProxy:
         # FIXME check for a specific code
         if code != 1:
             raise KeyError(key)
-
-
-
