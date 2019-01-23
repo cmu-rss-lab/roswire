@@ -22,7 +22,7 @@ logger.setLevel(logging.DEBUG)
 class Rozzy:
     def __init__(self,
                  dir_workspace: Optional[str] = None,
-                 daemon_bugzoo: Optional[bugzoo.BugZoo] = None
+                 daemon_bugzoo: Optional[BugZooDaemon] = None
                  ) -> None:
         if not dir_workspace:
             logger.debug("no workspace specified: using default workspace.")
