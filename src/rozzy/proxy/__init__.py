@@ -63,25 +63,9 @@ class ROSProxy(object):
             raise RozzyException("bad API call!")
         return {name: typ for (name, typ) in result}
 
-    def lookup_node(self, name: str) -> Optional[str]:
-        """
-        Attempts to retrieve the XML-RPC URI of a given node.
-
-        Parameters:
-            name: the name of the node.
-
-        Returns:
-            the URI of the node if found, or None if not.
-        """
-        conn = self.connection
-        code, msg, result = conn.lookupNode(self.__caller_id, name)
-        if code != 1:
-            return None
-        # TODO convert URI to host network
-        return result
-
     """
-    def launch(self) -> None:
+    def launch(self, fn_launch: str) -> None:
+        cmd = "roslaunch '{}'".format(fn_launch)
         pass
 
     def record(self) -> Iterator[ROSBagProxy]:
