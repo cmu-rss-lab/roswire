@@ -1,4 +1,4 @@
-__all__ = ['ShellProxy', 'ParameterServerProxy', 'ROSProxy']
+__all__ = ['ShellProxy', 'ParameterServerProxy', 'ROSProxy', 'ROSBagProxy']
 
 from typing import Tuple, Dict, Optional, Iterator, Any
 import os
@@ -8,6 +8,7 @@ import time
 
 from .shell import ShellProxy
 from .parameters import ParameterServerProxy
+from .rosbag import ROSBagProxy
 from ..exceptions import RozzyException
 
 logger = logging.getLogger(__name__)  # type: logging.Logger
@@ -54,6 +55,11 @@ class ROSProxy(object):
         The XML-RPC connection to the ROS master.
         """
         return self.__connection
+
+    def bag(self) -> Iterator[ROSBagProxy]:
+        p = ROSBagProxy()
+        yield p
+        # ensure that the file inside the container is destroyed
 
     @property
     def topic_to_type(self) -> Dict[str, str]:
