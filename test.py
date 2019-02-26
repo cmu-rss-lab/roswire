@@ -13,7 +13,7 @@ def main():
             print(f"ROS Master URI: {ros.uri}")
             time.sleep(10)
             print(ros.topic_to_type)
-            print(ros.lookup_node('rosout'))
+            # print(ros.lookup_node('rosout'))
 
             """
             ros.parameters['/chris'] = 'hello!'
@@ -31,17 +31,16 @@ def main():
             # launch SITL on 5760
             # sim_vehicle.py -C -v ArduCopter --daemon --no-rebuild
             cmd = ' '.join([
-                "/ros_ws/src/ardupilot/build/sitl/bin/arducopter",
+                "/ros_ws/src/ArduPilot/build/sitl/bin/arducopter",
                 "--model copter"
             ])
             container.shell.non_blocking_execute(cmd)
 
             # launch mavros
-            # roslaunch mavros apm4.launch fcu_url:=tcp://127.0.0.1:5760:5760
             cmd = ' '.join([
                 "roslaunch",
                 "mavros apm.launch",
-                "fcu_url:=http://127.0.0.1:5760@5760"
+                "fcu_url:=tcp://127.0.0.1:5760@5760"
             ])
             container.shell.non_blocking_execute(cmd)
 
