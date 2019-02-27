@@ -76,7 +76,7 @@ class NodeManagerProxy:
         if code != 0:
             raise RozzyException
         # TODO convert URI to host network
-        return
+        raise NotImplementedError
 
     def __delitem__(self, name: str) -> None:
         try:
