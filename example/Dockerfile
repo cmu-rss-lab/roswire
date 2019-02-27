@@ -1,16 +1,18 @@
-FROM ros:kinetic
+FROM ros:lunar
 
 # install core utilities
 WORKDIR /ros_ws
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
       apt-utils \
+      sudo \
       xvfb \
       vim \
       wget \
       curl \
       python-catkin-tools \
       python-rosinstall-generator \
+      python-pip \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
@@ -27,6 +29,9 @@ RUN . /opt/ros/${ROS_DISTRO}/setup.sh \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
+# install GeographicLib
+RUN /ros_ws/src/mavros/mavros/scripts/install_geographiclib_datasets.sh
+
 # build ArduPilot 3.6.4
 RUN git clone https://github.com/ArduPilot/ArduPilot src/ArduPilot \
  && cd src/ArduPilot \
@@ -35,17 +40,9 @@ RUN git clone https://github.com/ArduPilot/ArduPilot src/ArduPilot \
  && ./waf configure \
  && ./waf build
 
-# build
+# build mavros and dependencies
 RUN . /opt/ros/${ROS_DISTRO}/setup.sh \
  && catkin build
-
-RUN apt-get update \
- && apt-get install -y sudo \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
-
-# install GeographicLib
-RUN /ros_ws/src/mavros/mavros/scripts/install_geographiclib_datasets.sh
 
 # create entrypoint
 ENV ROS_WSPACE /ros_ws
