@@ -12,7 +12,7 @@ class ROSBagProxy:
         self.__dir_ctr_bag = None  # FIXME
 
     @contextlib.contextmanager
-    def record(self) -> Iterator[ROSBagRecorderProxy]:
+    def record(self) -> Iterator['ROSBagRecorderProxy']:
         # create a file for the bag
         cmd = "rosbag record -q -a -O {}"
         cmd = cmd.format(self.__fn_container)
