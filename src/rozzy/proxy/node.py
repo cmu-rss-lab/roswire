@@ -30,7 +30,7 @@ class NodeProxy:
         return self.__name
 
     @property
-    def url(self) -> NotImplementedError:
+    def url(self) -> str:
         """
         The URL that should be used to access this node from the host network.
         """
