@@ -1,6 +1,6 @@
 __all__ = ['NodeManagerProxy', 'NodeProxy']
 
-from typing import Iterator
+from typing import Iterator, Set
 import xmlrpc.client
 import logging
 
