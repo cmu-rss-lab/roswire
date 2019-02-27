@@ -64,7 +64,7 @@ class NodeManagerProxy:
 
     def __iter__(self) -> Iterator[str]:
         names = set()  # type: Set[str]
-        code, status, state = api.getSystemState()
+        code, status, state = self.api.getSystemState()
         for s in state:
             for t, l in s:
                 names.update(n for n in l)
