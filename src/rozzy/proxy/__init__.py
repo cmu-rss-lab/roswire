@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)  # type: logging.Logger
 logger.setLevel(logging.DEBUG)
 
 
-class ROSProxy(object):
+class ROSProxy:
     """
     Provides access to a remote ROS master via XML-RPC.
     """
