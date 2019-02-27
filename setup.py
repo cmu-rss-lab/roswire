@@ -27,7 +27,6 @@ setup(
     tests_require=[
         'pytest'
     ],
-    include_package_data=True,
     packages=find_packages('src'),
     package_dir={'': 'src'},
     py_modules=[splitext(basename(path))[0] for path in glob('src/*.py')],
@@ -40,4 +39,5 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7'
     ],
+    test_suites='tests'
 )
