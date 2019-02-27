@@ -21,6 +21,12 @@ setup(
         'bugzoo>=2.1.22',
         'attrs>=17.2.0'
     ],
+    setup_requires=[
+        'pytest-runner'
+    ],
+    tests_require=[
+        'pytest'
+    ],
     include_package_data=True,
     packages=find_packages('src'),
     package_dir={'': 'src'},
