@@ -3,7 +3,6 @@ services:
 - docker
 python:
 - '3.6'
-- '3.7'
 install:
 - pip install coveralls
 - pip install pycodestyle
