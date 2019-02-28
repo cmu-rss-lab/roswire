@@ -80,10 +80,12 @@ class NodeManagerProxy:
         code, status, uri = self.api.lookupNode('/.rozzy', name)
         if code == -1:
             raise NodeNotFoundError(name)
-        if code != 0:
-            m = f"unexpected error when attempting to find node [{name}]: {status}"
+        if code != 1:
+            m = f"unexpected error when attempting to find node [{name}]: {status} (code: {code})"   # noqa: pycodestyle
             raise RozzyException(m)
+
         # TODO convert URI to host network
+        print(f"CONTAINER URI: {uri}")
         raise NotImplementedError
 
     def __delitem__(self, name: str) -> None:
