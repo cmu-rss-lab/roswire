@@ -4,7 +4,7 @@ class RozzyException(Exception):
     """
 
 
-class NodeNotFound(RozzyException):
+class NodeNotFoundError(RozzyException):
     """
     No node was found with the given name.
     """

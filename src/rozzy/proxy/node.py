@@ -4,7 +4,7 @@ from typing import Iterator, Set
 import xmlrpc.client
 import logging
 
-from ..exceptions import RozzyException
+from ..exceptions import RozzyException, NodeNotFoundError
 
 logger = logging.getLogger(__name__)  # type: logging.Logger
 logger.setLevel(logging.DEBUG)
@@ -71,10 +71,18 @@ class NodeManagerProxy:
         yield from names
 
     def __getitem__(self, name: str) -> NodeProxy:
+        """
+        Attempts to fetch a given node.
+
+        Raises:
+            NodeNotFoundError: if there is no node with the given name.
+        """
         code, status, uri = self.api.lookupNode('/.rozzy', name)
-        # FIXME
+        if code == -1:
+            raise NodeNotFoundError(name)
         if code != 0:
-            raise RozzyException
+            m = f"unexpected error when attempting to find node [{name}]: {status}"
+            raise RozzyException(m)
         # TODO convert URI to host network
         raise NotImplementedError
 
