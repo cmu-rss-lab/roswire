@@ -65,6 +65,7 @@ def test_arducopter():
         print(f"PID: {node_mavros.pid}")
 
         print(list(ros.services))
+        print(ros.services['/mavros/set_mode'])
 
 
 if __name__ == '__main__':
