@@ -1,6 +1,6 @@
 __all__ = ['ParameterServerProxy']
 
-from typing import Iterator, Any
+from typing import Iterator, Any, Mapping
 import xmlrpc.client
 import logging
 
@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)  # type: logging.Logger
 logger.setLevel(logging.DEBUG)
 
 
-class ParameterServerProxy:
+class ParameterServerProxy(Mapping[str, Any]):
     """
     See: http://wiki.ros.org/ROS/Parameter%20Server%20API
     """
@@ -22,11 +22,18 @@ class ParameterServerProxy:
         self.__caller_id = '/rozzy'
         self.__connection = connection
 
-    def __contains__(self, key: str) -> bool:
+    def __len__(self) -> int:
+        """
+        Returns a count of the number of registered parameters.
+        """
+        return len(list(self))
+
+    def __contains__(self, key: object) -> bool:
         """
         Determines whether the parameter server contains a given parameter
         or tree with a given key.
         """
+        assert isinstance(key, str)
         conn = self.__connection
         code, msg, result = conn.hasParam(self.__caller_id, key)
         if code != 1:
