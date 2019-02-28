@@ -66,6 +66,7 @@ def test_arducopter():
 
         node_mavros = ros.nodes['/mavros']
         assert node_mavros.name == '/mavros'
+        assert node_mavros.pid > 0
         print(f"URL: {node_mavros.url}")
         print(f"PID: {node_mavros.pid}")
 
