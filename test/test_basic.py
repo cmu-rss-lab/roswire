@@ -5,6 +5,8 @@ import time
 
 import pytest
 
+import rozzy
+import rozzy.exceptions
 from rozzy import Rozzy, ROSProxy, Container
 
 
@@ -52,5 +54,21 @@ def test_arducopter():
             "fcu_url:=tcp://127.0.0.1:5760@5760"
         ])
         container.shell.non_blocking_execute(cmd)
-
         time.sleep(30)
+
+        assert set(ros.nodes) == {'/mavros', '/rosout'}
+        assert '/mavros' in ros.nodes
+        assert '/rosout' in ros.nodes
+        assert '/cool' not in ros.nodes
+
+        with pytest.raises(rozzy.exceptions.NodeNotFoundError):
+            ros.nodes['/cool']
+
+        node_mavros = ros.nodes['/mavros']
+        assert node_mavros.name == '/mavros'
+        print(f"URL: {node_mavros.url}")
+        print(f"PID: {node_mavros.pid}")
+
+
+if __name__ == '__main__':
+    test_arducopter()
