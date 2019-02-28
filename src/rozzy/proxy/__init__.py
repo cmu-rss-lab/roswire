@@ -1,5 +1,6 @@
 __all__ = [
     'ShellProxy',
+    'ServiceManagerProxy',
     'ParameterServerProxy',
     'NodeManagerProxy',
     'NodeProxy',
@@ -15,6 +16,7 @@ import time
 from .shell import ShellProxy
 from .parameters import ParameterServerProxy
 from .node import NodeProxy, NodeManagerProxy
+from .service import ServiceManagerProxy
 from ..exceptions import RozzyException
 
 logger = logging.getLogger(__name__)  # type: logging.Logger
@@ -40,6 +42,8 @@ class ROSProxy:
         time.sleep(5)  # FIXME #1
         self.__parameters = ParameterServerProxy(self.__connection)
         self.__nodes = NodeManagerProxy(self.__ip_address, self.__connection)
+        self.__services = \
+            ServiceManagerProxy(self.__ip_address, self.__connection)
 
     @property
     def uri(self) -> str:
@@ -54,6 +58,13 @@ class ROSProxy:
         Provides access to the nodes running on this ROS master.
         """
         return self.__nodes
+
+    @property
+    def services(self) -> ServiceManagerProxy:
+        """
+        Provides access to the services advertised on this ROS master.
+        """
+        return self.__services
 
     @property
     def parameters(self) -> ParameterServerProxy:
