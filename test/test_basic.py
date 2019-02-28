@@ -1,24 +1,24 @@
-from typing import Iterator
+from typing import Iterator, Tuple
 import contextlib
 import logging
 import time
 
 import pytest
 
-from rozzy import Rozzy, ROSProxy
+from rozzy import Rozzy, ROSProxy, Container
 
 
 @contextlib.contextmanager
-def build_test_environment() -> Iterator[ROSProxy]:
+def build_test_environment() -> Iterator[Tuple[ROSProxy, Container]]:
     rozzy = Rozzy()
     with rozzy.launch() as container:
         with container.roscore() as ros:
             time.sleep(5)
-            yield ros
+            yield (container, ros)
 
 
 def test_parameters():
-    with build_test_environment() as ros:
+    with build_test_environment() as (container, ros):
         assert ros.topic_to_type == {'/rosout': 'rosgraph_msgs/Log',
                                      '/rosout_agg': 'rosgraph_msgs/Log'}
 
@@ -36,12 +36,9 @@ def test_parameters():
             ros.parameters['/hello']
 
 
-def main():
+def test_arducopter():
     logging.basicConfig()
-    with build_test_environment() as ros:
-        # TODO connect to simulator: allow visualisation
-        # launch SITL on 5760
-        # sim_vehicle.py -C -v ArduCopter --daemon --no-rebuild
+    with build_test_environment() as (container, ros):
         cmd = ' '.join([
             "/ros_ws/src/ArduPilot/build/sitl/bin/arducopter",
             "--model copter"
@@ -57,9 +54,3 @@ def main():
         container.shell.non_blocking_execute(cmd)
 
         time.sleep(30)
-
-
-        print(ros.topic_to_type)
-
-        # launch_mavros = ros.launch("mavros apm.launch",
-        #                            {'fcu_url': 'tcp://127.0.0.1:5760:5760'})
