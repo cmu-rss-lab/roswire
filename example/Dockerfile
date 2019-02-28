@@ -1,4 +1,4 @@
-FROM ros:kinetic
+FROM ros:indigo
 
 # install core utilities
 WORKDIR /ros_ws
@@ -13,6 +13,7 @@ RUN apt-get update \
       python-catkin-tools \
       python-rosinstall-generator \
       python-pip \
+ && pip install future \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
@@ -30,7 +31,7 @@ RUN . /opt/ros/${ROS_DISTRO}/setup.sh \
  && rm -rf /var/lib/apt/lists/*
 
 # install GeographicLib
-RUN /ros_ws/src/mavros/mavros/scripts/install_geographiclib_datasets.sh
+# RUN /ros_ws/src/mavros/mavros/scripts/install_geographiclib_datasets.sh
 
 # build ArduPilot 3.6.4
 RUN git clone https://github.com/ArduPilot/ArduPilot src/ArduPilot \
