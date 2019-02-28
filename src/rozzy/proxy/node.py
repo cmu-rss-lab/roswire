@@ -1,6 +1,6 @@
 __all__ = ['NodeManagerProxy', 'NodeProxy']
 
-from typing import Iterator, Set
+from typing import Iterator, Set, Mapping
 from urllib.parse import urlparse
 import xmlrpc.client
 import logging
@@ -67,7 +67,7 @@ class NodeProxy:
         print(f"IGNORE: {ignore}")
 
 
-class NodeManagerProxy:
+class NodeManagerProxy(Mapping[str, NodeProxy]):
     def __init__(self,
                  host_ip_master: str,
                  api: xmlrpc.client.ServerProxy
@@ -78,6 +78,12 @@ class NodeManagerProxy:
     @property
     def api(self) -> xmlrpc.client.ServerProxy:
         return self.__api
+
+    def __len__(self) -> int:
+        """
+        Returns a count of the number of active nodes.
+        """
+        return len(list(self))
 
     def __iter__(self) -> Iterator[str]:
         """
