@@ -4,7 +4,7 @@ class RozzyException(Exception):
     """
 
 
-class NodeNotFoundError(RozzyException):
+class NodeNotFoundError(KeyError, RozzyException):
     """
     No node was found with the given name.
     """
@@ -12,7 +12,7 @@ class NodeNotFoundError(RozzyException):
         super().__init__(f"node not found: {name}")
 
 
-class ServiceNotFoundError(RozzyException):
+class ServiceNotFoundError(KeyError, RozzyException):
     """
     No service was found with the given name.
     """

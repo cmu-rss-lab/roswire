@@ -66,9 +66,12 @@ def test_arducopter():
 
         print(list(ros.services))
         print(ros.services['/mavros/set_mode'])
+        assert '/mavros/set_mode' in ros.services
 
         with pytest.raises(rozzy.exceptions.ServiceNotFoundError):
             ros.services['/coolio']
+
+        assert '/coolio' not in ros.services
 
 
 if __name__ == '__main__':
