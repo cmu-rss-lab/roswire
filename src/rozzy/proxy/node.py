@@ -61,7 +61,10 @@ class NodeProxy:
         return pid
 
     def shutdown(self, reason: str = '') -> None:
-        code, status, ignore = self.api.shutdown()
+        code, status, ignore = self.api.shutdown('/.rozzy')
+        print(f"CODE: {code}")
+        print(f"STATUS: {status}")
+        print(f"IGNORE: {ignore}")
 
 
 class NodeManagerProxy:
@@ -77,6 +80,9 @@ class NodeManagerProxy:
         return self.__api
 
     def __iter__(self) -> Iterator[str]:
+        """
+        Returns an iterator over the names of all active nodes.
+        """
         names = set()  # type: Set[str]
         code, status, state = self.api.getSystemState('./rozzy')
         for s in state:
@@ -104,9 +110,15 @@ class NodeManagerProxy:
         return NodeProxy(name, uri_host)
 
     def __delitem__(self, name: str) -> None:
+        """
+        Shutdown and deregister a given node.
+
+        Raises:
+            NodeNotFoundError: no node found with given name.
+        """
         try:
             node = self[name]
-        except KeyError:
-            logger.exception("failed to kill node [%s]: node not found.", name)
+        except NodeNotFoundError:
+            logger.exception("failed to delete node [%s]: not found.", name)
             raise
         node.shutdown()
