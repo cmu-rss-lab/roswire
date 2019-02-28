@@ -18,3 +18,11 @@ class ServiceNotFoundError(KeyError, RozzyException):
     """
     def __init__(self, name: str) -> None:
         super().__init__(f"service not found: {name}")
+
+
+class ParameterNotFoundError(KeyError, RozzyException):
+    """
+    No parameter was found with the given name.
+    """
+    def __init__(self, name: str) -> None:
+        super().__init__(f"parameter not found: {name}")
