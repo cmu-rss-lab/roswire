@@ -1,6 +1,7 @@
 __all__ = ['ServiceProxy', 'ServiceProxyManager']
 
 from typing import Iterator, Any, List
+from urllib.parse import urlparse
 import xmlrpc.client
 import logging
 
@@ -47,5 +48,14 @@ class ServiceManagerProxy:
         Raises:
             ServiceNotFound: if no service is found with the given name.
         """
-        url = "TODO"
-        return ServiceProxy(name, url)
+        code, msg, url_container = self.__api.lookupService('./rozzy', name)
+
+        if code != 1:
+            m = "an unexpected error occurred when retrieving services"
+            m = f"{m}: {msg} (code: {code})"
+            raise RozzyException(m)
+
+        # convert URL to host network
+        parsed = urlparse(url_container)
+        url_host = f"{parsed.scheme}://{self.__host_ip_master}:{parsed.port}"
+        return ServiceProxy(name, url_host)
