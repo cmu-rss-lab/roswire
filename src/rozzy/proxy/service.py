@@ -1,9 +1,10 @@
 __all__ = ['ServiceProxy', 'ServiceProxyManager']
 
 from typing import Iterator, Any, List, Set, Mapping
-# from collections.abc import Mapping
 from urllib.parse import urlparse
+import socket
 import xmlrpc.client
+import hashlib
 import logging
 
 import attr
@@ -18,6 +19,26 @@ logger.setLevel(logging.DEBUG)
 class ServiceProxy:
     name: str = attr.ib()
     url: str = attr.ib()
+
+    def call(self):
+        """
+
+        See:
+            * https://github.com/strawlab/ros_comm/blob/master/clients/rospy/src/rospy/impl/tcpros_base.py
+            * http://wiki.ros.org/ROS/TCPROS
+            * http://wiki.ros.org/ROS/Connection%20Header
+        """
+        # build header
+        # - callerid: node name of service client
+        # - service: name of the topic the subscriber is connecting to
+        # - md5sum: md5sum of the message type
+        # - type: service type 
+        callerid = '/rozzy'
+        service = self.name
+        msg_type = '/mavros_msgs/CommandBool'  # FIXME
+        # FIXME cache as part of srv definition
+        md5sum = hashlib.md5(msg_type.encode('utf-8')).hexdigest()
+        pass
 
 
 class ServiceManagerProxy(Mapping[str, ServiceProxy]):
