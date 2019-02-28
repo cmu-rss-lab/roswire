@@ -53,9 +53,8 @@ class NodeProxy:
         The PID of the main process for this node.
         """
         code, status, pid = self.api.getPid('/.rozzy')
-        if code != 0:
-            m = "bad API call: failed to obtain PID for node [{}]"
-            m = m.format(self.name)
+        if code != 1:
+            m = f"failed to obtain PID [{self.name}]: {status} (code: {code})"
             raise RozzyException(m)
         assert isinstance(pid, int)
         assert pid > 0
