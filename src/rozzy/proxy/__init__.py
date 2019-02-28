@@ -89,8 +89,8 @@ class ROSProxy:
         return {name: typ for (name, typ) in result}
 
     def launch(self,
-               *args: Tuple[str],
-               **kwargs: Dict[str, Union[int, str]]
+               *args: str,
+               **kwargs: Union[int, str]
                ) -> None:
         """
         Provides an interface to roslaunch.
