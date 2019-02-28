@@ -38,8 +38,7 @@ class ServiceManagerProxy(Mapping[str, ServiceProxy]):
             m = f"{m}: {msg} (code: {code})"
             raise exceptions.RozzyException(m)
         pubs, subs, services_and_providers = state
-        services = \
-            set(s[0] for s in services_and_providers)  # type: Set[string]
+        services: Set[str] = set(s[0] for s in services_and_providers)
         return services
 
     def __len__(self) -> int:
