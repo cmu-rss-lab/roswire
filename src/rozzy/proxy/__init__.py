@@ -6,7 +6,7 @@ __all__ = [
     'ROSProxy'
 ]
 
-from typing import Tuple, Dict, Optional, Iterator, Any
+from typing import Tuple, Dict, Optional, Iterator, Any, List, Union
 import os
 import xmlrpc.client
 import logging
@@ -77,11 +77,19 @@ class ROSProxy:
             raise RozzyException("bad API call!")
         return {name: typ for (name, typ) in result}
 
-    """
-    def launch(self, fn_launch: str) -> None:
-        cmd = "roslaunch '{}'".format(fn_launch)
-        pass
+    def launch(self,
+               *args: Tuple[str],
+               **kwargs: Dict[str, Union[int, str]]
+               ) -> None:
+        """
+        Provides an interface to roslaunch.
+        """
+        assert len(args) in [1, 2]
+        launch_args = [f'{arg}:={val}' for arg, val in kwargs.items()]
+        cmd = ' '.join(['roslaunch'] + list(args) + launch_args)
+        self.__shell.non_blocking_execute(cmd)
 
+    """
     def record(self) -> Iterator[ROSBagProxy]:
         pass
 

@@ -47,13 +47,7 @@ def test_arducopter():
         ])
         container.shell.non_blocking_execute(cmd)
 
-        # launch mavros
-        cmd = ' '.join([
-            "roslaunch",
-            "mavros apm.launch",
-            "fcu_url:=tcp://127.0.0.1:5760@5760"
-        ])
-        container.shell.non_blocking_execute(cmd)
+        ros.launch('mavros', 'apm.launch', fcu_url='tcp://127.0.0.1:5760@5760')
         time.sleep(30)
 
         assert set(ros.nodes) == {'/mavros', '/rosout'}
