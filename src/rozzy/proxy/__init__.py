@@ -1,4 +1,10 @@
-__all__ = ['ShellProxy', 'ParameterServerProxy', 'ROSProxy']
+__all__ = [
+    'ShellProxy',
+    'ParameterServerProxy',
+    'NodeManagerProxy',
+    'NodeProxy',
+    'ROSProxy'
+]
 
 from typing import Tuple, Dict, Optional, Iterator, Any
 import os
@@ -8,13 +14,14 @@ import time
 
 from .shell import ShellProxy
 from .parameters import ParameterServerProxy
+from .node import NodeProxy, NodeManagerProxy
 from ..exceptions import RozzyException
 
 logger = logging.getLogger(__name__)  # type: logging.Logger
 logger.setLevel(logging.DEBUG)
 
 
-class ROSProxy(object):
+class ROSProxy:
     """
     Provides access to a remote ROS master via XML-RPC.
     """
@@ -32,14 +39,21 @@ class ROSProxy(object):
         self.__connection = xmlrpc.client.ServerProxy(self.__uri)
         time.sleep(5)  # FIXME #1
         self.__parameters = ParameterServerProxy(self.__connection)
+        self.__nodes = NodeManagerProxy(self.__ip_address, self.__connection)
 
-    # TODO ability to kill nodes
     @property
     def uri(self) -> str:
         """
         The URI of the ROS Master.
         """
         return self.__uri
+
+    @property
+    def nodes(self) -> NodeManagerProxy:
+        """
+        Provides access to the nodes running on this ROS master.
+        """
+        return self.__nodes
 
     @property
     def parameters(self) -> ParameterServerProxy:
