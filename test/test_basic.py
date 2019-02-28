@@ -65,6 +65,10 @@ def test_arducopter():
         print(f"PID: {node_mavros.pid}")
 
         print(list(ros.services))
+        print(ros.services['/mavros/set_mode'])
+
+        with pytest.raises(rozzy.exceptions.ServiceNotFoundError):
+            ros.services['/coolio']
 
 
 if __name__ == '__main__':
