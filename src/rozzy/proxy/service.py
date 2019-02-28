@@ -7,7 +7,7 @@ import logging
 
 import attr
 
-from ..exceptions import RozzyException
+from .. import exceptions
 
 logger = logging.getLogger(__name__)  # type: logging.Logger
 logger.setLevel(logging.DEBUG)
@@ -35,7 +35,7 @@ class ServiceManagerProxy:
         if code != 1:
             m = "an unexpected error occurred when retrieving services"
             m = f"{m}: {msg} (code: {code})"
-            raise RozzyException(m)
+            raise exceptions.RozzyException(m)
 
         pubs, subs, services_and_providers = state
         services = [s[0] for s in services_and_providers]  # type: List[str]
@@ -50,10 +50,12 @@ class ServiceManagerProxy:
         """
         code, msg, url_container = self.__api.lookupService('./rozzy', name)
 
+        if code == -1:
+            raise exceptions.ServiceNotFoundError(name)
         if code != 1:
             m = "an unexpected error occurred when retrieving services"
             m = f"{m}: {msg} (code: {code})"
-            raise RozzyException(m)
+            raise exceptions.RozzyException(m)
 
         # convert URL to host network
         parsed = urlparse(url_container)
