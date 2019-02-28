@@ -1,6 +1,7 @@
 __all__ = ['NodeManagerProxy', 'NodeProxy']
 
 from typing import Iterator, Set
+from urllib.parse import urlparse
 import xmlrpc.client
 import logging
 
@@ -11,9 +12,19 @@ logger.setLevel(logging.DEBUG)
 
 
 class NodeProxy:
-    def __init__(self, name: str) -> None:
+    def __init__(self,
+                 name: str,
+                 url_host_network: str
+                 ) -> None:
+        """
+        Constructs a proxy for a given name.
+
+        Parameters:
+            name: the name of the node.
+            url_host_network: the URL of the node on the host network.
+        """
         self.__name = name
-        self.__url = "FIXME"  # FIXME
+        self.__url = url_host_network
 
     @property
     def api(self) -> xmlrpc.client.ServerProxy:
@@ -55,7 +66,11 @@ class NodeProxy:
 
 
 class NodeManagerProxy:
-    def __init__(self, api: xmlrpc.client.ServerProxy) -> None:
+    def __init__(self,
+                 host_ip_master: str,
+                 api: xmlrpc.client.ServerProxy
+                 ) -> None:
+        self.__host_ip_master = host_ip_master
         self.__api = api
 
     @property
@@ -77,16 +92,17 @@ class NodeManagerProxy:
         Raises:
             NodeNotFoundError: if there is no node with the given name.
         """
-        code, status, uri = self.api.lookupNode('/.rozzy', name)
+        code, status, uri_container = self.api.lookupNode('/.rozzy', name)
         if code == -1:
             raise NodeNotFoundError(name)
         if code != 1:
             m = f"unexpected error when attempting to find node [{name}]: {status} (code: {code})"   # noqa: pycodestyle
             raise RozzyException(m)
 
-        # TODO convert URI to host network
-        print(f"CONTAINER URI: {uri}")
-        raise NotImplementedError
+        # convert URI to host network
+        port = urlparse(uri_container).port
+        uri_host = f"http://{self.__host_ip_master}:{port}"
+        return NodeProxy(name, uri_host)
 
     def __delitem__(self, name: str) -> None:
         try:
