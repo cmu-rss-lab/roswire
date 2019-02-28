@@ -61,3 +61,13 @@ class ServiceManagerProxy:
         parsed = urlparse(url_container)
         url_host = f"{parsed.scheme}://{self.__host_ip_master}:{parsed.port}"
         return ServiceProxy(name, url_host)
+
+    def __contains__(self, name: str) -> bool:
+        """
+        Determines whether a service, given by its name, is being provided.
+        """
+        try:
+            self[name]
+            return True
+        except exceptions.ServiceNotFoundError:
+            return False
