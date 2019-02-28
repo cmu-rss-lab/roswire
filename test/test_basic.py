@@ -64,9 +64,7 @@ def test_arducopter():
         print(f"URL: {node_mavros.url}")
         print(f"PID: {node_mavros.pid}")
 
-        node_mavros.shutdown()
-        time.sleep(30)
-        print(list(ros.nodes))
+        print(list(ros.services))
 
 
 if __name__ == '__main__':
