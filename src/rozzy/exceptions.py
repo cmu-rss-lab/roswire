@@ -10,6 +10,12 @@ class RecorderAlreadyStarted(RozzyException):
     """
 
 
+class RecorderNotStarted(RozzyException):
+    """
+    Recording has not begun.
+    """
+
+
 class RecorderAlreadyStopped(RozzyException):
     """
     Recording has already stopped.
