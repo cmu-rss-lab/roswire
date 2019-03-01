@@ -57,7 +57,8 @@ class BagRecorderProxy:
     def __exit__(self) -> None:
         if not self.stopped:
             self.stop()
-        os.remove(self.__fn_host)
+        if os.path.exists(self.__fn_host):
+            os.remove(self.__fn_host)
 
     def stop(self) -> None:
         """
@@ -72,5 +73,4 @@ class BagRecorderProxy:
         """
         Saves the contents of the bag to a given file on the host machine.
         """
-        # TODO move instead
-        shutil.copyfile(self.__fn_host, fn)
+        shutil.move(self.__fn_host, fn)
