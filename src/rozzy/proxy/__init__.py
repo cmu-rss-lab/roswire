@@ -45,8 +45,9 @@ class ROSProxy:
         self.__connection = xmlrpc.client.ServerProxy(self.__uri)
         time.sleep(5)  # FIXME #1
         self.__parameters = ParameterServerProxy(self.__connection)
-        self.__nodes = NodeManagerProxy(self.__ip_address, self.__connection)
-        self.__services = \
+        self.__nodes: NodeManagerProxy = \
+            NodeManagerProxy(self.__ip_address, self.__connection, self.__shell)
+        self.__services: ServiceManagrProxy = \
             ServiceManagerProxy(self.__ip_address, self.__connection)
 
     @property
