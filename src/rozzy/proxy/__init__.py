@@ -1,6 +1,14 @@
-__all__ = ['ShellProxy', 'ParameterServerProxy', 'ROSProxy', 'ROSBagProxy']
+__all__ = [
+    'ShellProxy',
+    'ServiceManagerProxy',
+    'ParameterServerProxy',
+    'NodeManagerProxy',
+    'NodeProxy',
+    'ROSProxy',
+    'ROSBagProxy'
+]
 
-from typing import Tuple, Dict, Optional, Iterator, Any
+from typing import Tuple, Dict, Optional, Iterator, Any, List, Union
 import os
 import xmlrpc.client
 import logging
@@ -9,13 +17,15 @@ import time
 from .shell import ShellProxy
 from .parameters import ParameterServerProxy
 from .rosbag import ROSBagProxy
+from .node import NodeProxy, NodeManagerProxy
+from .service import ServiceManagerProxy
 from ..exceptions import RozzyException
 
 logger = logging.getLogger(__name__)  # type: logging.Logger
 logger.setLevel(logging.DEBUG)
 
 
-class ROSProxy(object):
+class ROSProxy:
     """
     Provides access to a remote ROS master via XML-RPC.
     """
@@ -33,14 +43,30 @@ class ROSProxy(object):
         self.__connection = xmlrpc.client.ServerProxy(self.__uri)
         time.sleep(5)  # FIXME #1
         self.__parameters = ParameterServerProxy(self.__connection)
+        self.__nodes = NodeManagerProxy(self.__ip_address, self.__connection)
+        self.__services = \
+            ServiceManagerProxy(self.__ip_address, self.__connection)
 
-    # TODO ability to kill nodes
     @property
     def uri(self) -> str:
         """
         The URI of the ROS Master.
         """
         return self.__uri
+
+    @property
+    def nodes(self) -> NodeManagerProxy:
+        """
+        Provides access to the nodes running on this ROS master.
+        """
+        return self.__nodes
+
+    @property
+    def services(self) -> ServiceManagerProxy:
+        """
+        Provides access to the services advertised on this ROS master.
+        """
+        return self.__services
 
     @property
     def parameters(self) -> ParameterServerProxy:
@@ -69,11 +95,19 @@ class ROSProxy(object):
             raise RozzyException("bad API call!")
         return {name: typ for (name, typ) in result}
 
-    """
-    def launch(self, fn_launch: str) -> None:
-        cmd = "roslaunch '{}'".format(fn_launch)
-        pass
+    def launch(self,
+               *args: str,
+               **kwargs: Union[int, str]
+               ) -> None:
+        """
+        Provides an interface to roslaunch.
+        """
+        assert len(args) in [1, 2]
+        launch_args = [f'{arg}:={val}' for arg, val in kwargs.items()]
+        cmd = ' '.join(['roslaunch'] + list(args) + launch_args)
+        self.__shell.non_blocking_execute(cmd)
 
+    """
     def record(self) -> Iterator[ROSBagProxy]:
         pass
 

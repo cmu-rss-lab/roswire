@@ -1,16 +1,16 @@
 __all__ = ['ParameterServerProxy']
 
-from typing import Iterator, Any
+from typing import Iterator, Any, Mapping
 import xmlrpc.client
 import logging
 
-from ..exceptions import RozzyException
+from .. import exceptions
 
 logger = logging.getLogger(__name__)  # type: logging.Logger
 logger.setLevel(logging.DEBUG)
 
 
-class ParameterServerProxy:
+class ParameterServerProxy(Mapping[str, Any]):
     """
     See: http://wiki.ros.org/ROS/Parameter%20Server%20API
     """
@@ -19,18 +19,25 @@ class ParameterServerProxy:
         Constructs a new parameter server proxy using an XML-RPC server proxy
         for a given ROS master.
         """
-        self.__caller_id = '/rozzy'
+        self.__caller_id = '/.rozzy'
         self.__connection = connection
 
-    def __contains__(self, key: str) -> bool:
+    def __len__(self) -> int:
+        """
+        Returns a count of the number of registered parameters.
+        """
+        return len(list(self))
+
+    def __contains__(self, key: object) -> bool:
         """
         Determines whether the parameter server contains a given parameter
         or tree with a given key.
         """
+        assert isinstance(key, str)
         conn = self.__connection
         code, msg, result = conn.hasParam(self.__caller_id, key)
         if code != 1:
-            raise RozzyException("bad API call!")
+            raise exceptions.RozzyException("bad API call!")
         assert isinstance(result, bool)
         return result
 
@@ -42,7 +49,7 @@ class ParameterServerProxy:
         conn = self.__connection
         code, msg, result = conn.getParamNames(self.__caller_id)
         if code != 1:
-            raise RozzyException("bad API call!")
+            raise exceptions.RozzyException("bad API call!")
         yield from result
 
     def __getitem__(self, key: str) -> Any:
@@ -58,14 +65,15 @@ class ParameterServerProxy:
             The value of the parameter or the contents of the given namespace.
 
         Raises:
-            KeyError: if no parameter with the given key is found on the
-                parameter server.
+            ParameterNotFoundError: if no parameter with the given key is found
+                on the parameter server.
         """
         conn = self.__connection
         code, msg, result = conn.getParam(self.__caller_id, key)
-        # FIXME check for a specific code
+        if code == -1:
+            raise exceptions.ParameterNotFoundError(key)
         if code != 1:
-            raise KeyError(key)
+            raise exceptions.RozzyException("bad API call")
         return result
 
     def __setitem__(self, key: str, value: Any) -> None:
@@ -76,7 +84,7 @@ class ParameterServerProxy:
         conn = self.__connection
         code, msg, result = conn.setParam(self.__caller_id, key, value)
         if code != 1:
-            raise RozzyException("bad API call!")
+            raise exceptions.RozzyException("bad API call!")
 
     def __delitem__(self, key: str) -> None:
         """
@@ -91,6 +99,7 @@ class ParameterServerProxy:
         """
         conn = self.__connection
         code, msg, result = conn.deleteParam(self.__caller_id, key)
-        # FIXME check for a specific code
+        if code == -1:
+            raise exceptions.ParameterNotFoundError(key)
         if code != 1:
-            raise KeyError(key)
+            raise exceptions.RozzyException("bad API call!")
