@@ -6,6 +6,7 @@ import logging
 import shutil
 import time
 import pathlib
+import threading
 import os
 
 from .shell import ShellProxy
@@ -37,6 +38,7 @@ class BagRecorderProxy:
             excluded_topics: an optional list of topics that should be excluded
                 from the bag.
         """
+        self.__lock: threading.Lock = threading.Lock()
         self.__started: bool = False
         self.__stopped: bool = False
         self.__shell: ShellProxy = shell
@@ -70,11 +72,9 @@ class BagRecorderProxy:
         return self
 
     def __exit__(self, ex_type, ex_val, ex_tb) -> None:
-        # FIXME did an exception occur? if so, don't save.
+        should_save = ex_type is not None
         if not self.stopped:
-            self.stop()
-        if os.path.exists(self.__fn_host):
-            os.remove(self.__fn_host)
+            self.stop(save=should_save)
 
     def start(self) -> None:
         """
@@ -83,32 +83,37 @@ class BagRecorderProxy:
         Raises:
             RecorderAlreadyStarted: if the recorder has already been started.
         """
-        if self.started:
-            raise exceptions.RecorderAlreadyStarted
+        with self.__lock:
+            if self.__started:
+                raise exceptions.RecorderAlreadyStarted
+            self.__started = True
+            # FIXME bad mounting?!
+            cmd: str = ("rosbag record -q -a"
+                        f" -O {self.__fn_host_temp}"
+                        f" __name:={self.__bag_name}")
+            self.__shell.non_blocking_execute(cmd)
 
-        # TODO could acquire lock?
-        self.__started = True
-
-        # FIXME bad mounting?!
-        cmd: str = ("rosbag record -q -a"
-                    f" -O {self.__fn_host_temp}"
-                    f" __name:={self.__bag_name}")
-        self.__shell.non_blocking_execute(cmd)
-
-    def stop(self) -> None:
+    def stop(self, save: bool = True) -> None:
         """
         Stops recording to the bag.
+
+        Parameters:
+            save: specifies whether the bag file should be saved to disk.
 
         Raises:
             RecorderAlreadyStopped: if this recorder has already been stopped.
         """
-        if self.stopped:
-            raise exceptions.RecorderAlreadyStopped
+        with self.__lock:
+            if self.__stopped:
+                raise exceptions.RecorderAlreadyStopped
+            if not self.__started:
+                raise exceptions.RecorderNotStarted
 
-        name_node = f'/{self.__bag_name}'
-        del self.__nodes[name_node]
-        time.sleep(10)
+            name_node = f'/{self.__bag_name}'
+            del self.__nodes[name_node]
+            time.sleep(10)  # FIXME
 
-        # FIXME exception handling
-        shutil.copyfile(self.__fn_host_temp, self.__fn_host_dest)
-        os.remove(self.__fn_host_temp)
+            if os.path.exists(self.__fn_host_temp):
+                if save:
+                    shutil.copyfile(self.__fn_host_temp, self.__fn_host_dest)
+                os.remove(self.__fn_host_temp)
