@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 import xmlrpc.client
 import logging
 
+from .shell import ShellProxy
 from ..exceptions import RozzyException, NodeNotFoundError
 
 logger = logging.getLogger(__name__)  # type: logging.Logger
@@ -14,7 +15,8 @@ logger.setLevel(logging.DEBUG)
 class NodeProxy:
     def __init__(self,
                  name: str,
-                 url_host_network: str
+                 url_host_network: str,
+                 shell: ShellProxy
                  ) -> None:
         """
         Constructs a proxy for a given name.
@@ -22,9 +24,11 @@ class NodeProxy:
         Parameters:
             name: the name of the node.
             url_host_network: the URL of the node on the host network.
+            shell: a shell proxy.
         """
         self.__name = name
         self.__url = url_host_network
+        self.__shell = shell
 
     @property
     def api(self) -> xmlrpc.client.ServerProxy:
@@ -60,20 +64,19 @@ class NodeProxy:
         assert pid > 0
         return pid
 
-    def shutdown(self, reason: str = '') -> None:
-        code, status, ignore = self.api.shutdown('/.rozzy')
-        print(f"CODE: {code}")
-        print(f"STATUS: {status}")
-        print(f"IGNORE: {ignore}")
+    def shutdown(self) -> None:
+        self.__shell.execute(f'rosnode kill {self.name}')
 
 
 class NodeManagerProxy(Mapping[str, NodeProxy]):
     def __init__(self,
                  host_ip_master: str,
-                 api: xmlrpc.client.ServerProxy
+                 api: xmlrpc.client.ServerProxy,
+                 shell: ShellProxy
                  ) -> None:
-        self.__host_ip_master = host_ip_master
-        self.__api = api
+        self.__host_ip_master: str = host_ip_master
+        self.__api: xmlrpc.client.ServerProxy = api
+        self.__shell: ShellProxy = shell
 
     @property
     def api(self) -> xmlrpc.client.ServerProxy:
@@ -119,7 +122,7 @@ class NodeManagerProxy(Mapping[str, NodeProxy]):
         # convert URI to host network
         port = urlparse(uri_container).port
         uri_host = f"http://{self.__host_ip_master}:{port}"
-        return NodeProxy(name, uri_host)
+        return NodeProxy(name, uri_host, self.__shell)
 
     def __delitem__(self, name: str) -> None:
         """
