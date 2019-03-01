@@ -8,7 +8,8 @@ __all__ = [
     'BagRecorderProxy'
 ]
 
-from typing import Tuple, Dict, Optional, Iterator, Any, List, Union, Collection
+from typing import (Tuple, Dict, Optional, Iterator, Any, List, Union,
+                    Collection)
 import os
 import xmlrpc.client
 import logging
@@ -46,7 +47,9 @@ class ROSProxy:
         time.sleep(5)  # FIXME #1
         self.__parameters = ParameterServerProxy(self.__connection)
         self.__nodes: NodeManagerProxy = \
-            NodeManagerProxy(self.__ip_address, self.__connection, self.__shell)
+            NodeManagerProxy(self.__ip_address,
+                             self.__connection,
+                             self.__shell)
         self.__services: ServiceManagerProxy = \
             ServiceManagerProxy(self.__ip_address, self.__connection)
 
