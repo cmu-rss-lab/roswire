@@ -7,13 +7,14 @@ import pytest
 
 import rozzy
 import rozzy.exceptions
-from rozzy import Rozzy, ROSProxy, Container
+from rozzy import Rozzy, ROSProxy, Container, System
 
 
 @contextlib.contextmanager
 def build_test_environment() -> Iterator[Tuple[ROSProxy, Container]]:
     rozzy = Rozzy()
-    with rozzy.launch() as container:
+    system = System('brass')
+    with rozzy.launch(system) as container:
         with container.roscore() as ros:
             time.sleep(5)
             yield (container, ros)
