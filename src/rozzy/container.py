@@ -15,16 +15,22 @@ class Container(object):
     def __init__(self,
                  daemon_bugzoo: BugZooDaemon,
                  container_bugzoo: BugZooContainer,
-                 uuid: UUID
+                 uuid: UUID,
+                 ws_host: str
                  ) -> None:
-        self.__daemon_bugzoo = daemon_bugzoo
-        self.__container_bugzoo = container_bugzoo
-        self.__uuid = uuid
-        self.__shell = ShellProxy(daemon_bugzoo, container_bugzoo)
+        self.__daemon_bugzoo: BugZooDaemon = daemon_bugzoo
+        self.__container_bugzoo: BugZooContainer = container_bugzoo
+        self.__uuid: UUID = uuid
+        self.__shell: ShellProxy = ShellProxy(daemon_bugzoo, container_bugzoo)
+        self.__ws_host: str = ws_host
 
     @property
     def uuid(self) -> UUID:
         return self.__uuid
+
+    @property
+    def ws_host(self) -> str:
+        return self.__ws_host
 
     @property
     def ip_address(self) -> str:
@@ -47,6 +53,7 @@ class Container(object):
         self.shell.non_blocking_execute(cmd)
         try:
             yield ROSProxy(shell=self.shell,
+                           ws_host=self.ws_host,
                            ip_address=self.ip_address,
                            port=port)
         finally:

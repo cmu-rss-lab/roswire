@@ -30,7 +30,6 @@ RUN . /opt/ros/${ROS_DISTRO}/setup.sh \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-# install GeographicLib
 # RUN /ros_ws/src/mavros/mavros/scripts/install_geographiclib_datasets.sh
 
 # build ArduPilot 3.6.4

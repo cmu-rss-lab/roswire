@@ -7,13 +7,14 @@ import pytest
 
 import rozzy
 import rozzy.exceptions
-from rozzy import Rozzy, ROSProxy, Container
+from rozzy import Rozzy, ROSProxy, Container, System
 
 
 @contextlib.contextmanager
 def build_test_environment() -> Iterator[Tuple[ROSProxy, Container]]:
     rozzy = Rozzy()
-    with rozzy.launch() as container:
+    system = System('brass')
+    with rozzy.launch(system) as container:
         with container.roscore() as ros:
             time.sleep(5)
             yield (container, ros)
@@ -48,12 +49,17 @@ def test_arducopter():
         container.shell.non_blocking_execute(cmd)
 
         ros.launch('mavros', 'apm.launch', fcu_url='tcp://127.0.0.1:5760@5760')
-        time.sleep(30)
+        time.sleep(10)
 
+
+        print(list(ros.nodes))
         assert set(ros.nodes) == {'/mavros', '/rosout'}
         assert '/mavros' in ros.nodes
         assert '/rosout' in ros.nodes
         assert '/cool' not in ros.nodes
+
+        with ros.record('/tmp/baggio.bag') as recorder:
+            time.sleep(30)
 
         with pytest.raises(rozzy.exceptions.NodeNotFoundError):
             ros.nodes['/cool']
