@@ -10,6 +10,7 @@ import os
 
 from .shell import ShellProxy
 from .node import NodeManagerProxy
+from .. import exceptions
 
 logger = logging.getLogger(__name__)  # type: logging.Logger
 logger.setLevel(logging.DEBUG)
@@ -78,10 +79,12 @@ class BagRecorderProxy:
     def start(self) -> None:
         """
         Starts recording to the bag.
+
+        Raises:
+            RecorderAlreadyStarted: if the recorder has already been started.
         """
-        # TODO throw error if already started
         if self.started:
-            return
+            raise exceptions.RecorderAlreadyStarted
 
         # TODO could acquire lock?
         self.__started = True
@@ -95,10 +98,12 @@ class BagRecorderProxy:
     def stop(self) -> None:
         """
         Stops recording to the bag.
+
+        Raises:
+            RecorderAlreadyStopped: if this recorder has already been stopped.
         """
-        # FIXME raise error
         if self.stopped:
-            return
+            raise exceptions.RecorderAlreadyStopped
 
         name_node = f'/{self.__bag_name}'
         del self.__nodes[name_node]
