@@ -23,7 +23,7 @@ class BagRecorderProxy:
                  ws_host: str,
                  shell: ShellProxy,
                  nodes: NodeManagerProxy,
-                 excluded_topics: Optional[Collection[str]] = None
+                 exclude_topics: Optional[Collection[str]] = None
                  ) -> None:
         """
         Note:

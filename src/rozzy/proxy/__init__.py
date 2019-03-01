@@ -8,7 +8,7 @@ __all__ = [
     'BagRecorderProxy'
 ]
 
-from typing import Tuple, Dict, Optional, Iterator, Any, List, Union
+from typing import Tuple, Dict, Optional, Iterator, Any, List, Union, Collection
 import os
 import xmlrpc.client
 import logging
@@ -105,14 +105,18 @@ class ROSProxy:
         cmd = ' '.join(['roslaunch'] + list(args) + launch_args)
         self.__shell.non_blocking_execute(cmd)
 
-    def record(self, fn: str) -> BagRecorderProxy:
+    def record(self,
+               fn: str,
+               exclude_topics: Optional[Collection[str]] = None
+               ) -> BagRecorderProxy:
         """
         Provides an interface to rosbag for recording ROS topics.
         """
         return BagRecorderProxy(fn,
                                 self.__ws_host,
                                 self.__shell,
-                                self.__nodes)
+                                self.__nodes,
+                                exclude_topics=exclude_topics)
 
 
 # TODO CoverageProxy
