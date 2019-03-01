@@ -47,7 +47,7 @@ class ROSProxy:
         self.__parameters = ParameterServerProxy(self.__connection)
         self.__nodes: NodeManagerProxy = \
             NodeManagerProxy(self.__ip_address, self.__connection, self.__shell)
-        self.__services: ServiceManagrProxy = \
+        self.__services: ServiceManagerProxy = \
             ServiceManagerProxy(self.__ip_address, self.__connection)
 
     @property
