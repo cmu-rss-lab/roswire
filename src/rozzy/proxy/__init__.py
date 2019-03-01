@@ -106,6 +106,9 @@ class ROSProxy:
         self.__shell.non_blocking_execute(cmd)
 
     def record(self, fn: str) -> BagRecorderProxy:
+        """
+        Provides an interface to rosbag for recording ROS topics.
+        """
         return BagRecorderProxy(fn,
                                 self.__ws_host,
                                 self.__shell,
