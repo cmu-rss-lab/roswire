@@ -4,8 +4,7 @@ __all__ = [
     'ParameterServerProxy',
     'NodeManagerProxy',
     'NodeProxy',
-    'ROSProxy',
-    'ROSBagProxy'
+    'ROSProxy'
 ]
 
 from typing import Tuple, Dict, Optional, Iterator, Any, List, Union
@@ -16,7 +15,7 @@ import time
 
 from .shell import ShellProxy
 from .parameters import ParameterServerProxy
-from .rosbag import ROSBagProxy
+from .bag import BagProxy
 from .node import NodeProxy, NodeManagerProxy
 from .service import ServiceManagerProxy
 from ..exceptions import RozzyException
@@ -82,11 +81,6 @@ class ROSProxy:
         """
         return self.__connection
 
-    def bag(self) -> Iterator[ROSBagProxy]:
-        p = ROSBagProxy()
-        yield p
-        # ensure that the file inside the container is destroyed
-
     @property
     def topic_to_type(self) -> Dict[str, str]:
         conn = self.connection
@@ -106,17 +100,6 @@ class ROSProxy:
         launch_args = [f'{arg}:={val}' for arg, val in kwargs.items()]
         cmd = ' '.join(['roslaunch'] + list(args) + launch_args)
         self.__shell.non_blocking_execute(cmd)
-
-    """
-    def record(self) -> Iterator[ROSBagProxy]:
-        pass
-
-    def replay(self) -> None:
-        pass
-    """
-
-
-# TODO ROSBagProxy
 
 
 # TODO CoverageProxy
