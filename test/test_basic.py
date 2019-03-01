@@ -67,17 +67,17 @@ def test_arducopter():
         node_mavros = ros.nodes['/mavros']
         assert node_mavros.name == '/mavros'
         assert node_mavros.pid > 0
-        print(f"URL: {node_mavros.url}")
-        print(f"PID: {node_mavros.pid}")
 
-        print(list(ros.services))
-        print(ros.services['/mavros/set_mode'])
+        print(f"SERVICES: {list(ros.services)}")
         assert '/mavros/set_mode' in ros.services
 
         with pytest.raises(rozzy.exceptions.ServiceNotFoundError):
             ros.services['/coolio']
 
         assert '/coolio' not in ros.services
+
+        # arm the copter
+        ros.services['/mavros/cmd/arming'].call()
 
 
 if __name__ == '__main__':
