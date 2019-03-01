@@ -1,0 +1,17 @@
+version: '1.0'
+blueprints:
+- context: .
+  file: Dockerfile
+  tag: brass
+bugs:
+- compiler:
+    time-limit: 300
+    type: catkin
+    workspace: /ros_ws/src/ArduPilot
+  image: brass
+  languages:
+  - cpp
+  name: brass
+  source-location: /ros_ws/src
+  test-harness:
+    type: empty
