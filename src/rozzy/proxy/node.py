@@ -79,22 +79,28 @@ class NodeManagerProxy(Mapping[str, NodeProxy]):
     def api(self) -> xmlrpc.client.ServerProxy:
         return self.__api
 
+    def __get_node_names(self) -> Set[str]:
+        """
+        Fetches a list of the names of all active nodes.
+        """
+        names: Set[str] = set()
+        code, status, state = self.api.getSystemState('./rozzy')
+        for s in state:
+            for t, l in s:
+                names.update(n for n in l)
+        return names
+
     def __len__(self) -> int:
         """
         Returns a count of the number of active nodes.
         """
-        return len(list(self))
+        return len(self.__get_node_names())
 
     def __iter__(self) -> Iterator[str]:
         """
         Returns an iterator over the names of all active nodes.
         """
-        names = set()  # type: Set[str]
-        code, status, state = self.api.getSystemState('./rozzy')
-        for s in state:
-            for t, l in s:
-                names.update(n for n in l)
-        yield from names
+        yield from self.__get_node_names()
 
     def __getitem__(self, name: str) -> NodeProxy:
         """
