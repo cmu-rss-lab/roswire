@@ -4,6 +4,18 @@ class RozzyException(Exception):
     """
 
 
+class RecorderAlreadyStarted(RozzyException):
+    """
+    Recording has already started.
+    """
+
+
+class RecorderAlreadyStopped(RozzyException):
+    """
+    Recording has already stopped.
+    """
+
+
 class NodeNotFoundError(KeyError, RozzyException):
     """
     No node was found with the given name.
