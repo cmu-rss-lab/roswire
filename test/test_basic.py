@@ -49,12 +49,17 @@ def test_arducopter():
         container.shell.non_blocking_execute(cmd)
 
         ros.launch('mavros', 'apm.launch', fcu_url='tcp://127.0.0.1:5760@5760')
-        time.sleep(30)
+        time.sleep(10)
 
+
+        print(list(ros.nodes))
         assert set(ros.nodes) == {'/mavros', '/rosout'}
         assert '/mavros' in ros.nodes
         assert '/rosout' in ros.nodes
         assert '/cool' not in ros.nodes
+
+        recorder = ros.record()
+        time.sleep(100)
 
         with pytest.raises(rozzy.exceptions.NodeNotFoundError):
             ros.nodes['/cool']
@@ -73,6 +78,9 @@ def test_arducopter():
             ros.services['/coolio']
 
         assert '/coolio' not in ros.services
+
+        recorder.stop()
+        recorder.save('/tmp/nice.bag')
 
 
 if __name__ == '__main__':

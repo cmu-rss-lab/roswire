@@ -86,7 +86,7 @@ class Rozzy:
                 snapshot,
                 volumes=volumes)
             logger.debug("launched docker container")
-            container = Container(bz, bz_container, uuid)
+            container = Container(bz, bz_container, uuid, dir_host)
             yield container
 
         finally:
