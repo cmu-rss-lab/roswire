@@ -105,8 +105,9 @@ class ROSProxy:
         cmd = ' '.join(['roslaunch'] + list(args) + launch_args)
         self.__shell.non_blocking_execute(cmd)
 
-    def record(self) -> BagRecorderProxy:
-        return BagRecorderProxy(self.__ws_host,
+    def record(self, fn: str) -> BagRecorderProxy:
+        return BagRecorderProxy(fn,
+                                self.__ws_host,
                                 self.__shell,
                                 self.__nodes)
 
