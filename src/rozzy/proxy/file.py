@@ -29,3 +29,11 @@ class FileProxy:
         cmd = f'test -e "{shlex.quote(path)}"'
         code, output, duration = self.__shell.execute(cmd)
         return code == 0
+
+    def isfile(self, path: str) -> bool:
+        """
+        Determines whether a regular file exists at a given path.
+        """
+        cmd = f'test -f "{shlex.quote(path)}"'
+        code, output, duration = self.__shell.execute(cmd)
+        return code == 0
