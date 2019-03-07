@@ -1,9 +1,11 @@
 from typing import Iterator
 import contextlib
 
-from test_basic import build_test_environment
+import pytest
 
 from rozzy.proxy import FileProxy
+
+from test_basic import build_test_environment
 
 
 @contextlib.contextmanager
@@ -56,3 +58,11 @@ def test_listdir():
             'pkgs.rosinstall',
             'src'
         ]
+
+        # not a directory
+        with pytest.raises(OSError):
+            files.listdir('/ros_ws/pkgs.rosinstall')
+
+        # not a file or directory
+        with pytest.raises(OSError):
+            files.listdir('/ros_ws/idontexist')
