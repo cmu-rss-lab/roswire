@@ -9,8 +9,9 @@ R_VAL = r".+"
 R_COMMENT = r"(#.*)?"
 R_FIELD = re.compile(
     f"^({R_TYPE})\s+({R_NAME})\s*{R_COMMENT}$")
-R_CONSTANT = re.compile(
-    f"^({R_TYPE})\s+({R_NAME})=\s*({R_VAL})\s*$")
+# R_CONSTANT = re.compile(
+#     f"^({R_TYPE})\s+({R_NAME})=\s*({R_VAL})\s*$")
+R_CONSTANT = re.compile(f"^(\w+)\s+(\w+)=(.+)$")
 R_BLANK = re.compile(
     f"^\s*{R_COMMENT}$")
 
@@ -60,14 +61,14 @@ class MsgFormat:
         constants: List[Constant] = []
 
         for line in text.split('\n'):
-            # is this line blank?
-            if R_BLANK.match(line):
-                continue
+            m_blank: re.Match = R_BLANK.match(line)
+            m_constant: re.Match = R_CONSTANT.match(line)
+            m_field: re.Match = R_FIELD.match(line)
 
-            # does this line specify a constant?
-            m: re.Match = R_CONSTANT.match(line)
-            if m:
-                typ, name, val_str = m.group(1, 2, 3)
+            if m_blank:
+                continue
+            elif m_constant:
+                typ, name, val_str = m_constant.group(1, 2, 3)
 
                 # is the type valid?
                 # if not is_legal_constant_type(typ):
@@ -78,17 +79,13 @@ class MsgFormat:
 
                 constant: Constant = Constant(typ, name, val)
                 constants.append(constant)
-
-            # does this line specify a field?
-            m = R_FIELD.match(line)
-            if m:
-                typ, name = m.group(1, 2)
+            elif m_field:
+                typ, name = m_field.group(1, 2)
                 # if not is_legal_type(typ):
                 #     raise Exception(f"illegal type: {type}")
                 field: Field = Field(typ, name)
                 fields.append(field)
+            else:
+                raise Exception(f"failed to parse line: {line}")
 
-            # unable to parse line
-            raise Exception(f"failed to parse line: {line}")
-
-        return MsgSpec(package, name, fields, constants)
+        return MsgFormat(package, name, fields, constants)
