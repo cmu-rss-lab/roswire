@@ -12,6 +12,14 @@ def build_file_proxy() -> Iterator[FileProxy]:
         yield container.files
 
 
+def test_exists():
+    with build_file_proxy() as files:
+        assert not files.exists('/foo')
+        assert files.exists('/tmp')
+        assert files.exists('/ros_ws/entrypoint.sh')
+        assert not files.exists('/ros_ws/entrypoint.shhhhh')
+
+
 def test_isfile():
     with build_file_proxy() as files:
         assert not files.isfile('/foo')
@@ -19,9 +27,11 @@ def test_isfile():
         assert files.isfile('/ros_ws/entrypoint.sh')
 
 
-def test_exists():
+def test_isdir():
     with build_file_proxy() as files:
-        assert not files.exists('/foo')
-        assert files.exists('/tmp')
-        assert files.exists('/ros_ws/entrypoint.sh')
-        assert not files.exists('/ros_ws/entrypoint.shhhhh')
+        assert not files.isdir('/foo')
+        assert files.isdir('/tmp')
+        assert files.isdir('/ros_ws')
+        assert files.isdir('/ros_ws/')
+        assert not files.isdir('/ros_ws/entrypoint.sh')
+        assert not files.isdir('/ros_ws/entrypoint.sh/')
