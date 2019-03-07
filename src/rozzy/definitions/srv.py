@@ -23,7 +23,7 @@ class SrvFormat:
         try:
             s_res, s_req = sections
         # TODO raise ParsingError
-        except:
+        except IndexError:
             m = "bad service description: missing separator (---)"
             raise Exception(m)
 
