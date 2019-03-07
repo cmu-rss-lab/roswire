@@ -1,9 +1,11 @@
 from typing import Iterator
 import contextlib
 
-from test_basic import build_test_environment
+import pytest
 
 from rozzy.proxy import FileProxy
+
+from test_basic import build_test_environment
 
 
 @contextlib.contextmanager
@@ -43,3 +45,24 @@ def test_islink():
         assert files.islink('/ros_ws/src/ArduPilot/libraries/AP_HAL_F4Light/sbus.cpp')
         assert files.isfile('/ros_ws/src/ArduPilot/libraries/AP_HAL_Linux/sbus.cpp')
         assert not files.islink('/ros_ws/src/ArduPilot/libraries/AP_HAL_Linux/sbus.cpp')
+
+
+def test_listdir():
+    with build_file_proxy() as files:
+        assert files.listdir('/ros_ws') == [
+            '.catkin_tools',
+            'build',
+            'devel',
+            'entrypoint.sh',
+            'logs',
+            'pkgs.rosinstall',
+            'src'
+        ]
+
+        # not a directory
+        with pytest.raises(OSError):
+            files.listdir('/ros_ws/pkgs.rosinstall')
+
+        # not a file or directory
+        with pytest.raises(OSError):
+            files.listdir('/ros_ws/idontexist')

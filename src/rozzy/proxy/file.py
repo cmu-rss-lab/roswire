@@ -1,5 +1,6 @@
 __all__ = ['FileProxy']
 
+from typing import List
 import shlex
 
 from .shell import ShellProxy
@@ -53,3 +54,19 @@ class FileProxy:
         cmd = f'test -h "{shlex.quote(path)}"'
         code, output, duration = self.__shell.execute(cmd)
         return code == 0
+
+    def listdir(self, d: str) -> List[str]:
+        """
+        Returns a list of the files belonging to a given directory.
+
+        Raises:
+            OSError: if the given path isn't a directory.
+            OSError: if the given path is not a file or directory.
+        """
+        cmd = f'ls -A -1 "{shlex.quote(d)}"'
+        code, output, duration = self.__shell.execute(cmd)
+        if code == 2:
+            raise OSError(f"no such file or directory: {d}")
+        if not self.isdir(d):
+            raise OSError(f"Not a directory: {d}")
+        return output.replace('\r', '').split('\n')
