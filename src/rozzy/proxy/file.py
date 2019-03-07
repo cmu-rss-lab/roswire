@@ -45,3 +45,11 @@ class FileProxy:
         cmd = f'test -d "{shlex.quote(path)}"'
         code, output, duration = self.__shell.execute(cmd)
         return code == 0
+
+    def islink(self, path: str) -> bool:
+        """
+        Determines whether a symbolic link exists at a given path.
+        """
+        cmd = f'test -h "{shlex.quote(path)}"'
+        code, output, duration = self.__shell.execute(cmd)
+        return code == 0

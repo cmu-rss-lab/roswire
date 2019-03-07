@@ -35,3 +35,11 @@ def test_isdir():
         assert files.isdir('/ros_ws/')
         assert not files.isdir('/ros_ws/entrypoint.sh')
         assert not files.isdir('/ros_ws/entrypoint.sh/')
+
+
+def test_islink():
+    with build_file_proxy() as files:
+        assert files.isfile('/ros_ws/src/ArduPilot/libraries/AP_HAL_F4Light/sbus.cpp')
+        assert files.islink('/ros_ws/src/ArduPilot/libraries/AP_HAL_F4Light/sbus.cpp')
+        assert files.isfile('/ros_ws/src/ArduPilot/libraries/AP_HAL_Linux/sbus.cpp')
+        assert not files.islink('/ros_ws/src/ArduPilot/libraries/AP_HAL_Linux/sbus.cpp')
