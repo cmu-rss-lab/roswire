@@ -28,8 +28,8 @@ class SrvFormat:
 
         sections: List[str] = [ss.strip() for ss in s.split('\n---')]
         try:
-            s_res, s_req = sections
-        except IndexError:
+            s_req, s_res = sections
+        except ValueError:
             m = "bad service description: missing separator (---)"
             raise exceptions.ParsingError(m)
 

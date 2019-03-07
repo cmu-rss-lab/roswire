@@ -33,8 +33,8 @@ class ActionFormat:
 
         sections: List[str] = [ss.strip() for ss in s.split('\n---')]
         try:
-            s_goal, s_feed, s_res = sections
-        except IndexError:
+            s_goal, s_res, s_feed = sections
+        except ValueError:
             m = "failed to parse action description: expected three sections."
             raise exceptions.ParsingError(m)
 
