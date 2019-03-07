@@ -19,8 +19,7 @@ setup(
     license='mit',
     install_requires=[
         'bugzoo>=2.1.22',
-        'attrs>=17.2.0',
-        'lark-parser>=0.6.6'
+        'attrs>=17.2.0'
     ],
     setup_requires=[
         'pytest-runner'
