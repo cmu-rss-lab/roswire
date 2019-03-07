@@ -26,9 +26,9 @@ class SrvFormat:
             m = "bad service description: missing separator (---)"
             raise Exception(m)
 
-        request = MsgFormat.from_string(s_request, package, name_request)
+        request = MsgFormat.from_string(package, name_request, s_request)
         if s_response:
-            response = MsgFormat.from_string(s_request, package, name_response)
+            response = MsgFormat.from_string(package, name_response, s_response)
         else:
             response = None
 

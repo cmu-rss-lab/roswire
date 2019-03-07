@@ -32,15 +32,15 @@ class ActionFormat:
             m = "failed to parse action description: expected three sections."
             raise Exception(m)
 
-        goal = MsgFormat.from_string(s_goal, package, name_goal)
+        goal = MsgFormat.from_string(package, name_goal, s_goal)
 
         if s_feedback:
-            feedback = MsgFormat.from_string(s_feedback, package, name_feedback)
+            feedback = MsgFormat.from_string(package, name_feedback, s_feedback )
         else:
             feedback = None
 
         if s_result:
-            result = MsgFormat.from_string(s_result, package, name_result)
+            result = MsgFormat.from_string(package, name_result, s_result)
         else:
             result = None
 

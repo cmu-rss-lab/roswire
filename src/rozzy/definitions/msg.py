@@ -41,7 +41,7 @@ class MsgFormat:
     constants = attr.ib(type=Tuple[Constant, ...], converter=tuple)
 
     @staticmethod
-    def from_string(text: str, package: str, name: str) -> 'MsgFormat':
+    def from_string(package: str, name: str, text: str) -> 'MsgFormat':
         """
         Constructs a message format from the contents of a .msg file.
         Reference:
