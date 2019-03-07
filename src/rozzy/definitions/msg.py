@@ -11,8 +11,8 @@ R_TYPE = r"[a-zA-Z0-9_/]+"
 R_NAME = r"[a-zA-Z0-9_/]+"
 R_VAL = r".+"
 R_COMMENT = r"(#.*)?"
-R_FIELD = re.compile(f"^({R_TYPE})\s+({R_NAME})\s*{R_COMMENT}$")
-R_CONSTANT = re.compile(f"^(\w+)\s+(\w+)=(.+)$")
+R_FIELD = re.compile(f"^\s*({R_TYPE})\s+({R_NAME})\s*{R_COMMENT}$")
+R_CONSTANT = re.compile(f"^\s*(\w+)\s+(\w+)=(.+)$")
 R_BLANK = re.compile(
     f"^\s*{R_COMMENT}$")
 
