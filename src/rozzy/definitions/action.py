@@ -21,12 +21,12 @@ class ActionFormat:
     @staticmethod
     def from_string(package: str, name: str, s: str) -> 'ActionFormat':
         name_goal = f"{name}Goal"
-        name_feedback = f"{name}Feedback"
-        name_result = f"{name}Result"
+        name_feed = f"{name}Feedback"
+        name_res = f"{name}Result"
 
         sections: List[str] = [ss.strip() for ss in s.split('\n---')]
         try:
-            s_goal, s_feedback, s_result = sections
+            s_goal, s_feed, s_res = sections
         # TODO add ParsingError
         except IndexError:
             m = "failed to parse action description: expected three sections."
@@ -34,14 +34,14 @@ class ActionFormat:
 
         goal = MsgFormat.from_string(package, name_goal, s_goal)
 
-        if s_feedback:
-            feedback = MsgFormat.from_string(package, name_feedback, s_feedback)
+        if s_feed:
+            feed = MsgFormat.from_string(package, name_feed, s_feed)
         else:
-            feedback = None
+            feed = None
 
-        if s_result:
-            result = MsgFormat.from_string(package, name_result, s_result)
+        if s_res:
+            res = MsgFormat.from_string(package, name_res, s_res)
         else:
-            result = None
+            res = None
 
-        return ActionFormat(package, name, goal, feedback, result)
+        return ActionFormat(package, name, goal, feed, res)
