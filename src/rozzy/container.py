@@ -24,7 +24,8 @@ class Container(object):
         self.__shell: ShellProxy = ShellProxy(daemon_bugzoo, container_bugzoo)
         self.__files: FileProxy = FileProxy(daemon_bugzoo,
                                             container_bugzoo,
-                                            ws_host)
+                                            ws_host,
+                                            self.__shell)
         self.__ws_host: str = ws_host
 
     @property
