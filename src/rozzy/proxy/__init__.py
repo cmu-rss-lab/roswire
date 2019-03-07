@@ -5,8 +5,7 @@ __all__ = [
     'NodeManagerProxy',
     'NodeProxy',
     'ROSProxy',
-    'BagRecorderProxy',
-    'FileProxy'
+    'BagRecorderProxy'
 ]
 
 from typing import (Tuple, Dict, Optional, Iterator, Any, List, Union,
