@@ -22,6 +22,12 @@ class RecorderAlreadyStopped(RozzyException):
     """
 
 
+class ParsingError(RozzyException):
+    """
+    Rozzy failed to parse a given file/string.
+    """
+
+
 class NodeNotFoundError(KeyError, RozzyException):
     """
     No node was found with the given name.
