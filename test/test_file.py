@@ -43,3 +43,16 @@ def test_islink():
         assert files.islink('/ros_ws/src/ArduPilot/libraries/AP_HAL_F4Light/sbus.cpp')
         assert files.isfile('/ros_ws/src/ArduPilot/libraries/AP_HAL_Linux/sbus.cpp')
         assert not files.islink('/ros_ws/src/ArduPilot/libraries/AP_HAL_Linux/sbus.cpp')
+
+
+def test_listdir():
+    with build_file_proxy() as files:
+        assert files.listdir('/ros_ws') == [
+            '.catkin_tools',
+            'build',
+            'devel',
+            'entrypoint.sh',
+            'logs',
+            'pkgs.rosinstall',
+            'src'
+        ]
