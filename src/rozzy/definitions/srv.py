@@ -5,6 +5,7 @@ from typing import Optional, List
 import attr
 
 from .msg import MsgFormat
+from .. import exceptions
 
 
 @attr.s(frozen=True)
@@ -16,16 +17,21 @@ class SrvFormat:
 
     @staticmethod
     def from_string(package: str, name: str, s: str) -> 'SrvFormat':
+        """
+        Constructs a service format from its description.
+
+        Raises:
+            ParsingError: if the description cannot be parsed.
+        """
         name_req = f"{name}Request"
         name_res = f"{name}Response"
 
         sections: List[str] = [ss.strip() for ss in s.split('\n---')]
         try:
             s_res, s_req = sections
-        # TODO raise ParsingError
         except IndexError:
             m = "bad service description: missing separator (---)"
-            raise Exception(m)
+            raise exceptions.ParsingError(m)
 
         req = MsgFormat.from_string(package, name_req, s_req)
         if s_res:

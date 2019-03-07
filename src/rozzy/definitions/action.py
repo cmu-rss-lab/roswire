@@ -5,6 +5,7 @@ from typing import Optional, List
 import attr
 
 from .msg import MsgFormat
+from .. import exceptions
 
 
 @attr.s(frozen=True)
@@ -20,6 +21,12 @@ class ActionFormat:
 
     @staticmethod
     def from_string(package: str, name: str, s: str) -> 'ActionFormat':
+        """
+        Constructs an action format from its description.
+
+        Raises:
+            ParsingError: if the description cannot be parsed.
+        """
         name_goal = f"{name}Goal"
         name_feed = f"{name}Feedback"
         name_res = f"{name}Result"
@@ -27,10 +34,9 @@ class ActionFormat:
         sections: List[str] = [ss.strip() for ss in s.split('\n---')]
         try:
             s_goal, s_feed, s_res = sections
-        # TODO add ParsingError
         except IndexError:
             m = "failed to parse action description: expected three sections."
-            raise Exception(m)
+            raise exceptions.ParsingError(m)
 
         goal = MsgFormat.from_string(package, name_goal, s_goal)
 

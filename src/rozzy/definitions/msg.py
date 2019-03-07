@@ -5,6 +5,8 @@ import re
 
 import attr
 
+from .. import exceptions
+
 R_TYPE = r"[a-zA-Z0-9_/]+"
 R_NAME = r"[a-zA-Z0-9_/]+"
 R_VAL = r".+"
@@ -40,9 +42,10 @@ class MsgFormat:
     @staticmethod
     def from_string(package: str, name: str, text: str) -> 'MsgFormat':
         """
-        Constructs a message format from the contents of a .msg file.
-        Reference:
-            https://github.com/strawlab/ros/blob/master/core/roslib/src/roslib/msgs.py#L577
+        Constructs a message format from its description.
+
+        Raises:
+            ParsingError: if the description cannot be parsed.
         """
         fields: List[Field] = []
         constants: List[Constant] = []
@@ -67,6 +70,6 @@ class MsgFormat:
                 field: Field = Field(typ, name)
                 fields.append(field)
             else:
-                raise Exception(f"failed to parse line: {line}")
+                raise exceptions.ParsingError(f"failed to parse line: {line}")
 
         return MsgFormat(package, name, fields, constants)
