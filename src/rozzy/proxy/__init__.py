@@ -5,7 +5,8 @@ __all__ = [
     'NodeManagerProxy',
     'NodeProxy',
     'ROSProxy',
-    'BagRecorderProxy'
+    'BagRecorderProxy',
+    'FileProxy'
 ]
 
 from typing import (Tuple, Dict, Optional, Iterator, Any, List, Union,
@@ -16,6 +17,7 @@ import logging
 import time
 
 from .shell import ShellProxy
+from .file import FileProxy
 from .parameters import ParameterServerProxy
 from .bag import BagRecorderProxy
 from .node import NodeProxy, NodeManagerProxy

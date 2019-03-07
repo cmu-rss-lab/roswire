@@ -8,7 +8,7 @@ from bugzoo import BugZoo as BugZooDaemon
 from bugzoo import Container as BugZooContainer
 
 from .exceptions import RozzyException
-from .proxy import ShellProxy, ROSProxy
+from .proxy import ShellProxy, ROSProxy, FileProxy
 
 
 class Container(object):
@@ -22,6 +22,9 @@ class Container(object):
         self.__container_bugzoo: BugZooContainer = container_bugzoo
         self.__uuid: UUID = uuid
         self.__shell: ShellProxy = ShellProxy(daemon_bugzoo, container_bugzoo)
+        self.__files: FileProxy = FileProxy(daemon_bugzoo,
+                                            container_bugzoo,
+                                            ws_host)
         self.__ws_host: str = ws_host
 
     @property
@@ -45,6 +48,10 @@ class Container(object):
     @property
     def shell(self) -> ShellProxy:
         return self.__shell
+
+    @property
+    def files(self) -> FileProxy:
+        return self.__files
 
     @contextlib.contextmanager
     def roscore(self, port: int = 11311) -> Iterator[ROSProxy]:
