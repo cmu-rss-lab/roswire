@@ -1,6 +1,6 @@
 __all__ = ['SrvFormat']
 
-from typing import Optional
+from typing import Optional, List
 
 import attr
 
@@ -16,20 +16,21 @@ class SrvFormat:
 
     @staticmethod
     def from_string(package: str, name: str, s: str) -> 'SrvFormat':
-        name_request = f"{name}Request"
-        name_response = f"{name}Response"
+        name_req = f"{name}Request"
+        name_res = f"{name}Response"
 
-        s_request, separator, s_response = s.partition('\n---\n')
-        s_response = s_response.strip()
-        s_request = s_request.strip()
-        if not separator:
+        sections: List[str] = [ss.strip() for ss in s.split('\n---')]
+        try:
+            s_res, s_req = sections
+        # TODO raise ParsingError
+        except:
             m = "bad service description: missing separator (---)"
             raise Exception(m)
 
-        request = MsgFormat.from_string(package, name_request, s_request)
-        if s_response:
-            response = MsgFormat.from_string(package, name_response, s_response)
+        req = MsgFormat.from_string(package, name_req, s_req)
+        if s_res:
+            res = MsgFormat.from_string(package, name_res, s_res)
         else:
-            response = None
+            res = None
 
-        return SrvFormat(package, name, request, response)
+        return SrvFormat(package, name, req, res)
