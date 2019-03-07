@@ -37,3 +37,11 @@ class FileProxy:
         cmd = f'test -f "{shlex.quote(path)}"'
         code, output, duration = self.__shell.execute(cmd)
         return code == 0
+
+    def isdir(self, path: str) -> bool:
+        """
+        Determines whether a directory exists at a given path.
+        """
+        cmd = f'test -d "{shlex.quote(path)}"'
+        code, output, duration = self.__shell.execute(cmd)
+        return code == 0
