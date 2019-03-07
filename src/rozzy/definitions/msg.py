@@ -20,18 +20,6 @@ R_BLANK = re.compile(
 ConstantValue = Union[str, int, float]
 
 
-def is_legal_constant_type(name_typ: str) -> bool:
-    """
-    Determines whether a type, given by its name, may be used to provide a
-    constant.
-    """
-    raise NotImplementedError
-
-
-def is_legal_msg_type(name_typ: str) -> bool:
-    raise NotImplementedError
-
-
 @attr.s(frozen=True)
 class Constant:
     typ = attr.ib(type=str)
@@ -72,10 +60,6 @@ class MsgFormat:
             elif m_constant:
                 typ, name, val_str = m_constant.group(1, 2, 3)
 
-                # is the type valid?
-                # if not is_legal_constant_type(typ):
-                #     raise Exception(f"illegal constant type: {typ}")
-
                 # FIXME convert value
                 val: ConstantValue = val_str
 
@@ -83,8 +67,6 @@ class MsgFormat:
                 constants.append(constant)
             elif m_field:
                 typ, name = m_field.group(1, 2)
-                # if not is_legal_type(typ):
-                #     raise Exception(f"illegal type: {type}")
                 field: Field = Field(typ, name)
                 fields.append(field)
             else:
