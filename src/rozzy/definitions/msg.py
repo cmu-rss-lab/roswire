@@ -1,6 +1,6 @@
 __all__ = ['Constant', 'ConstantValue', 'Field', 'MsgFormat']
 
-from typing import Type, Optional, Any, Union, Tuple
+from typing import Type, Optional, Any, Union, Tuple, List
 import re
 
 import attr
@@ -23,7 +23,7 @@ ConstantValue = Union[str, int, float]
 class Constant:
     typ = attr.ib(type=str)
     name = attr.ib(type=str)
-    value = attr.ib(type=ConstantValue)
+    value = attr.ib(type=Union[str, int, float])
 
 
 @attr.s(frozen=True)
@@ -51,9 +51,9 @@ class MsgFormat:
         constants: List[Constant] = []
 
         for line in text.split('\n'):
-            m_blank: re.Match = R_BLANK.match(line)
-            m_constant: re.Match = R_CONSTANT.match(line)
-            m_field: re.Match = R_FIELD.match(line)
+            m_blank = R_BLANK.match(line)
+            m_constant = R_CONSTANT.match(line)
+            m_field = R_FIELD.match(line)
 
             if m_blank:
                 continue
@@ -72,4 +72,4 @@ class MsgFormat:
             else:
                 raise exceptions.ParsingError(f"failed to parse line: {line}")
 
-        return MsgFormat(package, name, fields, constants)
+        return MsgFormat(package, name, fields, constants)  # type: ignore
