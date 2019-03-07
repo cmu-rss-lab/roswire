@@ -23,6 +23,8 @@ class SrvFormat:
         Raises:
             ParsingError: if the description cannot be parsed.
         """
+        req: MsgFormat
+        res: Optional[MsgFormat]
         name_req = f"{name}Request"
         name_res = f"{name}Response"
 
@@ -39,4 +41,4 @@ class SrvFormat:
         else:
             res = None
 
-        return SrvFormat(package, name, req, res)
+        return SrvFormat(package, name, req, res)  # type: ignore
