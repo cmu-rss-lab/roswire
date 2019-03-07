@@ -35,7 +35,7 @@ class ActionFormat:
         goal = MsgFormat.from_string(package, name_goal, s_goal)
 
         if s_feedback:
-            feedback = MsgFormat.from_string(package, name_feedback, s_feedback )
+            feedback = MsgFormat.from_string(package, name_feedback, s_feedback)
         else:
             feedback = None
 
