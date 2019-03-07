@@ -27,6 +27,10 @@ class ActionFormat:
         Raises:
             ParsingError: if the description cannot be parsed.
         """
+        goal: MsgFormat
+        feed: Optional[MsgFormat]
+        res: Optional[MsgFormat]
+
         name_goal = f"{name}Goal"
         name_feed = f"{name}Feedback"
         name_res = f"{name}Result"
