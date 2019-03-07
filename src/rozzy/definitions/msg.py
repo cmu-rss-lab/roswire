@@ -58,16 +58,16 @@ class MsgFormat:
             if m_blank:
                 continue
             elif m_constant:
-                typ, name, val_str = m_constant.group(1, 2, 3)
+                typ, name_const, val_str = m_constant.group(1, 2, 3)
 
                 # FIXME convert value
                 val: ConstantValue = val_str
 
-                constant: Constant = Constant(typ, name, val)
+                constant: Constant = Constant(typ, name_const, val)
                 constants.append(constant)
             elif m_field:
-                typ, name = m_field.group(1, 2)
-                field: Field = Field(typ, name)
+                typ, name_field = m_field.group(1, 2)
+                field: Field = Field(typ, name_field)
                 fields.append(field)
             else:
                 raise exceptions.ParsingError(f"failed to parse line: {line}")
