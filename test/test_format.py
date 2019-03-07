@@ -83,3 +83,41 @@ uint32 an_integer
     assert Field('another_pkg/YetAnotherMessage', 'val') in res.fields
     assert Field('CustomMessageDefinedInThisPackage', 'value') in res.fields
     assert Field('uint32', 'an_integer') in res.fields
+
+
+def test_action_from_string():
+    s = """
+# Define the goal
+uint32 dishwasher_id  # Specify which dishwasher we want to use
+---
+# Define the result
+uint32 total_dishes_cleaned
+---
+# Define a feedback message
+float32 percent_complete
+"""
+
+    fmt = ActionFormat.from_string("PkgName", "MessageName", s)
+    assert fmt.name == "MessageName"
+    assert fmt.package == "PkgName"
+
+    # check goal
+    goal = fmt.goal
+    assert goal is not None
+    assert not goal.constants
+    assert len(goal.fields) == 1
+    assert Field('uint32', 'dishwasher_id') in goal.fields
+
+    # check result
+    res = fmt.result
+    assert res is not None
+    assert not res.constants
+    assert len(res.fields) == 1
+    assert Field('uint32', 'total_dishes_cleaned') in res.fields
+
+    # check feedback
+    feedback = fmt.feedback
+    assert feedback is not None
+    assert not feedback.constants
+    assert len(feedback.fields) == 1
+    assert Field('float32', 'percent_complete') in feedback.fields
