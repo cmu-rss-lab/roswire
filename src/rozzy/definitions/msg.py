@@ -1,12 +1,14 @@
-from typing import Type, Optional, Any, Union
+from typing import Type, Optional, Any, Union, Tuple
 import re
 
+import attr
+
 R_TYPE = r"[a-zA-Z0-9_/]+"
-R_NAME = r"[a-zA-Z0-9_/]+"  # r"[a-zA-Z][a-zA-Z1-9_]+"
+R_NAME = r"[a-zA-Z0-9_/]+"
 R_VAL = r".+"
 R_COMMENT = r"(#.*)?"
 R_FIELD = re.compile(
-    f"^({R_TYPE})\s+({R_NAME})\s*{RE_COMMENT}$")
+    f"^({R_TYPE})\s+({R_NAME})\s*{R_COMMENT}$")
 R_CONSTANT = re.compile(
     f"^({R_TYPE})\s+({R_NAME})=\s*({R_VAL})\s*$")
 R_BLANK = re.compile(
@@ -48,7 +50,7 @@ class MsgFormat:
     constants = attr.ib(type=Tuple[Constant, ...], converter=tuple)
 
     @staticmethod
-    def from_string(text: str, package: str, name: str) -> MsgFormat:
+    def from_string(text: str, package: str, name: str) -> 'MsgFormat':
         """
         Constructs a message format from the contents of a .msg file.
         Reference:
