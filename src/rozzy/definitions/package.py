@@ -33,9 +33,19 @@ class Package:
             raise FileNotFoundError(f"directory does not exist: {path}")
 
         dir_msg = os.path.join(path, 'msg')
+        dir_srv = os.path.join(path, 'srv')
+        dir_action = os.path.join(path, 'action')
+
         if files.isdir(dir_msg):
-            messages = [MsgFormat.from_file(f, files)
+            messages = [MsgFormat.from_file(name, f, files)
                         for f in files.listdir(dir_msg) if f.endswith('.msg')]
+        if files.isdir(dir_srv):
+            services = [SrvFormat.from_file(name, f, files)
+                        for f in files.listdir(dir_srv) if f.endswith('.srv')]
+        if files.isdir(dir_action):
+            actions = [ActionFormat.from_file(name, f, files)
+                       for f in files.listdir(dir_action)
+                       if f.endswith('.action')]
 
         return Package(name,  # type: ignore
                        path,
