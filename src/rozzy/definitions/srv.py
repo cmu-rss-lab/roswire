@@ -5,6 +5,7 @@ from typing import Optional, List
 import attr
 
 from .msg import MsgFormat
+from ..proxy import FileProxy
 from .. import exceptions
 
 
@@ -14,6 +15,24 @@ class SrvFormat:
     name = attr.ib(type=str)
     request = attr.ib(type=MsgFormat)
     response = attr.ib(type=Optional[MsgFormat])
+
+    @staticmethod
+    def from_file(package: str, fn: str, files: FileProxy) -> 'SrvFormat':
+        """
+        Constructs a service format from a .srv file for a given package.
+
+        Parameters:
+            package: the name of the package that provides the file.
+            fn: the path to the .srv file.
+            files: a proxy for accessing the filesystem.
+
+        Raises:
+            FileNotFoundError: if the given file cannot be found.
+        """
+        assert fn.endswith('.srv'), 'service format files must end in .srv'
+        name: str = os.path.basename(fn[:-4])
+        contents: str = files.read(fn)
+        return SrvFormat.from_string(package, name, contents)
 
     @staticmethod
     def from_string(package: str, name: str, s: str) -> 'SrvFormat':
