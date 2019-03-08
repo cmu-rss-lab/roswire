@@ -55,6 +55,13 @@ class Package:
                        services,
                        actions)
 
+    @staticmethod
+    def from_dict(d: JSON) -> 'Package':
+        messages = [MsgFormat.from_dict(dd) for dd in d['messages']]
+        services = [SrvFormat.from_dict(dd) for dd in d['services']]
+        actions = [ActionFormat.from_dict(dd) for dd in d['actions']]
+        return Package(d['name'], d['path'], messages, services, actions)
+
     def to_dict(self) -> JSON:
         d = {'name': self.name,
              'path': self.path,
