@@ -297,3 +297,22 @@ def test_read():
         # directory
         with pytest.raises(IsADirectoryError):
             files.read('/ros_ws')
+
+
+def test_write():
+    with build_file_proxy() as files:
+        # write to new file
+        expected = "hello world"
+        files.write('/tmp/foo', expected)
+        assert files.isfile('/tmp/foo')
+        assert files.read('/tmp/foo') == expected
+
+        # overwrite existing file
+        expected = "goodbye world"
+        files.write('/tmp/foo', expected)
+        assert files.read('/tmp/foo') == expected
+        files.remove('/tmp/foo')
+
+        # write to a file that belongs to a non-existent directory
+        with pytest.raises(FileNotFoundError):
+            files.write('/tmp/bar/bork')
