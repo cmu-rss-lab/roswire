@@ -248,13 +248,35 @@ exec "$@"
             with open(fn_host, 'w') as f:
                 f.write(expected)
 
-            fn_container = "/tmp/foo"
+            fn_container = '/tmp/foo'
             files.copy_from_host(fn_host, fn_container)
             assert files.isfile(fn_container)
             assert files.read(fn_container) == expected
             files.remove(fn_container)
         finally:
             os.remove(fn_host)
+
+        # copy non-existent file
+        assert not os.path.exists(fn_host)
+        with pytest.raises(FileNotFoundError):
+            files.copy_from_host(fn_host, '/tmp/bar')
+
+        # copy directory
+        dir_host = tempfile.mkdtemp()
+        dir_container = '/tmp/cool'
+        try:
+            _, fn_host_foo = tempfile.mkstemp(dir=dir_host)
+            fn_container_foo = os.path.join(dir_container,
+                                            os.path.basename(fn_host_foo))
+            with open(fn_host_foo, 'w') as f:
+                f.write(expected)
+
+            files.copy_from_host(dir_host, dir_container)
+            assert files.isdir(dir_container)
+            assert files.isfile(fn_container_foo)
+            assert files.read(fn_container_foo) == expected
+        finally:
+            shutil.rmtree(dir_host)
 
 
 def test_read():
