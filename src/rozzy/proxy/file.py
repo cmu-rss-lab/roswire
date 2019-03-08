@@ -51,7 +51,7 @@ class FileProxy:
 
         path_container_parent: str = os.path.dirname(path_container)
         if not os.path.isdir(path_container_parent):
-            m = (f"directory [{path_host_container}] "
+            m = (f"directory [{path_container_parent}] "
                  "does not exist on container")
             raise FileNotFoundError(m)
 
