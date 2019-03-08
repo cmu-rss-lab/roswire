@@ -2,9 +2,11 @@ __all__ = ['Constant', 'ConstantValue', 'Field', 'MsgFormat']
 
 from typing import Type, Optional, Any, Union, Tuple, List
 import re
+import os
 
 import attr
 
+from ..proxy import FileProxy
 from .. import exceptions
 
 R_TYPE = r"[a-zA-Z0-9_/]+"
@@ -38,6 +40,23 @@ class MsgFormat:
     name = attr.ib(type=str)
     fields = attr.ib(type=Tuple[Field, ...], converter=tuple)
     constants = attr.ib(type=Tuple[Constant, ...], converter=tuple)
+
+    @staticmethod
+    def from_file(package: str, fn: str, files: FileProxy) -> 'MsgFormat':
+        """
+        Constructs a message format from a .msg file for a given package.
+
+        Parameters:
+            package: the name of the package that provides the file.
+            fn: the path to the .msg file.
+            files: a proxy for accessing the filesystem.
+
+        Raises:
+            FileNotFoundError: if the given file cannot be found.
+        """
+        assert fn.endswith('.msg'), 'message format files must end in .msg'
+        name: str = os.path.basename(fn[-4])
+        return MsgFormat.from_string(package, name, files.read(fn))
 
     @staticmethod
     def from_string(package: str, name: str, text: str) -> 'MsgFormat':
