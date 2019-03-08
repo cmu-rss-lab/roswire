@@ -99,3 +99,36 @@ class FileProxy:
             raise NotADirectoryError(d_parent)
         else:
             raise RozzyException("unexpected mkdir failure")
+
+    def makedirs(self, d: str, exist_ok: bool = False) -> None:
+        """
+        Recursively creates a directory at a given path, creating any missing
+        intermediate directories along the way.
+
+        Parameters:
+            d: the path to the directory.
+            exist_ok: specifies whether or not an exception should be raised
+                if the given directory already exists.
+
+        Raises:
+            FileExistsError: if either (a) `exist_ok=False` and a directory
+                already exists at the given path, or (b) a file already exists
+                at the given path.
+            NotADirectoryError: if the parent directory isn't a directory.
+            RozzyException: if an unexpected error occurred.
+        """
+        d_parent = os.path.dirname(d)
+        if self.isdir(d) and not exist_ok:
+            m = f"directory already exists: {d}"
+            raise FileExistsError(m)
+        if self.isfile(d):
+            m = f"file already exists at given path: {d}"
+            raise FileExistsError(m)
+        if self.exists(d_parent) and self.isfile(d_parent):
+            m = f"parent directory is actually a file: {d_parent}"
+            raise NotADirectoryError(m)
+
+        cmd = f'mkdir -p "{shlex.quote(d)}"'
+        code, output, duration = self.__shell.execute(cmd)
+        if code != 0:
+            raise RozzyException("unexpected makedirs failure")
