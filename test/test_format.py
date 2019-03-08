@@ -131,7 +131,7 @@ def test_msg_from_file():
         pkg = 'tf2_msgs'
         fn = '/ros_ws/src/geometry2/tf2_msgs/msg/TFMessage.msg'
         fmt = MsgFormat.from_file(pkg, fn, files)
-        assert fmt.package == tf2_msgs
+        assert fmt.package == pkg
         assert fmt.name == 'TFMessage'
         assert not fmt.constants
         assert len(fmt.fields) == 1
