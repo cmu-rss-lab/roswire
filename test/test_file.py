@@ -230,3 +230,18 @@ exec "$@"
             assert set(os.listdir(dir_host_src)) == {'eigen_kdl.cpp', 'eigen_msg.cpp'}
         finally:
             shutil.rmtree(dir_host)
+
+
+def test_read():
+    with build_file_proxy() as files:
+        # read file
+        assert files.read('/ros_ws/src/geometry/tf/msg/tfMessage.msg') == \
+            "geometry_msgs/TransformStamped[] transforms\n"
+
+        # non-existent file
+        with pytest.raises(FileNotFoundError):
+            files.read('/foo/bar')
+
+        # directory
+        with pytest.raises(IsADirectoryError):
+            files.read('/ros_ws')
