@@ -315,4 +315,4 @@ def test_write():
 
         # write to a file that belongs to a non-existent directory
         with pytest.raises(FileNotFoundError):
-            files.write('/tmp/bar/bork')
+            files.write('/tmp/bar/bork', 'code things')
