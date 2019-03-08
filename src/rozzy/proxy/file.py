@@ -29,7 +29,7 @@ class FileProxy:
         """
         Determines whether a file or directory exists at the given path.
         """
-        cmd = f'test -e "{shlex.quote(path)}"'
+        cmd = f'test -e {shlex.quote(path)}'
         code, output, duration = self.__shell.execute(cmd)
         return code == 0
 
@@ -37,7 +37,7 @@ class FileProxy:
         """
         Determines whether a regular file exists at a given path.
         """
-        cmd = f'test -f "{shlex.quote(path)}"'
+        cmd = f'test -f {shlex.quote(path)}'
         code, output, duration = self.__shell.execute(cmd)
         return code == 0
 
@@ -45,7 +45,7 @@ class FileProxy:
         """
         Determines whether a directory exists at a given path.
         """
-        cmd = f'test -d "{shlex.quote(path)}"'
+        cmd = f'test -d {shlex.quote(path)}'
         code, output, duration = self.__shell.execute(cmd)
         return code == 0
 
@@ -53,7 +53,7 @@ class FileProxy:
         """
         Determines whether a symbolic link exists at a given path.
         """
-        cmd = f'test -h "{shlex.quote(path)}"'
+        cmd = f'test -h {shlex.quote(path)}'
         code, output, duration = self.__shell.execute(cmd)
         return code == 0
 
@@ -65,7 +65,7 @@ class FileProxy:
             OSError: if the given path isn't a directory.
             OSError: if the given path is not a file or directory.
         """
-        cmd = f'ls -A -1 "{shlex.quote(d)}"'
+        cmd = f'ls -A -1 {shlex.quote(d)}'
         code, output, duration = self.__shell.execute(cmd)
         if code == 2:
             raise OSError(f"no such file or directory: {d}")
@@ -84,7 +84,7 @@ class FileProxy:
                 path.
             RozzyException: if an unexpected error occurred.
         """
-        cmd = f'mkdir "{shlex.quote(d)}"'
+        cmd = f"mkdir {shlex.quote(d)}"
         code, output, duration = self.__shell.execute(cmd)
         if code == 0:
             return
@@ -128,7 +128,7 @@ class FileProxy:
             m = f"parent directory is actually a file: {d_parent}"
             raise NotADirectoryError(m)
 
-        cmd = f'mkdir -p "{shlex.quote(d)}"'
+        cmd = f'mkdir -p {shlex.quote(d)}'
         code, output, duration = self.__shell.execute(cmd)
         if code != 0:
             raise RozzyException("unexpected makedirs failure")
@@ -143,8 +143,9 @@ class FileProxy:
         Raises:
             FileNotFoundError: if the given file does not exist.
             IsADirectoryError: if the given path is a directory.
+            RozzyException: an unexpected failure occurred.
         """
-        cmd = f'rm "{shlex.quote(fn)}"'
+        cmd = f'rm {shlex.quote(fn)}'
         code, output, duration = self.__shell.execute(cmd)
         if code == 0:
             return
@@ -153,5 +154,32 @@ class FileProxy:
             raise FileNotFoundError(f"file not found: {fn}")
         elif self.isdir(fn):
             raise IsADirectoryError(f"cannot remove directory: {fn}")
-        else:
-            raise RozzyException("unexpected makedirs failure")
+
+        raise RozzyException("unexpected remove failure")
+
+    def rmdir(self, d: str) -> None:
+        """
+        Removes a given directory.
+
+        Note:
+            Does not handle permissions errors.
+
+        Raises:
+            FileNotFoundError: if the given directory does not exist.
+            NotADirectoryError: if the given path is not a directory.
+            OSError: if the given directory is not empty.
+            RozzyException: an unexpected failure occurred.
+        """
+        if self.isfile(d):
+            raise NotADirectoryError(f"cannot remove file: {d}")
+        if not self.isdir(d):
+            raise FileNotFoundError(f"directory does not exist: {d}")
+
+        cmd = f'rmdir {shlex.quote(d)}'
+        code, output, duration = self.__shell.execute(cmd)
+        if code == 0:
+            return
+        if code == 1 and 'Directory not empty' in output:
+            raise OSError(f"directory not empty: {d}")
+
+        raise RozzyException("unexpected rmdir failure")
