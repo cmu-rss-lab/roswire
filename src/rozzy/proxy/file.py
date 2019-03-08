@@ -100,6 +100,22 @@ class FileProxy:
                  f"from container [{id_container}] to host: {path_host}")
             raise OSError(m)
 
+    def write(self, fn: str, contents: Union[str, bytes]) -> None:
+        mode = 'wb' if isinstance(contents, bytes) else 'w'
+        dir_parent = os.path.dirname(fn)
+        if not self.isdir(dir_parent):
+            m = f"parent directory does not exist: {dir_parent}"
+            raise FileNotFoundError(m)
+
+        # write to a temporary file on the host and copy to container
+        _, fn_host = tempfile.mkstemp()
+        try:
+            with open(fn_host, mode) as f:
+                f.write(contents)
+            self.copy_from_host(fn_host, fn)
+        finally:
+            os.remove(fn_host)
+
     @overload
     def read(self, fn: str, binary: Literal[True]) -> bytes:
         ...
