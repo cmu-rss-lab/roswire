@@ -128,6 +128,7 @@ float32 percent_complete
 
 def test_msg_from_file():
     with build_file_proxy() as files:
+        # read .msg file
         pkg = 'tf2_msgs'
         fn = '/ros_ws/src/geometry2/tf2_msgs/msg/TFMessage.msg'
         fmt = MsgFormat.from_file(pkg, fn, files)
@@ -136,3 +137,13 @@ def test_msg_from_file():
         assert not fmt.constants
         assert len(fmt.fields) == 1
         assert Field('geometry_msgs/TransformStamped[]', 'transforms') in fmt.fields
+
+        # attempt to read .action file
+        fn = '/ros_ws/src/geometry2/tf2_msgs/action/LookupTransform.action'
+        with pytest.raises(AssertionError):
+            MsgFormat.from_file(pkg, fn, files)
+
+        # attempt to read non-existent file
+        fn = '/ros_ws/src/geometry2/tf2_msgs/msg/Spooky.msg'
+        with pytest.raises(FileNotFoundError):
+            MsgFormat.from_file(pkg, fn, files)
