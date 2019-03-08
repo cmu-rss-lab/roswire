@@ -175,7 +175,7 @@ class FileProxy:
         if not self.isdir(d):
             raise FileNotFoundError(f"directory does not exist: {d}")
 
-        cmd = f'rmdir {shlex.quote(fn)}'
+        cmd = f'rmdir {shlex.quote(d)}'
         code, output, duration = self.__shell.execute(cmd)
         if code == 0:
             return
