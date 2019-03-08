@@ -40,8 +40,8 @@ class FileProxy:
         Raises:
             FileNotFoundError: if no file or directory exists at the given path
                 on the host.
-            FileNotFoundError: if the parent directory of the container filepath
-                does not exist.
+            FileNotFoundError: if the parent directory of the container
+                filepath does not exist.
             OSError: if the copy operation failed.
         """
         id_container: str = self.__container_bugzoo.uid
