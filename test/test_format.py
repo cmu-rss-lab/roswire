@@ -1,8 +1,11 @@
 import pytest
 
+from rozzy.proxy import FileProxy
 from rozzy.definitions import (Constant, Field, MsgFormat, SrvFormat,
                                ActionFormat)
 import rozzy.exceptions
+
+from test_file import build_file_proxy
 
 
 def test_msg_from_string():
@@ -121,3 +124,98 @@ float32 percent_complete
     assert not feedback.constants
     assert len(feedback.fields) == 1
     assert Field('float32', 'percent_complete') in feedback.fields
+
+
+def test_action_from_file():
+    with build_file_proxy() as files:
+        # read .action file
+        pkg = 'tf2_msgs'
+        fn = '/ros_ws/src/geometry2/tf2_msgs/action/LookupTransform.action'
+        fmt = ActionFormat.from_file(pkg, fn, files)
+        assert fmt.package == pkg
+        assert fmt.name == 'LookupTransform'
+
+        goal: MsgFormat = fmt.goal
+        assert not goal.constants
+        assert len(goal.fields) == 7
+        assert Field('string', 'target_frame') in goal.fields
+        assert Field('string', 'source_frame') in goal.fields
+        assert Field('time', 'source_time') in goal.fields
+        assert Field('duration', 'timeout') in goal.fields
+        assert Field('time', 'target_time') in goal.fields
+        assert Field('string', 'fixed_frame') in goal.fields
+        assert Field('bool', 'advanced') in goal.fields
+
+        assert fmt.result
+        res: MsgFormat = fmt.result
+        assert not res.constants
+        assert len(res.fields) == 2
+        assert Field('geometry_msgs/TransformStamped', 'transform') in res.fields
+        assert Field('tf2_msgs/TF2Error', 'error') in res.fields
+
+        assert not fmt.feedback
+
+        # attempt to read .msg file
+        fn = '/ros_ws/src/geometry2/tf2_msgs/msg/TFMessage.msg'
+        with pytest.raises(AssertionError):
+            ActionFormat.from_file(pkg, fn, files)
+
+        # attempt to read non-existent file
+        fn = '/ros_ws/src/geometry2/tf2_msgs/action/Spooky.action'
+        with pytest.raises(FileNotFoundError):
+            ActionFormat.from_file(pkg, fn, files)
+
+
+def test_srv_from_file():
+    with build_file_proxy() as files:
+        # read .srv file
+        pkg = 'nav_msgs'
+        fn = '/ros_ws/src/common_msgs/nav_msgs/srv/SetMap.srv'
+        fmt = SrvFormat.from_file(pkg, fn, files)
+        assert fmt.package == pkg
+        assert fmt.name == 'SetMap'
+
+        req: MsgFormat = fmt.request
+        assert not req.constants
+        assert len(req.fields) == 2
+        assert Field('nav_msgs/OccupancyGrid', 'map') in req.fields
+        assert Field('geometry_msgs/PoseWithCovarianceStamped', 'initial_pose') in req.fields
+
+        assert fmt.response
+        res: MsgFormat = fmt.response
+        assert not res.constants
+        assert len(res.fields) == 1
+        assert Field('bool', 'success') in res.fields
+
+        # attempt to read .action file
+        fn = '/ros_ws/src/geometry2/tf2_msgs/action/LookupTransform.action'
+        with pytest.raises(AssertionError):
+            SrvFormat.from_file(pkg, fn, files)
+
+        # attempt to read non-existent file
+        fn = '/ros_ws/src/common_msgs/nav_msgs/srv/Spooky.srv'
+        with pytest.raises(FileNotFoundError):
+            SrvFormat.from_file(pkg, fn, files)
+
+
+def test_msg_from_file():
+    with build_file_proxy() as files:
+        # read .msg file
+        pkg = 'tf2_msgs'
+        fn = '/ros_ws/src/geometry2/tf2_msgs/msg/TFMessage.msg'
+        fmt = MsgFormat.from_file(pkg, fn, files)
+        assert fmt.package == pkg
+        assert fmt.name == 'TFMessage'
+        assert not fmt.constants
+        assert len(fmt.fields) == 1
+        assert Field('geometry_msgs/TransformStamped[]', 'transforms') in fmt.fields
+
+        # attempt to read .action file
+        fn = '/ros_ws/src/geometry2/tf2_msgs/action/LookupTransform.action'
+        with pytest.raises(AssertionError):
+            SrvFormat.from_file(pkg, fn, files)
+
+        # attempt to read non-existent file
+        fn = '/ros_ws/src/geometry2/tf2_msgs/msg/Spooky.msg'
+        with pytest.raises(FileNotFoundError):
+            MsgFormat.from_file(pkg, fn, files)

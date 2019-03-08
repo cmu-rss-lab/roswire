@@ -1,10 +1,12 @@
 __all__ = ['ActionFormat']
 
 from typing import Optional, List
+import os
 
 import attr
 
 from .msg import MsgFormat
+from ..proxy import FileProxy
 from .. import exceptions
 
 
@@ -18,6 +20,25 @@ class ActionFormat:
     goal = attr.ib(type=MsgFormat)
     feedback = attr.ib(type=Optional[MsgFormat])
     result = attr.ib(type=Optional[MsgFormat])
+
+    @staticmethod
+    def from_file(package: str, fn: str, files: FileProxy) -> 'ActionFormat':
+        """
+        Constructs a message format from a .msg file for a given package.
+
+        Parameters:
+            package: the name of the package that provides the file.
+            fn: the path to the .msg file.
+            files: a proxy for accessing the filesystem.
+
+        Raises:
+            FileNotFoundError: if the given file cannot be found.
+        """
+        assert fn.endswith('.action'), \
+            'action format files must end in .action'
+        name: str = os.path.basename(fn[:-7])
+        contents: str = files.read(fn)
+        return ActionFormat.from_string(package, name, contents)
 
     @staticmethod
     def from_string(package: str, name: str, s: str) -> 'ActionFormat':
