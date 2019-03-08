@@ -235,8 +235,13 @@ exec "$@"
 def test_read():
     with build_file_proxy() as files:
         # read file
-        assert files.read('/ros_ws/src/geometry/tf/msg/tfMessage.msg') == \
-            "geometry_msgs/TransformStamped[] transforms\n"
+        expected = "geometry_msgs/TransformStamped[] transforms\n"
+        assert files.read('/ros_ws/src/geometry/tf/msg/tfMessage.msg') == expected
+
+        # read binary file
+        binary = files.read('/ros_ws/src/geometry/tf/msg/tfMessage.msg', binary=True)
+        text = binary.decode('utf-8')
+        assert text == expected
 
         # non-existent file
         with pytest.raises(FileNotFoundError):
