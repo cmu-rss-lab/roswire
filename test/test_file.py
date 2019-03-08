@@ -125,7 +125,7 @@ def test_makedirs():
 def test_remove():
     with build_file_proxy() as files:
         assert files.isfile('/ros_ws/pkgs.rosinstall')
-        files.remove('/ros_ws/pkg.rosinstall')
+        files.remove('/ros_ws/pkgs.rosinstall')
         assert not files.exists('/ros_ws/pkgs.rosinstall')
 
         # remove non-existent file
