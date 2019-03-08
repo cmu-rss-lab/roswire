@@ -108,6 +108,12 @@ def test_makedirs():
         assert files.isdir('/ros_ws/cool')
         files.makedirs('/ros_ws/cool', exist_ok=True)
 
+        # path is a file
+        with pytest.raises(FileExistsError):
+            files.makedirs('/ros_ws/entrypoint.sh')
+        with pytest.raises(FileExistsError):
+            files.makedirs('/ros_ws/entrypoint.sh', exist_ok=True)
+
         # parent directory is a file
         with pytest.raises(NotADirectoryError):
             files.makedirs('/ros_ws/entrypoint.sh/foo')
