@@ -28,6 +28,15 @@ class Package:
         messages: List[MsgFormat] = []
         services: List[SrvFormat] = []
         actions: List[ActionFormat] = []
+
+        if not files.isdir(path):
+            raise FileNotFoundError(f"directory does not exist: {path}")
+
+        dir_msg = os.path.join(path, 'msg')
+        if files.isdir(dir_msg):
+            messages = [MsgFormat.from_file(f, files)
+                        for f in files.listdir(dir_msg) if f.endswith('.msg')]
+
         return Package(name,  # type: ignore
                        path,
                        messages,
