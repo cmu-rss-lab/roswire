@@ -40,8 +40,8 @@ class FileProxy:
         Raises:
             FileNotFoundError: if no file or directory exists at the given path
                 on the host.
-            FileNotFoundError: if the parent directory of the container filepath
-                does not exist.
+            FileNotFoundError: if the parent directory of the container
+                filepath does not exist.
             OSError: if the copy operation failed.
         """
         id_container: str = self.__container_bugzoo.uid
@@ -51,7 +51,7 @@ class FileProxy:
 
         path_container_parent: str = os.path.dirname(path_container)
         if not os.path.isdir(path_container_parent):
-            m = (f"directory [{path_host_container}] "
+            m = (f"directory [{path_container_parent}] "
                  "does not exist on container")
             raise FileNotFoundError(m)
 
@@ -115,6 +115,10 @@ class FileProxy:
             self.copy_from_host(fn_host, fn)
         finally:
             os.remove(fn_host)
+
+    @overload
+    def read(self, fn: str) -> str:
+        ...
 
     @overload
     def read(self, fn: str, binary: Literal[True]) -> bytes:
