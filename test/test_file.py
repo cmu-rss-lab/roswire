@@ -232,6 +232,31 @@ exec "$@"
             shutil.rmtree(dir_host)
 
 
+def test_copy_from_host():
+    with build_file_proxy() as files:
+        # create temporary file on host
+        expected = """
+#!/bin/bash
+set -e
+
+# setup ros environment
+source "/opt/ros/$ROS_DISTRO/setup.bash"
+exec "$@"
+""".lstrip()
+        _, fn_host = tempfile.mkstemp()
+        try:
+            with open(fn_host, 'w') as f:
+                f.write(expected)
+
+            fn_container = "/tmp/foo"
+            files.copy_from_host(fn_host, fn_container)
+            assert files.isfile(fn_container)
+            assert files.read(fn_container) == expected
+            files.remove(fn_container)
+        finally:
+            os.remove(fn_host)
+
+
 def test_read():
     with build_file_proxy() as files:
         # read file
