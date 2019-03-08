@@ -1,12 +1,14 @@
 __all__ = ['FileProxy']
 
 from typing import List
+import os
 import shlex
-
-from .shell import ShellProxy
 
 from bugzoo import BugZoo as BugZooDaemon
 from bugzoo import Container as BugZooContainer
+
+from .shell import ShellProxy
+from ..exceptions import RozzyException
 
 
 class FileProxy:
@@ -70,3 +72,30 @@ class FileProxy:
         if not self.isdir(d):
             raise OSError(f"Not a directory: {d}")
         return output.replace('\r', '').split('\n')
+
+    def mkdir(self, d: str) -> None:
+        """
+        Creates a directory at a given path.
+
+        Raises:
+            NotADirectoryError: if the parent directory isn't a directory.
+            FileNotFoundError: if the parent directory doesn't exist.
+            FileExistsError: if a file or directory already exist at the given
+                path.
+            RozzyException: if an unexpected error occurred.
+        """
+        cmd = f'mkdir "{shlex.quote(d)}"'
+        code, output, duration = self.__shell.execute(cmd)
+        if code == 0:
+            return
+
+        if self.exists(d):
+            raise FileExistsError(d)
+
+        d_parent = os.path.dirname(d)
+        if not self.exists(d_parent):
+            raise FileNotFoundError(d_parent)
+        elif not self.isdir(d_parent):
+            raise NotADirectoryError(d_parent)
+        else:
+            raise RozzyException("unexpected mkdir failure")
