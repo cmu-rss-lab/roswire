@@ -1,9 +1,10 @@
 __all__ = ['FileProxy']
 
-from typing import List
+from typing import List, Union
 import os
 import shlex
 import tempfile
+import subprocess
 
 from bugzoo import BugZoo as BugZooDaemon
 from bugzoo import Container as BugZooContainer
@@ -26,6 +27,43 @@ class FileProxy:
         self.__dir_ws_host: str = ws_host
         self.__dir_ws_container: str = '/.rozzy'
 
+    def copy_to_host(self, path_container: str, path_host: str) -> None:
+        """
+        Copies a given file or directory tree from the container to the host.
+
+        Parameters:
+            fn_container: the file that should be copied from the container.
+            fn_host: the destination filepath on the host.
+
+        Raises:
+            FileNotFoundError: if no file or directory exists at the given path
+                inside the container.
+            FileNotFoundError: if the parent directory of the host filepath
+                does not exist.
+            OSError: if the copy operation failed.
+        """
+        id_container: str = self.__container_bugzoo.uid
+        if not self.exists(path_container):
+            m = (f"file [{path_container}] does not exist in container "
+                 f"[{id_container}]")
+            raise FileNotFoundError(m)
+
+        path_host_parent: str = os.path.dirname(path_host)
+        if not os.path.isdir(path_host_parent):
+            m = (f"directory [{path_host_parent}] "
+                 "does not exist on host machine")
+            raise FileNotFoundError(m)
+
+        cmd: str = (f"docker cp {id_container}:{shlex.quote(path_container)} "
+                    f"{shlex.quote(path_host)}")
+        try:
+            subprocess.check_call(cmd, shell=True)
+        except subprocess.CalledProcessError:
+            m = (f"failed to copy file [{path_container}] "
+                 f"from container [{id_container}] to host: {path_host}")
+            raise OSError(m)
+
+    # TODO use overload
     def read(self, fn: str, binary: bool = False) -> Union[str, bytes]:
         """
         Reads the contents of a given file.
