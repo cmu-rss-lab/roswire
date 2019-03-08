@@ -183,3 +183,25 @@ class FileProxy:
             raise OSError(f"directory not empty: {d}")
 
         raise RozzyException("unexpected rmdir failure")
+
+    def rmtree(self, d: str) -> None:
+        """
+        Removes a given directory tree.
+
+        Note:
+            Does not handle permissions errors.
+
+        Raises:
+            FileNotFoundError: if the given directory does not exist.
+            NotADirectoryError: if the given path is not a directory.
+            OSError: if the directory tree removal failed.
+        """
+        if self.isfile(d):
+            raise NotADirectoryError(f"cannot remove file: {d}")
+        if not self.isdir(d):
+            raise FileNotFoundError(f"directory does not exist: {d}")
+
+        cmd = f'rm -rf {shlex.quote(d)}'
+        code, output, duration = self.__shell.execute(cmd)
+        if code != 0:
+            raise OSError(f"failed to remove directory tree: {d}")
