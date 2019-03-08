@@ -1,5 +1,6 @@
 from typing import Iterator
 import contextlib
+import tempfile
 
 import pytest
 
@@ -191,3 +192,22 @@ def test_rmtree():
         assert files.isdir('/ros_ws/src')
         files.rmtree('/ros_ws/src')
         assert not files.exists('/ros_ws/src')
+
+
+def test_copy_to_host():
+    with build_file_proxy() as files:
+        _, fn_host = tempfile.mkstemp()
+        try:
+            files.copy_to_host('/ros_entrypoint.sh', fn_host)
+            with open(fn_host, 'r') as f:
+                contents = f.read()
+            assert contents == """
+#!/bin/bash
+set -e
+
+# setup ros environment
+source "/opt/ros/$ROS_DISTRO/setup.bash"
+exec "$@"
+""".strip()
+        finally:
+            os.remove(fn_host)
