@@ -1,6 +1,7 @@
 __all__ = ['FileProxy']
 
-from typing import List, Union
+from typing import List, Union, overload
+from typing_extensions import Literal
 import os
 import shlex
 import tempfile
@@ -63,7 +64,14 @@ class FileProxy:
                  f"from container [{id_container}] to host: {path_host}")
             raise OSError(m)
 
-    # TODO use overload
+    @overload
+    def read(self, fn: str, binary: Literal[True]) -> bytes:
+        ...
+
+    @overload
+    def read(self, fn: str, binary: Literal[False]) -> str:
+        ...
+
     def read(self, fn: str, binary: bool = False) -> Union[str, bytes]:
         """
         Reads the contents of a given file.
