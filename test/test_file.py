@@ -90,3 +90,27 @@ def test_mkdir():
         assert not files.exists('/ros_ws/entrypoint.sh/foo')
         assert not files.isdir('/ros_ws/entrypoint.sh')
         assert files.isfile('/ros_ws/entrypoint.sh')
+
+
+def test_makedirs():
+    with build_file_proxy() as files:
+        # parent directory exists
+        files.makedirs('/ros_ws/cool')
+        assert files.isdir('/ros_ws/cool')
+
+        # intermediate directory doesn't exist
+        files.makedirs('/ros_ws/foo/bar')
+        assert files.isdir('/ros_ws/foo/bar')
+
+        # directory already exists
+        with pytest.raises(FileExistsError):
+            files.makedirs('/ros_ws/cool')
+        assert files.isdir('/ros_ws/cool')
+        files.makedirs('/ros_ws/cool', exist_ok=True)
+
+        # parent directory is a file
+        with pytest.raises(NotADirectoryError):
+            files.makedirs('/ros_ws/entrypoint.sh/foo')
+        assert not files.exists('/ros_ws/entrypoint.sh/foo')
+        assert not files.isdir('/ros_ws/entrypoint.sh')
+        assert files.isfile('/ros_ws/entrypoint.sh')
