@@ -66,3 +66,20 @@ def test_listdir():
         # not a file or directory
         with pytest.raises(OSError):
             files.listdir('/ros_ws/idontexist')
+
+
+def test_mkdir():
+    with build_file_proxy() as files:
+        files.mkdir('/ros_ws/cool')
+        assert files.isdir('/ros_ws/cool')
+
+        # directory already exists
+        with pytest.raises(OSError):
+            files.mkdir('/ros_ws/cool')
+        assert files.isdir('/ros_ws/cool')
+
+        # intermediate directory doesn't exist
+        with pytest.raises(OSError):
+            files.mkdir('/ros_ws/foo/bar')
+        assert not files.isdir('/ros_ws/foo/bar')
+        assert not files.isdir('/ros_ws/foo')
