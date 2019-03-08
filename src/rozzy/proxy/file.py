@@ -117,6 +117,10 @@ class FileProxy:
             os.remove(fn_host)
 
     @overload
+    def read(self, fn: str) -> str:
+        ...
+
+    @overload
     def read(self, fn: str, binary: Literal[True]) -> bytes:
         ...
 

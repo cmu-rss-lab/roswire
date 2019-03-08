@@ -56,7 +56,8 @@ class MsgFormat:
         """
         assert fn.endswith('.msg'), 'message format files must end in .msg'
         name: str = os.path.basename(fn[-4])
-        return MsgFormat.from_string(package, name, files.read(fn))
+        contents: str = files.read(fn)
+        return MsgFormat.from_string(package, name, contents)
 
     @staticmethod
     def from_string(package: str, name: str, text: str) -> 'MsgFormat':
