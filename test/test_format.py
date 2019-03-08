@@ -126,6 +126,46 @@ float32 percent_complete
     assert Field('float32', 'percent_complete') in feedback.fields
 
 
+def test_action_from_file():
+    with build_file_proxy() as files:
+        # read .action file
+        pkg = 'tf2_msgs'
+        fn = '/ros_ws/src/geometry2/tf2_msgs/action/LookupTransform.action'
+        fmt = ActionFormat.from_file(pkg, fn, files)
+        assert fmt.package == pkg
+        assert fmt.name == 'LookupTransform'
+
+        goal: MsgFormat = fmt.goal
+        assert not goal.constants
+        assert len(goal.fields) == 7
+        assert Field('string', 'target_frame') in goal.fields
+        assert Field('string', 'source_frame') in goal.fields
+        assert Field('time', 'source_time') in goal.fields
+        assert Field('duration', 'timeout') in goal.fields
+        assert Field('time', 'target_time') in goal.fields
+        assert Field('string', 'fixed_frame') in goal.fields
+        assert Field('bool', 'advanced') in goal.fields
+
+        assert fmt.result
+        res: MsgFormat = fmt.result
+        assert not res.constants
+        assert len(res.fields) == 2
+        assert Field('geometry_msgs/TransformStamped', 'transform') in res.fields
+        assert Field('tf2_msgs/TF2Error', 'error') in res.fields
+
+        assert not fmt.feedback
+
+        # attempt to read .msg file
+        fn = '/ros_ws/src/geometry2/tf2_msgs/msg/TFMessage.msg'
+        with pytest.raises(AssertionError):
+            ActionFormat.from_file(pkg, fn, files)
+
+        # attempt to read non-existent file
+        fn = '/ros_ws/src/geometry2/tf2_msgs/action/Spooky.action'
+        with pytest.raises(FileNotFoundError):
+            ActionFormat.from_file(pkg, fn, files)
+
+
 def test_srv_from_file():
     with build_file_proxy() as files:
         # read .srv file
