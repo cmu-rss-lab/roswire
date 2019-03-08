@@ -132,3 +132,26 @@ class FileProxy:
         code, output, duration = self.__shell.execute(cmd)
         if code != 0:
             raise RozzyException("unexpected makedirs failure")
+
+    def remove(self, fn: str) -> None:
+        """
+        Removes a given file.
+
+        Note:
+            Does not handle permissions errors.
+
+        Raises:
+            FileNotFoundError: if the given file does not exist.
+            IsADirectoryError: if the given path is a directory.
+        """
+        cmd = f'rm "{shlex.quote(fn)}"'
+        code, output, duration = self.__shell.execute(cmd)
+        if code == 0:
+            return
+
+        if not self.exists(fn):
+            raise FileNotFoundError(f"file not found: {fn}")
+        elif self.isdir(fn):
+            raise IsADirectoryError(f"cannot remove directory: {fn}")
+        else:
+            raise RozzyException("unexpected makedirs failure")
