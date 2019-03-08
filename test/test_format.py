@@ -1,8 +1,11 @@
 import pytest
 
+from rozzy.proxy import FileProxy
 from rozzy.definitions import (Constant, Field, MsgFormat, SrvFormat,
                                ActionFormat)
 import rozzy.exceptions
+
+from test_file import build_file_proxy
 
 
 def test_msg_from_string():
@@ -121,3 +124,15 @@ float32 percent_complete
     assert not feedback.constants
     assert len(feedback.fields) == 1
     assert Field('float32', 'percent_complete') in feedback.fields
+
+
+def test_msg_from_file():
+    with build_file_proxy() as files:
+        pkg = 'tf2_msgs'
+        fn = '/ros_ws/src/geometry2/tf2_msgs/msg/TFMessage.msg'
+        fmt = MsgFormat.from_file(pkg, fn, files)
+        assert fmt.package == tf2_msgs
+        assert fmt.name == 'TFMessage'
+        assert not fmt.constants
+        assert len(fmt.fields) == 1
+        assert Field('geometry_msgs/TransformStamped[]', 'transforms') in fmt.fields
