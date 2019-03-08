@@ -161,8 +161,8 @@ def test_rmdir():
             files.rmdir('/tmp/foo')
 
         # remove a non-empty directory
-        assert files.isdir('/foo/src')
+        assert files.isdir('/ros_ws/src')
         with pytest.raises(OSError):
-            files.rmdir('/foo/src')
-        assert files.isdir('/foo/src')
-        assert files.isdir('/foo/src/ArduPilot')
+            files.rmdir('/ros_ws/src')
+        assert files.isdir('/ros_ws/src')
+        assert files.isdir('/ros_ws/src/ArduPilot')
