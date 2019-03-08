@@ -83,3 +83,10 @@ def test_mkdir():
             files.mkdir('/ros_ws/foo/bar')
         assert not files.isdir('/ros_ws/foo/bar')
         assert not files.isdir('/ros_ws/foo')
+
+        # parent directory is a file
+        with pytest.raises(OSError):
+            files.mkdir('/ros_ws/entrypoint.sh/foo')
+        assert not files.exists('/ros_ws/entrypoint.sh/foo')
+        assert not files.isdir('/ros_ws/entrypoint.sh')
+        assert files.isfile('/ros_ws/entrypoint.sh')
