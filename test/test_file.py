@@ -120,3 +120,20 @@ def test_makedirs():
         assert not files.exists('/ros_ws/entrypoint.sh/foo')
         assert not files.isdir('/ros_ws/entrypoint.sh')
         assert files.isfile('/ros_ws/entrypoint.sh')
+
+
+def test_remove():
+    with build_file_proxy() as files:
+        assert files.isfile('/ros_ws/pkgs.rosinstall')
+        files.remove('/ros_ws/pkg.rosinstall')
+        assert not files.exists('/ros_ws/pkgs.rosinstall')
+
+        # remove non-existent file
+        with pytest.raises(FileNotFoundError):
+            files.remove('/foo/bar')
+
+        # remove directory
+        assert files.isdir('/ros_ws/build')
+        with pytest.raises(IsADirectoryError):
+            files.remove('/ros_ws/build')
+        assert files.isdir('/ros_ws/build')
