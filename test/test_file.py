@@ -166,3 +166,28 @@ def test_rmdir():
             files.rmdir('/ros_ws/src')
         assert files.isdir('/ros_ws/src')
         assert files.isdir('/ros_ws/src/ArduPilot')
+
+
+def test_rmtree():
+    with build_file_proxy() as files:
+        # create and remove an empty directory
+        files.mkdir('/tmp/foo')
+        assert files.isdir('/tmp/foo')
+        files.rmtree('/tmp/foo')
+        assert not files.exists('/tmp/foo')
+
+        # remove a file
+        assert files.isfile('/ros_ws/pkgs.rosinstall')
+        with pytest.raises(NotADirectoryError):
+            files.rmdir('/ros_ws/pkgs.rosinstall')
+        assert files.isfile('/ros_ws/pkgs.rosinstall')
+
+        # remove a non-existent file/directory
+        assert not files.exists('/tmp/foo')
+        with pytest.raises(FileNotFoundError):
+            files.rmdir('/tmp/foo')
+
+        # remove a non-empty directory
+        assert files.isdir('/ros_ws/src')
+        files.rmtree('/ros_ws/src')
+        assert not files.exists('/ros_ws/src')
