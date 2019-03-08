@@ -28,6 +28,42 @@ class FileProxy:
         self.__dir_ws_host: str = ws_host
         self.__dir_ws_container: str = '/.rozzy'
 
+    def copy_from_host(self, path_host: str, path_container: str) -> None:
+        """
+        Copies a given file or directory tree from the host to the container.
+
+        Parameters:
+            fn_host: the file or directory tree that should be copied from
+                the host.
+            fn_container: the destination path on the container.
+
+        Raises:
+            FileNotFoundError: if no file or directory exists at the given path
+                on the host.
+            FileNotFoundError: if the parent directory of the container filepath
+                does not exist.
+            OSError: if the copy operation failed.
+        """
+        id_container: str = self.__container_bugzoo.uid
+        if not os.path.exists(path_host):
+            m = f"file [{path_host}] does not exist on host"
+            raise FileNotFoundError(m)
+
+        path_container_parent: str = os.path.dirname(path_container)
+        if not os.path.isdir(path_container_parent):
+            m = (f"directory [{path_host_container}] "
+                 "does not exist on container")
+            raise FileNotFoundError(m)
+
+        cmd: str = (f"docker cp {shlex.quote(path_host)} "
+                    f"{id_container}:{shlex.quote(path_container)}")
+        try:
+            subprocess.check_call(cmd, shell=True)
+        except subprocess.CalledProcessError:
+            m = (f"failed to copy file [{path_host}] "
+                 f"from host to container [{id_container}]: {path_container}")
+            raise OSError(m)
+
     def copy_to_host(self, path_container: str, path_host: str) -> None:
         """
         Copies a given file or directory tree from the container to the host.
