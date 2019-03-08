@@ -3,6 +3,7 @@ __all__ = ['FileProxy']
 from typing import List
 import os
 import shlex
+import tempfile
 
 from bugzoo import BugZoo as BugZooDaemon
 from bugzoo import Container as BugZooContainer
@@ -24,6 +25,29 @@ class FileProxy:
 
         self.__dir_ws_host: str = ws_host
         self.__dir_ws_container: str = '/.rozzy'
+
+    def read(self, fn: str, binary: bool = False) -> Union[str, bytes]:
+        """
+        Reads the contents of a given file.
+
+        Parameters:
+            fn: path to the file.
+            binary: if true, read the binary contents of the file;
+                otherwise, treat the file as a text file.
+        """
+        mode = 'rb' if binary else 'r'
+        if not self.exists(fn):
+            raise FileNotFoundError(f"file not found: {fn}")
+        if self.isdir(fn):
+            raise IsADirectoryError(f"cannot read directory: {fn}")
+
+        _, fn_host_temp = tempfile.mkstemp(suffix='.rozzy')
+        try:
+            self.copy_to_host(fn, fn_host_temp)
+            with open(fn_host_temp, mode) as f:
+                return f.read()
+        finally:
+            os.remove(fn_host_temp)
 
     def exists(self, path: str) -> bool:
         """
