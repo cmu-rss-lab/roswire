@@ -1,6 +1,6 @@
 __all__ = ['Package']
 
-from typing import Tuple, List
+from typing import Tuple, List, Dict, Union, Any
 import os
 
 import attr
@@ -9,6 +9,8 @@ from .msg import MsgFormat
 from .srv import SrvFormat
 from .action import ActionFormat
 from ..proxy import FileProxy
+
+JSON = Union[float, int, str, List[Any], Dict[str, Any]]
 
 
 @attr.s(frozen=True)
@@ -52,3 +54,11 @@ class Package:
                        messages,
                        services,
                        actions)
+
+    def to_dict(self) -> JSON:
+        d = {'name': self.name,
+             'path': self.path,
+             'messages': [m.to_dict() for m in self.messages],
+             'services': [s.to_dict() for s in self.services],
+             'actions': [a.to_dict() for a in self.actions]}
+        return d
