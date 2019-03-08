@@ -126,6 +126,38 @@ float32 percent_complete
     assert Field('float32', 'percent_complete') in feedback.fields
 
 
+def test_srv_from_file():
+    with build_file_proxy() as files:
+        # read .srv file
+        pkg = 'nav_msgs'
+        fn = '/ros_ws/src/common_msgs/nav_msgs/srv/SetMap.srv'
+        fmt = SrvFormat.from_file(pkg, fn, files)
+        assert fmt.package == pkg
+        assert fmt.name == 'SetMap'
+
+        req: MsgFormat = fmt.request
+        assert not req.constants
+        assert len(req.fields) == 2
+        assert Field('nav_msgs/OccupancyGrid', 'map') in req.fields
+        assert Field('geometry_msgs/PoseWithCovarianceStamped', 'initial_pose') in req.fields
+
+        assert fmt.response
+        res: MsgFormat = fmt.response
+        assert not res.constants
+        assert len(res.fields) == 1
+        assert Field('bool', 'success') in res.fields
+
+        # attempt to read .action file
+        fn = '/ros_ws/src/geometry2/tf2_msgs/action/LookupTransform.action'
+        with pytest.raises(AssertionError):
+            SrvFormat.from_file(pkg, fn, files)
+
+        # attempt to read non-existent file
+        fn = '/ros_ws/src/common_msgs/nav_msgs/srv/Spooky.srv'
+        with pytest.raises(FileNotFoundError):
+            SrvFormat.from_file(pkg, fn, files)
+
+
 def test_msg_from_file():
     with build_file_proxy() as files:
         # read .msg file
@@ -141,7 +173,7 @@ def test_msg_from_file():
         # attempt to read .action file
         fn = '/ros_ws/src/geometry2/tf2_msgs/action/LookupTransform.action'
         with pytest.raises(AssertionError):
-            MsgFormat.from_file(pkg, fn, files)
+            SrvFormat.from_file(pkg, fn, files)
 
         # attempt to read non-existent file
         fn = '/ros_ws/src/geometry2/tf2_msgs/msg/Spooky.msg'
