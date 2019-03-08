@@ -1,6 +1,8 @@
 from typing import Iterator
 import contextlib
 import tempfile
+import shutil
+import os
 
 import pytest
 
@@ -196,18 +198,35 @@ def test_rmtree():
 
 def test_copy_to_host():
     with build_file_proxy() as files:
-        _, fn_host = tempfile.mkstemp()
-        try:
-            files.copy_to_host('/ros_entrypoint.sh', fn_host)
-            with open(fn_host, 'r') as f:
-                contents = f.read()
-            assert contents == """
+        # copy file
+        expected = """
 #!/bin/bash
 set -e
 
 # setup ros environment
 source "/opt/ros/$ROS_DISTRO/setup.bash"
 exec "$@"
-""".strip()
+""".lstrip()
+        _, fn_host = tempfile.mkstemp()
+        try:
+            files.copy_to_host('/ros_entrypoint.sh', fn_host)
+            with open(fn_host, 'r') as f:
+                contents = f.read()
+            assert contents == expected
         finally:
             os.remove(fn_host)
+
+        # non-existent file
+        with pytest.raises(FileNotFoundError):
+            files.copy_to_host('/foo/bar', fn_host)
+
+        # copy directory
+        dir_host: str = tempfile.mkdtemp()
+        dir_host_src: str = os.path.join(dir_host, 'src')
+        try:
+            files.copy_to_host('/ros_ws/src/geometry/eigen_conversions/src',
+                               dir_host)
+            assert os.path.isdir(dir_host_src)
+            assert set(os.listdir(dir_host_src)) == {'eigen_kdl.cpp', 'eigen_msg.cpp'}
+        finally:
+            shutil.rmtree(dir_host)
