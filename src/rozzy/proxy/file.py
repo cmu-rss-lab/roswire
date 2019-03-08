@@ -57,10 +57,7 @@ class FileProxy:
         cmd: str = (f"docker cp {id_container}:{shlex.quote(path_container)} "
                     f"{shlex.quote(path_host)}")
         try:
-            subprocess.check_call(cmd,
-                                  shell=True)
-                                  # stdout=os.devnull,
-                                  # stderr=os.devnull)
+            subprocess.check_call(cmd, shell=True)
         except subprocess.CalledProcessError:
             m = (f"failed to copy file [{path_container}] "
                  f"from container [{id_container}] to host: {path_host}")
