@@ -143,7 +143,6 @@ def test_constant_to_and_from_dict():
 def test_msg_format_to_and_from_dict():
     d = {'package': 'tf',
          'name': 'tfMessage',
-         'constants': [],
          'fields': [
              {'type': 'geometry_msgs/TransformStamped[]',
               'name': 'transforms'}]}
@@ -153,6 +152,40 @@ def test_msg_format_to_and_from_dict():
                   fields=[Field('geometry_msgs/TransformStamped[]', 'transforms')])
     assert MsgFormat.from_dict(d) == f
     assert MsgFormat.from_dict(f.to_dict()) == f
+
+
+def test_srv_format_to_and_from_dict():
+    pkg = 'nav_msgs'
+    name = 'SetMap'
+    d = {'package': pkg,
+         'name': name,
+         'request': {
+            'fields': [
+                {'type': 'nav_msgs/OccupancyGrid',
+                 'name': 'map'},
+                {'type': 'geometry_msgs/PoseWithCovarianceStamped',
+                 'name': 'initial_pose'}]
+         },
+         'response': {
+            'fields': [{'type': 'bool', 'name': 'success'}]
+         }}
+    f = SrvFormat(
+            package='tf',
+            name='tfMessage',
+            request=MsgFormat(
+                package=pkg,
+                name=name,
+                constants=[],
+                fields=[Field('nav_msgs/OccupancyGrid', 'map'),
+                        Field('geometry_msgs/PoseWithCovarianceStamped',
+                              'initial_pose')]),
+            response=MsgFormat(
+                package=pkg,
+                name=name,
+                constants=[],
+                fields=[Field('bool', 'success')]))
+    assert SrvFormat.from_dict(d) == f
+    assert SrvFormat.from_dict(f.to_dict()) == f
 
 
 def test_action_from_file():
