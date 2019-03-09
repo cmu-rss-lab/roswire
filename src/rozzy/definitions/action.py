@@ -1,6 +1,6 @@
 __all__ = ['ActionFormat']
 
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 import os
 
 import attr
@@ -76,3 +76,34 @@ class ActionFormat:
             res = None
 
         return ActionFormat(package, name, goal, feed, res)
+
+    @staticmethod
+    def from_dict(d: Dict[str, Any]) -> 'ActionFormat':
+        pkg: str = d['package']
+        name: str = d['name']
+
+        res: Optional[MsgFormat] = None
+        feed: Optional[MsgFormat] = None
+        goal: MsgFormat = \
+            MsgFormat.from_dict(d['goal'], package=pkg, name=f'{name}Goal')
+
+        if 'result' in d:
+            res = MsgFormat.from_dict(d['result'],
+                                      package=pkg,
+                                      name=f'{name}Result')
+        if 'feedback' in d:
+            feed = MsgFormat.from_dict(d['feedback'],
+                                       package=pkg,
+                                       name=f'{name}Feedback')
+
+        return ActionFormat(pkg, name, goal, feed, res)
+
+    def to_dict(self) -> Dict[str, Any]:
+        d = {'package': self.package,
+             'name': self.name,
+             'goal': self.goal.to_dict()}
+        if self.feedback:
+            d['feedback'] = self.feedback.to_dict()
+        if self.result:
+            d['result'] = self.result.to_dict()
+        return d
