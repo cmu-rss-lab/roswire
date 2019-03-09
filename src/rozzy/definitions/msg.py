@@ -118,8 +118,8 @@ class MsgFormat:
         return MsgFormat(d['package'], d['name'], fields, constants)  # type: ignore  # noqa
 
     def to_dict(self) -> Dict[str, Any]:
-        d = {'package': self.package,
-             'name': self.name}
+        d: Dict[str, Any] = {'package': self.package,
+                             'name': self.name}
         if self.fields:
             d['fields'] = [f.to_dict() for f in self.fields]
         if self.constants:
