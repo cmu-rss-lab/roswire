@@ -68,23 +68,13 @@ class SrvFormat:
         package: str = d['package']
         name: str = d['name']
 
-        # build response
-        res: Optional[MsgFormat]
+        req: MsgFormat = MsgFormat.from_dict(d['request'],
+                                             package=package,
+                                             name=f'{name}Request')
         if 'response' in d:
-            constants = [Constant.from_dict(dd)
-                         for dd in d['response'].get('constants', [])]
-            fields = [Field.from_dict(dd)
-                      for dd in d['response'].get('fields', [])]
-            res = MsgFormat(package, name, fields, constants)  # type: ignore
-        else:
-            res = None
-
-        # build request
-        constants = [Constant.from_dict(dd)
-                     for dd in d['request'].get('constants', [])]
-        fields = [Field.from_dict(dd)
-                  for dd in d['request'].get('fields', [])]
-        req: MsgFormat = MsgFormat(package, name, fields, constants)  # type: ignore  # noqa
+            res = MsgFormat.from_dict(d['response'],
+                                      package=package,
+                                      name=f'{name}Response')
 
         return SrvFormat(package, name, req, res)
 
