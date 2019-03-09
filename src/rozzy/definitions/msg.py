@@ -112,10 +112,18 @@ class MsgFormat:
         return MsgFormat(package, name, fields, constants)  # type: ignore
 
     @staticmethod
-    def from_dict(d: Dict[str, Any]) -> 'MsgFormat':
+    def from_dict(d: Dict[str, Any],
+                  *,
+                  package: Optional[str] = None,
+                  name: Optional[str] = None
+                  ) -> 'MsgFormat':
+        if not package:
+            package = d['package']
+        if not name:
+            name = d['name']
         fields = [Field.from_dict(dd) for dd in d.get('fields', [])]
         constants = [Constant.from_dict(dd) for dd in d.get('constants', [])]
-        return MsgFormat(d['package'], d['name'], fields, constants)  # type: ignore  # noqa
+        return MsgFormat(package, name, fields, constants)  # type: ignore  # noqa
 
     def to_dict(self) -> Dict[str, Any]:
         d: Dict[str, Any] = {'package': self.package,
