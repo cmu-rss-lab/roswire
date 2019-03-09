@@ -188,6 +188,37 @@ def test_srv_format_to_and_from_dict():
     assert SrvFormat.from_dict(f.to_dict()) == f
 
 
+def test_action_format_to_and_from_dict():
+    pkg = 'actionlib'
+    name = 'TwoInts'
+    d = {'package': pkg,
+         'name': name,
+         'goal': {
+            'fields': [{'type': 'int64', 'name': 'a'},
+                       {'type': 'int64', 'name': 'b'}]
+         },
+         'result': {
+            'fields': [{'type': 'int64', 'name': 'sum'}]
+         }}
+    f = ActionFormat(
+            package=pkg,
+            name=name,
+            goal=MsgFormat(
+                package=pkg,
+                name=name,
+                constants=[],
+                fields=[Field('int64', 'a'),
+                        Field('int64', 'b')]),
+            feedback=None,
+            result=MsgFormat(
+                package=pkg,
+                name=name,
+                constants=[],
+                fields=[Field('int64', 'sum')]))
+    assert ActionFormat.from_dict(d) == f
+    assert ActionFormat.from_dict(f.to_dict()) == f
+
+
 def test_action_from_file():
     with build_file_proxy() as files:
         # read .action file
