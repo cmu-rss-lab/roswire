@@ -157,6 +157,8 @@ def test_msg_format_to_and_from_dict():
 def test_srv_format_to_and_from_dict():
     pkg = 'nav_msgs'
     name = 'SetMap'
+    name_request = 'SetMapRequest'
+    name_response = 'SetMapResponse'
     d = {'package': pkg,
          'name': name,
          'request': {
@@ -174,14 +176,14 @@ def test_srv_format_to_and_from_dict():
             name=name,
             request=MsgFormat(
                 package=pkg,
-                name=name,
+                name=name_request,
                 constants=[],
                 fields=[Field('nav_msgs/OccupancyGrid', 'map'),
                         Field('geometry_msgs/PoseWithCovarianceStamped',
                               'initial_pose')]),
             response=MsgFormat(
                 package=pkg,
-                name=name,
+                name=name_response,
                 constants=[],
                 fields=[Field('bool', 'success')]))
     assert SrvFormat.from_dict(d) == f
@@ -191,6 +193,8 @@ def test_srv_format_to_and_from_dict():
 def test_action_format_to_and_from_dict():
     pkg = 'actionlib'
     name = 'TwoInts'
+    name_goal = 'TwoIntsGoal'
+    name_result = 'TwoIntsResult'
     d = {'package': pkg,
          'name': name,
          'goal': {
@@ -205,14 +209,14 @@ def test_action_format_to_and_from_dict():
             name=name,
             goal=MsgFormat(
                 package=pkg,
-                name=name,
+                name=name_goal,
                 constants=[],
                 fields=[Field('int64', 'a'),
                         Field('int64', 'b')]),
             feedback=None,
             result=MsgFormat(
                 package=pkg,
-                name=name,
+                name=name_result,
                 constants=[],
                 fields=[Field('int64', 'sum')]))
     assert ActionFormat.from_dict(d) == f
