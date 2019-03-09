@@ -1,6 +1,6 @@
 __all__ = ['SrvFormat']
 
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 import os
 
 import attr
@@ -62,3 +62,18 @@ class SrvFormat:
             res = None
 
         return SrvFormat(package, name, req, res)  # type: ignore
+
+    @staticmethod
+    def from_dict(d: Dict[str, Any]) -> 'SrvFormat':
+        d_res = d.get('response')
+        res = MsgFormat.from_dict(d_res) if d_res else None
+        req = MsgFormat.from_dict(d['request'])
+        return SrvFormat(d['package'], d['name'], req, res)
+
+    def to_dict(self) -> Dict[str, Any]:
+        d = {'package': self.package,
+             'name': self.name,
+             'request': self.request.to_dict()}
+        if self.response:
+            d['response'] = self.response.to_dict()
+        return d
