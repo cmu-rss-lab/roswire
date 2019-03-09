@@ -1,6 +1,6 @@
 __all__ = ['Constant', 'ConstantValue', 'Field', 'MsgFormat']
 
-from typing import Type, Optional, Any, Union, Tuple, List
+from typing import Type, Optional, Any, Union, Tuple, List, Dict
 import re
 import os
 
@@ -27,11 +27,28 @@ class Constant:
     name = attr.ib(type=str)
     value = attr.ib(type=Union[str, int, float])
 
+    @staticmethod
+    def from_dict(d: Dict[str, Any]) -> 'Constant':
+        return Constant(d['type'], d['name'], d['value'])
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {'type': self.typ,
+                'name': self.name,
+                'value': self.value}
+
 
 @attr.s(frozen=True)
 class Field:
     typ = attr.ib(type=str)
     name = attr.ib(type=str)
+
+    @staticmethod
+    def from_dict(d: Dict[str, Any]) -> 'Field':
+        return Field(d['type'], d['name'])
+
+    def to_dict(self) -> Dict[str, str]:
+        return {'type': self.typ,
+                'name': self.name}
 
 
 @attr.s(frozen=True)
@@ -93,3 +110,15 @@ class MsgFormat:
                 raise exceptions.ParsingError(f"failed to parse line: {line}")
 
         return MsgFormat(package, name, fields, constants)  # type: ignore
+
+    @staticmethod
+    def from_dict(d: Dict[str, Any]) -> 'MsgFormat':
+        fields = [Field.from_dict(dd) for dd in d['fields']]
+        constants = [Constant.from_dict(dd) for dd in d['constants']]
+        return MsgFormat(d['package'], d['name'], fields, constants)  # type: ignore  # noqa
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {'package': self.package,
+                'name': self.name,
+                'fields': [f.to_dict() for f in self.fields],
+                'constants': [c.to_dict() for c in self.constants]}
