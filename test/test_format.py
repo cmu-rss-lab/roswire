@@ -126,6 +126,20 @@ float32 percent_complete
     assert Field('float32', 'percent_complete') in feedback.fields
 
 
+def test_field_to_and_from_dict():
+    d = {'type': 'uint32', 'name': 'foo'}
+    f = Field('uint32', 'foo')
+    assert Field.from_dict(d) == Field('uint32', 'foo')
+    assert Field.from_dict(f.to_dict()) == f
+
+
+def test_constant_to_and_from_dict():
+    d = {'type': 'uint32', 'name': 'foo', 'value': '100'}
+    c = Constant('uint32', 'foo', '100')
+    assert Constant.from_dict(d) == c
+    assert Constant.from_dict(c.to_dict()) == c
+
+
 def test_action_from_file():
     with build_file_proxy() as files:
         # read .action file
