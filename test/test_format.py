@@ -170,8 +170,8 @@ def test_srv_format_to_and_from_dict():
             'fields': [{'type': 'bool', 'name': 'success'}]
          }}
     f = SrvFormat(
-            package='tf',
-            name='tfMessage',
+            package=pkg,
+            name=name,
             request=MsgFormat(
                 package=pkg,
                 name=name,
