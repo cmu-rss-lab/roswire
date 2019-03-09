@@ -1,11 +1,11 @@
 __all__ = ['SrvFormat']
 
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 import os
 
 import attr
 
-from .msg import MsgFormat
+from .msg import MsgFormat, Constant, Field
 from ..proxy import FileProxy
 from .. import exceptions
 
@@ -62,3 +62,27 @@ class SrvFormat:
             res = None
 
         return SrvFormat(package, name, req, res)  # type: ignore
+
+    @staticmethod
+    def from_dict(d: Dict[str, Any]) -> 'SrvFormat':
+        package: str = d['package']
+        name: str = d['name']
+
+        req: MsgFormat = MsgFormat.from_dict(d['request'],
+                                             package=package,
+                                             name=f'{name}Request')
+        if 'response' in d:
+            res = MsgFormat.from_dict(d['response'],
+                                      package=package,
+                                      name=f'{name}Response')
+
+        return SrvFormat(package, name, req, res)
+
+    def to_dict(self) -> Dict[str, Any]:
+        d: Dict[str, Any] = {'package': self.package,
+                             'name': self.name}
+        if self.request:
+            d['request'] = self.request.to_dict()
+        if self.response:
+            d['response'] = self.response.to_dict()
+        return d

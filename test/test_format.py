@@ -126,6 +126,103 @@ float32 percent_complete
     assert Field('float32', 'percent_complete') in feedback.fields
 
 
+def test_field_to_and_from_dict():
+    d = {'type': 'uint32', 'name': 'foo'}
+    f = Field('uint32', 'foo')
+    assert Field.from_dict(d) == Field('uint32', 'foo')
+    assert Field.from_dict(f.to_dict()) == f
+
+
+def test_constant_to_and_from_dict():
+    d = {'type': 'uint32', 'name': 'foo', 'value': '100'}
+    c = Constant('uint32', 'foo', '100')
+    assert Constant.from_dict(d) == c
+    assert Constant.from_dict(c.to_dict()) == c
+
+
+def test_msg_format_to_and_from_dict():
+    d = {'package': 'tf',
+         'name': 'tfMessage',
+         'fields': [
+             {'type': 'geometry_msgs/TransformStamped[]',
+              'name': 'transforms'}]}
+    f = MsgFormat(package='tf',
+                  name='tfMessage',
+                  constants=[],
+                  fields=[Field('geometry_msgs/TransformStamped[]', 'transforms')])
+    assert MsgFormat.from_dict(d) == f
+    assert MsgFormat.from_dict(f.to_dict()) == f
+
+
+def test_srv_format_to_and_from_dict():
+    pkg = 'nav_msgs'
+    name = 'SetMap'
+    name_request = 'SetMapRequest'
+    name_response = 'SetMapResponse'
+    d = {'package': pkg,
+         'name': name,
+         'request': {
+            'fields': [
+                {'type': 'nav_msgs/OccupancyGrid',
+                 'name': 'map'},
+                {'type': 'geometry_msgs/PoseWithCovarianceStamped',
+                 'name': 'initial_pose'}]
+         },
+         'response': {
+            'fields': [{'type': 'bool', 'name': 'success'}]
+         }}
+    f = SrvFormat(
+            package=pkg,
+            name=name,
+            request=MsgFormat(
+                package=pkg,
+                name=name_request,
+                constants=[],
+                fields=[Field('nav_msgs/OccupancyGrid', 'map'),
+                        Field('geometry_msgs/PoseWithCovarianceStamped',
+                              'initial_pose')]),
+            response=MsgFormat(
+                package=pkg,
+                name=name_response,
+                constants=[],
+                fields=[Field('bool', 'success')]))
+    assert SrvFormat.from_dict(d) == f
+    assert SrvFormat.from_dict(f.to_dict()) == f
+
+
+def test_action_format_to_and_from_dict():
+    pkg = 'actionlib'
+    name = 'TwoInts'
+    name_goal = 'TwoIntsGoal'
+    name_result = 'TwoIntsResult'
+    d = {'package': pkg,
+         'name': name,
+         'goal': {
+            'fields': [{'type': 'int64', 'name': 'a'},
+                       {'type': 'int64', 'name': 'b'}]
+         },
+         'result': {
+            'fields': [{'type': 'int64', 'name': 'sum'}]
+         }}
+    f = ActionFormat(
+            package=pkg,
+            name=name,
+            goal=MsgFormat(
+                package=pkg,
+                name=name_goal,
+                constants=[],
+                fields=[Field('int64', 'a'),
+                        Field('int64', 'b')]),
+            feedback=None,
+            result=MsgFormat(
+                package=pkg,
+                name=name_result,
+                constants=[],
+                fields=[Field('int64', 'sum')]))
+    assert ActionFormat.from_dict(d) == f
+    assert ActionFormat.from_dict(f.to_dict()) == f
+
+
 def test_action_from_file():
     with build_file_proxy() as files:
         # read .action file
