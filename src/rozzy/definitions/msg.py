@@ -113,12 +113,15 @@ class MsgFormat:
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> 'MsgFormat':
-        fields = [Field.from_dict(dd) for dd in d['fields']]
-        constants = [Constant.from_dict(dd) for dd in d['constants']]
+        fields = [Field.from_dict(dd) for dd in d.get('fields', [])]
+        constants = [Constant.from_dict(dd) for dd in d.get('constants', [])]
         return MsgFormat(d['package'], d['name'], fields, constants)  # type: ignore  # noqa
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'package': self.package,
-                'name': self.name,
-                'fields': [f.to_dict() for f in self.fields],
-                'constants': [c.to_dict() for c in self.constants]}
+        d = {'package': self.package,
+             'name': self.name}
+        if self.fields:
+            d['fields'] = [f.to_dict() for f in self.fields]
+        if self.constants:
+            d['constants'] = [c.to_dict() for c in self.constants]
+        return d
