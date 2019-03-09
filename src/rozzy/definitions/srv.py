@@ -5,7 +5,7 @@ import os
 
 import attr
 
-from .msg import MsgFormat
+from .msg import MsgFormat, Constant, Field
 from ..proxy import FileProxy
 from .. import exceptions
 
@@ -65,15 +65,34 @@ class SrvFormat:
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> 'SrvFormat':
-        d_res = d.get('response')
-        res = MsgFormat.from_dict(d_res) if d_res else None
-        req = MsgFormat.from_dict(d['request'])
-        return SrvFormat(d['package'], d['name'], req, res)
+        package: str = d['package']
+        name: str = d['name']
+
+        # build response
+        res: Optional[MsgFormat]
+        if 'response' in d:
+            constants = [Constant.from_dict(dd)
+                         for dd in d['response'].get('constants', [])]
+            fields = [Field.from_dict(dd)
+                      for dd in d['response'].get('fields', [])]
+            res = MsgFormat(package, name, fields, constants)  # type: ignore
+        else:
+            res = None
+
+        # build request
+        constants = [Constant.from_dict(dd)
+                     for dd in d['request'].get('constants', [])]
+        fields = [Field.from_dict(dd)
+                  for dd in d['request'].get('fields', [])]
+        req: MsgFormat = MsgFormat(package, name, fields, constants)  # type: ignore  # noqa
+
+        return SrvFormat(package, name, req, res)
 
     def to_dict(self) -> Dict[str, Any]:
-        d = {'package': self.package,
-             'name': self.name,
-             'request': self.request.to_dict()}
+        d: Dict[str, Any] = {'package': self.package,
+                             'name': self.name}
+        if self.request:
+            d['request'] = self.request.to_dict()
         if self.response:
             d['response'] = self.response.to_dict()
         return d
