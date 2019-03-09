@@ -140,6 +140,21 @@ def test_constant_to_and_from_dict():
     assert Constant.from_dict(c.to_dict()) == c
 
 
+def test_msg_format_to_and_from_dict():
+    d = {'package': 'tf',
+         'name': 'tfMessage',
+         'constants': [],
+         'fields': [
+             {'type': 'geometry_msgs/TransformStamped[]',
+              'name': 'transforms'}]}
+    f = MsgFormat(package='tf',
+                  name='tfMessage',
+                  constants=[],
+                  fields=[Field('geometry_msgs/TransformStamped[]', 'transforms')])
+    assert MsgFormat.from_dict(d) == f
+    assert MsgFormat.from_dict(f.to_dict()) == f
+
+
 def test_action_from_file():
     with build_file_proxy() as files:
         # read .action file
