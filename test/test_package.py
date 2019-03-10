@@ -30,3 +30,24 @@ def test_to_and_from_dict():
                 actions=[],
                 services=[srv_fg])
     assert p == Package.from_dict(p.to_dict())
+
+
+def test_build():
+    with build_file_proxy() as files:
+        expected = Package.from_dict({
+            'package': 'tf',
+            'name': 'tfMessage',
+            'messages': [
+                {'name': 'tfMessage',
+                 'fields': [{'type': 'geometry_msgs/TransformStamped[]',
+                             'name': 'transforms'}]}
+            ],
+            'services': [
+                {'name': 'FrameGraph',
+                 'response': {
+                 'fields': [{'type': 'string',
+                             'name': 'dot_graph'}]}}
+            ]
+        })
+        actual = Package.build('/ros_ws/src/geometry/tf', files)
+        assert actual == expected
