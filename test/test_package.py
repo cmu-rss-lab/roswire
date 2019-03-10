@@ -34,7 +34,9 @@ def test_to_and_from_dict():
 
 def test_build():
     with build_file_proxy() as files:
+        path = '/ros_ws/src/geometry/tf'
         expected = Package.from_dict({
+            'path': path,
             'package': 'tf',
             'name': 'tfMessage',
             'messages': [
@@ -49,5 +51,5 @@ def test_build():
                              'name': 'dot_graph'}]}}
             ]
         })
-        actual = Package.build('/ros_ws/src/geometry/tf', files)
+        actual = Package.build(path, files)
         assert actual == expected
