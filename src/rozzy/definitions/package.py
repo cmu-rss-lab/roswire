@@ -1,6 +1,6 @@
 __all__ = ['Package', 'PackageDatabase']
 
-from typing import Tuple, List, Dict, Union, Any, Iterator
+from typing import Tuple, List, Dict, Union, Any, Iterator, Collection
 import os
 
 import attr
