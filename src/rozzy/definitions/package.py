@@ -80,6 +80,18 @@ class Package:
 
 
 class PackageDatabase:
+    @staticmethod
+    def from_paths(files: FileProxy, paths: List[str]) -> 'PackageDatabase':
+        """
+        Constructs a package database from a list of the paths of the packages
+        belonging to the database.
+
+        Parameters:
+            files: access to the filesystem.
+            paths: a list of the absolute paths of the packages.
+        """
+        return PackageDatabase([Package.build(p, files) for p in paths])
+
     def __init__(self, packages: Collection[Package]) -> None:
         self.__contents = {p.name: p for p in packages}
 
