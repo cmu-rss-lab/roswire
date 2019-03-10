@@ -14,7 +14,7 @@ from .. import exceptions
 class SrvFormat:
     package = attr.ib(type=str)
     name = attr.ib(type=str)
-    request = attr.ib(type=MsgFormat)
+    request = attr.ib(type=Optional[MsgFormat])
     response = attr.ib(type=Optional[MsgFormat])
 
     @staticmethod
@@ -43,8 +43,8 @@ class SrvFormat:
         Raises:
             ParsingError: if the description cannot be parsed.
         """
-        req: MsgFormat
-        res: Optional[MsgFormat]
+        req: Optional[MsgFormat] = None
+        res: Optional[MsgFormat] = None
         name_req = f"{name}Request"
         name_res = f"{name}Response"
 
@@ -55,22 +55,24 @@ class SrvFormat:
             m = "bad service description: missing separator (---)"
             raise exceptions.ParsingError(m)
 
-        req = MsgFormat.from_string(package, name_req, s_req)
+        if s_req:
+            req = MsgFormat.from_string(package, name_req, s_req)
         if s_res:
             res = MsgFormat.from_string(package, name_res, s_res)
-        else:
-            res = None
 
         return SrvFormat(package, name, req, res)  # type: ignore
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> 'SrvFormat':
+        req: Optional[MsgFormat]
+        res: Optional[MsgFormat]
         package: str = d['package']
         name: str = d['name']
 
-        req: MsgFormat = MsgFormat.from_dict(d['request'],
-                                             package=package,
-                                             name=f'{name}Request')
+        if 'request' in d:
+            req = MsgFormat.from_dict(d['request'],
+                                      package=package,
+                                      name=f'{name}Request')
         if 'response' in d:
             res = MsgFormat.from_dict(d['response'],
                                       package=package,
