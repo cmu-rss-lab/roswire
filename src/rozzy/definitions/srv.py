@@ -48,7 +48,7 @@ class SrvFormat:
         name_req = f"{name}Request"
         name_res = f"{name}Response"
 
-        sections: List[str] = [ss.strip() for ss in s.split('\n---')]
+        sections: List[str] = [ss.strip() for ss in s.split('---')]
         try:
             s_req, s_res = sections
         except ValueError:
@@ -63,11 +63,16 @@ class SrvFormat:
         return SrvFormat(package, name, req, res)  # type: ignore
 
     @staticmethod
-    def from_dict(d: Dict[str, Any]) -> 'SrvFormat':
-        req: Optional[MsgFormat]
-        res: Optional[MsgFormat]
-        package: str = d['package']
+    def from_dict(d: Dict[str, Any],
+                  *,
+                  package: Optional[str] = None
+                  ) -> 'SrvFormat':
+        req: Optional[MsgFormat] = None
+        res: Optional[MsgFormat] = None
         name: str = d['name']
+        if package is None:
+            assert d['package'] is not None
+            package = d['package']
 
         if 'request' in d:
             req = MsgFormat.from_dict(d['request'],

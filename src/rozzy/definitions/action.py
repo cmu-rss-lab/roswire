@@ -78,25 +78,30 @@ class ActionFormat:
         return ActionFormat(package, name, goal, feed, res)
 
     @staticmethod
-    def from_dict(d: Dict[str, Any]) -> 'ActionFormat':
-        pkg: str = d['package']
+    def from_dict(d: Dict[str, Any],
+                  *,
+                  package: Optional[str] = None
+                  ) -> 'ActionFormat':
         name: str = d['name']
+        if package is None:
+            assert d['package'] is not None
+            package = d['package']
 
         res: Optional[MsgFormat] = None
         feed: Optional[MsgFormat] = None
         goal: MsgFormat = \
-            MsgFormat.from_dict(d['goal'], package=pkg, name=f'{name}Goal')
+            MsgFormat.from_dict(d['goal'], package=package, name=f'{name}Goal')
 
         if 'result' in d:
             res = MsgFormat.from_dict(d['result'],
-                                      package=pkg,
+                                      package=package,
                                       name=f'{name}Result')
         if 'feedback' in d:
             feed = MsgFormat.from_dict(d['feedback'],
-                                       package=pkg,
+                                       package=package,
                                        name=f'{name}Feedback')
 
-        return ActionFormat(pkg, name, goal, feed, res)
+        return ActionFormat(package, name, goal, feed, res)
 
     def to_dict(self) -> Dict[str, Any]:
         d = {'package': self.package,
