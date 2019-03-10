@@ -37,8 +37,7 @@ def test_build():
         path = '/ros_ws/src/geometry/tf'
         expected = Package.from_dict({
             'path': path,
-            'package': 'tf',
-            'name': 'tfMessage',
+            'name': 'tf',
             'messages': [
                 {'name': 'tfMessage',
                  'fields': [{'type': 'geometry_msgs/TransformStamped[]',
