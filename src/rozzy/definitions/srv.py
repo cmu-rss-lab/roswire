@@ -70,7 +70,8 @@ class SrvFormat:
         req: Optional[MsgFormat] = None
         res: Optional[MsgFormat] = None
         name: str = d['name']
-        if not package:
+        if package is None:
+            assert d['package'] is not None
             package = d['package']
 
         if 'request' in d:
