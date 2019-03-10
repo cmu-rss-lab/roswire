@@ -63,11 +63,15 @@ class SrvFormat:
         return SrvFormat(package, name, req, res)  # type: ignore
 
     @staticmethod
-    def from_dict(d: Dict[str, Any]) -> 'SrvFormat':
+    def from_dict(d: Dict[str, Any],
+                  *,
+                  package: Optional[str] = None
+                  ) -> 'SrvFormat':
         req: Optional[MsgFormat] = None
         res: Optional[MsgFormat] = None
-        package: str = d['package']
         name: str = d['name']
+        if not package:
+            package = d['package']
 
         if 'request' in d:
             req = MsgFormat.from_dict(d['request'],
