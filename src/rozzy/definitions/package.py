@@ -1,6 +1,6 @@
-__all__ = ['Package']
+__all__ = ['Package', 'PackageDatabase']
 
-from typing import Tuple, List, Dict, Union, Any
+from typing import Tuple, List, Dict, Union, Any, Iterator, Collection
 import os
 
 import attr
@@ -8,7 +8,7 @@ import attr
 from .msg import MsgFormat
 from .srv import SrvFormat
 from .action import ActionFormat
-from ..proxy import FileProxy
+from ..proxy import FileProxy, ShellProxy
 
 
 @attr.s(frozen=True)
@@ -77,3 +77,42 @@ class Package:
              'services': [s.to_dict() for s in self.services],
              'actions': [a.to_dict() for a in self.actions]}
         return d
+
+
+class PackageDatabase:
+    @staticmethod
+    def from_paths(files: FileProxy, paths: List[str]) -> 'PackageDatabase':
+        """
+        Constructs a package database from a list of the paths of the packages
+        belonging to the database.
+
+        Parameters:
+            files: access to the filesystem.
+            paths: a list of the absolute paths of the packages.
+        """
+        return PackageDatabase([Package.build(p, files) for p in paths])
+
+    def __init__(self, packages: Collection[Package]) -> None:
+        self.__contents = {p.name: p for p in packages}
+
+    def __len__(self) -> int:
+        """
+        Returns a count of the number of packages within this database.
+        """
+        return len(self.__contents)
+
+    def __getitem__(self, name: str) -> Package:
+        """
+        Fetches the description for a given package.
+
+        Raises:
+            KeyError: if no package exists with the given name.
+        """
+        return self.__contents[name]
+
+    def __iter__(self) -> Iterator[str]:
+        """
+        Returns an iterator over the names of the packages contained within
+        this database.
+        """
+        yield from self.__contents
