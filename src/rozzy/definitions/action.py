@@ -83,7 +83,8 @@ class ActionFormat:
                   package: Optional[str] = None
                   ) -> 'ActionFormat':
         name: str = d['name']
-        if not package:
+        if package is None:
+            assert d['package'] is not None
             package = d['package']
 
         res: Optional[MsgFormat] = None
