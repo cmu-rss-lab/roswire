@@ -64,7 +64,7 @@ def test_database_from_paths():
             '/ros_ws/src/geometry2/tf2_py',
             '/ros_ws/src/geometry2/tf2_ros'
         ]
-        db = PackageDatabase.from_paths(paths, files)
+        db = PackageDatabase.from_paths(files, paths)
         assert len(db) == len(paths)
         assert set(db) == {'angles', 'mavros', 'tf2',
                            'tf2_msgs', 'tf2_py', 'tf2_ros'}
