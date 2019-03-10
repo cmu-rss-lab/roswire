@@ -48,7 +48,7 @@ class SrvFormat:
         name_req = f"{name}Request"
         name_res = f"{name}Response"
 
-        sections: List[str] = [ss.strip() for ss in s.split('\n---')]
+        sections: List[str] = [ss.strip() for ss in s.split('---')]
         try:
             s_req, s_res = sections
         except ValueError:
