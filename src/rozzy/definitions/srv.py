@@ -64,8 +64,8 @@ class SrvFormat:
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> 'SrvFormat':
-        req: Optional[MsgFormat]
-        res: Optional[MsgFormat]
+        req: Optional[MsgFormat] = None
+        res: Optional[MsgFormat] = None
         package: str = d['package']
         name: str = d['name']
 
