@@ -10,8 +10,6 @@ from .srv import SrvFormat
 from .action import ActionFormat
 from ..proxy import FileProxy
 
-JSON = Union[float, int, str, List[Any], Dict[str, Any]]
-
 
 @attr.s(frozen=True)
 class Package:
@@ -58,17 +56,21 @@ class Package:
                        actions)
 
     @staticmethod
-    def from_dict(d: JSON) -> 'Package':
+    def from_dict(d: Dict[str, Any]) -> 'Package':
         name: str = d['name']
-        messages: MsgFormat = [MsgFormat.from_dict(dd, package=name)
-                               for dd in d.get('messages', [])]
-        services: SrvFormat = [SrvFormat.from_dict(dd, package=name)
-                               for dd in d.get('services', [])]
-        actions: ActionFormat = [ActionFormat.from_dict(dd, package=name)
-                                 for dd in d.get('actions', [])]
-        return Package(d['name'], d['path'], messages, services, actions)
+        messages: List[MsgFormat] = [MsgFormat.from_dict(dd, package=name)
+                                     for dd in d.get('messages', [])]
+        services: List[SrvFormat] = [SrvFormat.from_dict(dd, package=name)
+                                     for dd in d.get('services', [])]
+        actions: List[ActionFormat] = [ActionFormat.from_dict(dd, package=name)
+                                       for dd in d.get('actions', [])]
+        return Package(d['name'],  # type: ignore
+                       d['path'],
+                       messages,
+                       services,
+                       actions)
 
-    def to_dict(self) -> JSON:
+    def to_dict(self) -> Dict[str, Any]:
         d = {'name': self.name,
              'path': self.path,
              'messages': [m.to_dict() for m in self.messages],
