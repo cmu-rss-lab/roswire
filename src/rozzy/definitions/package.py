@@ -18,7 +18,7 @@ class Package:
     name: str = attr.ib()
     path: str = attr.ib()
     messages: Tuple[MsgFormat, ...] = attr.ib(converter=tuple)
-    services: Tuple[SrvFormat, ...]  = attr.ib(converter=tuple)
+    services: Tuple[SrvFormat, ...] = attr.ib(converter=tuple)
     actions: Tuple[ActionFormat, ...] = attr.ib(converter=tuple)
 
     @staticmethod
