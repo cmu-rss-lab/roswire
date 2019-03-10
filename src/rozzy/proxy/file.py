@@ -183,9 +183,18 @@ class FileProxy:
         code, output, duration = self.__shell.execute(cmd)
         return code == 0
 
-    def listdir(self, d: str) -> List[str]:
+    def listdir(self,
+                d: str,
+                *,
+                absolute: bool = False
+                ) -> List[str]:
         """
         Returns a list of the files belonging to a given directory.
+
+        Parameters:
+            d: absolute path to the directory.
+            absolute: if True, returns a list of absolute paths; if False,
+                returns a list of relative paths.
 
         Raises:
             OSError: if the given path isn't a directory.
@@ -197,7 +206,10 @@ class FileProxy:
             raise OSError(f"no such file or directory: {d}")
         if not self.isdir(d):
             raise OSError(f"Not a directory: {d}")
-        return output.replace('\r', '').split('\n')
+        paths: List[str] = output.replace('\r', '').split('\n')
+        if absolute:
+            paths = [os.path.join(d, p) for p in paths]
+        return paths
 
     def mkdir(self, d: str) -> None:
         """
