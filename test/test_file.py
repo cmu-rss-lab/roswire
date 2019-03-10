@@ -70,6 +70,17 @@ def test_listdir():
         with pytest.raises(OSError):
             files.listdir('/ros_ws/idontexist')
 
+        # abs
+        assert files.listdir('/ros_ws', absolute=True) == [
+            '/ros_ws/.catkin_tools',
+            '/ros_ws/build',
+            '/ros_ws/devel',
+            '/ros_ws/entrypoint.sh',
+            '/ros_ws/logs',
+            '/ros_ws/pkgs.rosinstall',
+            '/ros_ws/src'
+        ]
+
 
 def test_mkdir():
     with build_file_proxy() as files:
