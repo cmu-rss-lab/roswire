@@ -57,9 +57,13 @@ class Package:
 
     @staticmethod
     def from_dict(d: JSON) -> 'Package':
-        messages = [MsgFormat.from_dict(dd) for dd in d['messages']]
-        services = [SrvFormat.from_dict(dd) for dd in d['services']]
-        actions = [ActionFormat.from_dict(dd) for dd in d['actions']]
+        name: str = d['name']
+        messages: MsgFormat = [MsgFormat.from_dict(dd, package=name)
+                               for dd in d.get('messages', [])]
+        services: SrvFormat = [SrvFormat.from_dict(dd, package=name)
+                               for dd in d.get('services', [])]
+        actions: ActionFormat = [ActionFormat.from_dict(dd, package=name)
+                                 for dd in d.get('actions', [])]
         return Package(d['name'], d['path'], messages, services, actions)
 
     def to_dict(self) -> JSON:
