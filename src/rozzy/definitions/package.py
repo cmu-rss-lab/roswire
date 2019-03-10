@@ -40,13 +40,15 @@ class Package:
 
         if files.isdir(dir_msg):
             messages = [MsgFormat.from_file(name, f, files)
-                        for f in files.listdir(dir_msg) if f.endswith('.msg')]
+                        for f in files.listdir(dir_msg, absolute=True)
+                        if f.endswith('.msg')]
         if files.isdir(dir_srv):
             services = [SrvFormat.from_file(name, f, files)
-                        for f in files.listdir(dir_srv) if f.endswith('.srv')]
+                        for f in files.listdir(dir_srv, absolute=True)
+                        if f.endswith('.srv')]
         if files.isdir(dir_action):
             actions = [ActionFormat.from_file(name, f, files)
-                       for f in files.listdir(dir_action)
+                       for f in files.listdir(dir_action, absolute=True)
                        if f.endswith('.action')]
 
         return Package(name,  # type: ignore
