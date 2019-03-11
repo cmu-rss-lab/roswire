@@ -9,16 +9,17 @@ class RecordHeader:
     @classmethod
     def from_byte_stream(cls, s: io.BytesIO) -> 'BagRecord':
         fields: Dict[str, bytes] = {}
-        length_header: int = int.from_bytes(s.read(4), 'little')
+        size = int.from_bytes(s.read(4), 'little')
         offset: int = 4
-        while offset < length_header:
+        while offset < size:
             bytes_name: bytes
             value: bytes
             length = int.from_bytes(s.read(4), 'little')
-            bytes_name, _, value = s.read(length).partition(0x3d)
+            bytes_name, _, value = s.read(length).partition(b'\x3d')
             name: str = bytes_name.decode('utf-8')
             fields[name] = value
-        return RecordHeader(fields)
+            offset += length
+        return RecordHeader(fields, size)
 
     def __init__(self,
                  fields: Dict[str, bytes],
@@ -26,6 +27,10 @@ class RecordHeader:
                  ) -> None:
         self.__fields = fields
         self.__size = size
+
+    @property
+    def fields(self) -> Dict[str, bytes]:
+        return self.__fields
 
     @property
     def size(self) -> int:
@@ -53,12 +58,16 @@ class BagRecord:
     def __init__(self, header: RecordHeader) -> None:
         self._header = header
 
+    @property
+    def header(self) -> RecordHeader:
+        return self._header
+
 
 class BagHeaderRecord(BagRecord):
     @classmethod
     def from_byte_stream(cls, s: io.BytesIO) -> 'BagHeaderRecord':
         header = RecordHeader.from_byte_stream(s)
-        assert header['op'] == 0x03
+        assert header['op'] == b'\x03'
         len_padding = 4096 - header.size
         s.read(len_padding)
         return BagHeaderRecord(header)
@@ -135,4 +144,4 @@ class Bag:
 
     @property
     def header(self) -> BagHeaderRecord:
-        return self._header
+        return self.__header
