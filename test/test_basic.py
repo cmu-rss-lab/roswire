@@ -8,6 +8,7 @@ import pytest
 import rozzy
 import rozzy.exceptions
 from rozzy import Rozzy, ROSProxy, Container, System
+from rozzy.proxy import ShellProxy
 
 
 @contextlib.contextmanager
@@ -18,6 +19,12 @@ def build_test_environment() -> Iterator[Tuple[ROSProxy, Container]]:
         with container.roscore() as ros:
             time.sleep(5)
             yield (container, ros)
+
+
+@contextlib.contextmanager
+def build_shell_proxy() -> Iterator[ShellProxy]:
+    with build_test_environment() as (container, ros):
+        yield container.shell
 
 
 def test_parameters():
