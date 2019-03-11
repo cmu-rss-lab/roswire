@@ -89,7 +89,7 @@ class PackageDatabase:
         code, path_str, duration = shell.execute('echo "${ROS_PACKAGE_PATH}"')
         if code != 0:
             raise Exception("unexpected error when fetching ROS_PACKAGE_PATH")
-        paths: List[str] = path_str.split(':')
+        paths: List[str] = path_str.strip().split(':')
         return paths
 
     @staticmethod
