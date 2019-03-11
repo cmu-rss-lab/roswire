@@ -56,7 +56,7 @@ class BagRecord:
 
 class BagHeaderRecord(BagRecord):
     @classmethod
-    def from_byte_stream(s: io.BytesIO) -> 'BagHeaderRecord':
+    def from_byte_stream(cls, s: io.BytesIO) -> 'BagHeaderRecord':
         header = RecordHeader.from_byte_stream(s)
         assert header['op'] == 0x03
         len_padding = 4096 - header.size
@@ -117,11 +117,9 @@ class Bag:
         version_line: str = s.readline().decode('utf-8')
         assert version_line == '#ROSBAG V2.0\n'
 
-        header: BagHeader = BagHeader.from_byte_stream(s)
+        header = BagHeaderRecord.from_byte_stream(s)
 
-        # parse records
-
-        BagRecord.from_byte_stream(s)
+        return Bag(header)
 
     @staticmethod
     def from_bytes(b: bytes) -> 'Bag':
@@ -132,5 +130,9 @@ class Bag:
         with open(fn, 'rb') as f:
             return Bag.from_byte_stream(f)
 
-    def __init__(self, header: BagHeader) -> None:
-        self.__header: BagHeader = header
+    def __init__(self, header: BagHeaderRecord) -> None:
+        self.__header = header
+
+    @property
+    def header(self) -> BagHeaderRecord:
+        return self._header
