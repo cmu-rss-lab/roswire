@@ -4,6 +4,7 @@ from typing import Dict
 import io
 
 
+# TODO make immutable
 class RecordHeader:
     @classmethod
     def from_byte_stream(cls, s: io.BytesIO) -> 'BagRecord':
@@ -13,7 +14,7 @@ class RecordHeader:
         while offset < length_header:
             bytes_name: bytes
             value: bytes
-            length: int = int.from_bytes(s.read(4), 'little')
+            length = int.from_bytes(s.read(4), 'little')
             bytes_name, _, value = s.read(length).partition(0x3d)
             name: str = bytes_name.decode('utf-8')
             fields[name] = value
@@ -49,38 +50,45 @@ class BagRecord:
     def from_byte_stream(cls, s: io.BytesIO) -> 'BagRecord':
         pass
 
+    def __init__(self, header: RecordHeader) -> None:
+        self._header = header
+
 
 class BagHeaderRecord(BagRecord):
     @classmethod
     def from_byte_stream(s: io.BytesIO) -> 'BagHeaderRecord':
-        # this is always 4096 bytes long
-        header: RecordHeader = RecordHeader.from_byte_stream(s)
+        header = RecordHeader.from_byte_stream(s)
         assert header['op'] == 0x03
+        len_padding = 4096 - header.size
+        s.read(len_padding)
+        return BagHeaderRecord(header)
 
-
-
-        return
+    def __init__(self, header: RecordHeader) -> None:
+        super().__init__(header)
+        self.__index_pos = int.from_bytes(header['index_pos'], 'little')
+        self.__conn_count = int.from_bytes(header['conn_count'], 'little')
+        self.__chunk_count = int.from_bytes(header['chunk_count'], 'little')
 
     @property
     def index_pos(self) -> int:
         """
         Offset of the first record after the chunk section.
         """
-        return int.from_bytes(self.header['index_pos'], 'little')
+        return self.__index_pos
 
     @property
     def conn_count(self) -> int:
         """
         Number of unique connections in the file.
         """
-        return int.from_bytes(self.header['chunk_count'], 'little')
+        return self.__conn_count
 
     @property
     def chunk_count(self) -> int:
         """
         Number of chunk records in the file.
         """
-        return int,from_bytes(self.header['chunk_count'], 'little')
+        return self.__chunk_count
 
 
 class ChunkRecord(BagRecord):
