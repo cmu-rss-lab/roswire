@@ -81,6 +81,18 @@ class Package:
 
 class PackageDatabase:
     @staticmethod
+    def paths(shell: ShellProxy) -> List[str]:
+        """
+        Parses the contents of the ROS_PACKAGE_PATH environment variable for a
+        given shell.
+        """
+        code, path_str, duration = shell.execute('echo ${ROS_PACKAGE_PATH}')
+        if code != 0:
+            raise Exception("unexpected error when fetching ROS_PACKAGE_PATH")
+        paths: List[str] = parse(path_str)
+        return paths
+
+    @staticmethod
     def from_paths(files: FileProxy, paths: List[str]) -> 'PackageDatabase':
         """
         Constructs a package database from a list of the paths of the packages
