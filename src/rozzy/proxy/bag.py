@@ -72,7 +72,10 @@ class BagRecorderProxy:
         return self
 
     def __exit__(self, ex_type, ex_val, ex_tb) -> None:
-        should_save = ex_type is not None
+        if ex_type is not None:
+            logger.error("error occurred during bag recording",
+                         exc_info=(ex_type, ex_val, ex_tab))
+        should_save = ex_type is None
         if not self.stopped:
             self.stop(save=should_save)
 
@@ -83,6 +86,7 @@ class BagRecorderProxy:
         Raises:
             RecorderAlreadyStarted: if the recorder has already been started.
         """
+        logger.debug("starting bag recording")
         with self.__lock:
             if self.__started:
                 raise exceptions.RecorderAlreadyStarted
@@ -92,6 +96,7 @@ class BagRecorderProxy:
                         f" -O {self.__fn_host_temp}"
                         f" __name:={self.__bag_name}")
             self.__shell.non_blocking_execute(cmd)
+            logger.debug("started bag recording")
 
     def stop(self, save: bool = True) -> None:
         """
@@ -103,6 +108,7 @@ class BagRecorderProxy:
         Raises:
             RecorderAlreadyStopped: if this recorder has already been stopped.
         """
+        logger.debug("stopping bag recording")
         with self.__lock:
             if self.__stopped:
                 raise exceptions.RecorderAlreadyStopped
@@ -116,4 +122,11 @@ class BagRecorderProxy:
             if os.path.exists(self.__fn_host_temp):
                 if save:
                     shutil.copyfile(self.__fn_host_temp, self.__fn_host_dest)
+                    logger.debug("bag file saved to %s", self.__fn_host_dest)
+                else:
+                    logger.debug("bag file will not be saved")
                 os.remove(self.__fn_host_temp)
+            else:
+                logger.debug("temporary bag file not found on host: %s",
+                             self.__fn_host_temp)
+        logger.debug("stopped bag recording")
