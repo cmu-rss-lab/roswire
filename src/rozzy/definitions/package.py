@@ -86,10 +86,10 @@ class PackageDatabase:
         Parses the contents of the ROS_PACKAGE_PATH environment variable for a
         given shell.
         """
-        code, path_str, duration = shell.execute('echo ${ROS_PACKAGE_PATH}')
+        code, path_str, duration = shell.execute('echo "${ROS_PACKAGE_PATH}"')
         if code != 0:
             raise Exception("unexpected error when fetching ROS_PACKAGE_PATH")
-        paths: List[str] = parse(path_str)
+        paths: List[str] = path_str.split(':')
         return paths
 
     @staticmethod

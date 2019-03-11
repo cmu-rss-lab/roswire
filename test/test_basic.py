@@ -22,7 +22,7 @@ def build_test_environment() -> Iterator[Tuple[ROSProxy, Container]]:
 
 
 @contextlib.contextmanager
-def build_shell() -> Iterator[ShellProxy]:
+def build_shell_proxy() -> Iterator[ShellProxy]:
     with build_test_environment() as (container, ros):
         yield container.shell
 
