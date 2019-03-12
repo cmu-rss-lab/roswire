@@ -1,6 +1,6 @@
 __all__ = ['Bag']
 
-from typing import Dict
+from typing import Dict, Sequence
 from io import BytesIO
 
 
