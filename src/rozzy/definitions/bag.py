@@ -19,7 +19,7 @@ logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-@attr.s(frozen=True, slotted=True)
+@attr.s(frozen=True, slots=True)
 class Time:
     secs: int = attr.ib()
     nsecs: int = attr.ib()
@@ -46,14 +46,27 @@ class OpCode(Enum):
         return f'0x{self.value.hex()}'
 
 
+class Compression(Enum):
+    NONE = 'none'
+    BZ2 = 'bz2'
+
+
+@attr.s(frozen=True)
+class ChunkConnection:
+    # connection id
+    uid: int = attr.ib()
+    # number of messages that arrived on this connection in the chunk
+    count: int = attr.ib()
+
+
 @attr.s(frozen=True)
 class Chunk:
-    ver: UInt8 = attr.ib()
-    pos_record: UInt64 = attr.ib()  # TODO: uint64
-    time_start: datetime.time = attr.ib()
-    time_end: datetime.time = attr.ib()
-    compression: str = attr.ib()
-    size: UInt64 = attr.ib()
+    pos_record: int = attr.ib()
+    time_start: Time = attr.ib()
+    time_end: Time = attr.ib()
+    connections: Tuple[ChunkConnection, ...] = attr.ib(converter=tuple)
+    # compression: Compression = attr.ib()
+    # size: int = attr.ib()
 
 
 @attr.s(frozen=True)
@@ -167,6 +180,30 @@ class BagReader:
 
     def _read_chunk_info_record(self):
         header = self._read_header(OpCode.CHUNK_INFO)
+        ver: int = decode_uint32(header['ver'])
+        assert ver == 1
+        pos_record: int = decode_uint64(header['chunk_pos'])
+        time_start: Time = decode_time(header['start_time'])
+        time_end: Time = decode_time(header['end_time'])
+        num_connections: int = decode_uint32(header['count'])
+
+        # obtain a summary of the number of messages for each connection
+        # represented in this chunk
+        connections: List[Tuple[int, int]] = []
+        contents: bytes = self._read_sized()
+        for i in range(num_connections):
+            uid = decode_uint32(contents[0:4])
+            count = decode_uint32(contents[4:8])
+            connections.append(ChunkConnection(uid, count))
+            contents = contents[8:]
+        assert not contents
+
+        chunk = Chunk(pos_record=pos_record,
+                      time_start=time_start,
+                      time_end=time_end,
+                      connections=connections)
+
+        logger.debug("decoded chunk: %s", chunk)
         raise NotImplementedError
 
     def _read_chunk_record(self):
