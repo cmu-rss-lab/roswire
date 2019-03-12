@@ -1,7 +1,9 @@
 __all__ = ['Bag']
 
-from typing import Dict, Sequence, Union
+from typing import Dict, Sequence, Union, Optional
 from io import BytesIO
+
+import attr
 
 
 # TODO make immutable
@@ -38,6 +40,9 @@ class RecordHeader:
         The size of the header, measured in bytes.
         """
         return self.__size
+
+    def __contains__(self, name: str) -> bool:
+        return name in self.__fields
 
     def __getitem__(self, name: str) -> bytes:
         """
@@ -106,8 +111,38 @@ class BagHeaderRecord(BagRecord):
         return self.__chunk_count
 
 
+@attr.s(frozen=True)
 class ConnectionRecord(BagRecord):
-    pass
+    conn: int = attr.ib()
+    topic: str = attr.ib()
+    topic_original: str = attr.ib()
+    typ: str = attr.ib()
+    md5sum: str = attr.ib()
+    message_definition: str = attr.ib()
+    callerid: Optional[str] = attr.ib()
+    latching: Optional[str] = attr.ib()
+
+    @classmethod
+    def from_stream_with_header(cls,
+                                s: BytesIO,
+                                header: RecordHeader
+                                ) -> 'ConnectionRecord':
+        assert header['op'] == b'\x07'
+        conn = RecordHeader.from_stream(s)
+        callerid: Optional[str] = None
+        latching: Optional[str] = None
+        if 'callerid' in conn:
+            callerid = conn['callerid'].decode('utf-8')
+        if 'latching' in conn:
+            latching = conn['latching'].decode('utf-8')
+        return ConnectionRecord(conn=header['conn'].decode('utf-8'),
+                                callerid=callerid,
+                                latching=latching,
+                                topic=header['topic'].decode('utf-8'),
+                                topic_original=conn['topic'].decode('utf-8'),
+                                typ=conn['type'].decode('utf-8'),
+                                md5sum=conn['md5sum'].decode('utf-8'),
+                                message_definition=conn['message_definition'].decode('utf-8'))  # noqa
 
 
 class MessageDataRecord(BagRecord):
