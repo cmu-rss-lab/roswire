@@ -1,6 +1,6 @@
 __all__ = ['Bag']
 
-from typing import Dict, Sequence, Union, Optional, Tuple, List
+from typing import Dict, Sequence, Union, Optional, Tuple, List, Type
 from io import BytesIO
 import bz2
 
@@ -56,7 +56,16 @@ class BagRecord:
     @classmethod
     def from_stream(cls, s: BytesIO) -> 'BagRecord':
         header = RecordHeader.from_stream(s)
-        return cls.from_stream_with_header(s, header)
+        print(header.fields)
+        cls_decode: Type[BagRecord] = ({
+            b'\x02': MessageDataRecord,
+            b'\x03': BagHeaderRecord,
+            b'\x04': IndexDataRecord,
+            b'\x05': ChunkRecord,
+            b'\x06': ChunkInfoRecord,
+            b'\x07': ConnectionRecord,
+        })[header['op']]
+        return cls_decode.from_stream_with_header(s, header)
 
     @classmethod
     def from_stream_with_header(cls,
@@ -171,6 +180,10 @@ class Bag:
         assert version_line == '#ROSBAG V2.0\n'
 
         header = BagHeaderRecord.from_stream(s)
+        records: List[BagRecord] = [header]
+        while True:
+            record = BagRecord.from_stream(s)
+            records.append(records)
 
         return Bag(header)
 
