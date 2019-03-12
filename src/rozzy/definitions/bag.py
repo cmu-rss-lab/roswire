@@ -49,7 +49,15 @@ class RecordHeader:
 class BagRecord:
     @classmethod
     def from_byte_stream(cls, s: BytesIO) -> 'BagRecord':
-        pass
+        header = RecordHeader.from_byte_stream(s)
+        return cls.from_byte_stream_with_header(s, header)
+
+    @classmethod
+    def from_byte_stream_with_header(cls,
+                                     s: BytesIO,
+                                     header: RecordHeader
+                                     ) -> 'BagRecord':
+        raise NotImplementedError
 
     def __init__(self, header: RecordHeader) -> None:
         self._header = header
@@ -61,8 +69,10 @@ class BagRecord:
 
 class BagHeaderRecord(BagRecord):
     @classmethod
-    def from_byte_stream(cls, s: BytesIO) -> 'BagHeaderRecord':
-        header = RecordHeader.from_byte_stream(s)
+    def from_byte_stream_with_header(cls,
+                                     s: BytesIO,
+                                     header: RecordHeader
+                                     ) -> 'BagHeaderRecord':
         assert header['op'] == b'\x03'
         len_padding = 4096 - header.size
         s.read(len_padding)
@@ -98,8 +108,10 @@ class BagHeaderRecord(BagRecord):
 
 class ChunkRecord(BagRecord):
     @classmethod
-    def from_byte_stream(cls, s: BytesIO) -> 'ChunkRecord':
-        header = RecordHeader.from_byte_stream(s)
+    def from_byte_stream_with_header(cls,
+                                     s: BytesIO,
+                                     header: RecordHeader
+                                     ) -> 'ChunkRecord':
         assert header['op'] == b'\x05'
         return
 
