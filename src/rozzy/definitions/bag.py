@@ -48,10 +48,6 @@ class RecordHeader:
 
 class BagRecord:
     @classmethod
-    def from_bytes(cls, b: bytes) -> 'BagRecord':
-        return cls.from_byte_stream(io.BytesIO(b))
-
-    @classmethod
     def from_byte_stream(cls, s: io.BytesIO) -> 'BagRecord':
         pass
 
@@ -101,7 +97,32 @@ class BagHeaderRecord(BagRecord):
 
 
 class ChunkRecord(BagRecord):
-    pass
+    @classmethod
+    def from_byte_stream(cls, s: io.BytesIO) -> 'ChunkRecord':
+        header = RecordHeader.from_byte_stream(s)
+        assert header['op'] == b'\x05'
+        return
+
+    def __init__(self,
+                 header: RecordHeader,
+                 data: Sequence[MessageDataRecord, ConnectionRecord]
+                 ) -> None:
+        self.__compression: str = header['compression'].decode('utf-8')
+        self.__size = int.from_bytes(header['size'], 'little')
+
+    @property
+    def compression(self) -> str:
+        """
+        The type of compression used by this chunk.
+        """
+        return self.__compression
+
+    @property
+    def size(self) -> int:
+        """
+        The size, in bytes, of the uncompressed chunk.
+        """
+        return self.__size
 
 
 class ConnectionRecord(BagRecord):
@@ -129,10 +150,6 @@ class Bag:
         header = BagHeaderRecord.from_byte_stream(s)
 
         return Bag(header)
-
-    @staticmethod
-    def from_bytes(b: bytes) -> 'Bag':
-        return Bag.from_byte_stream(io.BytesIO(b))
 
     @staticmethod
     def from_file(fn: str) -> 'Bag':
