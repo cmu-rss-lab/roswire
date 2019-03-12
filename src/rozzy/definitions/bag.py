@@ -97,8 +97,8 @@ class BagReader:
 
         # read connection records
         self._seek(self.__header.index_pos)
-        connections: List[ConnectionRecord] = []
-        for i in range(conn_count):
+        connections: List[ConnectionInfo] = []
+        for i in range(self.__header.conn_count):
             conn = self._read_connection_record()
             connections.append(conn)
             print(conn)
@@ -160,14 +160,14 @@ class BagReader:
             callerid = decode_str(conn['callerid'])
         if 'latching' in conn:
             latching = decode_str(conn['latching'])
-        return ConnectionRecord(conn=decode_str(header['conn']),
-                                callerid=callerid,
-                                latching=latching,
-                                topic=decode_str(header['topic']),
-                                topic_original=decode_str(conn['topic']),
-                                typ=decode_str(conn['type']),
-                                md5sum=decode_str(conn['md5sum']),
-                                message_definition=decode_str(conn['message_definition']))  # noqa
+        return ConnectionInfo(conn=decode_str(header['conn']),
+                              callerid=callerid,
+                              latching=latching,
+                              topic=decode_str(header['topic']),
+                              topic_original=decode_str(conn['topic']),
+                              typ=decode_str(conn['type']),
+                              md5sum=decode_str(conn['md5sum']),
+                              message_definition=decode_str(conn['message_definition']))  # noqa
 
     def _read_chunk_info_record(self):
         raise NotImplementedError
