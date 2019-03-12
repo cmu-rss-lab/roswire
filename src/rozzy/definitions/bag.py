@@ -96,12 +96,15 @@ class BagReader:
         logger.debug("bag header: %s", self.__header)
 
         # read connection records
-        s.seek(self.__header.index_pos)
+        self._seek(self.__header.index_pos)
         connections: List[ConnectionRecord] = []
         for i in range(conn_count):
             conn = self._read_connection_record()
             connections.append(conn)
             print(conn)
+
+    def _seek(self, pos: int) -> None:
+        self.__fp.seek(pos)
 
     def _skip_sized(self) -> None:
         self.__fp.seek(self._read_uint32(), os.SEEK_CUR)
