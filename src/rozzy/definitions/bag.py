@@ -7,7 +7,7 @@ from io import BytesIO
 # TODO make immutable
 class RecordHeader:
     @classmethod
-    def from_byte_stream(cls, s: BytesIO) -> 'BagRecord':
+    def from_stream(cls, s: BytesIO) -> 'BagRecord':
         fields: Dict[str, bytes] = {}
         size = int.from_bytes(s.read(4), 'little')
         offset: int = 4
@@ -48,15 +48,15 @@ class RecordHeader:
 
 class BagRecord:
     @classmethod
-    def from_byte_stream(cls, s: BytesIO) -> 'BagRecord':
-        header = RecordHeader.from_byte_stream(s)
-        return cls.from_byte_stream_with_header(s, header)
+    def from_stream(cls, s: BytesIO) -> 'BagRecord':
+        header = RecordHeader.from_stream(s)
+        return cls.from_stream_with_header(s, header)
 
     @classmethod
-    def from_byte_stream_with_header(cls,
-                                     s: BytesIO,
-                                     header: RecordHeader
-                                     ) -> 'BagRecord':
+    def from_stream_with_header(cls,
+                                s: BytesIO,
+                                header: RecordHeader
+                                ) -> 'BagRecord':
         raise NotImplementedError
 
     def __init__(self, header: RecordHeader) -> None:
@@ -69,10 +69,10 @@ class BagRecord:
 
 class BagHeaderRecord(BagRecord):
     @classmethod
-    def from_byte_stream_with_header(cls,
-                                     s: BytesIO,
-                                     header: RecordHeader
-                                     ) -> 'BagHeaderRecord':
+    def from_stream_with_header(cls,
+                                s: BytesIO,
+                                header: RecordHeader
+                                ) -> 'BagHeaderRecord':
         assert header['op'] == b'\x03'
         len_padding = 4096 - header.size
         s.read(len_padding)
@@ -108,10 +108,10 @@ class BagHeaderRecord(BagRecord):
 
 class ChunkRecord(BagRecord):
     @classmethod
-    def from_byte_stream_with_header(cls,
-                                     s: BytesIO,
-                                     header: RecordHeader
-                                     ) -> 'ChunkRecord':
+    def from_stream_with_header(cls,
+                                s: BytesIO,
+                                header: RecordHeader
+                                ) -> 'ChunkRecord':
         assert header['op'] == b'\x05'
         return
 
@@ -155,18 +155,18 @@ class ChunkInfoRecord(BagRecord):
 
 class Bag:
     @staticmethod
-    def from_byte_stream(s: BytesIO) -> 'Bag':
+    def from_stream(s: BytesIO) -> 'Bag':
         version_line: str = s.readline().decode('utf-8')
         assert version_line == '#ROSBAG V2.0\n'
 
-        header = BagHeaderRecord.from_byte_stream(s)
+        header = BagHeaderRecord.from_stream(s)
 
         return Bag(header)
 
     @staticmethod
     def from_file(fn: str) -> 'Bag':
         with open(fn, 'rb') as f:
-            return Bag.from_byte_stream(f)
+            return Bag.from_stream(f)
 
     def __init__(self, header: BagHeaderRecord) -> None:
         self.__header = header
