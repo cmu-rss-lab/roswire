@@ -106,6 +106,22 @@ class BagHeaderRecord(BagRecord):
         return self.__chunk_count
 
 
+class ConnectionRecord(BagRecord):
+    pass
+
+
+class MessageDataRecord(BagRecord):
+    pass
+
+
+class IndexDataRecord(BagRecord):
+    pass
+
+
+class ChunkInfoRecord(BagRecord):
+    pass
+
+
 class ChunkRecord(BagRecord):
     @classmethod
     def from_stream_with_header(cls,
@@ -135,22 +151,6 @@ class ChunkRecord(BagRecord):
         The size, in bytes, of the uncompressed chunk.
         """
         return self.__size
-
-
-class ConnectionRecord(BagRecord):
-    pass
-
-
-class MessageDataRecord(BagRecord):
-    pass
-
-
-class IndexDataRecord(BagRecord):
-    pass
-
-
-class ChunkInfoRecord(BagRecord):
-    pass
 
 
 class Bag:
