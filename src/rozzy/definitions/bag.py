@@ -1,6 +1,6 @@
 __all__ = ['Bag']
 
-from typing import Dict, Sequence
+from typing import Dict, Sequence, Union
 from io import BytesIO
 
 
@@ -133,7 +133,7 @@ class ChunkRecord(BagRecord):
 
     def __init__(self,
                  header: RecordHeader,
-                 data: Sequence[MessageDataRecord, ConnectionRecord]
+                 data: Sequence[Union[MessageDataRecord, ConnectionRecord]]
                  ) -> None:
         self.__compression: str = header['compression'].decode('utf-8')
         self.__size = int.from_bytes(header['size'], 'little')
