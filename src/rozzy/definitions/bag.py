@@ -160,7 +160,7 @@ class BagReader:
             callerid = decode_str(conn['callerid'])
         if 'latching' in conn:
             latching = decode_str(conn['latching'])
-        return ConnectionInfo(conn=decode_str(header['conn']),
+        return ConnectionInfo(conn=decode_uint32(header['conn']),
                               callerid=callerid,
                               latching=latching,
                               topic=decode_str(header['topic']),
