@@ -3,63 +3,48 @@ __all__ = ['Bag']
 from typing import Dict, Sequence, Union, Optional, Tuple, List, Type
 from io import BytesIO
 import bz2
+import struct
+import logging
 
 import attr
 
+logger: logging.Logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
-# TODO make immutable
-class RecordHeader:
-    @classmethod
-    def from_stream(cls, s: BytesIO) -> 'BagRecord':
-        fields: Dict[str, bytes] = {}
-        size = int.from_bytes(s.read(4), 'little')
-        offset: int = 4
-        while offset < size:
-            bytes_name: bytes
-            value: bytes
-            length = int.from_bytes(s.read(4), 'little')
-            bytes_name, _, value = s.read(length).partition(b'\x3d')
-            name: str = bytes_name.decode('utf-8')
-            fields[name] = value
-            offset += length
-        return RecordHeader(fields, size)
+RecordHeader = Dict[str, bytes]
 
-    def __init__(self,
-                 fields: Dict[str, bytes],
-                 size: int
-                 ) -> None:
-        self.__fields = fields
-        self.__size = size
 
-    @property
-    def fields(self) -> Dict[str, bytes]:
-        return self.__fields
+def decode_uint32(v: bytes): return struct.unpack('<L', v)[0]
+def decode_int(v: bytes): return int.from_bytes(v, 'little')
+def decode_str(v: bytes): return v.decode('utf-8')
 
-    @property
-    def size(self) -> int:
-        """
-        The size of the header, measured in bytes.
-        """
-        return self.__size
 
-    def __contains__(self, name: str) -> bool:
-        return name in self.__fields
+def read_sized(s: BytesIO) -> bytes:
+    size = int.from_bytes(s.read(4), 'little')
+    return s.read(size)
 
-    def __getitem__(self, name: str) -> bytes:
-        """
-        Retrieves the value of a given field.
-        """
-        return self.__fields[name]
+
+def read_header(s: BytesIO) -> RecordHeader:
+    fields: RecordHeader = {}
+    header = read_sized(s)
+    while header:
+        size = decode_int(header[:4])
+        header = header[4:]
+        name, sep, value = header[:size].partition(b'\x3d')
+        if sep == '':
+            raise Exception('error reading header field')
+        fields[decode_str(name)] = value
+        header = header[size:]
+    return fields
 
 
 class BagRecord:
     @classmethod
     def from_stream(cls, s: BytesIO) -> 'BagRecord':
-        header = RecordHeader.from_stream(s)
-        print(header.fields)
+        header = read_header(s)
+        print(header)
         cls_decode: Type[BagRecord] = ({
             b'\x02': MessageDataRecord,
-            b'\x03': BagHeaderRecord,
             b'\x04': IndexDataRecord,
             b'\x05': ChunkRecord,
             b'\x06': ChunkInfoRecord,
@@ -76,7 +61,7 @@ class BagRecord:
 
 
 @attr.s(frozen=True)
-class BagHeaderRecord(BagRecord):
+class BagHeader:
     index_pos: int = attr.ib()
     conn_count: int = attr.ib()
     chunk_count: int = attr.ib()
@@ -89,10 +74,12 @@ class BagHeaderRecord(BagRecord):
         assert header['op'] == b'\x03'
         len_padding = 4096 - header.size
         s.read(len_padding)
+
         index_pos = int.from_bytes(header['index_pos'], 'little')
         conn_count = int.from_bytes(header['conn_count'], 'little')
         chunk_count = int.from_bytes(header['chunk_count'], 'little')
-        return BagHeaderRecord(index_pos, conn_count, chunk_count)
+
+        return BagHeader(index_pos, conn_count, chunk_count)
 
 
 @attr.s(frozen=True)
@@ -179,11 +166,33 @@ class Bag:
         version_line: str = s.readline().decode('utf-8')
         assert version_line == '#ROSBAG V2.0\n'
 
-        header = BagHeaderRecord.from_stream(s)
-        records: List[BagRecord] = [header]
-        while True:
+        # read header
+        pos_start = s.tell()
+        header = read_header(s)
+        assert header['op'] == b'\x03'
+        len_padding = s.tell() - pos_start + 4096
+        if len_padding > 0:
+            s.read(len_padding)
+
+        index_pos = decode_int(header['index_pos'])
+        conn_count = decode_int(header['conn_count'])
+        chunk_count = decode_int(header['chunk_count'])
+
+        logger.debug("* index position: %d", index_pos)
+        logger.debug("* connection count: %d", conn_count)
+        logger.debug("* chunk count: %d", chunk_count)
+
+        size = int.from_bytes(s.read(4), 'little')
+        ends_at = s.tell() + size
+        logger.debug("* data size: %d bytes", size)
+        logger.debug("* ends at: %d", ends_at)
+
+        # read contents
+        records: List[BagRecord] = []
+        while s.tell() < ends_at:
             record = BagRecord.from_stream(s)
             records.append(records)
+            assert False
 
         return Bag(header)
 
@@ -192,9 +201,5 @@ class Bag:
         with open(fn, 'rb') as f:
             return Bag.from_stream(f)
 
-    def __init__(self, header: BagHeaderRecord) -> None:
-        self.__header = header
-
-    @property
-    def header(self) -> BagHeaderRecord:
-        return self.__header
+    def __init__(self, records: List[BagRecord]) -> None:
+        self.__records = records
