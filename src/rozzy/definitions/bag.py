@@ -64,15 +64,13 @@ class BagRecord:
                                 ) -> 'BagRecord':
         raise NotImplementedError
 
-    def __init__(self, header: RecordHeader) -> None:
-        self._header = header
 
-    @property
-    def header(self) -> RecordHeader:
-        return self._header
-
-
+@attr.s(frozen=True)
 class BagHeaderRecord(BagRecord):
+    index_pos: int = attr.ib()
+    conn_count: int = attr.ib()
+    chunk_count: int = attr.ib()
+
     @classmethod
     def from_stream_with_header(cls,
                                 s: BytesIO,
@@ -81,34 +79,10 @@ class BagHeaderRecord(BagRecord):
         assert header['op'] == b'\x03'
         len_padding = 4096 - header.size
         s.read(len_padding)
-        return BagHeaderRecord(header)
-
-    def __init__(self, header: RecordHeader) -> None:
-        super().__init__(header)
-        self.__index_pos = int.from_bytes(header['index_pos'], 'little')
-        self.__conn_count = int.from_bytes(header['conn_count'], 'little')
-        self.__chunk_count = int.from_bytes(header['chunk_count'], 'little')
-
-    @property
-    def index_pos(self) -> int:
-        """
-        Offset of the first record after the chunk section.
-        """
-        return self.__index_pos
-
-    @property
-    def conn_count(self) -> int:
-        """
-        Number of unique connections in the file.
-        """
-        return self.__conn_count
-
-    @property
-    def chunk_count(self) -> int:
-        """
-        Number of chunk records in the file.
-        """
-        return self.__chunk_count
+        index_pos = int.from_bytes(header['index_pos'], 'little')
+        conn_count = int.from_bytes(header['conn_count'], 'little')
+        chunk_count = int.from_bytes(header['chunk_count'], 'little')
+        return BagHeaderRecord(index_pos, conn_count, chunk_count)
 
 
 @attr.s(frozen=True)
