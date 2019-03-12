@@ -1,7 +1,8 @@
 __all__ = ['Bag']
 
-from typing import Dict, Sequence, Union, Optional
+from typing import Dict, Sequence, Union, Optional, Tuple, List
 from io import BytesIO
+import bz2
 
 import attr
 
@@ -131,35 +132,36 @@ class ChunkInfoRecord(BagRecord):
     pass
 
 
+@attr.s(frozen=True)
 class ChunkRecord(BagRecord):
+    compression: str = attr.ib()
+    size: int = attr.ib()
+    records: Tuple[Union[MessageDataRecord, ConnectionRecord], ...] = attr.ib()  # noqa
+
     @classmethod
     def from_stream_with_header(cls,
                                 s: BytesIO,
                                 header: RecordHeader
                                 ) -> 'ChunkRecord':
         assert header['op'] == b'\x05'
-        return
+        compression: str = header['compression'].decode('utf-8')
+        size_uncompressed = int.from_bytes(header['size'], 'little')
+        assert compression in ['none', 'bz2']
 
-    def __init__(self,
-                 header: RecordHeader,
-                 data: Sequence[Union[MessageDataRecord, ConnectionRecord]]
-                 ) -> None:
-        self.__compression: str = header['compression'].decode('utf-8')
-        self.__size = int.from_bytes(header['size'], 'little')
+        size_compressed = int.from_bytes(s.read(4), 'little')
+        data_bytes = s.read(size_compressed)
+        if compression == 'bz2':
+            data_bytes = bz2.decompress(data_bytes)
+        s = BytesIO(data_bytes)
 
-    @property
-    def compression(self) -> str:
-        """
-        The type of compression used by this chunk.
-        """
-        return self.__compression
+        records: List[Union[MessageDataRecord, ConnectionRecord]] = []
+        while s.tell() < size_uncompressed:
+            record = BagRecord.from_stream(s)
+            records.append(record)
 
-    @property
-    def size(self) -> int:
-        """
-        The size, in bytes, of the uncompressed chunk.
-        """
-        return self.__size
+        return ChunkRecord(compression, size_uncompressed, records)
+
+# data: Sequence[Union[MessageDataRecord, ConnectionRecord]]
 
 
 class Bag:
