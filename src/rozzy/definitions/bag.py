@@ -129,14 +129,14 @@ class BagReader:
         for i in range(self.__header.conn_count):
             conn = self._read_connection_record()
             connections.append(conn)
-        self.__connections: Tuple[ConnectionInfo, ...] = connections
+        self.__connections: Tuple[ConnectionInfo, ...] = tuple(connections)
 
         # obtain a summary of each chunk
         chunks: List[Chunk] = []
         for i in range(self.__header.chunk_count):
             info = self._read_chunk_info_record()
             chunks.append(info)
-        self.__chunks: Tuple[ChunkInfo, ...] = tuple(chunks)
+        self.__chunks: Tuple[Chunk, ...] = tuple(chunks)
 
         # read the index
         self.__index: Index = self._read_index()
