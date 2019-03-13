@@ -1,6 +1,7 @@
-__all__ = ['Constant', 'ConstantValue', 'Field', 'MsgFormat']
+__all__ = ('Constant', 'ConstantValue', 'Field', 'MsgFormat', 'Message',
+           'build_message_type')
 
-from typing import Type, Optional, Any, Union, Tuple, List, Dict
+from typing import Type, Optional, Any, Union, Tuple, List, Dict, ClassVar
 import re
 import os
 
@@ -15,8 +16,7 @@ R_VAL = r".+"
 R_COMMENT = r"(#.*)?"
 R_FIELD = re.compile(f"^\s*({R_TYPE})\s+({R_NAME})\s*{R_COMMENT}$")
 R_CONSTANT = re.compile(f"^\s*(\w+)\s+(\w+)\s*=\s*(.+)$")
-R_BLANK = re.compile(
-    f"^\s*{R_COMMENT}$")
+R_BLANK = re.compile(f"^\s*{R_COMMENT}$")
 
 ConstantValue = Union[str, int, float]
 
@@ -39,8 +39,8 @@ class Constant:
 
 @attr.s(frozen=True)
 class Field:
-    typ = attr.ib(type=str)
-    name = attr.ib(type=str)
+    typ: str = attr.ib()
+    name: str = attr.ib()
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> 'Field':
@@ -53,10 +53,10 @@ class Field:
 
 @attr.s(frozen=True)
 class MsgFormat:
-    package = attr.ib(type=str)
-    name = attr.ib(type=str)
-    fields = attr.ib(type=Tuple[Field, ...], converter=tuple)
-    constants = attr.ib(type=Tuple[Constant, ...], converter=tuple)
+    package: str = attr.ib()
+    name: str = attr.ib()
+    fields: Tuple[Field, ...] = attr.ib(converter=tuple)
+    constants: Tuple[Constant, ...] = attr.ib(converter=tuple)
 
     @staticmethod
     def from_file(package: str, fn: str, files: FileProxy) -> 'MsgFormat':
@@ -133,3 +133,19 @@ class MsgFormat:
         if self.constants:
             d['constants'] = [c.to_dict() for c in self.constants]
         return d
+
+
+class Message:
+    """
+    Base class used by all messages.
+    """
+    format: ClassVar[MsgFormat]
+
+
+def build_message_type(fmt: MsgFormat) -> Type[Message]:
+    # FIXME find type
+    ns: Dict[str, Any] = {f.name: attr.ib() for f in fmt.fields}
+    ns['format'] = fmt
+    t: Type[Message] = type(fmt.name, (Message,), ns)
+    t = attr.s(t, frozen=True, slots=True)
+    return t
