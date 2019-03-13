@@ -126,10 +126,8 @@ class BagReader:
 
         # obtain a list of all connections in the bag
         connections: List[ConnectionInfo] = []
-        connection_indices: Dict[int, List[Any]] = {}
         for i in range(self.__header.conn_count):
             conn = self._read_connection_record()
-            connection_indices[conn.conn] = []
             connections.append(conn)
         self.__connections: Tuple[ConnectionInfo, ...] = connections
 
