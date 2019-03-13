@@ -112,3 +112,7 @@ class ActionFormat:
         if self.result:
             d['result'] = self.result.to_dict()
         return d
+
+    @property
+    def fullname(self) -> str:
+        return f"{self.package}/{self.name}"

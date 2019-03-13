@@ -134,6 +134,10 @@ class MsgFormat:
             d['constants'] = [c.to_dict() for c in self.constants]
         return d
 
+    @property
+    def fullname(self) -> str:
+        return f"{self.package}/{self.name}"
+
 
 class Message:
     """

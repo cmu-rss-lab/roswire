@@ -93,3 +93,7 @@ class SrvFormat:
         if self.response:
             d['response'] = self.response.to_dict()
         return d
+
+    @property
+    def fullname(self) -> str:
+        return f"{self.package}/{self.name}"
