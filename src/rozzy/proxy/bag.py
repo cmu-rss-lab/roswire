@@ -74,7 +74,7 @@ class BagRecorderProxy:
     def __exit__(self, ex_type, ex_val, ex_tb) -> None:
         if ex_type is not None:
             logger.error("error occurred during bag recording",
-                         exc_info=(ex_type, ex_val, ex_tab))
+                         exc_info=(ex_type, ex_val, ex_tb))
         should_save = ex_type is None
         if not self.stopped:
             self.stop(save=should_save)
