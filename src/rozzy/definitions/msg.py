@@ -1,6 +1,7 @@
-__all__ = ['Constant', 'ConstantValue', 'Field', 'MsgFormat']
+__all__ = ('Constant', 'ConstantValue', 'Field', 'MsgFormat', 'Message',
+           'build_message_type')
 
-from typing import Type, Optional, Any, Union, Tuple, List, Dict
+from typing import Type, Optional, Any, Union, Tuple, List, Dict, ClassVar
 import re
 import os
 
@@ -138,6 +139,7 @@ class Message:
     """
     Base class used by all messages.
     """
+    format: ClassVar[MsgFormat]
 
 
 def build_message_type(fmt: MsgFormat) -> Type[Message]:
