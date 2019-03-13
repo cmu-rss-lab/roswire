@@ -269,22 +269,22 @@ class BagReader:
 
     def _read_index(self) -> Index:
         logger.debug("reading index")
-        indices: Index = {c.conn: [] for c in self.connections}
+        index: Index = {c.conn: [] for c in self.connections}
         for chunk in self.chunks:
             logger.debug("reading index for chunk: %s", chunk)
             pos = chunk.pos_record
             self._seek(pos)
             self._skip_record()
             for i in range(len(chunk.connections)):
-                self._read_index_record(pos, indices)
+                self._read_index_record(pos, index)
         logger.debug("read index")
 
         logger.debug("pruning empty connections from index")
-        for c in [cc for cc in indices if not indices[cc]]:
-            del indices[c]
+        for c in [cc for cc in index if not index[cc]]:
+            del index[c]
             # TODO delete connection!
         logger.debug("pruned index")
-        return indices
+        return index
 
     def _read_index_record(self, pos_chunk: int, index: Index) -> None:
         header = self._read_header(OpCode.INDEX_DATA)
