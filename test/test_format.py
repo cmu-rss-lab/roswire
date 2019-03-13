@@ -233,6 +233,7 @@ def test_action_from_file():
         fmt = ActionFormat.from_file(pkg, fn, files)
         assert fmt.package == pkg
         assert fmt.name == 'LookupTransform'
+        assert fmt.fullname == 'tf2_msgs/LookupTransform'
 
         goal: MsgFormat = fmt.goal
         assert not goal.constants
@@ -273,6 +274,7 @@ def test_srv_from_file():
         fmt = SrvFormat.from_file(pkg, fn, files)
         assert fmt.package == pkg
         assert fmt.name == 'SetMap'
+        assert fmt.fullname == 'nav_msgs/SetMap'
 
         req: MsgFormat = fmt.request
         assert not req.constants
@@ -305,6 +307,7 @@ def test_msg_from_file():
         fmt = MsgFormat.from_file(pkg, fn, files)
         assert fmt.package == pkg
         assert fmt.name == 'TFMessage'
+        assert fmt.fullname == 'tf2_msgs/TFMessage'
         assert not fmt.constants
         assert len(fmt.fields) == 1
         assert Field('geometry_msgs/TransformStamped[]', 'transforms') in fmt.fields
