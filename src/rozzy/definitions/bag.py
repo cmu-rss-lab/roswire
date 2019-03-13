@@ -90,6 +90,16 @@ class BagHeader:
     chunk_count: int = attr.ib()
 
 
+@attr.s(frozen=True)
+class IndexEntry:
+    time: Time = attr.ib()
+    pos: int = attr.ib()
+    offset: int = attr.ib()
+
+
+Index = Dict[int, List[IndexEntry]]
+
+
 class BagReader:
     def __init__(self, fn: str) -> None:
         self.__fp = open(fn, 'rb')
@@ -104,15 +114,37 @@ class BagReader:
 
         # skip past chunks
         self._seek(self.__header.index_pos)
+
+        # obtain a list of all connections in the bag
         connections: List[ConnectionInfo] = []
+        connection_indices: Dict[int, List[Any]] = {}
         for i in range(self.__header.conn_count):
             conn = self._read_connection_record()
+            connection_indices[conn.conn] = []
             connections.append(conn)
+        self.__connections: Tuple[ConnectionInfo, ...] = connections
 
-        chunks: List[ChunkInfo] = []
+        # obtain a summary of each chunk
+        chunks: List[Chunk] = []
         for i in range(self.__header.chunk_count):
             info = self._read_chunk_info_record()
             chunks.append(info)
+        self.__chunks: Tuple[ChunkInfo, ...] = tuple(chunks)
+
+        # read the index
+        self.__index: Index = self._read_index()
+
+    @property
+    def connections(self) -> Tuple[ConnectionInfo, ...]:
+        return self.__connections
+
+    @property
+    def chunks(self) -> Tuple[Chunk, ...]:
+        return self.__chunks
+
+    @property
+    def index(self) -> Index:
+        return self.__index
 
     def _seek(self, pos: int) -> None:
         self.__fp.seek(pos)
@@ -120,10 +152,17 @@ class BagReader:
     def _skip_sized(self) -> None:
         self.__fp.seek(self._read_uint32(), os.SEEK_CUR)
 
+    def _skip_record(self) -> None:
+        self._skip_sized()
+        self._skip_sized()
+
     def _read_sized(self) -> bytes:
         size = self._read_uint32()
         logger.debug("reading sized block: %d bytes", size)
         return self.__fp.read(size)
+
+    def _read_time(self) -> Time:
+        return decode_time(self.__fp.read(8))
 
     def _read_uint32(self) -> int:
         return decode_uint32(self.__fp.read(4))
@@ -198,6 +237,8 @@ class BagReader:
             count = decode_uint32(contents[4:8])
             connections.append(ChunkConnection(uid, count))
             contents = contents[8:]
+
+        # read connection index records?
         assert not contents
 
         # read the chunk header
@@ -225,6 +266,39 @@ class BagReader:
 
         logger.debug("decoded chunk: %s", chunk)
         return chunk
+
+    def _read_index(self) -> Index:
+        logger.debug("reading index")
+        indices: Index = {c.conn: [] for c in self.connections}
+        for chunk in self.chunks:
+            logger.debug("reading index for chunk: %s", chunk)
+            pos = chunk.pos_record
+            self._seek(pos)
+            self._skip_record()
+            for i in range(len(chunk.connections)):
+                self._read_index_record(pos, indices)
+        logger.debug("read index")
+
+        logger.debug("pruning empty connections from index")
+        for c in [cc for cc in indices if not indices[cc]]:
+            del indices[c]
+            # TODO delete connection!
+        logger.debug("pruned index")
+        return indices
+
+    def _read_index_record(self, pos_chunk: int, index: Index) -> None:
+        header = self._read_header(OpCode.INDEX_DATA)
+        ver = decode_uint32(header['ver'])
+        uid = decode_uint32(header['conn'])
+        count = decode_uint32(header['count'])
+        assert ver == 1
+
+        self._read_uint32()  # skip size
+        for i in range(count):
+            time = self._read_time()
+            offset = self._read_uint32()
+            entry = IndexEntry(time=time, pos=pos_chunk, offset=offset)
+            index[uid].append(entry)
 
     def _read_chunk_record(self):
         raise NotImplementedError
