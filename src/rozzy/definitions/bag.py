@@ -62,11 +62,13 @@ class ChunkConnection:
 @attr.s(frozen=True)
 class Chunk:
     pos_record: int = attr.ib()
+    pos_data: int = attr.ib()
     time_start: Time = attr.ib()
     time_end: Time = attr.ib()
     connections: Tuple[ChunkConnection, ...] = attr.ib(converter=tuple)
     compression: Compression = attr.ib()
     size_uncompressed: int = attr.ib()
+    size_compressed: int = attr.ib()
 
 
 @attr.s(frozen=True)
@@ -199,26 +201,29 @@ class BagReader:
         assert not contents
 
         # read the chunk header
-        pos_original: int = self.__fp.tell()
+        pos_original = self.__fp.tell()
         self.__fp.seek(pos_record)
         header = self._read_header(OpCode.CHUNK)
-        size_uncompressed: int = decode_uint32(header['size'])
-        compression: Compression = \
-            Compression(decode_str(header['compression']))
-        pos_data: int = self.__fp.tell()
+        size_uncompressed = decode_uint32(header['size'])
+        compression = Compression(decode_str(header['compression']))
+        pos_data = self.__fp.tell()
 
-        # restore the position of the read pointer
+        # determine the compressed size of the chunk data
+        size_compressed = self._read_uint32()
+
+        # restore the original position of the read pointer
         self.__fp.seek(pos_original)
 
         chunk = Chunk(pos_record=pos_record,
+                      pos_data=pos_data,
                       time_start=time_start,
                       time_end=time_end,
                       size_uncompressed=size_uncompressed,
+                      size_compressed=size_compressed,
                       compression=compression,
                       connections=connections)
 
         logger.debug("decoded chunk: %s", chunk)
-        raise NotImplementedError
         return chunk
 
     def _read_chunk_record(self):
