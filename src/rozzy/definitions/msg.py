@@ -145,5 +145,5 @@ def build_message_type(fmt: MsgFormat) -> Type[Message]:
     ns: Dict[str, Any] = {f.name: attr.ib() for f in fmt.fields}
     ns['format'] = fmt
     t: Type[Message] = type(fmt.name, (Message,), ns)
-    t: Type[Message] = attr.s(t, frozen=True, slots=True)
+    t = attr.s(t, frozen=True, slots=True)
     return t
