@@ -60,7 +60,7 @@ class Compression(Enum):
     BZ2 = 'bz2'
 
 
-@attr.s(frozen=True)
+@attr.s(frozen=True, slots=True)
 class ChunkConnection:
     # connection id
     uid: int = attr.ib()
@@ -68,7 +68,7 @@ class ChunkConnection:
     count: int = attr.ib()
 
 
-@attr.s(frozen=True)
+@attr.s(frozen=True, slots=True)
 class Chunk:
     pos_record: int = attr.ib()
     pos_data: int = attr.ib()
@@ -80,7 +80,7 @@ class Chunk:
     size_compressed: int = attr.ib()
 
 
-@attr.s(frozen=True)
+@attr.s(frozen=True, slots=True)
 class ConnectionInfo:
     conn: int = attr.ib()
     topic: str = attr.ib()
@@ -92,14 +92,14 @@ class ConnectionInfo:
     latching: Optional[str] = attr.ib()
 
 
-@attr.s(frozen=True)
+@attr.s(frozen=True, slots=True)
 class BagHeader:
     index_pos: int = attr.ib()
     conn_count: int = attr.ib()
     chunk_count: int = attr.ib()
 
 
-@attr.s(frozen=True)
+@attr.s(frozen=True, slots=True)
 class IndexEntry:
     time: Time = attr.ib()
     pos: int = attr.ib()
