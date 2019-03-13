@@ -1,6 +1,3 @@
-"""
-Reference: https://github.com/strawlab/ros_comm/blob/master/tools/rosbag/src/rosbag/bag.py
-"""
 __all__ = ['BagReader']
 
 from typing import (Dict, Sequence, Union, Optional, Tuple, List, Type,
@@ -25,10 +22,22 @@ class Time:
     nsecs: int = attr.ib()
 
 
-def decode_uint8(v: bytes) -> int: return struct.unpack('<B', v)[0]
-def decode_uint32(v: bytes) -> int: return struct.unpack('<L', v)[0]
-def decode_uint64(v: bytes) -> int: return struct.unpack('<LL', v)[0]
-def decode_str(v: bytes) -> str: return v.decode('utf-8')
+def decode_uint8(v: bytes) -> int:
+    return struct.unpack('<B', v)[0]
+
+
+def decode_uint32(v: bytes) -> int:
+    return struct.unpack('<L', v)[0]
+
+
+def decode_uint64(v: bytes) -> int:
+    return struct.unpack('<LL', v)[0]
+
+
+def decode_str(v: bytes) -> str:
+    return v.decode('utf-8')
+
+
 def decode_time(v: bytes) -> Time:
     return Time(decode_uint32(v[0:4]), decode_uint32(v[4:8]))
 
