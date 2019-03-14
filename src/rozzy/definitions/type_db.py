@@ -1,6 +1,8 @@
 __all__ = ('TypeDatabase', 'Message')
 
-from typing import Collection, Type, Mapping, Iterator, Dict, ClassVar
+from typing import Collection, Type, Mapping, Iterator, Dict, ClassVar, Any
+
+import attr
 
 from .msg import MsgFormat
 from .format import FormatDatabase
@@ -16,8 +18,9 @@ class Message:
 class TypeDatabase(Mapping[str, Type[Message]]):
     @staticmethod
     def build(db_format: FormatDatabase) -> 'TypeDatabase':
-        types = [build_type(m) for m in db_format.messages]
-        return TypeDatabse(types)
+        types = [TypeDatabase.build_type(m)
+                 for m in db_format.messages.values()]
+        return TypeDatabase(types)
 
     @staticmethod
     def build_type(fmt: MsgFormat) -> Type[Message]:
