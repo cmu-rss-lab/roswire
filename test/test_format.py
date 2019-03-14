@@ -3,7 +3,8 @@ import attr
 
 from rozzy.proxy import FileProxy
 from rozzy.definitions import (Constant, Field, MsgFormat, SrvFormat,
-                               ActionFormat, Time)
+                               ActionFormat, Time, Package, PackageDatabase,
+                               FormatDatabase)
 from rozzy.definitions.msg import build_message_type
 import rozzy.exceptions
 
@@ -321,6 +322,33 @@ def test_msg_from_file():
         fn = '/ros_ws/src/geometry2/tf2_msgs/msg/Spooky.msg'
         with pytest.raises(FileNotFoundError):
             MsgFormat.from_file(pkg, fn, files)
+
+
+def test_build_format_database():
+    with build_file_proxy() as files:
+        paths = [
+            '/ros_ws/src/geometry2/tf2_msgs',
+            '/ros_ws/src/geometry/tf'
+        ]
+        db_package = PackageDatabase.from_paths(files, paths)
+        db_format = FormatDatabase.build(db_package)
+        name_messages: Set[str] = set(db_format.messages)
+        name_services: Set[str] = set(db_format.services)
+        name_actions: Set[str] = set(db_format.actions)
+        assert name_messages == {
+            'tf/tfMessage',
+            'tf/FrameGraphResponse',
+            'tf2_msgs/TFMessage',
+            'tf2_msgs/TF2Error',
+            'tf2_msgs/FrameGraphResponse',
+            'tf2_msgs/LookupTransformGoal',
+            'tf2_msgs/LookupTransformResult'
+        }
+        assert name_services == {
+            'tf/FrameGraph',
+            'tf2_msgs/FrameGraph'
+        }
+        assert name_actions == {'tf2_msgs/LookupTransform'}
 
 
 def test_build_message_type():
