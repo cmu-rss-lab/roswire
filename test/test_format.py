@@ -1,11 +1,9 @@
 import pytest
-import attr
 
 from rozzy.proxy import FileProxy
 from rozzy.definitions import (Constant, Field, MsgFormat, SrvFormat,
                                ActionFormat, Time, Package, PackageDatabase,
                                FormatDatabase)
-from rozzy.definitions.msg import build_message_type
 import rozzy.exceptions
 
 from test_file import build_file_proxy
@@ -349,21 +347,3 @@ def test_build_format_database():
             'tf2_msgs/FrameGraph'
         }
         assert name_actions == {'tf2_msgs/LookupTransform'}
-
-
-def test_build_message_type():
-    s = """
-uint32 seq
-time stamp
-string frame_id
-    """
-    fmt = MsgFormat.from_string("PkgName", "MessageName", s)
-    t = build_message_type(fmt)
-    assert t.__name__ == fmt.name
-    assert t.format == fmt
-
-    m = t(seq=310, stamp=Time(30, 120), frame_id='foo')
-
-    # message should be immutable
-    with pytest.raises(attr.exceptions.FrozenInstanceError):
-        m.seq = 500

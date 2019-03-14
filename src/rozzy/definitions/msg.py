@@ -1,5 +1,4 @@
-__all__ = ('Constant', 'ConstantValue', 'Field', 'MsgFormat', 'Message',
-           'build_message_type')
+__all__ = ('Constant', 'ConstantValue', 'Field', 'MsgFormat')
 
 from typing import Type, Optional, Any, Union, Tuple, List, Dict, ClassVar
 import re
@@ -137,19 +136,3 @@ class MsgFormat:
     @property
     def fullname(self) -> str:
         return f"{self.package}/{self.name}"
-
-
-class Message:
-    """
-    Base class used by all messages.
-    """
-    format: ClassVar[MsgFormat]
-
-
-def build_message_type(fmt: MsgFormat) -> Type[Message]:
-    # FIXME find type
-    ns: Dict[str, Any] = {f.name: attr.ib() for f in fmt.fields}
-    ns['format'] = fmt
-    t: Type[Message] = type(fmt.name, (Message,), ns)
-    t = attr.s(t, frozen=True, slots=True)
-    return t
