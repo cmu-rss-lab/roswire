@@ -1,6 +1,7 @@
 __all__ = ['Package', 'PackageDatabase']
 
-from typing import Tuple, List, Dict, Union, Any, Iterator, Collection
+from typing import (Tuple, List, Dict, Union, Any, Iterator, Collection,
+                    Mapping)
 import os
 
 import attr
@@ -79,7 +80,7 @@ class Package:
         return d
 
 
-class PackageDatabase:
+class PackageDatabase(Mapping[str, Package]):
     @staticmethod
     def paths(shell: ShellProxy) -> List[str]:
         """
