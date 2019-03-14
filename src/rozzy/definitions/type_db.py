@@ -14,10 +14,12 @@ class Message:
 
 
 class TypeDatabase(Mapping[str, Type[Message]]):
+    @staticmethod
     def build(db_format: FormatDatabase) -> 'TypeDatabase':
         types = [build_type(m) for m in db_format.messages]
         return TypeDatabse(types)
 
+    @staticmethod
     def build_type(fmt: MsgFormat) -> Type[Message]:
         # FIXME find type
         ns: Dict[str, Any] = {f.name: attr.ib() for f in fmt.fields}
