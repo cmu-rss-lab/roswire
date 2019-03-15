@@ -9,7 +9,7 @@ from bugzoo import BugZoo as BugZooDaemon
 from bugzoo import Container as BugZooContainer
 
 from .exceptions import RozzyException
-from .proxy import ShellProxy, ROSProxy, FileProxy
+from .proxy import ShellProxy, ROSProxy, FileProxy, ContainerProxy
 
 
 @attr.s
@@ -17,48 +17,37 @@ class SystemDescription:
     image: str = attr.ib()
 
 
-class System(object):
+class System:
     def __init__(self,
                  daemon_bugzoo: BugZooDaemon,
                  container_bugzoo: BugZooContainer,
                  uuid: UUID,
                  ws_host: str
                  ) -> None:
-        self.__daemon_bugzoo: BugZooDaemon = daemon_bugzoo
-        self.__container_bugzoo: BugZooContainer = container_bugzoo
-        self.__uuid: UUID = uuid
-        self.__shell: ShellProxy = ShellProxy(daemon_bugzoo, container_bugzoo)
-        self.__files: FileProxy = FileProxy(daemon_bugzoo,
-                                            container_bugzoo,
-                                            ws_host,
-                                            self.__shell)
-        self.__ws_host: str = ws_host
+        self.__container = ContainerProxy(daemon_bugzoo,
+                                          container_bugzoo,
+                                          uuid,
+                                          ws_host)
 
     @property
     def uuid(self) -> UUID:
-        return self.__uuid
+        return self.__container.uuid
 
     @property
     def ws_host(self) -> str:
-        return self.__ws_host
+        return self.__container.ws_host
 
     @property
     def ip_address(self) -> str:
-        bz = self.__daemon_bugzoo
-        ip = bz.containers.ip_address(self.__container_bugzoo)
-        if not ip:
-            m = "no IP address for container: {}"
-            m = m.format(self.uuid.hex)
-            raise RozzyException(m)
-        return str(ip)
+        return self.__container.ip_address
 
     @property
     def shell(self) -> ShellProxy:
-        return self.__shell
+        return self.__container.shell
 
     @property
     def files(self) -> FileProxy:
-        return self.__files
+        return self.__container.files
 
     @contextlib.contextmanager
     def roscore(self, port: int = 11311) -> Iterator[ROSProxy]:
