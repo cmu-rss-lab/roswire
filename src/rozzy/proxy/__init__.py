@@ -1,4 +1,4 @@
-__all__ = [
+__all__ = (
     'ShellProxy',
     'ServiceManagerProxy',
     'ParameterServerProxy',
@@ -6,8 +6,9 @@ __all__ = [
     'NodeProxy',
     'ROSProxy',
     'BagRecorderProxy',
-    'FileProxy'
-]
+    'FileProxy',
+    'ContainerProxy'
+)
 
 from typing import (Tuple, Dict, Optional, Iterator, Any, List, Union,
                     Collection)
@@ -18,6 +19,7 @@ import time
 
 from .shell import ShellProxy
 from .file import FileProxy
+from .container import ContainerProxy
 from .parameters import ParameterServerProxy
 from .bag import BagRecorderProxy
 from .node import NodeProxy, NodeManagerProxy
