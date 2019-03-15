@@ -2,11 +2,15 @@ __all__ = ('ContainerProxy', )
 
 from typing import Iterator, Optional
 from uuid import UUID, uuid4
+from ipaddress import IPv4Address, IPv6Address
+import ipaddress
 import contextlib
 import logging
 import shutil
 import os
 
+from docker import APIClient as DockerAPIClient
+from docker.models.containers import Container as DockerContainer
 from bugzoo import BugZoo as BugZooDaemon
 from bugzoo import Container as BugZooContainer
 from bugzoo import Bug as BugZooSnapshot
@@ -94,11 +98,18 @@ class ContainerProxy:
         return self.__ws_host
 
     @property
+    def _docker(self) -> DockerContainer:
+        bzid: str = self.__container_bugzoo.id
+        bzc = self.__daemon_bugzoo.containers
+        return getattr(bzc, '_ContainerManager__dockerc')[bzid]
+
+    @property
     def ip_address(self) -> str:
-        bz = self.__daemon_bugzoo
-        ip = bz.containers.ip_address(self.__container_bugzoo)
-        if not ip:
-            m = "no IP address for container: {}"
-            m = m.format(self.uuid.hex)
-            raise RozzyException(m)
-        return str(ip)
+        container = self._docker
+        api = DockerAPIClient(base_url='unix://var/run/docker.sock')
+        docker_info = api.inspect_container(container.id)
+        address = docker_info['NetworkSettings']['IPAddress']
+        try:
+            return str(IPv4Address(address))
+        except ipaddress.AddressValueError:
+            return str(IPv6Address(address))
