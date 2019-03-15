@@ -7,15 +7,15 @@ import pytest
 
 import rozzy
 import rozzy.exceptions
-from rozzy import Rozzy, ROSProxy, SystemInstance, System
+from rozzy import Rozzy, ROSProxy, System, SystemDescription
 from rozzy.proxy import ShellProxy
 
 
 @contextlib.contextmanager
-def build_test_environment() -> Iterator[Tuple[SystemInstance, ROSProxy]]:
+def build_test_environment() -> Iterator[Tuple[System, ROSProxy]]:
     rozzy = Rozzy()
-    system = System('brass')
-    with rozzy.launch(system) as sut:
+    desc = SystemDescription('brass')
+    with rozzy.launch(desc) as sut:
         with sut.roscore() as ros:
             time.sleep(5)
             yield (sut, ros)

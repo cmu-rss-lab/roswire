@@ -1,4 +1,4 @@
-__all__ = ('System', 'SystemInstance')
+__all__ = ('SystemDescription', 'System')
 
 from typing import Iterator
 from uuid import UUID
@@ -13,11 +13,11 @@ from .proxy import ShellProxy, ROSProxy, FileProxy
 
 
 @attr.s
-class System:
+class SystemDescription:
     image: str = attr.ib()
 
 
-class SystemInstance(object):
+class System(object):
     def __init__(self,
                  daemon_bugzoo: BugZooDaemon,
                  container_bugzoo: BugZooContainer,
