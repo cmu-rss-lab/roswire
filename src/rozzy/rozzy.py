@@ -10,10 +10,10 @@ import shutil
 
 from bugzoo import BugZoo as BugZooDaemon
 from bugzoo import Bug as BugZooSnapshot
-from bugzoo import Container as BugZooContainer
 
 from .exceptions import RozzyException
 from .system import System, SystemDescription
+from .proxy import ContainerProxy
 
 logger = logging.getLogger(__name__)  # type: logging.Logger
 logger.setLevel(logging.DEBUG)
@@ -63,39 +63,9 @@ class Rozzy:
 
     @contextlib.contextmanager
     def launch(self, desc: SystemDescription) -> Iterator[System]:
-        bz: BugZooDaemon = self.bugzoo
-        snapshot: BugZooSnapshot = bz.bugs[desc.image]
-
-        # generate a unique identifier for the container
-        uuid = uuid4()
-        logger.debug("UUID for container: %s", uuid)
-        dir_host = os.path.join(self.workspace, 'containers', uuid.hex)
-        dir_container = '/.rozzy'
-        volumes = {dir_host: {'bind': dir_host, 'mode': 'rw'}}
-        bz_container = None  # type: Optional[BugZooContainer]
-
-        try:
-            logger.debug("creating container directory: %s", dir_host)
-            os.makedirs(dir_host, exist_ok=True)
-            logger.debug("created container directory: %s", dir_host)
-
-            # FIXME launch as user
-            logger.debug("launching docker container")
-            bz_container = bz.containers.provision(
-                snapshot,
-                volumes=volumes)
-            logger.debug("launched docker container")
-            sys = System(bz, bz_container, uuid, dir_host)
-            yield sys
-
-        finally:
-            if bz_container:
-                bzid = bz_container.id
-                logger.debug("destroying docker container: %s", bzid)
-                del bz.containers[bzid]
-                logger.debug("destroyed docker container: %s", bzid)
-
-            logger.debug("destroying container directory: %s", dir_host)
-            if os.path.exists(dir_host):
-                shutil.rmtree(dir_host)
-            logger.debug("destroyed container directory: %s", dir_host)
+        snapshot: BugZooSnapshot = self.bugzoo.bugs[desc.image]
+        with ContainerProxy.launch(self.bugzoo,
+                                   self.workspace,
+                                   snapshot) as container:
+            container = container
+            yield System(container)

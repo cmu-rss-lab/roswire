@@ -5,8 +5,6 @@ from uuid import UUID
 import contextlib
 
 import attr
-from bugzoo import BugZoo as BugZooDaemon
-from bugzoo import Container as BugZooContainer
 
 from .exceptions import RozzyException
 from .proxy import ShellProxy, ROSProxy, FileProxy, ContainerProxy
@@ -18,16 +16,8 @@ class SystemDescription:
 
 
 class System:
-    def __init__(self,
-                 daemon_bugzoo: BugZooDaemon,
-                 container_bugzoo: BugZooContainer,
-                 uuid: UUID,
-                 ws_host: str
-                 ) -> None:
-        self.__container = ContainerProxy(daemon_bugzoo,
-                                          container_bugzoo,
-                                          uuid,
-                                          ws_host)
+    def __init__(self, container: ContainerProxy) -> None:
+        self.__container = container
 
     @property
     def uuid(self) -> UUID:
