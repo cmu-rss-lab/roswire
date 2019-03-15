@@ -15,6 +15,7 @@ from bugzoo import Container as BugZooContainer
 from .exceptions import RozzyException
 from .system import System
 from .container import Container
+from .definitions import FormatDatabase, PackageDatabase, TypeDatabase
 
 logger = logging.getLogger(__name__)  # type: logging.Logger
 logger.setLevel(logging.DEBUG)
@@ -61,6 +62,20 @@ class Rozzy:
         The BugZoo daemon used by Rozzy.
         """
         return self.__bugzoo
+
+    def load_system(self, image: str) -> System:
+        """
+        Loads a description of the system provided by a given Docker image.
+        """
+        with self.launch_from_image(image) as container:
+            paths = PackageDatabase.paths(container.shell)
+            db_package = PackageDatabase.from_paths(container.files, paths)
+        db_format = FormatDatabase.build(db_package)
+        db_type = TypeDatabase.build(db_format)
+        return System(image=image,
+                      packages=db_package,
+                      formats=db_format,
+                      types=db_type)
 
     @contextlib.contextmanager
     def launch(self, system: System) -> Iterator[Container]:
