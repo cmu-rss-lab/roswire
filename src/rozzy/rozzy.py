@@ -13,8 +13,7 @@ from bugzoo import Bug as BugZooSnapshot
 from bugzoo import Container as BugZooContainer
 
 from .exceptions import RozzyException
-from .system import System
-from .system_instance import SystemInstance
+from .system import System, SystemInstance
 
 logger = logging.getLogger(__name__)  # type: logging.Logger
 logger.setLevel(logging.DEBUG)
