@@ -1,4 +1,4 @@
-__all__ = ['FileProxy']
+__all__ = ('FileProxy',)
 
 from typing import List, Union, overload
 from typing_extensions import Literal
@@ -7,8 +7,7 @@ import shlex
 import tempfile
 import subprocess
 
-from bugzoo import BugZoo as BugZooDaemon
-from bugzoo import Container as BugZooContainer
+from docker.models.containers import Container as DockerContainer
 
 from .shell import ShellProxy
 from ..exceptions import RozzyException
@@ -16,17 +15,12 @@ from ..exceptions import RozzyException
 
 class FileProxy:
     def __init__(self,
-                 daemon_bugzoo: BugZooDaemon,
-                 container_bugzoo: BugZooContainer,
-                 ws_host: str,
+                 container_docker: DockerContainer,
                  shell: ShellProxy
                  ) -> None:
-        self.__daemon_bugzoo: BugZooDaemon = daemon_bugzoo
-        self.__container_bugzoo: BugZooContainer = container_bugzoo
-        self.__shell: ShellProxy = shell
-
-        self.__dir_ws_host: str = ws_host
-        self.__dir_ws_container: str = '/.rozzy'
+        self.__docker_id = container_docker.id
+        self.__container_docker = container_docker
+        self.__shell = shell
 
     def copy_from_host(self, path_host: str, path_container: str) -> None:
         """
@@ -44,7 +38,7 @@ class FileProxy:
                 filepath does not exist.
             OSError: if the copy operation failed.
         """
-        id_container: str = self.__container_bugzoo.uid
+        id_container: str = self.__docker_id
         if not os.path.exists(path_host):
             m = f"file [{path_host}] does not exist on host"
             raise FileNotFoundError(m)
@@ -79,7 +73,7 @@ class FileProxy:
                 does not exist.
             OSError: if the copy operation failed.
         """
-        id_container: str = self.__container_bugzoo.uid
+        id_container: str = self.__docker_id
         if not self.exists(path_container):
             m = (f"file [{path_container}] does not exist in container "
                  f"[{id_container}]")

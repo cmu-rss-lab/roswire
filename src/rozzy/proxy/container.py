@@ -78,10 +78,7 @@ class ContainerProxy:
 
         dockerc = self._docker
         self.__shell = ShellProxy(dockerc)
-        self.__files = FileProxy(daemon_bugzoo,
-                                 container_bugzoo,
-                                 self.__ws_host,
-                                 self.__shell)
+        self.__files = FileProxy(dockerc, self.__shell)
 
     @property
     def uuid(self) -> UUID:
