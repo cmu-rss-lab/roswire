@@ -11,7 +11,7 @@ from .exceptions import RozzyException
 from .proxy import ShellProxy, ROSProxy, FileProxy
 
 
-class Container(object):
+class SystemInstance(object):
     def __init__(self,
                  daemon_bugzoo: BugZooDaemon,
                  container_bugzoo: BugZooContainer,

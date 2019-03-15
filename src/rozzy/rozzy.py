@@ -14,7 +14,7 @@ from bugzoo import Container as BugZooContainer
 
 from .exceptions import RozzyException
 from .system import System
-from .container import Container
+from .system_instance import SystemInstance
 
 logger = logging.getLogger(__name__)  # type: logging.Logger
 logger.setLevel(logging.DEBUG)
@@ -63,7 +63,7 @@ class Rozzy:
         return self.__bugzoo
 
     @contextlib.contextmanager
-    def launch(self, system: System) -> Iterator[Container]:
+    def launch(self, system: System) -> Iterator[SystemInstance]:
         bz: BugZooDaemon = self.bugzoo
         snapshot: BugZooSnapshot = bz.bugs[system.image]
 
@@ -86,8 +86,8 @@ class Rozzy:
                 snapshot,
                 volumes=volumes)
             logger.debug("launched docker container")
-            container = Container(bz, bz_container, uuid, dir_host)
-            yield container
+            instance = SystemInstance(bz, bz_container, uuid, dir_host)
+            yield instance
 
         finally:
             if bz_container:
