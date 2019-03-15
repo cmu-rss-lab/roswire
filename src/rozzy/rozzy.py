@@ -1,4 +1,4 @@
-__all__ = ['Rozzy']
+__all__ = ('Rozzy',)
 
 from typing import Optional, Dict, Iterator
 from uuid import uuid4
@@ -13,8 +13,7 @@ from bugzoo import Bug as BugZooSnapshot
 from bugzoo import Container as BugZooContainer
 
 from .exceptions import RozzyException
-from .system import System
-from .container import Container
+from .system import System, SystemDescription
 
 logger = logging.getLogger(__name__)  # type: logging.Logger
 logger.setLevel(logging.DEBUG)
@@ -63,9 +62,9 @@ class Rozzy:
         return self.__bugzoo
 
     @contextlib.contextmanager
-    def launch(self, system: System) -> Iterator[Container]:
+    def launch(self, desc: SystemDescription) -> Iterator[System]:
         bz: BugZooDaemon = self.bugzoo
-        snapshot: BugZooSnapshot = bz.bugs[system.image]
+        snapshot: BugZooSnapshot = bz.bugs[desc.image]
 
         # generate a unique identifier for the container
         uuid = uuid4()
@@ -86,8 +85,8 @@ class Rozzy:
                 snapshot,
                 volumes=volumes)
             logger.debug("launched docker container")
-            container = Container(bz, bz_container, uuid, dir_host)
-            yield container
+            sys = System(bz, bz_container, uuid, dir_host)
+            yield sys
 
         finally:
             if bz_container:

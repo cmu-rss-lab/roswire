@@ -7,28 +7,28 @@ import pytest
 
 import rozzy
 import rozzy.exceptions
-from rozzy import Rozzy, ROSProxy, Container, System
+from rozzy import Rozzy, ROSProxy, System, SystemDescription
 from rozzy.proxy import ShellProxy
 
 
 @contextlib.contextmanager
-def build_test_environment() -> Iterator[Tuple[ROSProxy, Container]]:
+def build_test_environment() -> Iterator[Tuple[System, ROSProxy]]:
     rozzy = Rozzy()
-    system = System('brass')
-    with rozzy.launch(system) as container:
-        with container.roscore() as ros:
+    desc = SystemDescription('brass')
+    with rozzy.launch(desc) as sut:
+        with sut.roscore() as ros:
             time.sleep(5)
-            yield (container, ros)
+            yield (sut, ros)
 
 
 @contextlib.contextmanager
 def build_shell_proxy() -> Iterator[ShellProxy]:
-    with build_test_environment() as (container, ros):
-        yield container.shell
+    with build_test_environment() as (sut, ros):
+        yield sut.shell
 
 
 def test_parameters():
-    with build_test_environment() as (container, ros):
+    with build_test_environment() as (sut, ros):
         assert ros.topic_to_type == {'/rosout': 'rosgraph_msgs/Log',
                                      '/rosout_agg': 'rosgraph_msgs/Log'}
 
@@ -48,12 +48,12 @@ def test_parameters():
 
 def test_arducopter():
     logging.basicConfig()
-    with build_test_environment() as (container, ros):
+    with build_test_environment() as (sut, ros):
         cmd = ' '.join([
             "/ros_ws/src/ArduPilot/build/sitl/bin/arducopter",
             "--model copter"
         ])
-        container.shell.non_blocking_execute(cmd)
+        sut.shell.non_blocking_execute(cmd)
 
         ros.launch('mavros', 'apm.launch', fcu_url='tcp://127.0.0.1:5760@5760')
         time.sleep(10)

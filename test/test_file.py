@@ -13,8 +13,8 @@ from test_basic import build_test_environment
 
 @contextlib.contextmanager
 def build_file_proxy() -> Iterator[FileProxy]:
-    with build_test_environment() as (container, ros):
-        yield container.files
+    with build_test_environment() as (sut, ros):
+        yield sut.files
 
 
 def test_exists():
