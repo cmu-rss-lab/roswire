@@ -75,7 +75,9 @@ class ContainerProxy:
         self.__daemon_bugzoo = daemon_bugzoo
         self.__container_bugzoo = container_bugzoo
         self.__ws_host = ws_host
-        self.__shell = ShellProxy(daemon_bugzoo, container_bugzoo)
+
+        dockerc = self._docker
+        self.__shell = ShellProxy(daemon_bugzoo, container_bugzoo, dockerc)
         self.__files = FileProxy(daemon_bugzoo,
                                  container_bugzoo,
                                  self.__ws_host,
