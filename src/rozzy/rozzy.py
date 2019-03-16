@@ -12,7 +12,7 @@ from docker import DockerClient
 from docker import APIClient as DockerAPIClient
 
 from .exceptions import RozzyException
-from .system import System, SystemDescription
+from .system import System, SystemDescription, SystemDescriptionManager
 from .proxy import ContainerProxy, ContainerProxyManager
 from .definitions import FormatDatabase, PackageDatabase, TypeDatabase
 
@@ -45,6 +45,7 @@ class Rozzy:
         self.__containers = ContainerProxyManager(self.__client_docker,
                                                   self.__api_docker,
                                                   self.__dir_workspace)
+        self.__descriptions = SystemDescriptionManager(self.__containers)
 
     @property
     def workspace(self) -> str:
@@ -61,13 +62,17 @@ class Rozzy:
     def containers(self) -> ContainerProxyManager:
         return self.__containers
 
+    @property
+    def descriptions(self) -> SystemDescriptionManager:
+        return self.__descriptions
+
     @contextlib.contextmanager
     def launch(self,
                image: str,
                description: Optional[SystemDescription] = None
                ) -> Iterator[System]:
         if not description:
-            description = SystemDescription.build(self.containers, image)
+            description = self.descriptions.build(image)
         with self.containers.launch(image) as container:
             container = container
             yield System(container, description)

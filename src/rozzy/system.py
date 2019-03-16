@@ -1,4 +1,4 @@
-__all__ = ('SystemDescription', 'System')
+__all__ = ('SystemDescription', 'SystemDescriptionManager', 'System')
 
 from typing import Iterator, Union
 from uuid import UUID
@@ -21,18 +21,24 @@ class SystemDescription:
     formats: FormatDatabase = attr.ib()
     packages: PackageDatabase = attr.ib()
 
-    @staticmethod
-    def build(containers: ContainerProxyManager,
+
+class SystemDescriptionManager:
+    def __init__(self,
+                 containers: ContainerProxyManager
+                 ) -> None:
+        self.__containers = containers
+
+    def build(self,
               image_or_tag: Union[str, DockerImage]
-              ) -> 'SystemDescription':
+              ) -> SystemDescription:
         image: DockerImage
         if isinstance(image_or_tag, str):
-            image = containers.image(image_or_tag)
+            image = self.__containers.image(image_or_tag)
         else:
             image = image_or_tag
 
         sha256: str = image.id[7:]
-        with containers.launch(image) as container:
+        with self.__containers.launch(image) as container:
             paths = PackageDatabase.paths(container.shell)
             db_package = PackageDatabase.from_paths(container.files, paths)
         db_format = FormatDatabase.build(db_package)
