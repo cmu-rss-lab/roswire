@@ -66,7 +66,7 @@ class SystemDescriptionManager:
         sha256 = self.__containers.image_sha256(image_or_tag)
         fn = os.path.join(self.__dir_cache, sha256)
         try:
-            return  SystemDescription.from_file(fn)
+            return SystemDescription.from_file(fn)
         except FileNotFoundError:
             logger.exception("failed to load description for image: %s",
                              image_or_tag)
@@ -112,6 +112,7 @@ class SystemDescriptionManager:
         if self.saved(image_or_tag):
             return self.load(image_or_tag)
         return self.build(image_or_tag, save)
+
 
 class System:
     def __init__(self,
