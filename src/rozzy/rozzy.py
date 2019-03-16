@@ -51,7 +51,7 @@ class Rozzy:
     def client_docker(self) -> DockerClient:
         return self.__client_docker
 
-    def load_system(self, image: str) -> SystemDescription:
+    def describe(self, image: str) -> SystemDescription:
         """
         Loads a description of the system provided by a given Docker image.
         """
