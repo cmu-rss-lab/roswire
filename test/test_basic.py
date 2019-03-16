@@ -8,7 +8,7 @@ import pytest
 import rozzy
 import rozzy.exceptions
 from rozzy import Rozzy, ROSProxy, System, SystemDescription
-from rozzy.proxy import ShellProxy
+from rozzy.proxy import ShellProxy, FileProxy, ContainerProxy
 
 
 @contextlib.contextmanager
@@ -23,8 +23,18 @@ def build_test_environment() -> Iterator[Tuple[System, ROSProxy]]:
 
 @contextlib.contextmanager
 def build_shell_proxy() -> Iterator[ShellProxy]:
-    with build_test_environment() as (sut, ros):
-        yield sut.shell
+    rozzy = Rozzy()
+    desc = SystemDescription('brass')
+    with rozzy.launch(desc) as system:
+        yield system.shell
+
+
+@contextlib.contextmanager
+def build_file_proxy() -> Iterator[FileProxy]:
+    rozzy = Rozzy()
+    desc = SystemDescription('brass')
+    with rozzy.launch(desc) as system:
+        yield system.files
 
 
 def test_parameters():
