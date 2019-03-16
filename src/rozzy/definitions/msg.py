@@ -9,7 +9,7 @@ import attr
 from ..proxy import FileProxy
 from .. import exceptions
 
-R_TYPE = r"[a-zA-Z0-9_/]+(?:\[\])?"
+R_TYPE = r"[a-zA-Z0-9_/]+(?:\[\d*\])?"
 R_NAME = r"[a-zA-Z0-9_/]+"
 R_VAL = r".+"
 R_COMMENT = r"(#.*)?"

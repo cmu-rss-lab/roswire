@@ -1,10 +1,12 @@
 __all__ = ('SystemDescription', 'System')
 
-from typing import Iterator
+from typing import Iterator, Union
 from uuid import UUID
 import contextlib
 
 import attr
+from docker import DockerClient
+from docker.models.images import Image as DockerImage
 
 from .exceptions import RozzyException
 from .definitions import TypeDatabase, FormatDatabase, PackageDatabase
@@ -13,10 +15,33 @@ from .proxy import ShellProxy, ROSProxy, FileProxy, ContainerProxy
 
 @attr.s
 class SystemDescription:
-    image: str = attr.ib()
+    sha256: str = attr.ib()
     types: TypeDatabase = attr.ib()
     formats: FormatDatabase = attr.ib()
     packages: PackageDatabase = attr.ib()
+
+    @staticmethod
+    def build(client_docker: DockerClient,
+              dir_host_ws: str,
+              image_or_tag: Union[str, DockerImage]
+              ) -> 'SystemDescription':
+        image: DockerImage
+        if isinstance(image_or_tag, str):
+            image = client_docker.images.get(image_or_tag)
+        else:
+            image = image_or_tag
+
+        sha256: str = image.id[7:]
+        args = [client_docker, dir_host_ws, image]
+        with ContainerProxy.launch(*args) as container:
+            paths = PackageDatabase.paths(container.shell)
+            db_package = PackageDatabase.from_paths(container.files, paths)
+        db_format = FormatDatabase.build(db_package)
+        db_type = TypeDatabase.build(db_format)
+        return SystemDescription(sha256=sha256,
+                                 packages=db_package,
+                                 formats=db_format,
+                                 types=db_type)
 
 
 class System:
