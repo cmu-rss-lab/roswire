@@ -45,7 +45,9 @@ class Rozzy:
         self.__containers = ContainerProxyManager(self.__client_docker,
                                                   self.__api_docker,
                                                   self.__dir_workspace)
-        self.__descriptions = SystemDescriptionManager(self.__containers)
+        dir_descriptions = os.path.join(dir_workspace, 'descriptions')
+        self.__descriptions = SystemDescriptionManager(self.__containers,
+                                                       dir_descriptions)
 
     @property
     def workspace(self) -> str:

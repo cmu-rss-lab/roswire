@@ -1,9 +1,12 @@
 __all__ = ('SystemDescription', 'SystemDescriptionManager', 'System')
 
-from typing import Iterator, Union
+from typing import Iterator, Union, Dict, Any
 from uuid import UUID
 import contextlib
+import logging
+import os
 
+import yaml
 import attr
 from docker import DockerClient
 from docker.models.images import Image as DockerImage
@@ -13,40 +16,86 @@ from .definitions import TypeDatabase, FormatDatabase, PackageDatabase
 from .proxy import (ShellProxy, ROSProxy, FileProxy, ContainerProxy,
                     ContainerProxyManager)
 
+logger: logging.Logger = logging.getLogger(__name__)
+logger.setLevel(loging.DEBUG)
 
-@attr.s
+
+@attr.s(slots=True)
 class SystemDescription:
     sha256: str = attr.ib()
     types: TypeDatabase = attr.ib()
     formats: FormatDatabase = attr.ib()
     packages: PackageDatabase = attr.ib()
 
+    @staticmethod
+    def from_file(fn: str) -> 'SystemDescription':
+        with open(fn, 'r') as f:
+            d = yaml.load(f)
+        return SystemDescription.from_dict(d)
+
+    @staticmethod
+    def from_dict(d: Dict[str, Any]) -> 'SystemDescription':
+        sha256: str = d['sha256']
+        packages = PackageDatabase.from_dict(d['packages'])
+        formats = FormatDatabase.build(packages)
+        types = TypeDatabase.build(formats)
+        return SystemDescription(sha256=sha256,
+                                 packages=packages,
+                                 formats=formats,
+                                 types=types)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {'sha256': self.sha256,
+                'packages': self.packages.to_dict()}
+
 
 class SystemDescriptionManager:
     def __init__(self,
-                 containers: ContainerProxyManager
+                 containers: ContainerProxyManager,
+                 dir_cache: str
                  ) -> None:
         self.__containers = containers
 
-    def build(self,
-              image_or_tag: Union[str, DockerImage]
-              ) -> SystemDescription:
-        image: DockerImage
-        if isinstance(image_or_tag, str):
-            image = self.__containers.image(image_or_tag)
-        else:
-            image = image_or_tag
+        # ensure that the cache directory exists
+        self.__dir_cache = dir_cache
+        os.makedirs(dir_cache, exist_ok=True)
 
-        sha256: str = image.id[7:]
-        with self.__containers.launch(image) as container:
+    def load(self,
+             image_or_tag: Union[str, DockerImage]
+             ) -> SystemDescription:
+        sha256 = self.__containers.image_sha256(image_or_tag)
+        fn = os.path.join(self.__dir_cache, sha256)
+        try:
+            return  SystemDescription.from_file(fn)
+        except FileNotFoundError:
+            logger.exception("failed to load description for image: %s",
+                             image_or_tag)
+            raise
+
+    def save(self, description: SystemDescription) -> None:
+        fn = os.path.join(self.__dir_cache, description.sha256)
+        yml = description.to_dict()
+        with open(fn, 'w') as f:
+            yaml.dump(yml, f, default_flow_style=False)
+
+    def build(self,
+              image_or_tag: Union[str, DockerImage],
+              save: bool = True
+              ) -> SystemDescription:
+        sha256 = self.__containers.image_sha256(image_or_tag)
+        with self.__containers.launch(image_or_tag) as container:
             paths = PackageDatabase.paths(container.shell)
             db_package = PackageDatabase.from_paths(container.files, paths)
         db_format = FormatDatabase.build(db_package)
         db_type = TypeDatabase.build(db_format)
-        return SystemDescription(sha256=sha256,
-                                 packages=db_package,
-                                 formats=db_format,
-                                 types=db_type)
+
+        description = SystemDescription(sha256=sha256,
+                                        packages=db_package,
+                                        formats=db_format,
+                                        types=db_type)
+        if save:
+            self.save(description)
+        return description
 
 
 class System:
