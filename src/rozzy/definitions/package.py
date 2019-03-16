@@ -1,4 +1,4 @@
-__all__ = ['Package', 'PackageDatabase']
+__all__ = ('Package', 'PackageDatabase')
 
 from typing import (Tuple, List, Dict, Union, Any, Iterator, Collection,
                     Mapping)
@@ -140,3 +140,10 @@ class PackageDatabase(Mapping[str, Package]):
         this database.
         """
         yield from self.__contents
+
+    @staticmethod
+    def from_dict(d: List[Dict[str, Any]]) -> 'PackageDatabase':
+        return PackageDatabase([Package.from_dict(dd) for dd in d])
+
+    def to_dict(self) -> List[Dict[str, Any]]:
+        return [p.to_dict() for p in self.values()]
