@@ -17,7 +17,7 @@ from .proxy import (ShellProxy, ROSProxy, FileProxy, ContainerProxy,
                     ContainerProxyManager)
 
 logger: logging.Logger = logging.getLogger(__name__)
-logger.setLevel(loging.DEBUG)
+logger.setLevel(logging.DEBUG)
 
 
 @attr.s(slots=True)
@@ -72,6 +72,14 @@ class SystemDescriptionManager:
                              image_or_tag)
             raise
 
+    def saved(self, image_or_tag: Union[str, DockerImage]) -> bool:
+        """
+        Determines whether a description for a given image has been saved.
+        """
+        sha256 = self.__containers.image_sha256(image_or_tag)
+        fn = os.path.join(self.__dir_cache, sha256)
+        return os.path.exists(fn)
+
     def save(self, description: SystemDescription) -> None:
         fn = os.path.join(self.__dir_cache, description.sha256)
         yml = description.to_dict()
@@ -97,6 +105,13 @@ class SystemDescriptionManager:
             self.save(description)
         return description
 
+    def load_or_build(self,
+                      image_or_tag: Union[str, DockerImage],
+                      save: bool = True
+                      ) -> SystemDescription:
+        if self.saved(image_or_tag):
+            return self.load(image_or_tag)
+        return self.build(image_or_tag, save)
 
 class System:
     def __init__(self,
