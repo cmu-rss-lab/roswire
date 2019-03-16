@@ -94,7 +94,10 @@ class PackageDatabase(Mapping[str, Package]):
         return paths
 
     @staticmethod
-    def from_paths(files: FileProxy, paths: List[str]) -> 'PackageDatabase':
+    def from_paths(files: FileProxy,
+                   paths: List[str],
+                   ignore_bad_paths: bool = True
+                   ) -> 'PackageDatabase':
         """
         Constructs a package database from a list of the paths of the packages
         belonging to the database.
@@ -103,7 +106,15 @@ class PackageDatabase(Mapping[str, Package]):
             files: access to the filesystem.
             paths: a list of the absolute paths of the packages.
         """
-        return PackageDatabase([Package.build(p, files) for p in paths])
+        packages: List[Package] = []
+        for p in paths:
+            try:
+                package = Package.build(p, files)
+            except FileNotFoundError:
+                if not ignore_bad_paths:
+                    raise
+            packages.append(package)
+        return PackageDatabase(packages)
 
     def __init__(self, packages: Collection[Package]) -> None:
         self.__contents = {p.name: p for p in packages}
