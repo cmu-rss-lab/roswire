@@ -140,3 +140,6 @@ class PackageDatabase(Mapping[str, Package]):
         this database.
         """
         yield from self.__contents
+
+    def to_dict(self) -> List[Dict[str, Any]]:
+        return [p.to_dict() for p in self.values()]
