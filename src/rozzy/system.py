@@ -13,7 +13,7 @@ from .proxy import ShellProxy, ROSProxy, FileProxy, ContainerProxy
 
 @attr.s
 class SystemDescription:
-    image: str = attr.ib()
+    sha256: str = attr.ib()
     types: TypeDatabase = attr.ib()
     formats: FormatDatabase = attr.ib()
     packages: PackageDatabase = attr.ib()

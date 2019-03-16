@@ -55,13 +55,14 @@ class Rozzy:
         """
         Loads a description of the system provided by a given Docker image.
         """
+        sha256: str = self.__client_docker.images.get(image).id[7:]
         args = [self.client_docker, self.workspace, image]
         with ContainerProxy.launch(*args) as container:
             paths = PackageDatabase.paths(container.shell)
             db_package = PackageDatabase.from_paths(container.files, paths)
         db_format = FormatDatabase.build(db_package)
         db_type = TypeDatabase.build(db_format)
-        return SystemDescription(image=image,
+        return SystemDescription(sha256=sha256,
                                  packages=db_package,
                                  formats=db_format,
                                  types=db_type)
