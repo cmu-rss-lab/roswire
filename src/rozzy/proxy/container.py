@@ -17,6 +17,7 @@ from docker.models.containers import Container as DockerContainer
 
 from .file import FileProxy
 from .shell import ShellProxy
+from ..util import Stopwatch
 from ..exceptions import RozzyException
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -88,12 +89,17 @@ class ContainerProxy:
                dir_host_ws: str,
                image_or_name: Union[str, DockerImage]
                ) -> Iterator['ContainerProxy']:
+        stopwatch = Stopwatch()
+        stopwatch.start()
         uuid = uuid4()
         logger.debug("UUID for container: %s", uuid)
         with ContainerProxy._build_shared_directory(dir_host_ws, uuid) as dir_host:  # noqa
             args = [client_docker, image_or_name, dir_host_ws, uuid]
             with ContainerProxy._build_container(*args) as dockerc:
                 c = ContainerProxy(client_docker, dockerc, uuid, dir_host)
+                stopwatch.stop()
+                logger.debug("launched container (took %.3f secs)",
+                             stopwatch.duration)
                 yield c
 
     def __init__(self,
