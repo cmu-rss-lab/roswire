@@ -2,8 +2,8 @@ __all__ = ('ShellProxy',)
 
 from typing import Tuple, Optional
 import shlex
-import asyncio
 import logging
+import threading
 
 from docker.models.containers import Container as DockerContainer
 
@@ -61,8 +61,11 @@ class ShellProxy:
                      command, retcode, timer.duration, output)
         return retcode, output, timer.duration
 
-    async def non_blocking_execute(self,
-                                   *args,
-                                   **kwargs
-                                   ) -> Tuple[int, str, float]:
-        return self.execute(*args, **kwargs)
+    def non_blocking_execute(self,
+                             *args,
+                             **kwargs
+                             ) -> None:
+        thread = threading.Thread(target=ShellProxy.execute,
+                                  args=(self, *args),
+                                  kwargs=kwargs)
+        thread.start()
