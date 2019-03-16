@@ -67,8 +67,13 @@ class Rozzy:
                                  types=db_type)
 
     @contextlib.contextmanager
-    def launch(self, desc: SystemDescription) -> Iterator[System]:
-        args = [self.client_docker, self.workspace, desc.image]
+    def launch(self,
+               image: str,
+               description: Optional[SystemDescription] = None
+               ) -> Iterator[System]:
+        if not description:
+            description = self.describe(image)
+        args = [self.client_docker, self.workspace, image]
         with ContainerProxy.launch(*args) as container:
             container = container
-            yield System(container)
+            yield System(container, description)

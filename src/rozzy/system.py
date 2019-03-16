@@ -20,8 +20,16 @@ class SystemDescription:
 
 
 class System:
-    def __init__(self, container: ContainerProxy) -> None:
+    def __init__(self,
+                 container: ContainerProxy,
+                 description: SystemDescription
+                 ) -> None:
         self.__container = container
+        self.__description = description
+
+    @property
+    def description(self) -> SystemDescription:
+        return self.__description
 
     @property
     def uuid(self) -> UUID:
