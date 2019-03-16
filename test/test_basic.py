@@ -14,8 +14,9 @@ from rozzy.proxy import ShellProxy, FileProxy, ContainerProxy
 @contextlib.contextmanager
 def build_test_environment() -> Iterator[Tuple[System, ROSProxy]]:
     rozzy = Rozzy()
-    desc = SystemDescription('brass', [], [], [])
-    with rozzy.launch(desc.image, desc) as sut:
+    image = 'brass'
+    desc = SystemDescription(image, [], [], [])
+    with rozzy.launch(image, desc) as sut:
         with sut.roscore() as ros:
             time.sleep(5)
             yield (sut, ros)
@@ -24,17 +25,19 @@ def build_test_environment() -> Iterator[Tuple[System, ROSProxy]]:
 @contextlib.contextmanager
 def build_shell_proxy() -> Iterator[ShellProxy]:
     rozzy = Rozzy()
-    desc = SystemDescription('brass', [], [], [])
-    with rozzy.launch(desc.image, 'brass') as system:
-        yield system.shell
+    image = 'brass'
+    desc = SystemDescription(image, [], [], [])
+    with rozzy.launch(image, desc) as sut:
+        yield sut.shell
 
 
 @contextlib.contextmanager
 def build_file_proxy() -> Iterator[FileProxy]:
     rozzy = Rozzy()
-    desc = SystemDescription('brass', [], [], [])
-    with rozzy.launch(desc.image, desc) as system:
-        yield system.files
+    image = 'brass'
+    desc = SystemDescription(image, [], [], [])
+    with rozzy.launch(image, desc) as sut:
+        yield sut.files
 
 
 def test_parameters():
