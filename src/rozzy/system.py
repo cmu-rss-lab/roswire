@@ -7,17 +7,29 @@ import contextlib
 import attr
 
 from .exceptions import RozzyException
+from .definitions import TypeDatabase, FormatDatabase, PackageDatabase
 from .proxy import ShellProxy, ROSProxy, FileProxy, ContainerProxy
 
 
 @attr.s
 class SystemDescription:
     image: str = attr.ib()
+    types: TypeDatabase = attr.ib()
+    formats: FormatDatabase = attr.ib()
+    packages: PackageDatabase = attr.ib()
 
 
 class System:
-    def __init__(self, container: ContainerProxy) -> None:
+    def __init__(self,
+                 container: ContainerProxy,
+                 description: SystemDescription
+                 ) -> None:
         self.__container = container
+        self.__description = description
+
+    @property
+    def description(self) -> SystemDescription:
+        return self.__description
 
     @property
     def uuid(self) -> UUID:

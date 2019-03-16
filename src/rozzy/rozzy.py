@@ -13,6 +13,7 @@ from docker import DockerClient
 from .exceptions import RozzyException
 from .system import System, SystemDescription
 from .proxy import ContainerProxy
+from .definitions import FormatDatabase, PackageDatabase, TypeDatabase
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -50,9 +51,29 @@ class Rozzy:
     def client_docker(self) -> DockerClient:
         return self.__client_docker
 
+    def describe(self, image: str) -> SystemDescription:
+        """
+        Loads a description of the system provided by a given Docker image.
+        """
+        args = [self.client_docker, self.workspace, image]
+        with ContainerProxy.launch(*args) as container:
+            paths = PackageDatabase.paths(container.shell)
+            db_package = PackageDatabase.from_paths(container.files, paths)
+        db_format = FormatDatabase.build(db_package)
+        db_type = TypeDatabase.build(db_format)
+        return SystemDescription(image=image,
+                                 packages=db_package,
+                                 formats=db_format,
+                                 types=db_type)
+
     @contextlib.contextmanager
-    def launch(self, desc: SystemDescription) -> Iterator[System]:
-        args = [self.client_docker, self.workspace, desc.image]
+    def launch(self,
+               image: str,
+               description: Optional[SystemDescription] = None
+               ) -> Iterator[System]:
+        if not description:
+            description = self.describe(image)
+        args = [self.client_docker, self.workspace, image]
         with ContainerProxy.launch(*args) as container:
             container = container
-            yield System(container)
+            yield System(container, description)
