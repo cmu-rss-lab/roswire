@@ -8,21 +8,19 @@ import logging
 import contextlib
 import shutil
 
-from bugzoo import BugZoo as BugZooDaemon
-from bugzoo import Bug as BugZooSnapshot
+from docker import DockerClient
 
 from .exceptions import RozzyException
 from .system import System, SystemDescription
 from .proxy import ContainerProxy
 
-logger = logging.getLogger(__name__)  # type: logging.Logger
+logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
 class Rozzy:
     def __init__(self,
-                 dir_workspace: Optional[str] = None,
-                 daemon_bugzoo: Optional[BugZooDaemon] = None
+                 dir_workspace: Optional[str] = None
                  ) -> None:
         if not dir_workspace:
             logger.debug("no workspace specified: using default workspace.")
@@ -39,13 +37,7 @@ class Rozzy:
                 raise RozzyException(m)
 
         self.__dir_workspace = os.path.abspath(dir_workspace)
-
-        if not daemon_bugzoo:
-            logger.debug("no bugzoo daemon provided; creating one instead")
-            self.__bugzoo = BugZooDaemon()
-        else:
-            logger.debug("using provided bugzoo daemon")
-            self.__bugzoo = daemon_bugzoo
+        self.__client_docker = DockerClient()
 
     @property
     def workspace(self) -> str:
@@ -55,17 +47,12 @@ class Rozzy:
         return self.__dir_workspace
 
     @property
-    def bugzoo(self) -> BugZooDaemon:
-        """
-        The BugZoo daemon used by Rozzy.
-        """
-        return self.__bugzoo
+    def client_docker(self) -> DockerClient:
+        return self.__client_docker
 
     @contextlib.contextmanager
     def launch(self, desc: SystemDescription) -> Iterator[System]:
-        snapshot: BugZooSnapshot = self.bugzoo.bugs[desc.image]
-        with ContainerProxy.launch(self.bugzoo,
-                                   self.workspace,
-                                   snapshot) as container:
+        args = [self.client_docker, self.workspace, desc.image]
+        with ContainerProxy.launch(*args) as container:
             container = container
             yield System(container)

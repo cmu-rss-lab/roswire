@@ -8,13 +8,7 @@ import pytest
 
 from rozzy.proxy import FileProxy
 
-from test_basic import build_test_environment
-
-
-@contextlib.contextmanager
-def build_file_proxy() -> Iterator[FileProxy]:
-    with build_test_environment() as (sut, ros):
-        yield sut.files
+from test_basic import build_file_proxy
 
 
 def test_exists():
