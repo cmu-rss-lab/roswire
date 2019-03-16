@@ -7,7 +7,8 @@ __all__ = (
     'ROSProxy',
     'BagRecorderProxy',
     'FileProxy',
-    'ContainerProxy'
+    'ContainerProxy',
+    'ContainerProxyManager'
 )
 
 from typing import (Tuple, Dict, Optional, Iterator, Any, List, Union,
@@ -19,14 +20,14 @@ import time
 
 from .shell import ShellProxy
 from .file import FileProxy
-from .container import ContainerProxy
+from .container import ContainerProxy, ContainerProxyManager
 from .parameters import ParameterServerProxy
 from .bag import BagRecorderProxy
 from .node import NodeProxy, NodeManagerProxy
 from .service import ServiceManagerProxy
 from ..exceptions import RozzyException
 
-logger = logging.getLogger(__name__)  # type: logging.Logger
+logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 

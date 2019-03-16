@@ -9,10 +9,11 @@ import contextlib
 import shutil
 
 from docker import DockerClient
+from docker import APIClient as DockerAPIClient
 
 from .exceptions import RozzyException
 from .system import System, SystemDescription
-from .proxy import ContainerProxy
+from .proxy import ContainerProxy, ContainerProxyManager
 from .definitions import FormatDatabase, PackageDatabase, TypeDatabase
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -39,6 +40,11 @@ class Rozzy:
 
         self.__dir_workspace = os.path.abspath(dir_workspace)
         self.__client_docker = DockerClient()
+        self.__api_docker = \
+            DockerAPIClient(base_url='unix://var/run/docker.sock')
+        self.__containers = ContainerProxyManager(self.__client_docker,
+                                                  self.__api_docker,
+                                                  self.__dir_workspace)
 
     @property
     def workspace(self) -> str:
@@ -51,16 +57,17 @@ class Rozzy:
     def client_docker(self) -> DockerClient:
         return self.__client_docker
 
+    @property
+    def containers(self) -> ContainerProxyManager:
+        return self.__containers
+
     @contextlib.contextmanager
     def launch(self,
                image: str,
                description: Optional[SystemDescription] = None
                ) -> Iterator[System]:
         if not description:
-            description = SystemDescription.build(self.client_docker,
-                                                  self.workspace,
-                                                  image)
-        args = [self.client_docker, self.workspace, image]
-        with ContainerProxy.launch(*args) as container:
+            description = SystemDescription.build(self.containers, image)
+        with self.containers.launch(image) as container:
             container = container
             yield System(container, description)
