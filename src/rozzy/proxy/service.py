@@ -1,4 +1,4 @@
-__all__ = ['ServiceProxy', 'ServiceProxyManager']
+__all__ = ('ServiceProxy', 'ServiceProxyManager')
 
 from typing import Iterator, Any, List, Set, Mapping
 # from collections.abc import Mapping
@@ -8,9 +8,10 @@ import logging
 
 import attr
 
+from .shell import ShellProxy
 from .. import exceptions
 
-logger = logging.getLogger(__name__)  # type: logging.Logger
+logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
@@ -26,10 +27,12 @@ class ServiceManagerProxy(Mapping[str, ServiceProxy]):
     """
     def __init__(self,
                  host_ip_master: str,
-                 api: xmlrpc.client.ServerProxy
+                 api: xmlrpc.client.ServerProxy,
+                 shell: ShellProxy
                  ) -> None:
         self.__host_ip_master = host_ip_master
         self.__api = api
+        self.__shell = shell
 
     def __get_service_names(self) -> Set[str]:
         code, msg, state = self.__api.getSystemState('./rozzy')
