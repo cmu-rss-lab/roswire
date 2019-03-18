@@ -88,4 +88,4 @@ class TypeDatabase(Mapping[str, Type[Message]]):
         typ: Type[Message] = self[fmt.fullname]
         args: Dict[str, Any] = {f.name: self._from_dict_value(f, d[f.name])
                                 for f in fmt.fields}
-        return typ(**args)
+        return typ(**args)  # type: ignore
