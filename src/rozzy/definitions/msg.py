@@ -41,6 +41,14 @@ class Field:
     typ: str = attr.ib()
     name: str = attr.ib()
 
+    @property
+    def is_array(self) -> bool:
+        return '[' in self.typ
+
+    @property
+    def base_type(self) -> str:
+        return self.typ.partition('[')[0] if self.is_array else self.typ
+
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> 'Field':
         return Field(d['type'], d['name'])
