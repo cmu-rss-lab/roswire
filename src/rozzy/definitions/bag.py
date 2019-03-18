@@ -1,4 +1,4 @@
-__all__ = ['BagReader']
+__all__ = ('BagReader',)
 
 from typing import (Dict, Sequence, Union, Optional, Tuple, List, Type,
                     Callable)
@@ -12,14 +12,10 @@ import logging
 
 import attr
 
+from .base import Time
+
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-
-
-@attr.s(frozen=True, slots=True)
-class Time:
-    secs: int = attr.ib()
-    nsecs: int = attr.ib()
 
 
 def decode_uint8(v: bytes) -> int:
