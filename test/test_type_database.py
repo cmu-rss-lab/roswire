@@ -57,17 +57,20 @@ def test_build():
             t('foo', 'bar')
 
 
-def test_to_dict():
+def test_to_and_from_dict():
     s = """
 uint32 seq
 time stamp
 string frame_id
     """
     fmt = MsgFormat.from_string("PkgName", "MessageName", s)
-    t = TypeDatabase.build_type(fmt)
+    db_fmt = FormatDatabase({fmt}, {}, {})
+    db_type = TypeDatabase.build(db_fmt)
 
+    t = db_type['PkgName/MessageName']
     m = t(seq=310, stamp=Time(30, 120), frame_id='foo')
-    assert m.to_dict() == {
-        'seq': 310,
-        'stamp': {'secs': 30, 'nsecs': 120},
-        'frame_id': 'foo'}
+    d = {'seq': 310,
+         'stamp': {'secs': 30, 'nsecs': 120},
+         'frame_id': 'foo'}
+    assert m.to_dict() == d
+    assert db_type.from_dict(fmt, d) == m
