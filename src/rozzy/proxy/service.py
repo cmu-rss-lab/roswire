@@ -15,10 +15,11 @@ logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-@attr.s
+@attr.s(slots=True)
 class ServiceProxy:
     name: str = attr.ib()
     url: str = attr.ib()
+    _shell: ShellProxy = attr.ib()
 
 
 class ServiceManagerProxy(Mapping[str, ServiceProxy]):
@@ -75,4 +76,4 @@ class ServiceManagerProxy(Mapping[str, ServiceProxy]):
         # convert URL to host network
         parsed = urlparse(url_container)
         url_host = f"{parsed.scheme}://{self.__host_ip_master}:{parsed.port}"
-        return ServiceProxy(name, url_host)
+        return ServiceProxy(name, url_host, self.__shell)
