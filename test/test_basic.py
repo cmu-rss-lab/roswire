@@ -78,8 +78,8 @@ def test_arducopter():
         assert '/rosout' in ros.nodes
         assert '/cool' not in ros.nodes
 
-        with ros.record('/tmp/baggio.bag') as recorder:
-            time.sleep(30)
+        # with ros.record('/tmp/baggio.bag') as recorder:
+        #     time.sleep(30)
 
         with pytest.raises(rozzy.exceptions.NodeNotFoundError):
             ros.nodes['/cool']
@@ -98,6 +98,10 @@ def test_arducopter():
             ros.services['/coolio']
 
         assert '/coolio' not in ros.services
+
+        # arm the copter
+        ros.services['/mavros/set_mode'].call(None)
+        assert False
 
 
 if __name__ == '__main__':

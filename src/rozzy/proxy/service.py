@@ -1,15 +1,18 @@
 __all__ = ('ServiceProxy', 'ServiceProxyManager')
 
-from typing import Iterator, Any, List, Set, Mapping
-# from collections.abc import Mapping
+from typing import Iterator, Any, List, Set, Mapping, Optional
 from urllib.parse import urlparse
 import xmlrpc.client
 import logging
+import shlex
+import json
 
 import attr
+import yaml
 
 from .shell import ShellProxy
 from .. import exceptions
+from ..definitions import Message
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -20,6 +23,24 @@ class ServiceProxy:
     name: str = attr.ib()
     url: str = attr.ib()
     _shell: ShellProxy = attr.ib()
+
+    def call(self, message: Optional[Message] = None) -> None:
+        if not message:
+            yml = '{}'
+        else:
+            yml = yaml.dump(message.to_dict())
+        cmd = f"rosservice call {self.name} '{yml}'"
+        code, output, duration = self._shell.execute(cmd)
+
+        if code == 2:
+            raise exceptions.RozzyException('illegal service call args')
+        if code != 0:
+            raise exceptions.RozzyException('unexpected error during service call')  # noqa
+
+        # TODO parse output
+        print(f"CODE: {code}")
+        print(f"OUTPUT: {output}")
+        print(f"DURATION: {duration:.3f} secs.")
 
 
 class ServiceManagerProxy(Mapping[str, ServiceProxy]):
