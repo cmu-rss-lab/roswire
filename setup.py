@@ -19,7 +19,8 @@ setup(
     license='mit',
     install_requires=[
         'attrs>=17.2.0',
-        'typing-extensions>=3.7.2'
+        'typing-extensions>=3.7.2',
+        'ruamel.python>=0.15.89'
     ],
     setup_requires=[
         'pytest-runner'
