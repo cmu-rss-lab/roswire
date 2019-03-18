@@ -55,3 +55,19 @@ def test_build():
             t(foo='bar')
         with pytest.raises(TypeError):
             t('foo', 'bar')
+
+
+def test_to_dict():
+    s = """
+uint32 seq
+time stamp
+string frame_id
+    """
+    fmt = MsgFormat.from_string("PkgName", "MessageName", s)
+    t = TypeDatabase.build_type(fmt)
+
+    m = t(seq=310, stamp=Time(30, 120), frame_id='foo')
+    assert m.to_dict() == {
+        'seq': 310,
+        'stamp': {'secs': 30, 'nsecs': 120},
+        'frame_id': 'foo'}
