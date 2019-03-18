@@ -4,7 +4,7 @@ from typing import Collection, Type, Mapping, Iterator, Dict, ClassVar, Any
 
 import attr
 
-from .msg import MsgFormat
+from .msg import MsgFormat, Field
 from .format import FormatDatabase
 from .base import Time
 
@@ -71,3 +71,21 @@ class TypeDatabase(Mapping[str, Type[Message]]):
 
     def __getitem__(self, name: str) -> Type[Message]:
         return self.__contents[name]
+
+    def to_dict(self, message: Message) -> Dict[str, Any]:
+        return message.to_dict()
+
+    def _from_dict_value(self, field: Field, val: Any) -> Any:
+        if field.is_array:
+            fmt_item: MsgFormat = self[field.base_type].format
+            return [self.from_dict(fmt_item, dd) for dd in val]
+        if field.typ == 'time':
+            return Time.from_dict(val)
+        # NOTE covers simple values (e.g., str, int, float, bool)
+        return val
+
+    def from_dict(self, fmt: MsgFormat, d: Dict[str, Any]) -> Message:
+        typ: Type[Message] = self[fmt.fullname]
+        args: Dict[str, Any] = {f.name: self._from_dict_value(f, d[f.name])
+                                for f in fmt.fields}
+        return typ(**args)
