@@ -13,7 +13,7 @@ from docker.models.containers import Container as DockerContainer
 
 from ..util import Stopwatch
 
-logger: logging.Logger = logging.getLogger(__name__)  # type: logging.Logger
+logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
