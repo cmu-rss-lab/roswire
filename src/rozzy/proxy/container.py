@@ -35,7 +35,7 @@ class ContainerProxy:
         self.__api_docker = api_docker
         self.__container_docker = container_docker
         self.__ws_host = ws_host
-        self.__shell = ShellProxy(self.__container_docker)
+        self.__shell = ShellProxy(self.__api_docker, self.__container_docker)
         self.__files = FileProxy(self.__container_docker, self.__shell)
 
     @property
