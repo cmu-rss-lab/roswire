@@ -25,6 +25,7 @@ from .parameters import ParameterServerProxy
 from .bag import BagRecorderProxy
 from .node import NodeProxy, NodeManagerProxy
 from .service import ServiceManagerProxy
+from ..description import SystemDescription
 from ..exceptions import RozzyException
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -36,17 +37,19 @@ class ROSProxy:
     Provides access to a remote ROS master via XML-RPC.
     """
     def __init__(self,
+                 description: SystemDescription,
                  shell: ShellProxy,
                  ws_host: str,
                  ip_address: str,
                  port: int = 11311
                  ) -> None:
-        self.__shell: ShellProxy = shell
-        self.__ws_host: str = ws_host
-        self.__caller_id: str = '/rozzy'
-        self.__port: int = port
-        self.__ip_address: str = ip_address
-        self.__uri: str = f"http://{ip_address}:{port}"
+        self.__description = description
+        self.__shell = shell
+        self.__ws_host = ws_host
+        self.__caller_id = '/rozzy'
+        self.__port = port
+        self.__ip_address = ip_address
+        self.__uri = f"http://{ip_address}:{port}"
         logger.debug("connecting to ROS Master: %s", self.__uri)
         self.__connection = xmlrpc.client.ServerProxy(self.__uri)
         time.sleep(5)  # FIXME #1
@@ -56,7 +59,8 @@ class ROSProxy:
                              self.__connection,
                              self.__shell)
         self.__services: ServiceManagerProxy = \
-            ServiceManagerProxy(self.__ip_address, self.__connection)
+            ServiceManagerProxy(self.__ip_address,
+                                self.__connection)
 
     @property
     def uri(self) -> str:
