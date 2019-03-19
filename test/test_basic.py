@@ -23,6 +23,15 @@ def build_test_environment() -> Iterator[Tuple[System, ROSProxy]]:
 
 
 @contextlib.contextmanager
+def build_ardu() -> Iterator[Tuple[System, ROSProxy]]:
+    rozzy = Rozzy()
+    with rozzy.launch('brass') as sut:
+        with sut.roscore() as ros:
+            time.sleep(5)
+            yield (sut, ros)
+
+
+@contextlib.contextmanager
 def build_shell_proxy() -> Iterator[ShellProxy]:
     rozzy = Rozzy()
     image = 'brass'
@@ -61,7 +70,9 @@ def test_parameters():
 
 def test_arducopter():
     logging.basicConfig()
-    with build_test_environment() as (sut, ros):
+    with build_ardu() as (sut, ros):
+        db_type = sut.description.types
+        db_fmt = sut.description.formats
         cmd = ' '.join([
             "/ros_ws/src/ArduPilot/build/sitl/bin/arducopter",
             "--model copter"
@@ -78,8 +89,8 @@ def test_arducopter():
         assert '/rosout' in ros.nodes
         assert '/cool' not in ros.nodes
 
-        with ros.record('/tmp/baggio.bag') as recorder:
-            time.sleep(30)
+        # with ros.record('/tmp/baggio.bag') as recorder:
+        #     time.sleep(30)
 
         with pytest.raises(rozzy.exceptions.NodeNotFoundError):
             ros.nodes['/cool']
@@ -98,6 +109,14 @@ def test_arducopter():
             ros.services['/coolio']
 
         assert '/coolio' not in ros.services
+
+        # arm the copter
+        req: Message = db_type.from_dict(db_fmt.messages['mavros_msgs/SetModeRequest'], {
+            'base_mode': 64,
+            'custom_mode': ''
+        })
+        res = ros.services['/mavros/set_mode'].call(req)
+        assert res.success
 
 
 if __name__ == '__main__':

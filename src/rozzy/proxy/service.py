@@ -1,23 +1,52 @@
-__all__ = ['ServiceProxy', 'ServiceProxyManager']
+__all__ = ('ServiceProxy', 'ServiceProxyManager')
 
-from typing import Iterator, Any, List, Set, Mapping
-# from collections.abc import Mapping
+from typing import Iterator, Any, List, Set, Mapping, Optional
 from urllib.parse import urlparse
 import xmlrpc.client
 import logging
+import shlex
+import json
 
 import attr
+import yaml
 
+from .shell import ShellProxy
 from .. import exceptions
+from ..definitions import Message, SrvFormat, MsgFormat
+from ..description import SystemDescription
 
-logger = logging.getLogger(__name__)  # type: logging.Logger
+logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-@attr.s
+@attr.s(slots=True)
 class ServiceProxy:
     name: str = attr.ib()
     url: str = attr.ib()
+    format: SrvFormat = attr.ib()
+    _description: SystemDescription = attr.ib()
+    _shell: ShellProxy = attr.ib()
+
+    def call(self, message: Optional[Message] = None) -> Optional[Message]:
+        if not message:
+            yml = '{}'
+        else:
+            yml = yaml.dump(message.to_dict())
+        cmd = f"rosservice call {self.name} '{yml}'"
+        code, output, duration = self._shell.execute(cmd)
+
+        if code == 2:
+            raise exceptions.RozzyException('illegal service call args')
+        if code != 0:
+            raise exceptions.RozzyException('unexpected error during service call')  # noqa
+
+        fmt_response: Optional[MsgFormat] = self.format.response
+        if not fmt_response:
+            return None
+
+        d = yaml.load(output)
+        db_type = self._description.types
+        return db_type.from_dict(fmt_response, d)
 
 
 class ServiceManagerProxy(Mapping[str, ServiceProxy]):
@@ -25,11 +54,15 @@ class ServiceManagerProxy(Mapping[str, ServiceProxy]):
     Provides access to the registered services on a ROS graph.
     """
     def __init__(self,
+                 description: SystemDescription,
                  host_ip_master: str,
-                 api: xmlrpc.client.ServerProxy
+                 api: xmlrpc.client.ServerProxy,
+                 shell: ShellProxy
                  ) -> None:
+        self.__description = description
         self.__host_ip_master = host_ip_master
         self.__api = api
+        self.__shell = shell
 
     def __get_service_names(self) -> Set[str]:
         code, msg, state = self.__api.getSystemState('./rozzy')
@@ -72,4 +105,16 @@ class ServiceManagerProxy(Mapping[str, ServiceProxy]):
         # convert URL to host network
         parsed = urlparse(url_container)
         url_host = f"{parsed.scheme}://{self.__host_ip_master}:{parsed.port}"
-        return ServiceProxy(name, url_host)
+
+        # find the format for the service
+        code, name_fmt, duration = \
+            self.__shell.execute(f'rosservice type {name}')
+        if code != 0:
+            m = f"unable to determine type for service [{name}]"
+            raise exceptions.RozzyException(m)
+        fmt = self.__description.formats.services[name_fmt]
+        return ServiceProxy(name,
+                            url_host,
+                            fmt,
+                            self.__description,
+                            self.__shell)
