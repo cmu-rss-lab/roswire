@@ -27,7 +27,7 @@ class ServiceProxy:
     _description: SystemDescription = attr.ib()
     _shell: ShellProxy = attr.ib()
 
-    def call(self, message: Optional[Message] = None) -> None:
+    def call(self, message: Optional[Message] = None) -> Optional[Message]:
         if not message:
             yml = '{}'
         else:
