@@ -12,7 +12,8 @@ from docker import DockerClient
 from docker import APIClient as DockerAPIClient
 
 from .exceptions import RozzyException
-from .system import System, SystemDescription, SystemDescriptionManager
+from .description import SystemDescription, SystemDescriptionManager
+from .system import System
 from .proxy import ContainerProxy, ContainerProxyManager
 from .definitions import FormatDatabase, PackageDatabase, TypeDatabase
 
