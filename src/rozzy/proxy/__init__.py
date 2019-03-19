@@ -59,7 +59,8 @@ class ROSProxy:
                              self.__connection,
                              self.__shell)
         self.__services: ServiceManagerProxy = \
-            ServiceManagerProxy(self.__ip_address,
+            ServiceManagerProxy(self.__description,
+                                self.__ip_address,
                                 self.__connection,
                                 self.__shell)
 
