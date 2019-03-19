@@ -44,9 +44,9 @@ class ServiceProxy:
         if not fmt_response:
             return None
 
-        yml = yaml.load(output)
+        d = yaml.load(output)
         db_type = self._description.types
-        return db_type.from_dict(fmt_response, yml)
+        return db_type.from_dict(fmt_response, d)
 
 
 class ServiceManagerProxy(Mapping[str, ServiceProxy]):
@@ -107,7 +107,8 @@ class ServiceManagerProxy(Mapping[str, ServiceProxy]):
         url_host = f"{parsed.scheme}://{self.__host_ip_master}:{parsed.port}"
 
         # find the format for the service
-        code, name_fmt, duration = self.__shell.execute(f'rosservice type {name}')
+        code, name_fmt, duration = \
+            self.__shell.execute(f'rosservice type {name}')
         if code != 0:
             m = f"unable to determine type for service [{name}]"
             raise exceptions.RozzyException(m)
