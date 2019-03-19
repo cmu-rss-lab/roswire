@@ -1,9 +1,11 @@
 __all__ = ('ShellProxy',)
 
 from typing import Tuple, Optional, Dict, Any, Iterator
+import os
 import shlex
 import logging
 import threading
+import signal
 
 from docker import DockerClient
 from docker import APIClient as DockerAPIClient
@@ -18,14 +20,15 @@ logger.setLevel(logging.DEBUG)
 class Popen:
     def __init__(self,
                  args: str,
+                 shell: 'ShellProxy',
                  api_docker: DockerAPIClient,
                  exec_id: int,
                  stream: Iterator[bytes]
                  ) -> None:
         self.__args = args
+        self.__shell = shell
         self.__api_docker = api_docker
         self.__exec_id = exec_id
-        self.__binary = binary
         self.__stream = stream
         self.__pid: Optional[int] = None
         self.__returncode: Optional[int] = None
@@ -60,11 +63,19 @@ class Popen:
             self.__returncode = self._inspect()['ExitCode']
         return self.__returncode
 
+    def send_signal(self, sig: int) -> None:
+        # FIXME this is the host PID!
+        pid = self.pid
+        while not pid:
+            pid = self.pid
+        logger.debug("killing process %d", pid)
+        self.__shell.send_signal(pid, sig)
+
     def kill(self) -> None:
-        raise NotImplementedError
+        self.send_signal(signal.SIGKILL)
 
     def terminate(self) -> None:
-        raise NotImplementedError
+        self.send_signal(signal.SIGTERM)
 
 
 class ShellProxy:
@@ -77,6 +88,9 @@ class ShellProxy:
                  ) -> None:
         self.__api_docker = api_docker
         self.__container_docker = container_docker
+
+    def send_signal(self, pid: int, sig: int) -> None:
+        self.execute(f'kill -{sig} {pid}', user='root')
 
     def instrument(self,
                    command: str,
@@ -102,20 +116,18 @@ class ShellProxy:
               context: Optional[str] = None,
               time_limit: Optional[int] = None,
               kill_after: int = 1
-              ) -> Tuple[int, str, float]:
+              ) -> Popen:
         id_container = self.__container_docker.id
         api_docker = self.__api_docker
         command_orig = command
         command = self.instrument(command, time_limit, kill_after)
-
-        # create object
         exec_resp = api_docker.exec_create(id_container, command,
                                            tty=True,
                                            stdout=stdout,
                                            stderr=stderr)
         exec_id = exec_resp['Id']
-        stream = api_docker.exec_start(exec_id, stream=True)
-        return Popen(command_orig, api_docker, exec_id, stream)
+        stream = api_docker.exec_start(exec_id, stream=True, tty=True)
+        return Popen(command_orig, self, api_docker, exec_id, stream)
 
     def execute(self,
                 command: str,
