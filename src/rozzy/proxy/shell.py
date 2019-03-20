@@ -1,6 +1,7 @@
 __all__ = ('ShellProxy',)
 
 from typing import Tuple, Optional, Dict, Any, Iterator
+from timeit import default_timer as timer
 import os
 import shlex
 import logging
@@ -100,8 +101,10 @@ class ShellProxy:
     def send_signal(self, pid: int, sig: int) -> None:
         self.execute(f'kill -{sig} {pid}', user='root')
 
-    def __generate_popen_uid(self) -> str:
-        return "cool"
+    def __generate_popen_uid(self, command: str) -> str:
+        id_thread = threading.get_ident()
+        h = abs(hash((id_thread, timer(), command)))
+        return str(h)
 
     def instrument(self,
                    command: str,
@@ -131,7 +134,7 @@ class ShellProxy:
               time_limit: Optional[int] = None,
               kill_after: int = 1
               ) -> Popen:
-        uid_popen = self.__generate_popen_uid()
+        uid_popen = self.__generate_popen_uid(command)
         id_container = self.__container_docker.id
         api_docker = self.__api_docker
         command_orig = command
