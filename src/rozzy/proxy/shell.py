@@ -145,8 +145,13 @@ class ShellProxy:
                                            stdout=stdout,
                                            stderr=stderr)
         exec_id = exec_resp['Id']
-        stream = api_docker.exec_start(exec_id, stream=True, tty=True)
-        return Popen(command_orig, uid_popen, self, api_docker, exec_id, stream)
+        stream = api_docker.exec_start(exec_id, stream=True)
+        return Popen(command_orig,
+                     uid_popen,
+                     self,
+                     api_docker,
+                     exec_id,
+                     stream)
 
     def execute(self,
                 command: str,
