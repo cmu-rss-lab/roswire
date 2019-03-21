@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+"""
+This module provides access to the Rozzy session.
+"""
 __all__ = ('Rozzy',)
 
 from typing import Optional, Dict, Iterator
@@ -22,6 +26,23 @@ logger.setLevel(logging.DEBUG)
 
 
 class Rozzy:
+    """
+    Provides an interface for building, analysing, and interacting with
+    containerised ROS applications.
+
+    Attributes
+    ----------
+    containers: ContainerProxyManager
+        A manager for building and connecting to Docker containers.
+    descriptions: SystemDescriptionManager
+        A manager for building, loading, and storing static descriptions of
+        ROS applications.
+    workspace: str
+        The absolute path of the workspace directory for this session. The
+        workspace is used to store cache data and to store shared temporary
+        directories between the host machine and containerised ROS
+        applications.
+    """
     def __init__(self,
                  dir_workspace: Optional[str] = None
                  ) -> None:
@@ -52,9 +73,6 @@ class Rozzy:
 
     @property
     def workspace(self) -> str:
-        """
-        The absolute path to the workspace directory.
-        """
         return self.__dir_workspace
 
     @property
@@ -74,6 +92,18 @@ class Rozzy:
                image: str,
                description: Optional[SystemDescription] = None
                ) -> Iterator[System]:
+        """
+        Launches a ROS application using a provided Docker image.
+
+        Parameters
+        ----------
+            image: str
+                the name of the Docker image.
+            description: Optional[SystemDescription]
+                an optional static description of the ROS application.
+                If no description is provided, Rozzy will attempt to load one
+                from the cache or else build one.
+        """
         if not description:
             description = self.descriptions.build(image)
         with self.containers.launch(image) as container:
