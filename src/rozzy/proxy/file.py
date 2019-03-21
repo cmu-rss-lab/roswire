@@ -4,7 +4,7 @@ This file implements a proxy for accessing container file systems.
 """
 __all__ = ('FileProxy',)
 
-from typing import List, Union, overload
+from typing import List, Union, Optional, overload
 from typing_extensions import Literal
 import os
 import shlex
