@@ -329,6 +329,14 @@ def test_mktemp():
         fn = files.mktemp()
         assert files.isfile(fn)
 
+        # use specified dir
+        d = '/boop'
+        files.makedirs(d, exist_ok=True)
+        assert files.isdir(d)
+        fn = files.mktemp(dirname=d)
+        assert os.path.dirname(fn) == d
+        assert files.isfile(fn)
+
         # add suffix
         fn = files.mktemp(suffix='.foo')
         assert fn.endswith('.foo')
