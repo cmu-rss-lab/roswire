@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+"""
+This file implements a proxy for accessing container file systems.
+"""
 __all__ = ('FileProxy',)
 
 from typing import List, Union, overload
@@ -337,3 +341,29 @@ class FileProxy:
         code, output, duration = self.__shell.execute(cmd)
         if code != 0:
             raise OSError(f"failed to remove directory tree: {d}")
+
+    def mktemp(self,
+               suffix: Optional[str] = None,
+               prefix: Optional[str] = None,
+               dir: Optional[str] = None
+               ) -> str:
+        """Creates a temporary file.
+
+        Parameters
+        ----------
+        suffix: str, optional
+            an optional suffix for the filename.
+        prefix: str, optional
+            an optional prefix for the filename.
+        dir: str, optional
+            if specified, the temporary file will be created in the given
+            directory.
+
+        Raises
+        ------
+        FileNotFoundError:
+            if specified directory does not exist.
+        OSError:
+            if the temporary file could not be constructed.
+        """
+        raise NotImplementedError
