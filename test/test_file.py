@@ -337,6 +337,12 @@ def test_mktemp():
         assert os.path.dirname(fn) == d
         assert files.isfile(fn)
 
+        # use non-existent dir
+        with pytest.raises(FileNotFoundError):
+            d = '/idontexist'
+            assert not files.isdir(d)
+            files.mktemp(dirname=d)
+
         # add suffix
         fn = files.mktemp(suffix='.foo')
         assert fn.endswith('.foo')
