@@ -71,6 +71,15 @@ service and action types:
    description = rozzy.descriptions.load_or_build(image)
 
 
+API Reference
+-------------
+
+
+.. py:module:: rozzy
+.. autoclass:: Rozzy
+  :members:
+
+
 Contents
 --------
 
