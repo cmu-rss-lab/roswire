@@ -1,9 +1,15 @@
+# -*- coding: utf-8 -*-
+"""
+This file implements a proxy for accessing container file systems.
+"""
 __all__ = ('FileProxy',)
 
-from typing import List, Union, overload
+from typing import List, Union, Iterator, Optional, overload
 from typing_extensions import Literal
 import os
+import contextlib
 import shlex
+import logging
 import tempfile
 import subprocess
 
@@ -11,6 +17,9 @@ from docker.models.containers import Container as DockerContainer
 
 from .shell import ShellProxy
 from ..exceptions import RozzyException
+
+logger: logging.Logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 class FileProxy:
@@ -337,3 +346,78 @@ class FileProxy:
         code, output, duration = self.__shell.execute(cmd)
         if code != 0:
             raise OSError(f"failed to remove directory tree: {d}")
+
+    def mktemp(self,
+               suffix: Optional[str] = None,
+               prefix: Optional[str] = None,
+               dirname: Optional[str] = None
+               ) -> str:
+        """Creates a temporary file.
+
+        Parameters
+        ----------
+        suffix: str, optional
+            an optional suffix for the filename.
+        prefix: str, optional
+            an optional prefix for the filename.
+        dirname: str, optional
+            if specified, the temporary file will be created in the given
+            directory.
+
+        Raises
+        ------
+        FileNotFoundError:
+            if specified directory does not exist.
+        OSError:
+            if the temporary file could not be constructed.
+
+        Returns
+        -------
+        str
+            The absolute path of the temporary file.
+        """
+        template = shlex.quote(f"{prefix if prefix else 'tmp'}.XXXXXXXXXX")
+        cmd_parts = ['mktemp', template]
+        if suffix:
+            cmd_parts += ['--suffix', shlex.quote(suffix)]
+        if dirname:
+            cmd_parts += ['-p', shlex.quote(dirname)]
+            if not self.isdir(dirname):
+                m = f'directory does not exist: {dirname}'
+                raise FileNotFoundError(m)
+        cmd = ' '.join(cmd_parts)
+
+        code, output, duration = self.__shell.execute(cmd)
+        # TODO capture context
+        if code != 0:
+            raise OSError(f"failed to create temporary directory")
+
+        return output
+
+    @contextlib.contextmanager
+    def tempfile(self,
+                 suffix: Optional[str] = None,
+                 prefix: Optional[str] = None,
+                 dirname: Optional[str] = None
+                 ) -> Iterator[str]:
+        """Creates a temporary file within a context.
+
+        Upon exiting the context, the temporary file will be destroyed.
+
+        See Also
+        --------
+        mktemp: Uses the same arguments to create a temporary file.
+
+        Yields
+        ------
+        str
+            The absolute path of the temporary file.
+        """
+        fn = self.mktemp(suffix=suffix, prefix=prefix, dirname=dirname)
+        logger.debug("created temporary file: %s", fn)
+        yield fn
+        logger.debug("destroying temporary file: %s", fn)
+        try:
+            self.remove(fn)
+        except FileNotFoundError:
+            logger.debug("temporary file already destroyed: %s", fn)
