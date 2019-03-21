@@ -23,6 +23,22 @@ Rozzy is installed within a
 `virtualenv <https://virtualenv.pypa.io/en/latest/>`_ or
 `pipenv <https://pipenv.readthedocs.io/en/latest/>`_ (pipenv is preferred).
 
+From within the virtual environment (i.e., the `virtualenv` or `pipenv`),
+the latest stable release of Rozzy on `PyPI <https://pypi.org>`_
+can be installed via:
+
+.. code:: shell
+
+   (rozzy) $ pip install rozzy
+
+Rozzy can also be installed from source:
+
+.. code:: shell
+
+   $ git clone git@github.com:ChrisTimperley/rozzy rozzy
+   $ cd rozzy
+   $ pipenv shell
+   (rozzy) $ pip install .
 
 
 Contents
