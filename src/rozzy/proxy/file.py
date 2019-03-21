@@ -373,6 +373,9 @@ class FileProxy:
             cmd_parts += ['--tmpdir', shlex.quote(prefix)]
         if dirname:
             cmd_parts += ['-p', shlex.quote(dirname)]
+            if not self.isdir(dirname):
+                m = f'directory does not exist: {dirname}'
+                raise FileNotFoundError(m)
         cmd = ' '.join(cmd_parts)
 
         code, output, duration = self.__shell.execute(cmd)
