@@ -1,6 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+This file implements a proxy for accessing container file systems.
+"""
 __all__ = ('FileProxy',)
 
-from typing import List, Union, overload
+from typing import List, Union, Optional, overload
 from typing_extensions import Literal
 import os
 import shlex
@@ -337,3 +341,45 @@ class FileProxy:
         code, output, duration = self.__shell.execute(cmd)
         if code != 0:
             raise OSError(f"failed to remove directory tree: {d}")
+
+    def mktemp(self,
+               suffix: Optional[str] = None,
+               prefix: Optional[str] = None,
+               dirname: Optional[str] = None
+               ) -> str:
+        """Creates a temporary file.
+
+        Parameters
+        ----------
+        suffix: str, optional
+            an optional suffix for the filename.
+        prefix: str, optional
+            an optional prefix for the filename.
+        dirname: str, optional
+            if specified, the temporary file will be created in the given
+            directory.
+
+        Raises
+        ------
+        FileNotFoundError:
+            if specified directory does not exist.
+        OSError:
+            if the temporary file could not be constructed.
+        """
+        template = shlex.quote(f"{prefix if prefix else 'tmp'}.XXXXXXXXXX")
+        cmd_parts = ['mktemp', template]
+        if suffix:
+            cmd_parts += ['--suffix', shlex.quote(suffix)]
+        if dirname:
+            cmd_parts += ['-p', shlex.quote(dirname)]
+            if not self.isdir(dirname):
+                m = f'directory does not exist: {dirname}'
+                raise FileNotFoundError(m)
+        cmd = ' '.join(cmd_parts)
+
+        code, output, duration = self.__shell.execute(cmd)
+        # TODO capture context
+        if code != 0:
+            raise OSError(f"failed to create temporary directory")
+
+        return output
