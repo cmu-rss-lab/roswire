@@ -333,3 +333,8 @@ def test_mktemp():
         fn = files.mktemp(suffix='.foo')
         assert fn.endswith('.foo')
         assert files.isfile(fn)
+
+        # add prefix
+        fn = files.mktemp(prefix='foo')
+        assert os.path.basename(fn).startswith('foo')
+        assert files.isfile(fn)
