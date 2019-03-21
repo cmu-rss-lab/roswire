@@ -384,4 +384,3 @@ class FileProxy:
             raise OSError(f"failed to create temporary directory")
 
         return output
-
