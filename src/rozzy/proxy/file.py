@@ -375,4 +375,10 @@ class FileProxy:
             cmd_parts += ['-p', shlex.quote(dirname)]
         cmd = ' '.join(cmd_parts)
 
-        raise NotImplementedError
+        code, output, duration = self.__shell.execute(cmd)
+        # TODO capture context
+        if code != 0:
+            raise OSError(f"failed to create temporary directory")
+
+        return output
+
