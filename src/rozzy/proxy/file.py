@@ -366,11 +366,10 @@ class FileProxy:
         OSError:
             if the temporary file could not be constructed.
         """
-        cmd_parts = ['mktemp']
+        template = shlex.quote(f"{prefix if prefix else 'tmp'}.XXXXXXXXXX")
+        cmd_parts = ['mktemp', template]
         if suffix:
             cmd_parts += ['--suffix', shlex.quote(suffix)]
-        if prefix:
-            cmd_parts += ['--tmpdir', shlex.quote(prefix)]
         if dirname:
             cmd_parts += ['-p', shlex.quote(dirname)]
             if not self.isdir(dirname):
