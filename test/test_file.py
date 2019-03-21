@@ -321,3 +321,10 @@ def test_write():
         # write to a file that belongs to a non-existent directory
         with pytest.raises(FileNotFoundError):
             files.write('/tmp/bar/bork', 'code things')
+
+
+def test_mktemp():
+    with build_file_proxy() as files:
+        # create a temporary file
+        fn = files.mktemp()
+        assert files.isfile(fn)
