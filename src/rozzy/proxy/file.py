@@ -345,7 +345,7 @@ class FileProxy:
     def mktemp(self,
                suffix: Optional[str] = None,
                prefix: Optional[str] = None,
-               dir: Optional[str] = None
+               dirname: Optional[str] = None
                ) -> str:
         """Creates a temporary file.
 
@@ -355,7 +355,7 @@ class FileProxy:
             an optional suffix for the filename.
         prefix: str, optional
             an optional prefix for the filename.
-        dir: str, optional
+        dirname: str, optional
             if specified, the temporary file will be created in the given
             directory.
 
@@ -366,4 +366,13 @@ class FileProxy:
         OSError:
             if the temporary file could not be constructed.
         """
+        cmd_parts = ['mktemp']
+        if suffix:
+            cmd_parts += ['-s', shlex.quote(suffix)]
+        if prefix:
+            cmd_parts += ['-b', shlex.quote(prefix)]
+        if dirname:
+            cmd_parts += ['-p', shlex.quote(dirname)]
+        cmd = ' '.join(cmd_parts)
+
         raise NotImplementedError
