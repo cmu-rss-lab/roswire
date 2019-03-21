@@ -17,6 +17,11 @@ subscribing, catkin builds, etc.).
 Installation
 ------------
 
+To avoid interfering with the rest of your system (i.e., to avoid Python's
+equivalent of DLL hell), we strongly recommend that
+Rozzy is installed within a
+`virtualenv <https://virtualenv.pypa.io/en/latest/>`_ or
+`pipenv <https://pipenv.readthedocs.io/en/latest/>`_ (pipenv is preferred).
 
 
 
