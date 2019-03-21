@@ -6,6 +6,7 @@ python:
 install:
 - pip install coveralls
 - pip install pycodestyle
+- pip install sphinx
 - pip install mypy mypy-extensions
 - pip install --upgrade .
 script:
