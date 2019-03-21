@@ -1,4 +1,5 @@
 __all__ = (
+    'GcovProxy',
     'ShellProxy',
     'ServiceManagerProxy',
     'ParameterServerProxy',
@@ -20,6 +21,7 @@ import time
 
 from .shell import ShellProxy
 from .file import FileProxy
+from .gcov import GcovProxy
 from .container import ContainerProxy, ContainerProxyManager
 from .parameters import ParameterServerProxy
 from .bag import BagRecorderProxy
