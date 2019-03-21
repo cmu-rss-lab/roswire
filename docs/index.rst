@@ -79,6 +79,14 @@ API Reference
 .. autoclass:: Rozzy
   :members:
 
+.. py:module:: rozzy.description
+.. autoclass:: SystemDescriptionManager()
+  :members:
+
+.. autoclass:: SystemDescription()
+  :members:
+
+
 
 Contents
 --------
