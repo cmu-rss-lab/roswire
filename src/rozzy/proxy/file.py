@@ -368,9 +368,9 @@ class FileProxy:
         """
         cmd_parts = ['mktemp']
         if suffix:
-            cmd_parts += ['-s', shlex.quote(suffix)]
+            cmd_parts += ['--suffix', shlex.quote(suffix)]
         if prefix:
-            cmd_parts += ['-b', shlex.quote(prefix)]
+            cmd_parts += ['--tmpdir', shlex.quote(prefix)]
         if dirname:
             cmd_parts += ['-p', shlex.quote(dirname)]
         cmd = ' '.join(cmd_parts)
