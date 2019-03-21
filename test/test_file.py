@@ -352,3 +352,11 @@ def test_mktemp():
         fn = files.mktemp(prefix='foo')
         assert os.path.basename(fn).startswith('foo')
         assert files.isfile(fn)
+
+
+def test_tempfile():
+    with build_file_proxy() as files:
+        fn: str
+        with files.tempfile() as fn:
+            assert files.isfile(fn)
+        assert not files.exists(fn)
