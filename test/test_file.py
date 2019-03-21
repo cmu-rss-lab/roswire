@@ -328,3 +328,8 @@ def test_mktemp():
         # create a temporary file
         fn = files.mktemp()
         assert files.isfile(fn)
+
+        # add suffix
+        fn = files.mktemp(suffix='.foo')
+        assert fn.endswith('.foo')
+        assert files.isfile(fn)
