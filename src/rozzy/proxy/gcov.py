@@ -35,7 +35,7 @@ class GcovProxy:
 
     def extract(self,
                 dir_src: str,
-                dir_obj: str,
+                *,
                 delete: bool = False
                 ) -> None:
         with self.__files.tempfile() as fn_temp:
