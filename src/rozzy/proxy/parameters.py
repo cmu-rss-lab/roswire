@@ -19,7 +19,7 @@ class ParameterServerProxy(Mapping[str, Any]):
         Constructs a new parameter server proxy using an XML-RPC server proxy
         for a given ROS master.
         """
-        self.__caller_id = '/.rozzy'
+        self.__caller_id = '/.roswire'
         self.__connection = connection
 
     def __len__(self) -> int:

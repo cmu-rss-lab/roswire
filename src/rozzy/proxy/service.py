@@ -65,7 +65,7 @@ class ServiceManagerProxy(Mapping[str, ServiceProxy]):
         self.__shell = shell
 
     def __get_service_names(self) -> Set[str]:
-        code, msg, state = self.__api.getSystemState('./rozzy')
+        code, msg, state = self.__api.getSystemState('/.roswire')
         if code != 1:
             m = "an unexpected error occurred when retrieving services"
             m = f"{m}: {msg} (code: {code})"
@@ -93,7 +93,7 @@ class ServiceManagerProxy(Mapping[str, ServiceProxy]):
         Raises:
             ServiceNotFound: if no service is found with the given name.
         """
-        code, msg, url_container = self.__api.lookupService('./rozzy', name)
+        code, msg, url_container = self.__api.lookupService('/.roswire', name)
 
         if code == -1:
             raise exceptions.ServiceNotFoundError(name)

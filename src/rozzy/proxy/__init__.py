@@ -46,7 +46,7 @@ class ROSProxy:
         self.__description = description
         self.__shell = shell
         self.__ws_host = ws_host
-        self.__caller_id = '/rozzy'
+        self.__caller_id = '/roswire'
         self.__port = port
         self.__ip_address = ip_address
         self.__uri = f"http://{ip_address}:{port}"

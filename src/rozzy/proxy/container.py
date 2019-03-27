@@ -114,7 +114,7 @@ class ContainerProxyManager:
             cmd_env_file,
             user='root',
             name=uuid,
-            volumes={dir_host_shared: {'bind': '/.rozzy', 'mode': 'rw'}},
+            volumes={dir_host_shared: {'bind': '/.roswire', 'mode': 'rw'}},
             stdin_open=True,
             tty=False,
             detach=True)

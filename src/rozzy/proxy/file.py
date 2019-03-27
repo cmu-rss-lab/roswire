@@ -146,7 +146,7 @@ class FileProxy:
         if self.isdir(fn):
             raise IsADirectoryError(f"cannot read directory: {fn}")
 
-        _, fn_host_temp = tempfile.mkstemp(suffix='.rozzy')
+        _, fn_host_temp = tempfile.mkstemp(suffix='.roswire')
         try:
             self.copy_to_host(fn, fn_host_temp)
             with open(fn_host_temp, mode) as f:

@@ -49,7 +49,7 @@ class BagRecorderProxy:
 
         # create a temporary file inside the shared directory
         self.__fn_host_dest: str = fn_dest
-        self.__fn_container: str = f"/.rozzy/{self.__bag_name}.bag"
+        self.__fn_container: str = f"/.roswire/{self.__bag_name}.bag"
         self.__fn_host_temp: str = \
             os.path.join(ws_host, f'{self.__bag_name}.bag')
 
