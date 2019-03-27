@@ -2,7 +2,7 @@
 """
 This module provides access to the Rozzy session.
 """
-__all__ = ('Rozzy',)
+__all__ = ('ROSWire',)
 
 from typing import Optional, Dict, Iterator
 from uuid import uuid4
@@ -25,7 +25,7 @@ logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-class Rozzy:
+class ROSWire:
     """
     Provides an interface for building, analysing, and interacting with
     containerised ROS applications.
@@ -49,7 +49,7 @@ class Rozzy:
         if not dir_workspace:
             logger.debug("no workspace specified: using default workspace.")
             dir_home = os.path.expanduser("~")
-            dir_workspace = os.path.join(dir_home, ".rozzy")
+            dir_workspace = os.path.join(dir_home, ".roswire")
             logger.debug("default workspace: %s", dir_workspace)
             if not os.path.exists(dir_workspace):
                 logger.debug("initialising default workspace")
