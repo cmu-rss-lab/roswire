@@ -1,8 +1,13 @@
-# rozzy
+.. -*-restructuredtext-*-
 
-[![Build Status](https://travis-ci.com/ChrisTimperley/rozzy.svg?token=NEepgzkwf1KGUTphtdZ4&branch=master)](https://travis-ci.com/ChrisTimperley/rozzy)
+roswire
+=======
 
-## Features
+.. image:: https://travis-ci.org/ChrisTimperley/roswire.svg?branch=master
+    :target: https://travis-ci.org/ChrisTimperley/roswire
+
+Feature Roadmap
+----------------
 
 * Supports ROS 1 and 2.
 * Differential coverage collection for C, C++ and Java.
@@ -14,7 +19,8 @@
 * Trace collection and streaming.
 
 
-## Applications
+Applications
+------------
 
 * Property-based testing
 * Blackbox fuzzing
