@@ -6,8 +6,8 @@ import os
 
 import pytest
 
-from rozzy.proxy import FileProxy
-from rozzy.definitions import MsgFormat, SrvFormat, Package, PackageDatabase
+from roswire.proxy import FileProxy
+from roswire.definitions import MsgFormat, SrvFormat, Package, PackageDatabase
 
 from test_file import build_file_proxy
 from test_basic import build_shell_proxy

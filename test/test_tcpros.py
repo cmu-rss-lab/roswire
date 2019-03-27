@@ -1,6 +1,6 @@
 import re
 
-from rozzy.proxy.tcpros import decode_header
+from roswire.proxy.tcpros import decode_header
 
 
 def hex2bytes(s: str) -> bytes:

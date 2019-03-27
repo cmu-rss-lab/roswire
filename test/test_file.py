@@ -6,7 +6,7 @@ import os
 
 import pytest
 
-from rozzy.proxy import FileProxy
+from roswire.proxy import FileProxy
 
 from test_basic import build_file_proxy
 

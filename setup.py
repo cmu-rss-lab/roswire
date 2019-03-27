@@ -3,19 +3,19 @@ from glob import glob
 from setuptools import setup, find_packages
 
 
-path = os.path.join(os.path.dirname(__file__), 'src/rozzy/version.py')
+path = os.path.join(os.path.dirname(__file__), 'src/roswire/version.py')
 with open(path, 'r') as f:
     exec(f.read())
 
 
 setup(
-    name='rozzy',
+    name='roswire',
     version=__version__,
     python_requires='>=3.5',
     description='An API for testing and mutating ROS systems.',
     author='Chris Timperley',
-    author_email='ctimperley@cmu.edu',
-    url='https://github.com/squaresLab/rozzy',
+    author_email='christimperley@googlemail.com',
+    url='https://github.com/ChrisTimperley/roswire',
     license='mit',
     install_requires=[
         'attrs>=17.2.0',

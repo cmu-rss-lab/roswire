@@ -1,8 +1,8 @@
 import pytest
 import attr
 
-from rozzy.definitions import (PackageDatabase, FormatDatabase, TypeDatabase,
-                               MsgFormat, Time)
+from roswire.definitions import (PackageDatabase, FormatDatabase, TypeDatabase,
+                                 MsgFormat, Time)
 
 from test_file import build_file_proxy
 

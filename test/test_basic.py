@@ -5,10 +5,10 @@ import time
 
 import pytest
 
-import rozzy
-import rozzy.exceptions
-from rozzy import ROSWire, ROSProxy, System, SystemDescription
-from rozzy.proxy import ShellProxy, FileProxy, ContainerProxy
+import roswire
+import roswire.exceptions
+from roswire import ROSWire, ROSProxy, System, SystemDescription
+from roswire.proxy import ShellProxy, FileProxy, ContainerProxy
 
 
 @contextlib.contextmanager

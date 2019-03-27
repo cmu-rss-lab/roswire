@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from rozzy.definitions.bag import BagReader
+from roswire.definitions.bag import BagReader
 
 DIR_TEST = os.path.dirname(__file__)
 

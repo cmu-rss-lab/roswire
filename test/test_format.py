@@ -1,10 +1,10 @@
 import pytest
 
-from rozzy.proxy import FileProxy
-from rozzy.definitions import (Constant, Field, MsgFormat, SrvFormat,
-                               ActionFormat, Time, Package, PackageDatabase,
-                               FormatDatabase)
-import rozzy.exceptions
+from roswire.proxy import FileProxy
+from roswire.definitions import (Constant, Field, MsgFormat, SrvFormat,
+                                 ActionFormat, Time, Package, PackageDatabase,
+                                 FormatDatabase)
+import roswire.exceptions
 
 from test_file import build_file_proxy
 
