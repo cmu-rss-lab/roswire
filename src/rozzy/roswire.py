@@ -15,7 +15,7 @@ import shutil
 from docker import DockerClient
 from docker import APIClient as DockerAPIClient
 
-from .exceptions import RozzyException
+from .exceptions import ROSWireException
 from .description import SystemDescription, SystemDescriptionManager
 from .system import System
 from .proxy import ContainerProxy, ContainerProxyManager
@@ -58,7 +58,7 @@ class ROSWire:
             logger.debug("using specified workspace: %s", dir_workspace)
             if not os.path.exists(dir_workspace):
                 m = "workspace not found: {}".format(dir_workspace)
-                raise RozzyException(m)
+                raise ROSWireException(m)
 
         self.__dir_workspace = os.path.abspath(dir_workspace)
         self.__client_docker = DockerClient()

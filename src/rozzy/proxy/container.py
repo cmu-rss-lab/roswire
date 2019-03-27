@@ -18,7 +18,7 @@ from docker.models.containers import Container as DockerContainer
 from .file import FileProxy
 from .shell import ShellProxy
 from ..util import Stopwatch
-from ..exceptions import RozzyException
+from ..exceptions import ROSWireException
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

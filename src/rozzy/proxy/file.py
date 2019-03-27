@@ -16,7 +16,7 @@ import subprocess
 from docker.models.containers import Container as DockerContainer
 
 from .shell import ShellProxy
-from ..exceptions import RozzyException
+from ..exceptions import ROSWireException
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -223,7 +223,7 @@ class FileProxy:
             FileNotFoundError: if the parent directory doesn't exist.
             FileExistsError: if a file or directory already exist at the given
                 path.
-            RozzyException: if an unexpected error occurred.
+            ROSWireException: if an unexpected error occurred.
         """
         cmd = f"mkdir {shlex.quote(d)}"
         code, output, duration = self.__shell.execute(cmd)
@@ -239,7 +239,7 @@ class FileProxy:
         elif not self.isdir(d_parent):
             raise NotADirectoryError(d_parent)
         else:
-            raise RozzyException("unexpected mkdir failure")
+            raise ROSWireException("unexpected mkdir failure")
 
     def makedirs(self, d: str, exist_ok: bool = False) -> None:
         """
@@ -256,7 +256,7 @@ class FileProxy:
                 already exists at the given path, or (b) a file already exists
                 at the given path.
             NotADirectoryError: if the parent directory isn't a directory.
-            RozzyException: if an unexpected error occurred.
+            ROSWireException: if an unexpected error occurred.
         """
         d_parent = os.path.dirname(d)
         if self.isdir(d) and not exist_ok:
@@ -272,7 +272,7 @@ class FileProxy:
         cmd = f'mkdir -p {shlex.quote(d)}'
         code, output, duration = self.__shell.execute(cmd)
         if code != 0:
-            raise RozzyException("unexpected makedirs failure")
+            raise ROSWireException("unexpected makedirs failure")
 
     def remove(self, fn: str) -> None:
         """
@@ -284,7 +284,7 @@ class FileProxy:
         Raises:
             FileNotFoundError: if the given file does not exist.
             IsADirectoryError: if the given path is a directory.
-            RozzyException: an unexpected failure occurred.
+            ROSWireException: an unexpected failure occurred.
         """
         cmd = f'rm {shlex.quote(fn)}'
         code, output, duration = self.__shell.execute(cmd)
@@ -296,7 +296,7 @@ class FileProxy:
         elif self.isdir(fn):
             raise IsADirectoryError(f"cannot remove directory: {fn}")
 
-        raise RozzyException("unexpected remove failure")
+        raise ROSWireException("unexpected remove failure")
 
     def rmdir(self, d: str) -> None:
         """
@@ -309,7 +309,7 @@ class FileProxy:
             FileNotFoundError: if the given directory does not exist.
             NotADirectoryError: if the given path is not a directory.
             OSError: if the given directory is not empty.
-            RozzyException: an unexpected failure occurred.
+            ROSWireException: an unexpected failure occurred.
         """
         if self.isfile(d):
             raise NotADirectoryError(f"cannot remove file: {d}")
@@ -323,7 +323,7 @@ class FileProxy:
         if code == 1 and 'Directory not empty' in output:
             raise OSError(f"directory not empty: {d}")
 
-        raise RozzyException("unexpected rmdir failure")
+        raise ROSWireException("unexpected rmdir failure")
 
     def rmtree(self, d: str) -> None:
         """

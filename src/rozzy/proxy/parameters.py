@@ -37,7 +37,7 @@ class ParameterServerProxy(Mapping[str, Any]):
         conn = self.__connection
         code, msg, result = conn.hasParam(self.__caller_id, key)
         if code != 1:
-            raise exceptions.RozzyException("bad API call!")
+            raise exceptions.ROSWireException("bad API call!")
         assert isinstance(result, bool)
         return result
 
@@ -49,7 +49,7 @@ class ParameterServerProxy(Mapping[str, Any]):
         conn = self.__connection
         code, msg, result = conn.getParamNames(self.__caller_id)
         if code != 1:
-            raise exceptions.RozzyException("bad API call!")
+            raise exceptions.ROSWireException("bad API call!")
         yield from result
 
     def __getitem__(self, key: str) -> Any:
@@ -73,7 +73,7 @@ class ParameterServerProxy(Mapping[str, Any]):
         if code == -1:
             raise exceptions.ParameterNotFoundError(key)
         if code != 1:
-            raise exceptions.RozzyException("bad API call")
+            raise exceptions.ROSWireException("bad API call")
         return result
 
     def __setitem__(self, key: str, value: Any) -> None:
@@ -84,7 +84,7 @@ class ParameterServerProxy(Mapping[str, Any]):
         conn = self.__connection
         code, msg, result = conn.setParam(self.__caller_id, key, value)
         if code != 1:
-            raise exceptions.RozzyException("bad API call!")
+            raise exceptions.ROSWireException("bad API call!")
 
     def __delitem__(self, key: str) -> None:
         """
@@ -102,4 +102,4 @@ class ParameterServerProxy(Mapping[str, Any]):
         if code == -1:
             raise exceptions.ParameterNotFoundError(key)
         if code != 1:
-            raise exceptions.RozzyException("bad API call!")
+            raise exceptions.ROSWireException("bad API call!")

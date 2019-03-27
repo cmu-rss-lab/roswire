@@ -6,7 +6,7 @@ import xmlrpc.client
 import logging
 
 from .shell import ShellProxy
-from ..exceptions import RozzyException, NodeNotFoundError
+from ..exceptions import ROSWireException, NodeNotFoundError
 
 logger = logging.getLogger(__name__)  # type: logging.Logger
 logger.setLevel(logging.DEBUG)
@@ -59,7 +59,7 @@ class NodeProxy:
         code, status, pid = self.api.getPid('/.roswire')
         if code != 1:
             m = f"failed to obtain PID [{self.name}]: {status} (code: {code})"
-            raise RozzyException(m)
+            raise ROSWireException(m)
         assert isinstance(pid, int)
         assert pid > 0
         return pid
@@ -117,7 +117,7 @@ class NodeManagerProxy(Mapping[str, NodeProxy]):
             raise NodeNotFoundError(name)
         if code != 1:
             m = f"unexpected error when attempting to find node [{name}]: {status} (code: {code})"   # noqa: pycodestyle
-            raise RozzyException(m)
+            raise ROSWireException(m)
 
         # convert URI to host network
         port = urlparse(uri_container).port

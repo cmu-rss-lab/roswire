@@ -36,9 +36,9 @@ class ServiceProxy:
         code, output, duration = self._shell.execute(cmd)
 
         if code == 2:
-            raise exceptions.RozzyException('illegal service call args')
+            raise exceptions.ROSWireException('illegal service call args')
         if code != 0:
-            raise exceptions.RozzyException('unexpected error during service call')  # noqa
+            raise exceptions.ROSWireException('unexpected error during service call')  # noqa
 
         fmt_response: Optional[MsgFormat] = self.format.response
         if not fmt_response:
@@ -69,7 +69,7 @@ class ServiceManagerProxy(Mapping[str, ServiceProxy]):
         if code != 1:
             m = "an unexpected error occurred when retrieving services"
             m = f"{m}: {msg} (code: {code})"
-            raise exceptions.RozzyException(m)
+            raise exceptions.ROSWireException(m)
         pubs, subs, services_and_providers = state
         services: Set[str] = set(s[0] for s in services_and_providers)
         return services
@@ -100,7 +100,7 @@ class ServiceManagerProxy(Mapping[str, ServiceProxy]):
         if code != 1:
             m = "an unexpected error occurred when retrieving services"
             m = f"{m}: {msg} (code: {code})"
-            raise exceptions.RozzyException(m)
+            raise exceptions.ROSWireException(m)
 
         # convert URL to host network
         parsed = urlparse(url_container)
@@ -111,7 +111,7 @@ class ServiceManagerProxy(Mapping[str, ServiceProxy]):
             self.__shell.execute(f'rosservice type {name}')
         if code != 0:
             m = f"unable to determine type for service [{name}]"
-            raise exceptions.RozzyException(m)
+            raise exceptions.ROSWireException(m)
         fmt = self.__description.formats.services[name_fmt]
         return ServiceProxy(name,
                             url_host,
