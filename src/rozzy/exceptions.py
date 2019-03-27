@@ -15,7 +15,7 @@ class RecorderAlreadyStopped(ROSWireException):
 
 
 class ParsingError(ROSWireException):
-    """Rozzy failed to parse a given file/string."""
+    """ROSWire failed to parse a given file/string."""
 
 
 class NodeNotFoundError(KeyError, ROSWireException):

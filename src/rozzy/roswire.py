@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-This module provides access to the Rozzy session.
+This module provides access to the ROSWire session.
 """
 __all__ = ('ROSWire',)
 
@@ -101,7 +101,7 @@ class ROSWire:
                 the name of the Docker image.
             description: Optional[SystemDescription]
                 an optional static description of the ROS application.
-                If no description is provided, Rozzy will attempt to load one
+                If no description is provided, ROSWire will attempt to load one
                 from the cache or else build one.
         """
         if not description:
