@@ -5,18 +5,18 @@ import time
 
 import pytest
 
-import rozzy
-import rozzy.exceptions
-from rozzy import Rozzy, ROSProxy, System, SystemDescription
-from rozzy.proxy import ShellProxy, FileProxy, ContainerProxy
+import roswire
+import roswire.exceptions
+from roswire import ROSWire, ROSProxy, System, SystemDescription
+from roswire.proxy import ShellProxy, FileProxy, ContainerProxy
 
 
 @contextlib.contextmanager
 def build_test_environment() -> Iterator[Tuple[System, ROSProxy]]:
-    rozzy = Rozzy()
+    rsw = ROSWire()
     image = 'brass'
     desc = SystemDescription(image, [], [], [])
-    with rozzy.launch(image, desc) as sut:
+    with rsw.launch(image, desc) as sut:
         with sut.roscore() as ros:
             time.sleep(5)
             yield (sut, ros)
@@ -24,8 +24,8 @@ def build_test_environment() -> Iterator[Tuple[System, ROSProxy]]:
 
 @contextlib.contextmanager
 def build_ardu() -> Iterator[Tuple[System, ROSProxy]]:
-    rozzy = Rozzy()
-    with rozzy.launch('brass') as sut:
+    rsw = ROSWire()
+    with rsw.launch('brass') as sut:
         with sut.roscore() as ros:
             time.sleep(5)
             yield (sut, ros)
@@ -33,19 +33,19 @@ def build_ardu() -> Iterator[Tuple[System, ROSProxy]]:
 
 @contextlib.contextmanager
 def build_shell_proxy() -> Iterator[ShellProxy]:
-    rozzy = Rozzy()
+    rsw = ROSWire()
     image = 'brass'
     desc = SystemDescription(image, [], [], [])
-    with rozzy.launch(image, desc) as sut:
+    with rsw.launch(image, desc) as sut:
         yield sut.shell
 
 
 @contextlib.contextmanager
 def build_file_proxy() -> Iterator[FileProxy]:
-    rozzy = Rozzy()
+    rsw = ROSWire()
     image = 'brass'
     desc = SystemDescription(image, [], [], [])
-    with rozzy.launch(image, desc) as sut:
+    with rsw.launch(image, desc) as sut:
         yield sut.files
 
 

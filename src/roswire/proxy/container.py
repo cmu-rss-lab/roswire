@@ -18,7 +18,7 @@ from docker.models.containers import Container as DockerContainer
 from .file import FileProxy
 from .shell import ShellProxy
 from ..util import Stopwatch
-from ..exceptions import RozzyException
+from ..exceptions import ROSWireException
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -114,7 +114,7 @@ class ContainerProxyManager:
             cmd_env_file,
             user='root',
             name=uuid,
-            volumes={dir_host_shared: {'bind': '/.rozzy', 'mode': 'rw'}},
+            volumes={dir_host_shared: {'bind': '/.roswire', 'mode': 'rw'}},
             stdin_open=True,
             tty=False,
             detach=True)

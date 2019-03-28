@@ -6,7 +6,7 @@ import xmlrpc.client
 import logging
 
 from .shell import ShellProxy
-from ..exceptions import RozzyException, NodeNotFoundError
+from ..exceptions import ROSWireException, NodeNotFoundError
 
 logger = logging.getLogger(__name__)  # type: logging.Logger
 logger.setLevel(logging.DEBUG)
@@ -56,10 +56,10 @@ class NodeProxy:
         """
         The PID of the main process for this node.
         """
-        code, status, pid = self.api.getPid('/.rozzy')
+        code, status, pid = self.api.getPid('/.roswire')
         if code != 1:
             m = f"failed to obtain PID [{self.name}]: {status} (code: {code})"
-            raise RozzyException(m)
+            raise ROSWireException(m)
         assert isinstance(pid, int)
         assert pid > 0
         return pid
@@ -87,7 +87,7 @@ class NodeManagerProxy(Mapping[str, NodeProxy]):
         Fetches a list of the names of all active nodes.
         """
         names: Set[str] = set()
-        code, status, state = self.api.getSystemState('./rozzy')
+        code, status, state = self.api.getSystemState('/.roswire')
         for s in state:
             for t, l in s:
                 names.update(n for n in l)
@@ -112,12 +112,12 @@ class NodeManagerProxy(Mapping[str, NodeProxy]):
         Raises:
             NodeNotFoundError: if there is no node with the given name.
         """
-        code, status, uri_container = self.api.lookupNode('/.rozzy', name)
+        code, status, uri_container = self.api.lookupNode('/.roswire', name)
         if code == -1:
             raise NodeNotFoundError(name)
         if code != 1:
             m = f"unexpected error when attempting to find node [{name}]: {status} (code: {code})"   # noqa: pycodestyle
-            raise RozzyException(m)
+            raise ROSWireException(m)
 
         # convert URI to host network
         port = urlparse(uri_container).port

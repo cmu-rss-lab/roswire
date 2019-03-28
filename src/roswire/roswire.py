@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-This module provides access to the Rozzy session.
+This module provides access to the ROSWire session.
 """
-__all__ = ('Rozzy',)
+__all__ = ('ROSWire',)
 
 from typing import Optional, Dict, Iterator
 from uuid import uuid4
@@ -15,7 +15,7 @@ import shutil
 from docker import DockerClient
 from docker import APIClient as DockerAPIClient
 
-from .exceptions import RozzyException
+from .exceptions import ROSWireException
 from .description import SystemDescription, SystemDescriptionManager
 from .system import System
 from .proxy import ContainerProxy, ContainerProxyManager
@@ -25,7 +25,7 @@ logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-class Rozzy:
+class ROSWire:
     """
     Provides an interface for building, analysing, and interacting with
     containerised ROS applications.
@@ -49,7 +49,7 @@ class Rozzy:
         if not dir_workspace:
             logger.debug("no workspace specified: using default workspace.")
             dir_home = os.path.expanduser("~")
-            dir_workspace = os.path.join(dir_home, ".rozzy")
+            dir_workspace = os.path.join(dir_home, ".roswire")
             logger.debug("default workspace: %s", dir_workspace)
             if not os.path.exists(dir_workspace):
                 logger.debug("initialising default workspace")
@@ -58,7 +58,7 @@ class Rozzy:
             logger.debug("using specified workspace: %s", dir_workspace)
             if not os.path.exists(dir_workspace):
                 m = "workspace not found: {}".format(dir_workspace)
-                raise RozzyException(m)
+                raise ROSWireException(m)
 
         self.__dir_workspace = os.path.abspath(dir_workspace)
         self.__client_docker = DockerClient()
@@ -101,7 +101,7 @@ class Rozzy:
                 the name of the Docker image.
             description: Optional[SystemDescription]
                 an optional static description of the ROS application.
-                If no description is provided, Rozzy will attempt to load one
+                If no description is provided, ROSWire will attempt to load one
                 from the cache or else build one.
         """
         if not description:

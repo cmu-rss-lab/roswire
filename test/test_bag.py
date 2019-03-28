@@ -1,10 +1,13 @@
 import os
 
-from rozzy.definitions.bag import BagReader
+import pytest
+
+from roswire.definitions.bag import BagReader
 
 DIR_TEST = os.path.dirname(__file__)
 
 
+@pytest.mark.skip(reason='not implemented')
 def test_from_file():
     fn_bag = os.path.join(DIR_TEST, 'example.bag')
     bag = BagReader.from_file(fn_bag)

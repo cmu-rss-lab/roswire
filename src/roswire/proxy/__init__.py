@@ -26,7 +26,7 @@ from .bag import BagRecorderProxy
 from .node import NodeProxy, NodeManagerProxy
 from .service import ServiceManagerProxy
 from ..description import SystemDescription
-from ..exceptions import RozzyException
+from ..exceptions import ROSWireException
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -46,7 +46,7 @@ class ROSProxy:
         self.__description = description
         self.__shell = shell
         self.__ws_host = ws_host
-        self.__caller_id = '/rozzy'
+        self.__caller_id = '/roswire'
         self.__port = port
         self.__ip_address = ip_address
         self.__uri = f"http://{ip_address}:{port}"
@@ -104,7 +104,7 @@ class ROSProxy:
         conn = self.connection
         code, msg, result = conn.getTopicTypes(self.__caller_id)
         if code != 1:
-            raise RozzyException("bad API call!")
+            raise ROSWireException("bad API call!")
         return {name: typ for (name, typ) in result}
 
     def launch(self,

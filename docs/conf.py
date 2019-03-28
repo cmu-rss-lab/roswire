@@ -14,19 +14,19 @@
 
 import os
 import sys
-import rozzy
+import roswire
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'Rozzy'
+project = 'roswire'
 copyright = '2019, Christopher Steven Timperley'
 author = 'Christopher Steven Timperley'
 
 # The short X.Y version
-version = rozzy.__version__
+version = roswire.__version__
 # The full version, including alpha/beta/rc tags
-release = rozzy.__version__
+release = roswire.__version__
 
 
 # -- General configuration ---------------------------------------------------
@@ -110,7 +110,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Rozzydoc'
+htmlhelp_basename = 'roswiredoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -137,7 +137,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'Rozzy.tex', 'Rozzy Documentation',
+    (master_doc, 'roswire.tex', 'ROSWire Documentation',
      'Christopher Steven Timperley', 'manual'),
 ]
 
@@ -147,7 +147,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'rozzy', 'Rozzy Documentation',
+    (master_doc, 'roswire', 'ROSWire Documentation',
      [author], 1)
 ]
 
@@ -158,8 +158,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'Rozzy', 'Rozzy Documentation',
-     author, 'Rozzy', 'One line description of project.',
+    (master_doc, 'ROSWire', 'ROSWire Documentation',
+     author, 'ROSWire', 'One line description of project.',
      'Miscellaneous'),
 ]
 
