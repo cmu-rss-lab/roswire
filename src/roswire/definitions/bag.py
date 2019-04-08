@@ -393,6 +393,8 @@ class BagReader:
         topic = conn_info.topic
         msg_typ_name = conn_info.typ
 
+        # TODO read and decode message content
+
         logger.debug("TOPIC: %s (%s)", topic, msg_typ_name)
         msg = BagMessage(topic, t)
         logger.debug(msg)
