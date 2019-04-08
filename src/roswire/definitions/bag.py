@@ -1,7 +1,7 @@
 __all__ = ('BagReader',)
 
 from typing import (Dict, Sequence, Union, Optional, Tuple, List, Type,
-                    Callable)
+                    Callable, Collection, Set, Iterator)
 from io import BytesIO
 from enum import Enum
 import os
@@ -13,6 +13,7 @@ import logging
 import attr
 
 from .base import Time
+from .type_db import Message
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -136,10 +137,15 @@ class BagReader:
 
         # read the index
         self.__index: Index = self._read_index()
+        logger.debug("topics: %s", self.topics)
 
     @property
     def connections(self) -> Tuple[ConnectionInfo, ...]:
         return self.__connections
+
+    @property
+    def header(self) -> BagHeader:
+        return self.__header
 
     @property
     def chunks(self) -> Tuple[Chunk, ...]:
@@ -148,6 +154,11 @@ class BagReader:
     @property
     def index(self) -> Index:
         return self.__index
+
+    @property
+    def topics(self) -> Set[str]:
+        """The names of all topics represented in this bag."""
+        return set(c.topic for c in self.connections)
 
     def _seek(self, pos: int) -> None:
         self.__fp.seek(pos)
@@ -305,3 +316,20 @@ class BagReader:
 
     def _read_chunk_record(self):
         raise NotImplementedError
+
+    def _get_connections(self,
+                         topics: Optional[Collection[str]] = None
+                         ) -> Iterator[ConnectionInfo]:
+        """Returns an iterator over all connections related to a given topic."""
+        if topics:
+            yield from self.connections
+        else:
+            yield from (c for c in self.connections if c.topic_name in topics)
+
+    def read_messages(self,
+                      topics: Optional[Collection[str]] = None,
+                      time_start: Optional[Time] = None,
+                      time_end: Optional[Time] = None
+                      ) -> Iterator[Message]:
+        conns = set(self._get_connections(topics))
+        logger.debug("relevant connections: %s", conns)
