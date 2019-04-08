@@ -354,8 +354,7 @@ class BagReader:
                      time_start: Optional[Time] = None,
                      time_end: Optional[Time] = None
                      ) -> Iterator[IndexEntry]:
-        entries = [self.__index[c.conn] for c in connections]
-        entries = heapq.merge(*entries)
+        entries = heapq.merge(*[self.__index[c.conn] for c in connections])
         for entry in entries:
             if time_start and entry.time < time_start:
                 continue
