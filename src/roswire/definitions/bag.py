@@ -410,5 +410,5 @@ class BagReader:
         for entry in self._get_entries(conns, time_start, time_end):
             yield self.fetch_message_data_record(entry.pos, entry.offset)
 
-    def __iter__(self) -> Iterator[BagMesssage]:
+    def __iter__(self) -> Iterator[BagMessage]:
         yield from self.read_messages()
