@@ -9,6 +9,7 @@ import bz2
 import struct
 import datetime
 import logging
+import heapq
 
 import attr
 
@@ -138,6 +139,9 @@ class BagReader:
         # read the index
         self.__index: Index = self._read_index()
         logger.debug("topics: %s", self.topics)
+        for conn, indices in self.__index.items():
+            logger.debug("conn %d (%s): %d messages",
+                         conn, self.__connections[conn].topic, len(indices))
 
     @property
     def connections(self) -> Tuple[ConnectionInfo, ...]:
@@ -321,10 +325,24 @@ class BagReader:
                          topics: Optional[Collection[str]] = None
                          ) -> Iterator[ConnectionInfo]:
         """Returns an iterator over all connections related to a given topic."""
-        if topics:
+        if not topics:
             yield from self.connections
         else:
-            yield from (c for c in self.connections if c.topic_name in topics)
+            yield from (c for c in self.connections if c.topic in topics)
+
+    def _get_entries(self,
+                     connections: Collection[ConnectionInfo],
+                     time_start: Optional[Time] = None,
+                     time_end: Optional[Time] = None
+                     ) -> Iterator[IndexEntry]:
+        entries = [self.__index[c.conn] for c in connections]
+        entries = heapq.merge(*entries)
+        for entry in entries:
+            if time_start and entry.time < time_start:
+                continue
+            if time_end and entry.time > time_end:
+                return
+            yield entry
 
     def read_messages(self,
                       topics: Optional[Collection[str]] = None,
@@ -332,4 +350,5 @@ class BagReader:
                       time_end: Optional[Time] = None
                       ) -> Iterator[Message]:
         conns = set(self._get_connections(topics))
-        logger.debug("relevant connections: %s", conns)
+        for i, entry in enumerate(self._get_entries(conns, time_start, time_end)):
+            logger.debug("entry %d", i)
