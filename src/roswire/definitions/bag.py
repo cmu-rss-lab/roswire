@@ -341,7 +341,9 @@ class BagReader:
     def _get_connections(self,
                          topics: Optional[Collection[str]] = None
                          ) -> Iterator[ConnectionInfo]:
-        """Returns an iterator over all connections related to a given topic."""
+        """
+        Returns an iterator over all connections for a given set of topics.
+        """
         if not topics:
             yield from self.connections
         else:
