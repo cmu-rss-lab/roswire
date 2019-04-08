@@ -381,13 +381,22 @@ class BagReader:
                 self._skip_sized(bfr)
                 continue
             if op == OpCode.MESSAGE_DATA:
+                conn_id = decode_uint32(header['conn'])
+                t = decode_time(header['time'])
                 break
             m = "unexpected opcode: got {} but expected {}"
             m = m.format(op, OpCode.MESSAGE_DATA)
             raise Exception(m)
 
-        assert False
-        return BagMessage(conn_info.topic, msg, t)
+        # fetch the topic name and message type
+        conn_info = self.__connections[conn_id]
+        topic = conn_info.topic
+        msg_typ_name = conn_info.typ
+
+        logger.debug("TOPIC: %s (%s)", topic, msg_typ_name)
+        msg = BagMessage(topic, t)
+        logger.debug(msg)
+        return msg
 
     def read_messages(self,
                       topics: Optional[Collection[str]] = None,
