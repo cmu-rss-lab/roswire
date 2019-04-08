@@ -148,9 +148,9 @@ class BagReader:
         # read the index
         self.__index: Index = self._read_index()
         logger.debug("topics: %s", self.topics)
-        for conn, indices in self.__index.items():
+        for conn_id, indices in self.__index.items():
             logger.debug("conn %d (%s): %d messages",
-                         conn, self.__connections[conn].topic, len(indices))
+                         conn, self.__connections[conn_id].topic, len(indices))
 
     @property
     def connections(self) -> Tuple[ConnectionInfo, ...]:
