@@ -31,6 +31,7 @@ class Time:
     def from_dict(d: Dict[str, Any]) -> 'Time':
         return Time(d['secs'], d['nsecs'])
 
+    @staticmethod
     def decode(b: BytesIO) -> 'Time':
         secs = decode_uint32(b.read(4))
         nsecs = decode_uint32(b.read(4))
@@ -53,6 +54,12 @@ class Duration:
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> 'Duration':
         return Duration(d['secs'], d['nsecs'])
+
+    @staticmethod
+    def decode(b: BytesIO) -> 'Duration':
+        secs = decode_uint32(b.read(4))
+        nsecs = decode_uint32(b.read(4))
+        return Duration(secs, nsecs)
 
     def to_dict(self) -> Dict[str, int]:
         return {'secs': self.secs,
