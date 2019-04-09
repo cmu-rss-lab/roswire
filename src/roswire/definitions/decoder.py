@@ -41,10 +41,6 @@ def simple(typ: str) -> Callable[[BytesIO], Any]:
     return decode_bool if typ == 'bool' else decode
 
 
-def get_struct_pattern(typs: List[str]) -> str:
-    pass
-
-
 def simple_array(base_typ: str,
                  size: Optional[int] = None
                  ) -> Callable[[BytesIO], List[Any]]:
