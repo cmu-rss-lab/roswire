@@ -56,7 +56,9 @@ class Field:
     def base_type(self) -> str:
         return self.typ.partition('[')[0] if self.is_array else self.typ
 
-    base_typ = base_type
+    @property
+    def base_typ(self) -> str:
+        return self.base_type
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> 'Field':
