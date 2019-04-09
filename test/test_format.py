@@ -347,3 +347,18 @@ def test_build_format_database():
             'tf2_msgs/FrameGraph'
         }
         assert name_actions == {'tf2_msgs/LookupTransform'}
+
+
+def test_msg_toposort():
+    with build_file_proxy() as files:
+        paths = [
+            '/ros_ws/src/geometry2/tf2_msgs',
+            '/ros_ws/src/geometry/tf',
+            '/ros_ws/src/common_msgs/geometry_msgs',
+            '/ros_ws/src/std_msgs'
+        ]
+        db_package = PackageDatabase.from_paths(files, paths)
+        db_format = FormatDatabase.build(db_package)
+
+        msgs = db_format.messages.values()
+        msgs = MsgFormat.toposort(msgs)
