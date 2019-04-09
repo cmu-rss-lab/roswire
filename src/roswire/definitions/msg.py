@@ -76,7 +76,10 @@ class MsgFormat:
         fn_to_deps: Dict[str, Set[str]] = \
             {fn: {f.base_typ for f in fmt.fields if not is_builtin(f.base_typ)}
              for fn, fmt in fn_to_fmt.items()}
-        return [fn_to_fmt[fn] for fn in toposort(fn_to_deps)]
+        print(fn_to_deps)
+        toposorted = list(toposort(fn_to_deps))
+        print(toposorted)
+        return [fn_to_fmt[fn] for fn in toposorted]
 
     @staticmethod
     def from_file(package: str, fn: str, files: FileProxy) -> 'MsgFormat':
@@ -124,6 +127,13 @@ class MsgFormat:
                 constants.append(constant)
             elif m_field:
                 typ, name_field = m_field.group(1, 2)
+
+                # resolve the type of the field
+                if typ == 'Header':
+                    typ = 'std_msgs/Header'
+                if '/' not in typ and not is_builtin(typ):
+                    typ = f'{package}/{typ}'
+
                 field: Field = Field(typ, name_field)
                 fields.append(field)
             else:
