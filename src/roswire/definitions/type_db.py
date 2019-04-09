@@ -1,12 +1,13 @@
 __all__ = ('TypeDatabase', 'Message')
 
-from typing import Collection, Type, Mapping, Iterator, Dict, ClassVar, Any
+from typing import (Collection, Type, Mapping, Iterator, Dict, ClassVar, Any,
+                    Sequence)
 
 import attr
 
 from .msg import MsgFormat, Field
 from .format import FormatDatabase
-from .base import Time
+from .base import Time, get_builtin
 
 
 class Message:
@@ -50,8 +51,14 @@ class TypeDatabase(Mapping[str, Type[Message]]):
         formats = MsgFormat.toposort(formats)
         name_to_type: Dict[str, Type[Message]] = {}
         for fmt in formats:
-            # FIXME find type
-            ns: Dict[str, Any] = {f.name: attr.ib() for f in fmt.fields}
+            ns: Dict[str, Any] = {}
+            for f in fmt.fields:
+                if f.base_type in name_to_type:
+                    f_base_typ = name_to_type[f.base_type]
+                else:
+                    f_base_typ = get_builtin(f.base_type)
+                f_typ = Sequence[f_base_typ] if f.is_array else f_base_typ
+                ns[f.name] = attr.ib(type=f_typ)
             ns['format'] = fmt
             t: Type[Message] = type(fmt.name, (Message,), ns)
             t = attr.s(t, frozen=True, slots=True)
