@@ -1,8 +1,25 @@
 __all__ = ('Time', 'is_builtin', 'get_builtin')
 
 from typing import Dict, Any, FrozenSet, Type
+from io import BytesIO
 
 import attr
+
+
+def decode_uint8(v: bytes) -> int:
+    return struct.unpack('<B', v)[0]
+
+
+def decode_uint32(v: bytes) -> int:
+    return struct.unpack('<L', v)[0]
+
+
+def decode_uint64(v: bytes) -> int:
+    return struct.unpack('<LL', v)[0]
+
+
+def decode_str(v: bytes) -> str:
+    return v.decode('utf-8')
 
 
 @attr.s(frozen=True, slots=True)
@@ -14,9 +31,18 @@ class Time:
     def from_dict(d: Dict[str, Any]) -> 'Time':
         return Time(d['secs'], d['nsecs'])
 
+    def decode(b: BytesIO) -> 'Time':
+        secs = decode_uint32(b.read(4))
+        nsecs = decode_uint32(b.read(4))
+        return Time(secs, nsecs)
+
     def to_dict(self) -> Dict[str, int]:
         return {'secs': self.secs,
                 'nsecs': self.nsecs}
+
+
+def decode_time(v: bytes) -> Time:
+    return Time(decode_uint32(v[0:4]), decode_uint32(v[4:8]))
 
 
 _BUILTIN_TYPES: Dict[str, Type] = {
