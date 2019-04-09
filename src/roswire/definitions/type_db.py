@@ -46,18 +46,17 @@ class Message:
 class TypeDatabase(Mapping[str, Type[Message]]):
     @staticmethod
     def build(db_format: FormatDatabase) -> 'TypeDatabase':
-        types = [TypeDatabase.build_type(m)
-                 for m in db_format.messages.values()]
-        return TypeDatabase(types)
-
-    @staticmethod
-    def build_type(fmt: MsgFormat) -> Type[Message]:
-        # FIXME find type
-        ns: Dict[str, Any] = {f.name: attr.ib() for f in fmt.fields}
-        ns['format'] = fmt
-        t: Type[Message] = type(fmt.name, (Message,), ns)
-        t = attr.s(t, frozen=True, slots=True)
-        return t
+        formats = list(db_format.messages.values())
+        formats = MsgFormat.toposort(formats)
+        name_to_type: Dict[str, Type[Message]] = {}
+        for fmt in formats:
+            # FIXME find type
+            ns: Dict[str, Any] = {f.name: attr.ib() for f in fmt.fields}
+            ns['format'] = fmt
+            t: Type[Message] = type(fmt.name, (Message,), ns)
+            t = attr.s(t, frozen=True, slots=True)
+            name_to_type[fmt.fullname] = t
+        return TypeDatabase(name_to_type.values())
 
     def __init__(self, types: Collection[Type[Message]]) -> None:
         self.__contents: Dict[str, Type[Message]] = \
