@@ -9,7 +9,7 @@ import os
 import attr
 from toposort import toposort_flatten as toposort
 
-from .base import is_builtin, is_simple
+from .base import is_builtin, is_simple, Time, Duration
 from ..proxy import FileProxy
 from .. import exceptions
 
@@ -204,7 +204,7 @@ class Message:
     def _to_dict_value(val: Any) -> Any:
         typ = type(val)
 
-        if typ == Time or isinstance(typ, Message):
+        if typ in (Time, Duration) or isinstance(typ, Message):
             return val.to_dict()
 
         if typ in (list, tuple):
