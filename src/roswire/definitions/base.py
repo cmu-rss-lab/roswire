@@ -33,7 +33,7 @@ _BUILTIN_TYPES: Dict[str, Type] = {
     'float64': float,
     'string': str,
     'time': Time,
-    'duration': None,  # FIXME add Duration
+    'duration': Time,  # FIXME add Duration
     'char': int,  # deprecated: alias for uint8
     'byte': int  # deprecated: alias for int8
 }
