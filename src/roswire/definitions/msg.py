@@ -287,7 +287,7 @@ class Message:
             val = read_duration(b)
         elif field.is_array:
             val = cls._decode_array(name_to_type, field, b)
-        raise NotImplementedError
+        raise Exception("unexpected complex field: {field.name} [{field.typ}]")
 
     @classmethod
     def decode(cls,
