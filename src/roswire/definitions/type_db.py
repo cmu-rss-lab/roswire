@@ -6,6 +6,7 @@ from io import BytesIO
 
 import attr
 
+from . import decoder as dec
 from .msg import MsgFormat, Field, Message
 from .format import FormatDatabase
 from .base import Time, get_builtin
@@ -27,6 +28,10 @@ class TypeDatabase(Mapping[str, Type[Message]]):
                     f_base_typ = get_builtin(f.base_type)
                 ns[f.name] = attr.ib(type=f_base_typ)
             ns['format'] = fmt
+
+            # TODO build decoder
+            decoder = dec.message(name_to_type, fmt)
+
             t: Type[Message] = type(fmt.name, (Message,), ns)
             t = attr.s(t, frozen=True, slots=True)
             name_to_type[fmt.fullname] = t
