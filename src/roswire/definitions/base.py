@@ -1,6 +1,8 @@
-__all__ = ('Time', 'Duration', 'is_builtin', 'get_builtin', 'is_simple')
+__all__ = ('Time', 'Duration', 'is_builtin', 'get_builtin', 'is_simple',
+           'decode_uint32', 'read_uint32')
 
 from typing import Dict, Any, FrozenSet, Type
+from io import BytesIO
 
 import attr
 
@@ -83,3 +85,11 @@ def get_builtin(typ: str) -> Type:
 def is_simple(typ: str) -> bool:
     """Determines whether a given type is a simple primitive."""
     return typ in _SIMPLE_TYPE_TO_STRUCT
+
+
+def decode_uint32(b: bytes) -> int:
+    return struct.unpack('<B', v)[0]
+
+
+def read_uint32(b: BytesIO) -> int:
+    return decode_uint32(b.read(4))
