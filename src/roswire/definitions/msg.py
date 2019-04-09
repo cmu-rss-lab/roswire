@@ -9,7 +9,7 @@ import os
 import attr
 from toposort import toposort_flatten as toposort
 
-from .base import is_builtin
+from .base import is_builtin, is_simple
 from ..proxy import FileProxy
 from .. import exceptions
 
@@ -51,6 +51,10 @@ class Field:
     @property
     def is_array(self) -> bool:
         return '[' in self.typ
+
+    @property
+    def is_simple(self) -> bool:
+        return not self.is_array and is_simple(self.typ)
 
     @property
     def base_type(self) -> str:
@@ -179,6 +183,12 @@ class MsgFormat:
         return f"{self.package}/{self.name}"
 
     def flatten(self,
-                name_to_format: Mapping[str, MsgFormat]
-                ) -> Iterator[Tuple[str, Field]]:
-        raise NotImplementedError
+                name_to_format: Mapping[str, 'MsgFormat'],
+                ctx: Tuple[str, ...] = tuple()
+                ) -> Iterator[Tuple[Tuple[str, ...], Field]]:
+        for field in self.fields:
+            if field.is_array or is_builtin(field.typ):
+                yield (ctx, field)
+            else:
+                fmt = name_to_format[field.typ]
+                yield from fmt.flatten(name_to_format, ctx + (field.name,))
