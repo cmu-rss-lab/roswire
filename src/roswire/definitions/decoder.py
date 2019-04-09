@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+"""
+TODO:
+    * handle special types: Time, Duration and Header
+"""
 import struct
 
 
@@ -102,20 +107,21 @@ def message(factory: Type[Message],
     return decode
 
 
-def build(typ: Type[Message],
+def build(db_typ: TypeDatabase,
+          typ: Type[Message],
           fmt: MsgFormat
           ) -> Callable[[BytesIO], Message]:
-    # obtain the factory for each field
     field_factories: List[Tuple[str, Callable[[BytesIO], Any]]] = []
     for field in fmt.fields:
         if field.is_array:
             if is_simple(field.base_typ):
                 factory = simple_array(field.base_typ, field.length)
             else:
-                factory_base = "GET BASE FACTORY"
+                factory_base = db_typ[field.base_typ].decode
                 factory = complex_array(factory_base, field.length)
         elif is_simple(field.typ):
-            return simple(field.typ)
-
+            factory = simple(field.typ)
+        else:
+            factory = db_typ[field.typ].decode
         field_factories[field.name] = factory
     return message(typ, field_factories)
