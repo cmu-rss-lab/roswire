@@ -53,12 +53,12 @@ class TypeDatabase(Mapping[str, Type[Message]]):
         for fmt in formats:
             ns: Dict[str, Any] = {}
             for f in fmt.fields:
+                f_base_typ: Type
                 if f.base_type in name_to_type:
                     f_base_typ = name_to_type[f.base_type]
                 else:
                     f_base_typ = get_builtin(f.base_type)
-                f_typ = Sequence[f_base_typ] if f.is_array else f_base_typ
-                ns[f.name] = attr.ib(type=f_typ)
+                ns[f.name] = attr.ib(type=f_base_typ)
             ns['format'] = fmt
             t: Type[Message] = type(fmt.name, (Message,), ns)
             t = attr.s(t, frozen=True, slots=True)
