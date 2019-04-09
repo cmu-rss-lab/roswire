@@ -1,13 +1,20 @@
 __all__ = ('Constant', 'ConstantValue', 'Field', 'MsgFormat')
 
-from typing import Type, Optional, Any, Union, Tuple, List, Dict, ClassVar
+from typing import (Type, Optional, Any, Union, Tuple, List, Dict, ClassVar,
+                    Collection, Set)
+import logging
 import re
 import os
 
 import attr
+from toposort import toposort_flatten as toposort
 
+from .base import is_builtin
 from ..proxy import FileProxy
 from .. import exceptions
+
+logger: logging.Logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 R_TYPE = r"[a-zA-Z0-9_/]+(?:\[\d*\])?"
 R_NAME = r"[a-zA-Z0-9_/]+"
@@ -49,6 +56,10 @@ class Field:
     def base_type(self) -> str:
         return self.typ.partition('[')[0] if self.is_array else self.typ
 
+    @property
+    def base_typ(self) -> str:
+        return self.base_type
+
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> 'Field':
         return Field(d['type'], d['name'])
@@ -64,6 +75,15 @@ class MsgFormat:
     name: str = attr.ib()
     fields: Tuple[Field, ...] = attr.ib(converter=tuple)
     constants: Tuple[Constant, ...] = attr.ib(converter=tuple)
+
+    @staticmethod
+    def toposort(fmts: Collection['MsgFormat']) -> List['MsgFormat']:
+        fn_to_fmt: Dict[str, MsgFormat] = {f.fullname: f for f in fmts}
+        fn_to_deps: Dict[str, Set[str]] = \
+            {fn: {f.base_typ for f in fmt.fields if not is_builtin(f.base_typ)}
+             for fn, fmt in fn_to_fmt.items()}
+        toposorted = list(toposort(fn_to_deps))
+        return [fn_to_fmt[fn] for fn in toposorted]
 
     @staticmethod
     def from_file(package: str, fn: str, files: FileProxy) -> 'MsgFormat':
@@ -111,6 +131,19 @@ class MsgFormat:
                 constants.append(constant)
             elif m_field:
                 typ, name_field = m_field.group(1, 2)
+
+                # resolve the type of the field
+                typ_resolved = typ
+                base_typ = typ.partition('[')[0]
+                if typ == 'Header':
+                    typ_resolved = 'std_msgs/Header'
+                elif '/' not in typ and not is_builtin(base_typ):
+                    typ_resolved = f'{package}/{typ}'
+
+                if typ != typ_resolved:
+                    logger.debug("resolved type [%s]: %s", typ, typ_resolved)
+                    typ = typ_resolved
+
                 field: Field = Field(typ, name_field)
                 fields.append(field)
             else:
