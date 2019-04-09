@@ -10,7 +10,7 @@ import os
 import attr
 from toposort import toposort_flatten as toposort
 
-from .base import is_builtin, is_simple, Time, Duration
+from .base import is_builtin, is_simple, Time, Duration, read_uint32
 from ..proxy import FileProxy
 from .. import exceptions
 
@@ -229,6 +229,12 @@ class Message:
         return d
 
     @classmethod
+    def _decode_string(cls, length: Optional[int] = None, b: BytesIO) -> None:
+        if length is None:
+            length = read_uint32(b)
+        return b.read(length).decode('utf-8')
+
+    @classmethod
     def _decode_chunk(cls,
                       name_to_format: Mapping[str, MsgFormat],
                       field_buffer: Dict[str, Any],
@@ -243,6 +249,8 @@ class Message:
                         ctx: Tuple[str, ...],
                         field: Field
                         ) -> None:
+        if field.typ == 'string':
+            val = cls._decode_string(field.length, b)
         raise NotImplementedError
 
     @classmethod
