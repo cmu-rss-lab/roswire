@@ -11,7 +11,8 @@ import os
 import attr
 from toposort import toposort_flatten as toposort
 
-from .base import is_builtin, is_simple, Time, Duration, read_uint32
+from .base import (is_builtin, is_simple, Time, Duration, read_uint32,
+                   read_time, read_duration)
 from ..proxy import FileProxy
 from .. import exceptions
 
@@ -280,6 +281,10 @@ class Message:
                         ) -> None:
         if field.typ == 'string':
             val = cls._decode_string(field.length, b)
+        elif field.typ == 'time':
+            val = read_time(b)
+        elif field.typ == 'duration':
+            val = read_duration(b)
         elif field.is_array:
             val = cls._decode_array(name_to_type, field, b)
         raise NotImplementedError
