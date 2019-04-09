@@ -229,7 +229,7 @@ class Message:
         return d
 
     @classmethod
-    def _decode_chunk(self,
+    def _decode_chunk(cls,
                       name_to_format: Mapping[str, MsgFormat],
                       field_buffer: Dict[str, Any],
                       b: BytesIO
@@ -237,7 +237,7 @@ class Message:
         raise NotImplementedError
 
     @classmethod
-    def _decode_complex(self,
+    def _decode_complex(cls,
                         name_to_format: Mapping[str, MsgFormat],
                         field_buffer: Dict[str, Any],
                         ctx: Tuple[str, ...],
