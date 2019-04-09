@@ -2,6 +2,7 @@ __all__ = ('Constant', 'ConstantValue', 'Field', 'MsgFormat')
 
 from typing import (Type, Optional, Any, Union, Tuple, List, Dict, ClassVar,
                     Collection, Set)
+import logging
 import re
 import os
 
@@ -11,6 +12,9 @@ from toposort import toposort_flatten as toposort
 from .base import is_builtin
 from ..proxy import FileProxy
 from .. import exceptions
+
+logger: logging.Logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 R_TYPE = r"[a-zA-Z0-9_/]+(?:\[\d*\])?"
 R_NAME = r"[a-zA-Z0-9_/]+"
@@ -129,10 +133,16 @@ class MsgFormat:
                 typ, name_field = m_field.group(1, 2)
 
                 # resolve the type of the field
+                typ_resolved = typ
+                base_typ = typ.partition('[')[0]
                 if typ == 'Header':
-                    typ = 'std_msgs/Header'
-                if '/' not in typ and not is_builtin(typ):
-                    typ = f'{package}/{typ}'
+                    typ_resolved = 'std_msgs/Header'
+                elif '/' not in typ and not is_builtin(base_typ):
+                    typ_resolved = f'{package}/{typ}'
+
+                if typ != typ_resolved:
+                    logger.debug("resolved type [%s]: %s", typ, typ_resolved)
+                    typ = typ_resolved
 
                 field: Field = Field(typ, name_field)
                 fields.append(field)
