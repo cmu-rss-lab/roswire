@@ -1,6 +1,7 @@
 __all__ = ('TypeDatabase', 'Message')
 
-from typing import Collection, Type, Mapping, Iterator, Dict, ClassVar, Any
+from typing import (Collection, Type, Mapping, Iterator, Dict, ClassVar, Any,
+                    Callable, List)
 
 import attr
 
@@ -32,12 +33,14 @@ def is_simple(typ: str) -> bool:
     return typ in SIMPLE_TYPE_TO_STRUCT.keys()
 
 
-def array(item, size: Optional[int] = None):
-    def decode(bfr: BytesIO) -> List[Any]:
-        if not size:
-            size = read_uint32(bfr)
-        contents = [item(bfr) for i in range(size)]
-        return contents
+def get_struct_pattern(typs: List[str]) -> str:
+    pass
+
+
+def simple_array(base_typ: str,
+                 size: Optional[int] = None
+                 ) -> Callable[[BytesIO], List[Any]]:
+    # treat char and uint8 arrays as special strings
 
     if size is not None:
         def get_size(bfr: BytesIO) -> int:
@@ -46,17 +49,31 @@ def array(item, size: Optional[int] = None):
         def get_size(bfr: BytesIO) -> int:
             return read_uint32(bfr)
 
-    # optimise simple arrays
-    # simple + variable-length
     # obtain a struct pattern for the base type
-
-    # simple + fixed-length
+    if is_simple(base_type):
+        size = get_size()
+        pattern = f'{size}{get_struct_pattern([base_type])}'
+        num_bytes = struct.calcsize(f'<{pattern}')
+        contents = unpack(pattern, bfr.read(num_bytes))
 
     # if boolean, transform from byte to boolean
     contents  = [bool(e) for e in contents]
 
 
     return decode
+
+
+def complex_array(factory,
+                  size: Optional[int] = None
+                  ) -> Callable[[BytesIO], List[Any]]:
+    def decode_fixed(bfr: BytesIO) -> List[Any]:
+        return [factory(bfr) for i in range(size)]
+
+    def decode_variable(bfr: BytesIO) -> List[Any]:
+        s = read_uint32(bfr)
+        return [factory(bfr) for i in range(s)]
+
+    return decode_fixed if size is not None else decode_variable
 
 
 def string(base_type: str, size: Optional[int] = None):
