@@ -235,6 +235,16 @@ class Message:
         return b.read(length).decode('utf-8')
 
     @classmethod
+    def _decode_array(cls,
+                      name_to_format: Mapping[str, MsgFormat],
+                      field: Field
+                      ) -> List[Any]:
+        if is_simple(field.base_type):
+            return cls._decode_simple_array(field)
+        else:
+            return cls._decode_complex_array(name_to_format, field)
+
+    @classmethod
     def _decode_chunk(cls,
                       name_to_format: Mapping[str, MsgFormat],
                       field_buffer: Dict[str, Any],
@@ -251,6 +261,8 @@ class Message:
                         ) -> None:
         if field.typ == 'string':
             val = cls._decode_string(field.length, b)
+        elif field.is_array:
+            val = cls._decode_array(name_to_format, field)
         raise NotImplementedError
 
     @classmethod
