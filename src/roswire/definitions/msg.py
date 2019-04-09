@@ -235,18 +235,24 @@ class Message:
         return b.read(length).decode('utf-8')
 
     @classmethod
+    def _decode_simple_array(cls, field: Field, b: BytesIO) -> List[Any]:
+        length = read_uint32(b) if field.length is None else field.length
+        pattern = "<{length}{get_pattern(field.base_type)}"
+        return list(struct.unpack(pattern, b))
+
+    @classmethod
     def _decode_array(cls,
-                      name_to_format: Mapping[str, MsgFormat],
-                      field: Field
+                      name_to_type: Mapping[str, Type[Message]],
+                      field: Field,
+                      b: BytesIO
                       ) -> List[Any]:
         if is_simple(field.base_type):
-            return cls._decode_simple_array(field)
+            return cls._decode_simple_array(field, b)
         else:
-            return cls._decode_complex_array(name_to_format, field)
+            return cls._decode_complex_array(name_to_type, field, b)
 
     @classmethod
     def _decode_chunk(cls,
-                      name_to_format: Mapping[str, MsgFormat],
                       field_buffer: Dict[str, Any],
                       b: BytesIO
                       ) -> None:
@@ -254,7 +260,7 @@ class Message:
 
     @classmethod
     def _decode_complex(cls,
-                        name_to_format: Mapping[str, MsgFormat],
+                        name_to_type: Mapping[str, Type[Message]],
                         field_buffer: Dict[str, Any],
                         ctx: Tuple[str, ...],
                         field: Field
@@ -262,14 +268,15 @@ class Message:
         if field.typ == 'string':
             val = cls._decode_string(field.length, b)
         elif field.is_array:
-            val = cls._decode_array(name_to_format, field)
+            val = cls._decode_array(name_to_type, field, b)
         raise NotImplementedError
 
     @classmethod
     def decode(cls,
-               name_to_format: Mapping[str, MsgFormat],
+               name_to_type: Mapping[str, Type[Message]],
                b: BytesIO
                ) -> Message:
+        name_to_format = {n: t.format for n, t in name_to_type.items()}
         field_values: Dict[str, Any] = {}
 
         # TODO how do we deal with Time, Header and Duration?
@@ -281,11 +288,11 @@ class Message:
             if field.is_simple:
                 chunk.append(field)
             else:
-                cls._decode_chunk(name_to_format, field_values, chunk)
+                cls._decode_chunk(field_values, chunk)
                 chunk.clear()
-                cls._decode_complex(name_to_format, field_values, ctx, field)
+                cls._decode_complex(name_to_type, field_values, ctx, field)
         if chunk:
-            cls._decode_chunk(name_to_format, field_values, chunk)
+            cls._decode_chunk(name_to_type, field_values, chunk)
 
         # TODO construct message from field value buffer
         raise NotImplementedError
