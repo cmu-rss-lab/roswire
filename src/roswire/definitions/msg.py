@@ -1,7 +1,7 @@
 __all__ = ('Constant', 'ConstantValue', 'Field', 'MsgFormat')
 
 from typing import (Type, Optional, Any, Union, Tuple, List, Dict, ClassVar,
-                    Collection, Set)
+                    Collection, Set, Iterator, Mapping)
 import logging
 import re
 import os
@@ -177,3 +177,8 @@ class MsgFormat:
     @property
     def fullname(self) -> str:
         return f"{self.package}/{self.name}"
+
+    def flatten(self,
+                name_to_format: Mapping[str, MsgFormat]
+                ) -> Iterator[Tuple[str, Field]]:
+        raise NotImplementedError
