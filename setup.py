@@ -22,7 +22,8 @@ setup(
         'typing-extensions>=3.7.2',
         'ruamel.yaml>=0.15.89',
         'toposort~=1.5',
-        'docker~=3.7.2'
+        'docker~=3.7.2',
+        'pyyaml~=5.1'
     ],
     setup_requires=[
         'pytest-runner'
