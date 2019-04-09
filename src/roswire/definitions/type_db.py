@@ -2,6 +2,7 @@ __all__ = ('TypeDatabase', 'Message')
 
 from typing import (Collection, Type, Mapping, Iterator, Dict, ClassVar, Any,
                     Callable, List, Sequence)
+from io import BytesIO
 
 import attr
 
@@ -66,7 +67,7 @@ class TypeDatabase(Mapping[str, Type[Message]]):
         return TypeDatabase(name_to_type.values())
 
     @staticmethod
-    def _build_decoder(db_typ: TypeDatabase,
+    def _build_decoder(name_to_type: Mapping[str, Type[Message]],
                        fmt: MsgFormat
                        ) -> Callable[[BytesIO], Message]:
         field_factories: List[Tuple[str, Callable[[BytesIO], Any]]] = []
@@ -75,12 +76,12 @@ class TypeDatabase(Mapping[str, Type[Message]]):
                 if is_simple(field.base_typ):
                     factory = simple_array(field.base_typ, field.length)
                 else:
-                    factory_base = db_typ[field.base_typ].decode
+                    factory_base = name_to_type[field.base_typ].decode
                     factory = complex_array(factory_base, field.length)
             elif is_simple(field.typ):
                 factory = simple(field.typ)
             else:
-                factory = db_typ[field.typ].decode
+                factory = name_to_type[field.typ].decode
             field_factories[field.name] = factory
         return message(typ, field_factories)
 
