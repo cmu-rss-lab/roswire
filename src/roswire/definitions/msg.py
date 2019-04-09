@@ -1,11 +1,14 @@
 __all__ = ('Constant', 'ConstantValue', 'Field', 'MsgFormat')
 
-from typing import Type, Optional, Any, Union, Tuple, List, Dict, ClassVar
+from typing import (Type, Optional, Any, Union, Tuple, List, Dict, ClassVar,
+                    Collection, Set)
 import re
 import os
 
 import attr
+from toposort import toposort_flatten as toposort
 
+from .base import is_builtin
 from ..proxy import FileProxy
 from .. import exceptions
 
@@ -49,6 +52,8 @@ class Field:
     def base_type(self) -> str:
         return self.typ.partition('[')[0] if self.is_array else self.typ
 
+    base_typ = base_type
+
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> 'Field':
         return Field(d['type'], d['name'])
@@ -64,6 +69,14 @@ class MsgFormat:
     name: str = attr.ib()
     fields: Tuple[Field, ...] = attr.ib(converter=tuple)
     constants: Tuple[Constant, ...] = attr.ib(converter=tuple)
+
+    @staticmethod
+    def toposort(fmts: Collection['MsgFormat']) -> List['MsgFormat']:
+        fn_to_fmt: Dict[str, MsgFormat] = {f.fullname: f for f in fmts}
+        fn_to_deps: Dict[str, Set[str]] = \
+            {fn: {f.base_typ for f in fmt.fields if not is_builtin(f.base_typ)}
+             for fn, fmt in fn_to_fmt.items()}
+        return [fn_to_fmt[fn] for fn in toposort(fn_to_deps)]
 
     @staticmethod
     def from_file(package: str, fn: str, files: FileProxy) -> 'MsgFormat':
