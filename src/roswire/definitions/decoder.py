@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 """
 TODO:
-    * handle special types: Time and Duration
     * handle special string optimisations
 """
 from typing import (Dict, Callable, Mapping, Any, Optional, List, Type)
 from io import BytesIO
 import struct
 
-from .base import Time, decode_uint32
+from .base import Duration, Time, decode_uint32
 from .msg import Message, MsgFormat, Field
 
 SIMPLE_TYPE_TO_STRUCT = {
@@ -31,6 +30,14 @@ SIMPLE_TYPE_TO_STRUCT = {
 
 def read_uint32(b: BytesIO) -> int:
     return decode_uint32(b.read(4))
+
+
+def time() -> Callable[[BytesIO], Time]:
+    return Time.decode
+
+
+def duration() -> Callable[[BytesIO], Duration]:
+    return Duration.decode
 
 
 def is_simple(typ: str) -> bool:
@@ -112,10 +119,11 @@ def field(name_to_type: Mapping[str, Type[Message]],
     if is_simple(field.typ):
         return simple(field.typ)
     if field.typ == 'time':
-        return Time.decode
+        return time()
+    if field.typ == 'duration':
+        return duration()
     if field.typ == 'string':
         return string(field.length)
-    # FIXME time and duration
     return name_to_type[field.typ].decode
 
 
