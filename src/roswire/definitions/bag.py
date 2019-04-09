@@ -1,7 +1,7 @@
 __all__ = ('BagReader',)
 
 from typing import (Dict, Sequence, Union, Optional, Tuple, List, Type,
-                    Callable)
+                    Callable, Collection, Set, Iterator)
 from io import BytesIO
 from enum import Enum
 import os
@@ -9,10 +9,12 @@ import bz2
 import struct
 import datetime
 import logging
+import heapq
 
 import attr
 
 from .base import Time
+from .type_db import Message
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -54,6 +56,13 @@ class OpCode(Enum):
 class Compression(Enum):
     NONE = 'none'
     BZ2 = 'bz2'
+
+
+@attr.s(frozen=True, slots=True)
+class BagMessage:
+    topic: str = attr.ib()
+    time: Time = attr.ib()
+    # message/data
 
 
 @attr.s(frozen=True, slots=True)
@@ -133,13 +142,23 @@ class BagReader:
             info = self._read_chunk_info_record()
             chunks.append(info)
         self.__chunks: Tuple[Chunk, ...] = tuple(chunks)
+        self.__pos_to_chunk: Dict[int, Chunk] = \
+            {c.pos_record: c for c in chunks}
 
         # read the index
         self.__index: Index = self._read_index()
+        logger.debug("topics: %s", self.topics)
+        for conn_id, indices in self.__index.items():
+            logger.debug("conn %d (%s): %d messages",
+                         conn, self.__connections[conn_id].topic, len(indices))
 
     @property
     def connections(self) -> Tuple[ConnectionInfo, ...]:
         return self.__connections
+
+    @property
+    def header(self) -> BagHeader:
+        return self.__header
 
     @property
     def chunks(self) -> Tuple[Chunk, ...]:
@@ -149,35 +168,48 @@ class BagReader:
     def index(self) -> Index:
         return self.__index
 
-    def _seek(self, pos: int) -> None:
-        self.__fp.seek(pos)
+    @property
+    def topics(self) -> Set[str]:
+        """The names of all topics represented in this bag."""
+        return set(c.topic for c in self.connections)
 
-    def _skip_sized(self) -> None:
-        self.__fp.seek(self._read_uint32(), os.SEEK_CUR)
+    def _seek(self, pos: int, ptr=None) -> None:
+        ptr = ptr if ptr else self.__fp
+        ptr.seek(pos)
 
-    def _skip_record(self) -> None:
-        self._skip_sized()
-        self._skip_sized()
+    def _skip_sized(self, ptr=None) -> None:
+        ptr = ptr if ptr else self.__fp
+        ptr.seek(self._read_uint32(), os.SEEK_CUR)
 
-    def _read_sized(self) -> bytes:
-        size = self._read_uint32()
+    def _skip_record(self, ptr=None) -> None:
+        self._skip_sized(ptr)
+        self._skip_sized(ptr)
+
+    def _read_sized(self, ptr=None) -> bytes:
+        ptr = ptr if ptr else self.__fp
+        size = self._read_uint32(ptr)
         logger.debug("reading sized block: %d bytes", size)
-        return self.__fp.read(size)
+        return ptr.read(size)
 
-    def _read_time(self) -> Time:
-        return decode_time(self.__fp.read(8))
+    def _read_time(self, ptr=None) -> Time:
+        ptr = ptr if ptr else self.__fp
+        return decode_time(ptr.read(8))
 
-    def _read_uint32(self) -> int:
-        return decode_uint32(self.__fp.read(4))
+    def _read_uint32(self, ptr=None) -> int:
+        ptr = ptr if ptr else self.__fp
+        return decode_uint32(ptr.read(4))
 
-    def _read_version(self) -> str:
-        return decode_str(self.__fp.readline()).rstrip()
+    def _read_version(self, ptr=None) -> str:
+        ptr = ptr if ptr else self.__fp
+        return decode_str(ptr.readline()).rstrip()
 
     def _read_header(self,
-                     op_expected: Optional[OpCode] = None
+                     op_expected: Optional[OpCode] = None,
+                     *,
+                     ptr=None
                      ) -> Dict[str, bytes]:
         fields: Dict[str, bytes] = {}
-        header = self._read_sized()
+        header = self._read_sized(ptr)
         while header:
             size = decode_uint32(header[:4])
             header = header[4:]
@@ -305,3 +337,78 @@ class BagReader:
 
     def _read_chunk_record(self):
         raise NotImplementedError
+
+    def _get_connections(self,
+                         topics: Optional[Collection[str]] = None
+                         ) -> Iterator[ConnectionInfo]:
+        """
+        Returns an iterator over all connections for a given set of topics.
+        """
+        if not topics:
+            yield from self.connections
+        else:
+            yield from (c for c in self.connections if c.topic in topics)
+
+    def _get_entries(self,
+                     connections: Collection[ConnectionInfo],
+                     time_start: Optional[Time] = None,
+                     time_end: Optional[Time] = None
+                     ) -> Iterator[IndexEntry]:
+        entries = heapq.merge(*[self.__index[c.conn] for c in connections])
+        for entry in entries:
+            if time_start and entry.time < time_start:
+                continue
+            if time_end and entry.time > time_end:
+                return
+            yield entry
+
+    def fetch_message_data_record(self, pos: int, offset: int) -> BagMessage:
+        # find the chunk to which the message belongs
+        # read the contents of that chunk to a bytes buffer
+        chunk = self.__pos_to_chunk[pos]
+        self._seek(chunk.pos_data)
+        if chunk.compression == Compression.NONE:
+            bfr = BytesIO(self._read_sized())
+        else:
+            raise NotImplementedError
+
+        # seek position of message data record
+        # - skip any preceding connection records
+        self._seek(offset, bfr)
+        while True:
+            header = self._read_header(ptr=bfr)
+            op = OpCode(header['op'])
+            if op == OpCode.CONNECTION_INFO:
+                self._skip_sized(bfr)
+                continue
+            if op == OpCode.MESSAGE_DATA:
+                conn_id = decode_uint32(header['conn'])
+                t = decode_time(header['time'])
+                break
+            m = "unexpected opcode: got {} but expected {}"
+            m = m.format(op, OpCode.MESSAGE_DATA)
+            raise Exception(m)
+
+        # fetch the topic name and message type
+        conn_info = self.__connections[conn_id]
+        topic = conn_info.topic
+        msg_typ_name = conn_info.typ
+
+        # TODO read and decode message content
+
+        logger.debug("TOPIC: %s (%s)", topic, msg_typ_name)
+        msg = BagMessage(topic, t)
+        logger.debug(msg)
+        return msg
+
+    def read_messages(self,
+                      topics: Optional[Collection[str]] = None,
+                      time_start: Optional[Time] = None,
+                      time_end: Optional[Time] = None
+                      ) -> Iterator[BagMessage]:
+        conns = set(self._get_connections(topics))
+        for entry in self._get_entries(conns, time_start, time_end):
+            yield self.fetch_message_data_record(entry.pos, entry.offset)
+
+    def __iter__(self) -> Iterator[BagMessage]:
+        yield from self.read_messages()
