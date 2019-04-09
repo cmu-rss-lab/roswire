@@ -79,7 +79,9 @@ def string(base_type: str, size: Optional[int] = None):
     return decode_fixed if size is not None else decode_variable
 
 
-def complex(**fields):
+def message(factory: Type[Message],
+            fields: Sequence[Tuple[str, Callable[[BytesIO], Any]]]
+            ) -> Callable[[BytesIO], Message]:
     def decode(bfr: BytesIO):
-        return
+        return factory(**{n: f(bfr) for n, f in fields})
     return decode
