@@ -47,15 +47,40 @@ class Message:
 class TypeDatabase(Mapping[str, Type[Message]]):
     @staticmethod
     def build(db_format: FormatDatabase) -> 'TypeDatabase':
-        types = [TypeDatabase.build_type(m)
-                 for m in db_format.messages.values()]
-        return TypeDatabase(types)
+        formats: List[MsgFormat] = list(db_format.messages.values())
+        # TODO topsort formats: MsgFormat.toposort(formats)
+
+        name_to_type: Dict[str, Type[Message]] = {}
+        for fmt in formats:
+            t = TypeDatabase.build_type(m)
+            name_to_type[fmt.name] = t
+        return TypeDatabase(name_to_type.values())
+
+    @staticmethod
+    def _build_decoder(db_typ: TypeDatabase,
+                       fmt: MsgFormat
+                       ) -> Callable[[BytesIO], Message]:
+        field_factories: List[Tuple[str, Callable[[BytesIO], Any]]] = []
+        for field in fmt.fields:
+            if field.is_array:
+                if is_simple(field.base_typ):
+                    factory = simple_array(field.base_typ, field.length)
+                else:
+                    factory_base = db_typ[field.base_typ].decode
+                    factory = complex_array(factory_base, field.length)
+            elif is_simple(field.typ):
+                factory = simple(field.typ)
+            else:
+                factory = db_typ[field.typ].decode
+            field_factories[field.name] = factory
+        return message(typ, field_factories)
 
     @staticmethod
     def build_type(fmt: MsgFormat) -> Type[Message]:
         # FIXME find type
         ns: Dict[str, Any] = {f.name: attr.ib() for f in fmt.fields}
         ns['format'] = fmt
+        # ns['decode'] = classmethod(_build_decoder(fmt))
         t: Type[Message] = type(fmt.name, (Message,), ns)
         t = attr.s(t, frozen=True, slots=True)
         return t
