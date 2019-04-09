@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
 """
 TODO:
-    * handle special types: Time, Duration and Header
+    * handle special types: Time and Duration
+    * handle special string optimisations
 """
+from typing import (Dict, Callable, Mapping, Any, Optional, List, Type)
+from io import BytesIO
 import struct
 
+from .base import Time, decode_uint32
+from .msg import Message, MsgFormat, Field
 
 SIMPLE_TYPE_TO_STRUCT = {
     'int8': 'b',
@@ -22,6 +27,10 @@ SIMPLE_TYPE_TO_STRUCT = {
     'char': 'B',  # unsigned
     'byte': 'b'  # signed
 }
+
+
+def read_uint32(b: BytesIO) -> int:
+    return decode_uint32(b.read(4))
 
 
 def is_simple(typ: str) -> bool:
@@ -80,44 +89,43 @@ def complex_array(factory,
     return decode_fixed if size is not None else decode_variable
 
 
-def string(base_type: str, size: Optional[int] = None):
-    def decode_fixed(bfr: BytesIO) -> str:
-        # apparently we still read a size var in some circumstances
-        return bfr.read(size).decode('utf-8')
+def string(size: Optional[int] = None) -> Callable[[BytesIO], str]:
+    def read_fixed(b: BytesIO) -> str:
+        return b.read(size).decode('utf-8')
 
-    def decode_variable(bfr: BytesIO) -> str:
+    def read_variable(b: BytesIO) -> str:
         size = read_uint32(bfr)
-        if base_type in ['uint8', 'char']:
-            return bfr.read(size)
+        return b.read(size).decode('utf-8')
+
+    return read_fixed if size else read_variable
+
+
+def field(name_to_type: Mapping[str, Type[Message]],
+          field: Field
+          ) -> Callable[[BytesIO], Any]:
+    if field.is_array:
+        if is_simple(field.base_typ):
+            return simple_array(field.base_typ, field.length)
         else:
-            return bfr.read(size).decode('utf-8')
+            factory_base = name_to_type[field.base_typ].decode
+            return complex_array(factory_base, field.length)
+    if is_simple(field.typ):
+        return simple(field.typ)
+    if field.typ == 'time':
+        return Time.decode
+    if field.typ == 'string':
+        return string(field.length)
+    # FIXME time and duration
+    return name_to_type[field.typ].decode
 
-    return decode_fixed if size is not None else decode_variable
 
-
-def message(factory: Type[Message],
-            fields: Sequence[Tuple[str, Callable[[BytesIO], Any]]]
+def message(name_to_type: Mapping[str, Type[Message]],
+            fmt: MsgFormat
             ) -> Callable[[BytesIO], Message]:
-    def decode(bfr: BytesIO):
+    fields: List[Tuple[str, Callable[[BytesIO], Any]]] = \
+        [(f.name, field(name_to_type, f)) for f in fmt.fields]
+
+    def decode(factory: Type[Message], bfr: BytesIO) -> Message:
         return factory(**{n: f(bfr) for n, f in fields})
+
     return decode
-
-
-def build(db_typ: TypeDatabase,
-          typ: Type[Message],
-          fmt: MsgFormat
-          ) -> Callable[[BytesIO], Message]:
-    field_factories: List[Tuple[str, Callable[[BytesIO], Any]]] = []
-    for field in fmt.fields:
-        if field.is_array:
-            if is_simple(field.base_typ):
-                factory = simple_array(field.base_typ, field.length)
-            else:
-                factory_base = db_typ[field.base_typ].decode
-                factory = complex_array(factory_base, field.length)
-        elif is_simple(field.typ):
-            factory = simple(field.typ)
-        else:
-            factory = db_typ[field.typ].decode
-        field_factories[field.name] = factory
-    return message(typ, field_factories)
