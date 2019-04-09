@@ -1,6 +1,8 @@
 __all__ = ('Time', 'Duration',
            'is_builtin', 'get_builtin', 'is_simple', 'get_pattern',
-           'decode_uint32', 'read_uint32')
+           'decode_uint32', 'read_uint32',
+           'decode_time', 'read_time',
+           'decode_duration', 'read_duration')
 
 from typing import Dict, Any, FrozenSet, Type
 from io import BytesIO
@@ -99,3 +101,23 @@ def decode_uint32(b: bytes) -> int:
 
 def read_uint32(b: BytesIO) -> int:
     return decode_uint32(b.read(4))
+
+
+def decode_time(b: bytes) -> Time:
+    secs = read_uint32(b)
+    nsecs = read_uint32(b)
+    return Time(secs, nsecs)
+
+
+def read_time(b: BytesIO) -> Time:
+    return decode_time(b.read(8))
+
+
+def decode_duration(b: bytes) -> Duration:
+    secs = read_uint32(b)
+    nsecs = read_uint32(b)
+    return Duration(secs, nsecs)
+
+
+def read_duration(b: BytesIO) -> Duration:
+    return decode_duration(b.read(8))
