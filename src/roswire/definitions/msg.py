@@ -57,6 +57,15 @@ class Field:
         return self.typ.partition('[')[0] if self.is_array else self.typ
 
     @property
+    def length(self) -> Optional[int]:
+        if not self.is_array:
+            return None
+        sz = self.typ.partition('[')[2].partition(']')[0]
+        if sz == '':
+            return None
+        return int(sz)
+
+    @property
     def base_typ(self) -> str:
         return self.base_type
 
