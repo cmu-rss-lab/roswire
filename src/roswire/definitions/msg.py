@@ -2,6 +2,7 @@ __all__ = ('Constant', 'ConstantValue', 'Field', 'MsgFormat', 'Message')
 
 from typing import (Type, Optional, Any, Union, Tuple, List, Dict, ClassVar,
                     Collection, Set, Iterator, Mapping)
+from io import BytesIO
 import logging
 import re
 import os
@@ -226,3 +227,45 @@ class Message:
             val = getattr(self, field.name)
             d[name] = self._to_dict_value(val)
         return d
+
+    @classmethod
+    def _decode_chunk(self,
+                      name_to_format: Mapping[str, MsgFormat],
+                      field_buffer: Dict[str, Any],
+                      b: BytesIO
+                      ) -> None:
+        raise NotImplementedError
+
+    @classmethod
+    def _decode_complex(self,
+                        name_to_format: Mapping[str, MsgFormat],
+                        field_buffer: Dict[str, Any],
+                        ctx: Tuple[str, ...],
+                        field: Field
+                        ) -> None:
+        raise NotImplementedError
+
+    @classmethod
+    def decode(cls,
+               name_to_format: Mapping[str, MsgFormat],
+               b: BytesIO
+               ) -> Message:
+        field_values: Dict[str, Any] = {}
+
+        # TODO how do we deal with Time, Header and Duration?
+        # individually process each:
+        # - contiguous chunk of simple fields
+        # - complex field
+        chunk: List[Tuple[Tuple[str, ...], Field]] = []
+        for ctx, field in self.format.flatten(name_to_format):
+            if field.is_simple:
+                chunk.append(field)
+            else:
+                cls._decode_chunk(name_to_format, field_values, chunk)
+                chunk.clear()
+                cls._decode_complex(name_to_format, field_values, ctx, field)
+        if chunk:
+            cls._decode_chunk(name_to_format, field_values, chunk)
+
+        # TODO construct message from field value buffer
+        raise NotImplementedError
