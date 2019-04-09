@@ -1,3 +1,6 @@
+import struct
+
+
 SIMPLE_TYPE_TO_STRUCT = {
     'int8': 'b',
     'uint8': 'B',
@@ -19,6 +22,18 @@ SIMPLE_TYPE_TO_STRUCT = {
 def is_simple(typ: str) -> bool:
     """Determines whether a given type is simple."""
     return typ in SIMPLE_TYPE_TO_STRUCT.keys()
+
+
+def simple(typ: str) -> Callable[[BytesIO], Any]:
+    pattern = SIMPLE_TYPE_TO_STRUCT[typ]
+    size = struct.calcsize(f'<{pattern}')
+    def decode(bfr: BytesIO) -> Any:
+        return struct.unpack(pattern, bfr.read(size))
+
+    def decode_bool(bfr: BytesIO) -> bool:
+        return bool(decode(bfr))
+
+    return decode_bool if typ == 'bool' else decode
 
 
 def get_struct_pattern(typs: List[str]) -> str:
@@ -85,3 +100,22 @@ def message(factory: Type[Message],
     def decode(bfr: BytesIO):
         return factory(**{n: f(bfr) for n, f in fields})
     return decode
+
+
+def build(typ: Type[Message],
+          fmt: MsgFormat
+          ) -> Callable[[BytesIO], Message]:
+    # obtain the factory for each field
+    field_factories: List[Tuple[str, Callable[[BytesIO], Any]]] = []
+    for field in fmt.fields:
+        if field.is_array:
+            if is_simple(field.base_typ):
+                factory = simple_array(field.base_typ, field.length)
+            else:
+                factory_base = "GET BASE FACTORY"
+                factory = complex_array(factory_base, field.length)
+        elif is_simple(field.typ):
+            return simple(field.typ)
+
+        field_factories[field.name] = factory
+    return message(typ, field_factories)
