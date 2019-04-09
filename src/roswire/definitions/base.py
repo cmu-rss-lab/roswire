@@ -1,4 +1,4 @@
-__all__ = ('Time', 'is_builtin', 'get_builtin')
+__all__ = ('Time', 'Duration', 'is_builtin', 'get_builtin')
 
 from typing import Dict, Any, FrozenSet, Type
 from io import BytesIO
@@ -43,6 +43,20 @@ class Time:
 
 def decode_time(v: bytes) -> Time:
     return Time(decode_uint32(v[0:4]), decode_uint32(v[4:8]))
+
+
+@attr.s(frozen=True, slots=True)
+class Duration:
+    secs: int = attr.ib()
+    nsecs: int = attr.ib()
+
+    @staticmethod
+    def from_dict(d: Dict[str, Any]) -> 'Duration':
+        return Duration(d['secs'], d['nsecs'])
+
+    def to_dict(self) -> Dict[str, int]:
+        return {'secs': self.secs,
+                'nsecs': self.nsecs}
 
 
 _BUILTIN_TYPES: Dict[str, Type] = {
