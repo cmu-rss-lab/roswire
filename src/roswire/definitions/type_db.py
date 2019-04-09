@@ -9,6 +9,77 @@ from .format import FormatDatabase
 from .base import Time
 
 
+SIMPLE_TYPE_TO_STRUCT = {
+    'int8': 'b',
+    'uint8': 'B',
+    'bool': 'B',
+    'int16': 'h',
+    'uint16': 'H',
+    'int32': 'i',
+    'uint32': 'I',
+    'int64': 'q',
+    'uint64': 'Q',
+    'float32': 'f',
+    'float64': 'd',
+    # deprecated types
+    'char': 'B',  # unsigned
+    'byte': 'b'  # signed
+}
+
+
+def is_simple(typ: str) -> bool:
+    """Determines whether a given type is simple."""
+    return typ in SIMPLE_TYPE_TO_STRUCT.keys()
+
+
+def array(item, size: Optional[int] = None):
+    def decode(bfr: BytesIO) -> List[Any]:
+        if not size:
+            size = read_uint32(bfr)
+        contents = [item(bfr) for i in range(size)]
+        return contents
+
+    if size is not None:
+        def get_size(bfr: BytesIO) -> int:
+            return size
+    else:
+        def get_size(bfr: BytesIO) -> int:
+            return read_uint32(bfr)
+
+    # optimise simple arrays
+    # simple + variable-length
+    # obtain a struct pattern for the base type
+
+    # simple + fixed-length
+
+    # if boolean, transform from byte to boolean
+    contents  = [bool(e) for e in contents]
+
+
+    return decode
+
+
+def string(base_type: str, size: Optional[int] = None):
+    def decode_fixed(bfr: BytesIO) -> str:
+        # apparently we still read a size var in some circumstances
+        return bfr.read(size).decode('utf-8')
+
+    def decode_variable(bfr: BytesIO) -> str:
+        size = read_uint32(bfr)
+        if base_type in ['uint8', 'char']:
+            return bfr.read(size)
+        else:
+            return bfr.read(size).decode('utf-8')
+
+    return decode_fixed if size is not None else decode_variable
+
+
+def complex(**fields):
+    def decode(bfr: BytesIO):
+        return
+    return decode
+
+
 class Message:
     """
     Base class used by all messages.
