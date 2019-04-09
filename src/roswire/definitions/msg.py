@@ -4,6 +4,7 @@ from typing import (Type, Optional, Any, Union, Tuple, List, Dict, ClassVar,
                     Collection, Set, Iterator, Mapping)
 from io import BytesIO
 import logging
+import functools
 import re
 import os
 
@@ -239,6 +240,18 @@ class Message:
         length = read_uint32(b) if field.length is None else field.length
         pattern = "<{length}{get_pattern(field.base_type)}"
         return list(struct.unpack(pattern, b))
+
+    @classmethod
+    def _decode_complex_array(cls
+                              name_to_type: Mapping[str, Type[Message]],
+                              field: Field,
+                              b: BytesIO
+                              ) -> List[Any]:
+        dec = functools.partialmethod(name_to_type[field.base_type].decode,
+                                      name_to_type,
+                                      b)
+        length = read_uint32(b) if field.length is None else field.length
+        return [dec() for i in range(length)]
 
     @classmethod
     def _decode_array(cls,
