@@ -13,31 +13,12 @@ import heapq
 
 import attr
 
-from .base import Time
+from .base import (Time, decode_uint8, decode_uint32, decode_uint64,
+                   decode_str, decode_time)
 from .type_db import Message
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-
-
-def decode_uint8(v: bytes) -> int:
-    return struct.unpack('<B', v)[0]
-
-
-def decode_uint32(v: bytes) -> int:
-    return struct.unpack('<L', v)[0]
-
-
-def decode_uint64(v: bytes) -> int:
-    return struct.unpack('<LL', v)[0]
-
-
-def decode_str(v: bytes) -> str:
-    return v.decode('utf-8')
-
-
-def decode_time(v: bytes) -> Time:
-    return Time(decode_uint32(v[0:4]), decode_uint32(v[4:8]))
 
 
 class OpCode(Enum):
