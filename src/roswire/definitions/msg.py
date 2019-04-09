@@ -82,9 +82,7 @@ class MsgFormat:
         fn_to_deps: Dict[str, Set[str]] = \
             {fn: {f.base_typ for f in fmt.fields if not is_builtin(f.base_typ)}
              for fn, fmt in fn_to_fmt.items()}
-        print(fn_to_deps)
         toposorted = list(toposort(fn_to_deps))
-        print(toposorted)
         return [fn_to_fmt[fn] for fn in toposorted]
 
     @staticmethod

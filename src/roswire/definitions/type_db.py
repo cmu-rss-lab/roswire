@@ -1,12 +1,13 @@
 __all__ = ('TypeDatabase', 'Message')
 
-from typing import Collection, Type, Mapping, Iterator, Dict, ClassVar, Any
+from typing import (Collection, Type, Mapping, Iterator, Dict, ClassVar, Any,
+                    Sequence)
 
 import attr
 
 from .msg import MsgFormat, Field
 from .format import FormatDatabase
-from .base import Time
+from .base import Time, get_builtin
 
 
 class Message:
@@ -46,18 +47,23 @@ class Message:
 class TypeDatabase(Mapping[str, Type[Message]]):
     @staticmethod
     def build(db_format: FormatDatabase) -> 'TypeDatabase':
-        types = [TypeDatabase.build_type(m)
-                 for m in db_format.messages.values()]
-        return TypeDatabase(types)
-
-    @staticmethod
-    def build_type(fmt: MsgFormat) -> Type[Message]:
-        # FIXME find type
-        ns: Dict[str, Any] = {f.name: attr.ib() for f in fmt.fields}
-        ns['format'] = fmt
-        t: Type[Message] = type(fmt.name, (Message,), ns)
-        t = attr.s(t, frozen=True, slots=True)
-        return t
+        formats = list(db_format.messages.values())
+        formats = MsgFormat.toposort(formats)
+        name_to_type: Dict[str, Type[Message]] = {}
+        for fmt in formats:
+            ns: Dict[str, Any] = {}
+            for f in fmt.fields:
+                f_base_typ: Type
+                if f.base_type in name_to_type:
+                    f_base_typ = name_to_type[f.base_type]
+                else:
+                    f_base_typ = get_builtin(f.base_type)
+                ns[f.name] = attr.ib(type=f_base_typ)
+            ns['format'] = fmt
+            t: Type[Message] = type(fmt.name, (Message,), ns)
+            t = attr.s(t, frozen=True, slots=True)
+            name_to_type[fmt.fullname] = t
+        return TypeDatabase(name_to_type.values())
 
     def __init__(self, types: Collection[Type[Message]]) -> None:
         self.__contents: Dict[str, Type[Message]] = \
