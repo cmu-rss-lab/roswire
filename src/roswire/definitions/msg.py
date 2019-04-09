@@ -1,4 +1,4 @@
-__all__ = ('Constant', 'ConstantValue', 'Field', 'MsgFormat')
+__all__ = ('Constant', 'ConstantValue', 'Field', 'MsgFormat', 'Message')
 
 from typing import (Type, Optional, Any, Union, Tuple, List, Dict, ClassVar,
                     Collection, Set)
@@ -9,7 +9,7 @@ import os
 import attr
 from toposort import toposort_flatten as toposort
 
-from .base import is_builtin
+from .base import is_builtin, Time
 from ..proxy import FileProxy
 from .. import exceptions
 
@@ -177,3 +177,35 @@ class MsgFormat:
     @property
     def fullname(self) -> str:
         return f"{self.package}/{self.name}"
+
+
+class Message:
+    """Base class used by all messages."""
+    format: ClassVar[MsgFormat]
+
+    @staticmethod
+    def _to_dict_value(val: Any) -> Any:
+        typ = type(val)
+
+        if typ == Time or isinstance(typ, Message):
+            return val.to_dict()
+
+        if typ in (list, tuple):
+            if not typ:
+                return []
+            typ_item = type(typ[0])
+            if typ_item == Time or isinstance(typ_item, Message):
+                return [vv.to_dict() for vv in val]
+            # includes (str, int, float)
+            return list(val)
+
+        # includes (str, int, float)
+        return val
+
+    def to_dict(self) -> Dict[str, Any]:
+        d: Dict[str, Any] = {}
+        for field in self.format.fields:
+            name: str = field.name
+            val = getattr(self, field.name)
+            d[name] = self._to_dict_value(val)
+        return d
