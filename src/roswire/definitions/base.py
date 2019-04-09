@@ -40,4 +40,4 @@ class Time:
 
 def is_builtin(typ: str) -> bool:
     """Determines whether a given type is a built-in type."""
-    return typ in _BUILTIN_TYPS
+    return typ in _BUILTIN_TYPES
