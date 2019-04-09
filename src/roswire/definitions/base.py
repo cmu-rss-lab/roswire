@@ -18,6 +18,7 @@ class Time:
         return {'secs': self.secs,
                 'nsecs': self.nsecs}
 
+
 @attr.s(frozen=True, slots=True)
 class Duration:
     secs: int = attr.ib()
