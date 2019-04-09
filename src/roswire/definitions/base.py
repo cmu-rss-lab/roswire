@@ -1,4 +1,5 @@
-__all__ = ('Time', 'Duration', 'is_builtin', 'get_builtin', 'is_simple',
+__all__ = ('Time', 'Duration',
+           'is_builtin', 'get_builtin', 'is_simple', 'get_pattern',
            'decode_uint32', 'read_uint32')
 
 from typing import Dict, Any, FrozenSet, Type
@@ -80,6 +81,11 @@ def is_builtin(typ: str) -> bool:
 def get_builtin(typ: str) -> Type:
     """Returns the Python type that implements a given ROS type."""
     return _BUILTIN_TYPES[typ]
+
+
+def get_pattern(typ: str) -> str:
+    """Returns the struct pattern for a simple type."""
+    return _SIMPLE_TYPE_TO_STRUCT[typ]
 
 
 def is_simple(typ: str) -> bool:
