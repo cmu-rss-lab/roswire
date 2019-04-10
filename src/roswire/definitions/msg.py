@@ -278,8 +278,9 @@ class Message:
 
         # read struct into buffer
         values = struct.unpack(pattern, b.read(num_bytes))
-        for ctx, field in chunk:
-            raise NotImplementedError
+        for value, (ctx, field) in zip(values, chunk):
+            d = functools.reduce(lambda d, n: d[n], ctx, field_buffer)
+            d[field.name] = value
 
     @classmethod
     def _decode_complex(cls,
