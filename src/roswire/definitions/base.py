@@ -105,8 +105,8 @@ def read_uint32(b: BytesIO) -> int:
 
 
 def decode_time(b: bytes) -> Time:
-    secs = read_uint32(b)
-    nsecs = read_uint32(b)
+    secs = decode_uint32(b)
+    nsecs = decode_uint32(b)
     return Time(secs, nsecs)
 
 
@@ -115,8 +115,8 @@ def read_time(b: BytesIO) -> Time:
 
 
 def decode_duration(b: bytes) -> Duration:
-    secs = read_uint32(b)
-    nsecs = read_uint32(b)
+    secs = decode_uint32(b)
+    nsecs = decode_uint32(b)
     return Duration(secs, nsecs)
 
 
