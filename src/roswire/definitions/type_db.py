@@ -1,47 +1,13 @@
-__all__ = ('TypeDatabase', 'Message')
+__all__ = ('TypeDatabase',)
 
 from typing import (Collection, Type, Mapping, Iterator, Dict, ClassVar, Any,
                     Sequence)
 
 import attr
 
-from .msg import MsgFormat, Field
+from .msg import MsgFormat, Field, Message
 from .format import FormatDatabase
 from .base import Time, get_builtin
-
-
-class Message:
-    """
-    Base class used by all messages.
-    """
-    format: ClassVar[MsgFormat]
-
-    @staticmethod
-    def _to_dict_value(val: Any) -> Any:
-        typ = type(val)
-
-        if typ == Time or isinstance(typ, Message):
-            return val.to_dict()
-
-        if typ in (list, tuple):
-            if not typ:
-                return []
-            typ_item = type(typ[0])
-            if typ_item == Time or isinstance(typ_item, Message):
-                return [vv.to_dict() for vv in val]
-            # includes (str, int, float)
-            return list(val)
-
-        # includes (str, int, float)
-        return val
-
-    def to_dict(self) -> Dict[str, Any]:
-        d: Dict[str, Any] = {}
-        for field in self.format.fields:
-            name: str = field.name
-            val = getattr(self, field.name)
-            d[name] = self._to_dict_value(val)
-        return d
 
 
 class TypeDatabase(Mapping[str, Type[Message]]):
