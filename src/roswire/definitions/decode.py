@@ -28,6 +28,7 @@ _SIMPLE_TO_STRUCT = {
 def decoder_decoder_simple(typ: str) -> Callable[[bytes], Any]:
     """Returns a decoder for a specified simple type."""
     pattern = '<' + _SIMPLE_TO_STRUCT[typ]
+
     def decoder(v: bytes) -> Any:
         return struct.unpack(pattern)[0]
 
