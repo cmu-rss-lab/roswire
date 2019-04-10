@@ -239,7 +239,7 @@ class MessageBuffer:
                 vt = self.__name_to_type[field.typ]
                 values[n] = self.__build(vt, v)
         logger.debug("building message [%s] with values: %s", typ, values)
-        return typ(**values)
+        return typ(**values)  # type: ignore
 
     def build(self) -> 'Message':
         return self.__build(self.__typ, self.__contents)
