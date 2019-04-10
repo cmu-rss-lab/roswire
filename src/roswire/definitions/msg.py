@@ -5,6 +5,7 @@ from typing import (Type, Optional, Any, Union, Tuple, List, Dict, ClassVar,
 from io import BytesIO
 import logging
 import functools
+import struct
 import re
 import os
 
