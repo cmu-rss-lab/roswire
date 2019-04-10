@@ -6,6 +6,7 @@ __all__ = ('Time', 'Duration',
 
 from typing import Dict, Any, FrozenSet, Type
 from io import BytesIO
+import struct
 
 import attr
 
