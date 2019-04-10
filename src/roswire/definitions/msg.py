@@ -57,6 +57,15 @@ class Field:
         return not self.is_array and is_simple(self.typ)
 
     @property
+    def length(self) -> Optional[int]:
+        if not self.is_array:
+            return None
+        sz = self.typ.partition('[')[2].partition(']')[0]
+        if sz == '':
+            return None
+        return int(sz)
+
+    @property
     def base_type(self) -> str:
         return self.typ.partition('[')[0] if self.is_array else self.typ
 
