@@ -1,3 +1,5 @@
+from typing import List
+
 import pytest
 
 from roswire.proxy import FileProxy
@@ -362,3 +364,34 @@ def test_msg_toposort():
 
         msgs = db_format.messages.values()
         msgs = MsgFormat.toposort(msgs)
+
+
+def test_msg_flatten():
+    register: Dict[str, MsgFormat] = {}
+
+    def mf(name: str, definition: str) -> MsgFormat:
+        f = MsgFormat.from_string('example_pkg', name, definition)
+        register[f.fullname] = f
+        return f
+
+    def names(fmt: MsgFormat) -> List[str]:
+        buff = []
+        for ctx, field in fmt.flatten(register):
+            name = field.name
+            if ctx:
+                name = f"{'.'.join(ctx)}.{name}"
+            buff.append(name)
+        return buff
+
+    f1 = mf("Item", """
+uint32 foo
+duration    lifespan
+    """)
+    f2 = mf("Container", """
+Item        prize
+Item[]      contents
+time        stamp
+    """)
+
+    assert names(f1) == ['foo', 'lifespan']
+    assert names(f2) == ['prize.foo', 'prize.lifespan', 'contents', 'stamp']
