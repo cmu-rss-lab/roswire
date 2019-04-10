@@ -14,7 +14,8 @@ import heapq
 import attr
 
 from .base import Time
-from .type_db import Message
+from .msg import Message
+from .type_db import TypeDatabase
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -397,7 +398,7 @@ class BagReader:
         msg_typ = self.__db_type[msg_typ_name]
 
         # read and decode message content
-        msg = msg_typ.decode(self.__db_type, bfr)
+        content = msg_typ.decode(self.__db_type, bfr)
 
         logger.debug("TOPIC: %s (%s)", topic, msg_typ_name)
         msg = BagMessage(topic, t)
