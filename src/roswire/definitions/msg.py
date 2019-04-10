@@ -232,7 +232,7 @@ class Message:
         return d
 
     @classmethod
-    def _decode_string(cls, length: Optional[int], b: BytesIO) -> None:
+    def _decode_string(cls, length: Optional[int], b: BytesIO) -> str:
         if length is None:
             length = read_uint32(b)
         return b.read(length).decode('utf-8')
