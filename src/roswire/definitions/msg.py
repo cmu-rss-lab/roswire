@@ -232,7 +232,10 @@ class MessageBuffer:
     def contents(self) -> Dict[str, Any]:
         return self.__contents
 
-    def __build(self, typ: Type['Message'], values: Dict[str, Any]) -> 'Message':
+    def __build(self,
+                typ: Type['Message'],
+                values: Dict[str, Any]
+                ) -> 'Message':
         for n, v in values.items():
             if isinstance(v, dict):
                 field = next(f for f in typ.format.fields if f.name == n)
@@ -379,8 +382,8 @@ class Message:
                b: BytesIO
                ) -> 'Message':
         name_to_format = {n: t.format for n, t in name_to_type.items()}
-        flattened_names = ['.'.join(ctx + (field.name,))
-                           for ctx, field in cls.format.flatten(name_to_format)]
+        flattened_names = ['.'.join(c + (f.name,))
+                           for c, f in cls.format.flatten(name_to_format)]
         msg_buffer = MessageBuffer(cls, name_to_type)
 
         logger.debug("decoding message [%s]", cls.format.fullname)
