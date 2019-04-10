@@ -302,6 +302,9 @@ class Message:
                       chunk: List[Tuple[Tuple[str, ...], Field]],
                       b: BytesIO
                       ) -> None:
+        chunk_names = ['.'.join(ctx + (field.name,)) for ctx, field in chunk]
+        logger.debug("decoding chunk: %s", chunk_names)
+
         # compute the struct pattern for the chunk
         typs = [field.typ for ctx, field in chunk]
         pattern = '<' + ''.join([get_pattern(t) for t in typs])
@@ -321,9 +324,13 @@ class Message:
                         field: Field,
                         b: BytesIO
                         ) -> None:
+        field_fullname = '.'.join(ctx + (field.name,))
+        logger.debug("decoding complex field [%s]", field_fullname)
+
         # read the value for the field
         val: Any
         if field.typ == 'string':
+            logger.debug("decoding string: %s", field)
             val = cls._decode_string(field.length, b)
         elif field.typ == 'time':
             val = read_time(b)
@@ -343,22 +350,28 @@ class Message:
                b: BytesIO
                ) -> 'Message':
         name_to_format = {n: t.format for n, t in name_to_type.items()}
+        flattened_names = ['.'.join(ctx + (field.name,))
+                           for ctx, field in cls.format.flatten(name_to_format)]
         msg_buffer = MessageBuffer()
 
-        logger.debug("decoding [%s]", cls.format.fullname)
+        logger.debug("decoding message [%s]", cls.format.fullname)
+        logger.debug("message fields [%s]: %s",
+                     cls.format.fullname, flattened_names)
 
         # individually process each:
         # - contiguous chunk of simple fields
         # - complex field
         chunk: List[Tuple[Tuple[str, ...], Field]] = []
         for ctx, field in cls.format.flatten(name_to_format):
-            field_fullname = '.'.join(ctx + (field,))
+            field_fullname = '.'.join(ctx + (field.name,))
             logger.debug("decoding field [%s]", field_fullname)
             if field.is_simple:
+                logger.debug("adding field to chunk [%s]", field_fullname)
                 chunk.append((ctx, field))
             else:
-                cls._decode_chunk(msg_buffer, chunk, b)
-                chunk.clear()
+                if chunk:
+                    cls._decode_chunk(msg_buffer, chunk, b)
+                    chunk.clear()
                 cls._decode_complex(name_to_type, msg_buffer, ctx, field, b)
         if chunk:
             cls._decode_chunk(msg_buffer, chunk, b)
