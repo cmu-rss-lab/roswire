@@ -13,7 +13,7 @@ import attr
 from toposort import toposort_flatten as toposort
 
 from .base import (is_builtin, is_simple, Time, Duration, read_uint32,
-                   read_time, read_duration)
+                   read_time, read_duration, get_pattern)
 from ..proxy import FileProxy
 from .. import exceptions
 
