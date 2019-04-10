@@ -207,10 +207,29 @@ class MsgFormat:
                 yield from fmt.flatten(name_to_format, ctx + (field.name,))
 
 
+class MessageBuffer:
+    def __init__(self) -> None:
+        self.__contents: Dict[str, Any] = {}
+
+    def write(self,
+              ctx: Tuple[str, ...],
+              field: Field,
+              value: Any
+              ) -> None:
+        d = self.__contents
+        for ancestor in ctx:
+            if ancestor not in d:
+                d[ancestor] = {}
+            d = d[ancestor]
+        d[field.name] = value
+
+    @property
+    def contents(self) -> Dict[str, Any]:
+        return self.__contents
+
+
 class Message:
-    """
-    Base class used by all messages.
-    """
+    """Base class used by all messages."""
     format: ClassVar[MsgFormat]
 
     @staticmethod
@@ -279,7 +298,7 @@ class Message:
 
     @classmethod
     def _decode_chunk(cls,
-                      field_buffer: Dict[str, Any],
+                      msg_buffer: MessageBuffer,
                       chunk: List[Tuple[Tuple[str, ...], Field]],
                       b: BytesIO
                       ) -> None:
@@ -291,13 +310,13 @@ class Message:
         # read struct into buffer
         values = struct.unpack(pattern, b.read(num_bytes))
         for value, (ctx, field) in zip(values, chunk):
-            d = functools.reduce(lambda d, n: d[n], ctx, field_buffer)
-            d[field.name] = value
+            msg_buffer.write(ctx, field, value)
+
 
     @classmethod
     def _decode_complex(cls,
                         name_to_type: Mapping[str, Type['Message']],
-                        field_buffer: Dict[str, Any],
+                        msg_buffer: MessageBuffer,
                         ctx: Tuple[str, ...],
                         field: Field,
                         b: BytesIO
@@ -316,8 +335,7 @@ class Message:
             Exception("unexpected complex field: {field.name} [{field.typ}]")
 
         # write the value to the buffer
-        d = functools.reduce(lambda d, n: d[n], ctx, field_buffer)
-        d[field.name] = val
+        msg_buffer.write(ctx, field, val)
 
     @classmethod
     def decode(cls,
@@ -325,7 +343,7 @@ class Message:
                b: BytesIO
                ) -> 'Message':
         name_to_format = {n: t.format for n, t in name_to_type.items()}
-        field_values: Dict[str, Any] = {}
+        msg_buffer = MessageBuffer()
 
         # individually process each:
         # - contiguous chunk of simple fields
@@ -335,12 +353,12 @@ class Message:
             if field.is_simple:
                 chunk.append((ctx, field))
             else:
-                cls._decode_chunk(field_values, chunk, b)
+                cls._decode_chunk(msg_buffer, chunk, b)
                 chunk.clear()
-                cls._decode_complex(name_to_type, field_values, ctx, field, b)
+                cls._decode_complex(name_to_type, msg_buffer, ctx, field, b)
         if chunk:
-            cls._decode_chunk(field_values, chunk, b)
+            cls._decode_chunk(msg_buffer, chunk, b)
 
-        # TODO construct message from field value buffer
-        logger.debug("field value buffer: %s", field_values)
+        # TODO construct message from message buffer
+        logger.debug("message buffer: %s", msg_buffer.contents)
         raise NotImplementedError
