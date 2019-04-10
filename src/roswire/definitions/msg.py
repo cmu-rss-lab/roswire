@@ -250,7 +250,8 @@ class Message:
     def _decode_simple_array(cls, field: Field, b: BytesIO) -> List[Any]:
         length = read_uint32(b) if field.length is None else field.length
         pattern = "<{length}{get_pattern(field.base_type)}"
-        return list(struct.unpack(pattern, b))
+        num_bytes = struct.calcsize(pattern)
+        return list(struct.unpack(pattern, b.read(num_bytes)))
 
     @classmethod
     def _decode_complex_array(cls,
