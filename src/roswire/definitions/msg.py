@@ -271,6 +271,9 @@ class Message:
                       chunk: List[Tuple[Tuple[str, ...], Field]],
                       b: BytesIO
                       ) -> None:
+        # compute the struct pattern for the chunk
+        typs = [field.typ for ctx, field in chunk]
+        pattern = '<' + ''.join([get_pattern(t) for t in typs])
         raise NotImplementedError
 
     @classmethod
