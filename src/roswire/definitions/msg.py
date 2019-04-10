@@ -303,6 +303,7 @@ class Message:
                         b: BytesIO
                         ) -> None:
         # read the value for the field
+        val: Any
         if field.typ == 'string':
             val = cls._decode_string(field.length, b)
         elif field.typ == 'time':
