@@ -262,7 +262,11 @@ class Message:
     @classmethod
     def _decode_string(cls, length: Optional[int], b: BytesIO) -> str:
         if length is None:
+            logger.debug("decoding string length")
             length = read_uint32(b)
+            logger.debug("decoded string length: %d characters", length)
+        else:
+            logger.debug("decoding fixed-length string")
         return b.read(length).decode('utf-8')
 
     @classmethod
@@ -313,6 +317,9 @@ class Message:
         # read struct into buffer
         values = struct.unpack(pattern, b.read(num_bytes))
         for value, (ctx, field) in zip(values, chunk):
+            field_fullname = '.'.join(ctx + (field.name,))
+            logger.debug("decoded simple field [%s]: %s",
+                         field_fullname, repr(value))
             msg_buffer.write(ctx, field, value)
 
 
@@ -333,9 +340,13 @@ class Message:
             logger.debug("decoding string: %s", field)
             val = cls._decode_string(field.length, b)
         elif field.typ == 'time':
+            logger.debug("decoding time: %s", field_fullname)
             val = read_time(b)
+            logger.debug("decoded time [%s]: %s", field_fullname, val)
         elif field.typ == 'duration':
+            logger.debug("decoding duration: %s", field_fullname)
             val = read_duration(b)
+            logger.debug("decoded duration [%s]: %s", field_fullname, val)
         elif field.is_array:
             val = cls._decode_array(name_to_type, field, b)
         else:
