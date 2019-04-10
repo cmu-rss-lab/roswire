@@ -397,8 +397,10 @@ class BagReader:
         msg_typ_name = conn_info.typ
         msg_typ = self.__db_type[msg_typ_name]
 
-        # read and decode message content
-        content = msg_typ.decode(self.__db_type, bfr)
+        # read the raw message data
+        raw = self._read_sized(bfr)
+        logger.debug("raw message: %s", raw)
+        content = msg_typ.decode(self.__db_type, BytesIO(raw))
 
         logger.debug("TOPIC: %s (%s)", topic, msg_typ_name)
         msg = BagMessage(topic, t)
