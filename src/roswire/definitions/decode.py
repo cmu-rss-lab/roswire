@@ -35,7 +35,7 @@ def get_pattern(typ: str) -> str:
     return _SIMPLE_TO_STRUCT[typ]
 
 
-def decoder_simple(typ: str) -> Callable[[bytes], Any]:
+def simple_decoder(typ: str) -> Callable[[bytes], Any]:
     """Returns a decoder for a specified simple type."""
     pattern = '<' + get_pattern(typ)
 
@@ -48,10 +48,10 @@ def decoder_simple(typ: str) -> Callable[[bytes], Any]:
     return bool_decoder if typ == 'bool' else decoder
 
 
-def reader_simple(typ: str) -> Callable[[BytesIO], Any]:
+def simple_reader(typ: str) -> Callable[[BytesIO], Any]:
     """Returns a reader for a specified simple type."""
     pattern = '<' + get_pattern(typ)
-    decoder = decoder_simple(typ)
+    decoder = simple_decoder(typ)
     size = struct.calcsize(pattern)
 
     def reader(b: BytesIO) -> Any:
@@ -60,30 +60,30 @@ def reader_simple(typ: str) -> Callable[[BytesIO], Any]:
     return reader
 
 
-decode_int8 = decoder_simple('int8')
-decode_uint8 = decoder_simple('uint8')
-decode_int16 = decoder_simple('int16')
-decode_uint16 = decoder_simple('uint16')
-decode_int32 = decoder_simple('int32')
-decode_uint32 = decoder_simple('uint32')
-decode_int64 = decoder_simple('int64')
-decode_uint64 = decoder_simple('uint64')
-decode_float32 = decoder_simple('float32')
-decode_float64 = decoder_simple('float64')
-decode_char = decoder_simple('char')
-decode_byte = decoder_simple('byte')
-decode_bool = decoder_simple('bool')
+decode_int8 = simple_decoder('int8')
+decode_uint8 = simple_decoder('uint8')
+decode_int16 = simple_decoder('int16')
+decode_uint16 = simple_decoder('uint16')
+decode_int32 = simple_decoder('int32')
+decode_uint32 = simple_decoder('uint32')
+decode_int64 = simple_decoder('int64')
+decode_uint64 = simple_decoder('uint64')
+decode_float32 = simple_decoder('float32')
+decode_float64 = simple_decoder('float64')
+decode_char = simple_decoder('char')
+decode_byte = simple_decoder('byte')
+decode_bool = simple_decoder('bool')
 
-read_int8 = reader_simple('int8')
-read_uint8 = reader_simple('uint8')
-read_int16 = reader_simple('int16')
-read_uint16 = reader_simple('uint16')
-read_int32 = reader_simple('int32')
-read_uint32 = reader_simple('uint32')
-read_int64 = reader_simple('int64')
-read_uint64 = reader_simple('uint64')
-read_float32 = reader_simple('float32')
-read_float64 = reader_simple('float64')
-read_char = reader_simple('char')
-read_byte = reader_simple('byte')
-read_bool = reader_simple('bool')
+read_int8 = simple_reader('int8')
+read_uint8 = simple_reader('uint8')
+read_int16 = simple_reader('int16')
+read_uint16 = simple_reader('uint16')
+read_int32 = simple_reader('int32')
+read_uint32 = simple_reader('uint32')
+read_int64 = simple_reader('int64')
+read_uint64 = simple_reader('uint64')
+read_float32 = simple_reader('float32')
+read_float64 = simple_reader('float64')
+read_char = simple_reader('char')
+read_byte = simple_reader('byte')
+read_bool = simple_reader('bool')
