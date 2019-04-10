@@ -249,6 +249,7 @@ class Message:
                               field: Field,
                               b: BytesIO
                               ) -> List[Any]:
+        # FIXME this doesn't handle Time or Duration
         dec = functools.partialmethod(name_to_type[field.base_type].decode,
                                       name_to_type,
                                       b)
@@ -291,6 +292,7 @@ class Message:
                         field: Field,
                         b: BytesIO
                         ) -> None:
+        # read the value for the field
         if field.typ == 'string':
             val = cls._decode_string(field.length, b)
         elif field.typ == 'time':
@@ -299,7 +301,12 @@ class Message:
             val = read_duration(b)
         elif field.is_array:
             val = cls._decode_array(name_to_type, field, b)
-        raise Exception("unexpected complex field: {field.name} [{field.typ}]")
+        else:
+            Exception("unexpected complex field: {field.name} [{field.typ}]")
+
+        # write the value to the buffer
+        d = functools.reduce(lambda d, n: d[n], ctx, field_buffer)
+        d[field.name] = val
 
     @classmethod
     def decode(cls,
@@ -324,4 +331,5 @@ class Message:
             cls._decode_chunk(name_to_type, field_values, chunk, b)
 
         # TODO construct message from field value buffer
+        logger.debug("field value buffer: %s", field_values)
         raise NotImplementedError
