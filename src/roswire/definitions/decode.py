@@ -123,4 +123,4 @@ def read_fixed_length_string(size: int, b: BytesIO) -> str:
 def read_string(b: BytesIO) -> str:
     """Reads a variable-length string from a bytestream."""
     size = read_uint32(b)
-    return read_fixed_string(b, size)
+    return read_fixed_length_string(b, size)
