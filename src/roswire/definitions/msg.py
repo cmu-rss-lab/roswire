@@ -272,8 +272,10 @@ class Message:
     @classmethod
     def _decode_simple_array(cls, field: Field, b: BytesIO) -> List[Any]:
         length = read_uint32(b) if field.length is None else field.length
-        pattern = "<{length}{get_pattern(field.base_type)}"
+        pattern = f"<{length}{get_pattern(field.base_type)}"
+        logger.debug("simple array pattern: %s", pattern)
         num_bytes = struct.calcsize(pattern)
+        logger.debug("simple array size: %d bytes", num_bytes)
         return list(struct.unpack(pattern, b.read(num_bytes)))
 
     @classmethod
