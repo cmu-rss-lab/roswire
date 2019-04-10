@@ -268,6 +268,7 @@ class Message:
     @classmethod
     def _decode_chunk(cls,
                       field_buffer: Dict[str, Any],
+                      chunk: List[Tuple[Tuple[str, ...], Field]],
                       b: BytesIO
                       ) -> None:
         raise NotImplementedError
@@ -277,7 +278,8 @@ class Message:
                         name_to_type: Mapping[str, Type[Message]],
                         field_buffer: Dict[str, Any],
                         ctx: Tuple[str, ...],
-                        field: Field
+                        field: Field,
+                        b: BytesIO
                         ) -> None:
         if field.typ == 'string':
             val = cls._decode_string(field.length, b)
@@ -297,7 +299,6 @@ class Message:
         name_to_format = {n: t.format for n, t in name_to_type.items()}
         field_values: Dict[str, Any] = {}
 
-        # TODO how do we deal with Time, Header and Duration?
         # individually process each:
         # - contiguous chunk of simple fields
         # - complex field
@@ -306,11 +307,11 @@ class Message:
             if field.is_simple:
                 chunk.append(field)
             else:
-                cls._decode_chunk(field_values, chunk)
+                cls._decode_chunk(field_values, chunk, b)
                 chunk.clear()
-                cls._decode_complex(name_to_type, field_values, ctx, field)
+                cls._decode_complex(name_to_type, field_values, ctx, field, b)
         if chunk:
-            cls._decode_chunk(name_to_type, field_values, chunk)
+            cls._decode_chunk(name_to_type, field_values, chunk, b)
 
         # TODO construct message from field value buffer
         raise NotImplementedError
