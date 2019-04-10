@@ -244,7 +244,7 @@ class Message:
         return list(struct.unpack(pattern, b))
 
     @classmethod
-    def _decode_complex_array(cls
+    def _decode_complex_array(cls,
                               name_to_type: Mapping[str, Type[Message]],
                               field: Field,
                               b: BytesIO
