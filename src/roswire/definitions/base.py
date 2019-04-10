@@ -1,6 +1,5 @@
 __all__ = ('Time', 'Duration',
-           'is_builtin', 'get_builtin', 'is_simple', 'get_pattern',
-           'decode_uint32', 'read_uint32',
+           'is_builtin', 'get_builtin',
            'decode_time', 'read_time',
            'decode_duration', 'read_duration')
 
@@ -10,7 +9,7 @@ import struct
 
 import attr
 
-from .decode import is_simple, decode_uint32
+from .decode import decode_uint32, read_uint32
 
 _SIMPLE_TYPE_TO_STRUCT = {
     'int8': 'b',
@@ -86,15 +85,6 @@ def is_builtin(typ: str) -> bool:
 def get_builtin(typ: str) -> Type:
     """Returns the Python type that implements a given ROS type."""
     return _BUILTIN_TYPES[typ]
-
-
-def get_pattern(typ: str) -> str:
-    """Returns the struct pattern for a simple type."""
-    return _SIMPLE_TYPE_TO_STRUCT[typ]
-
-
-def read_uint32(b: BytesIO) -> int:
-    return decode_uint32(b.read(4))
 
 
 def decode_time(b: bytes) -> Time:

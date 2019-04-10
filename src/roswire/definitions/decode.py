@@ -37,7 +37,7 @@ def get_pattern(typ: str) -> str:
 
 def decoder_simple(typ: str) -> Callable[[bytes], Any]:
     """Returns a decoder for a specified simple type."""
-    pattern = '<' + _SIMPLE_TO_STRUCT[typ]
+    pattern = '<' + get_pattern(typ)
 
     def decoder(v: bytes) -> Any:
         return struct.unpack(pattern, v)[0]
@@ -50,7 +50,14 @@ def decoder_simple(typ: str) -> Callable[[bytes], Any]:
 
 def reader_simple(typ: str) -> Callable[[BytesIO], Any]:
     """Returns a reader for a specified simple type."""
-    raise NotImplementedError
+    pattern = '<' + get_pattern(typ)
+    decoder = decoder_simple(typ)
+    size = struct.calcsize(pattern)
+
+    def reader(b: BytesIO) -> Any:
+        return decoder(b.read(size))
+
+    return reader
 
 
 decode_int8 = decoder_simple('int8')
@@ -66,3 +73,17 @@ decode_float64 = decoder_simple('float64')
 decode_char = decoder_simple('char')
 decode_byte = decoder_simple('byte')
 decode_bool = decoder_simple('bool')
+
+read_int8 = reader_simple('int8')
+read_uint8 = reader_simple('uint8')
+read_int16 = reader_simple('int16')
+read_uint16 = reader_simple('uint16')
+read_int32 = reader_simple('int32')
+read_uint32 = reader_simple('uint32')
+read_int64 = reader_simple('int64')
+read_uint64 = reader_simple('uint64')
+read_float32 = reader_simple('float32')
+read_float64 = reader_simple('float64')
+read_char = reader_simple('char')
+read_byte = reader_simple('byte')
+read_bool = reader_simple('bool')
