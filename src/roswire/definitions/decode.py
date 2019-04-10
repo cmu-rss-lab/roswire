@@ -7,27 +7,46 @@ from typing import Optional, Iterator, Callable
 from io import BytesIO
 import struct
 
+_SIMPLE_TO_STRUCT = {
+    'int8': 'b',
+    'uint8': 'B',
+    'bool': 'B',
+    'int16': 'h',
+    'uint16': 'H',
+    'int32': 'i',
+    'uint32': 'I',
+    'int64': 'q',
+    'uint64': 'Q',
+    'float32': 'f',
+    'float64': 'd',
+    # deprecated types
+    'char': 'B',  # unsigned
+    'byte': 'b'  # signed
+}
 
-def __simple_decoder(pattern: str) -> Callable[[BytesIO], Any]:
-    pattern = '<' + pattern
+
+def simple(typ: str) -> Callable[[BytesIO], Any]:
+    """Returns a deserialiser for a specified simple type."""
+    pattern = '<' + _SIMPLE_TO_STRUCT[typ]
     def decoder(b: BytesIO) -> Any:
         return struct.unpack(pattern)[0]
-    return decoder
+
+    def bool_decoder(b: BytesIO) -> bool:
+        return bool(struct.unpack(pattern)[0])
+
+    return bool_decoder if typ == 'bool' else decoder
 
 
-decode_int8 = __simple_decoder('b')
-decode_uint8 = __simple_decoder('B')
-decode_int16 = __simple_decoder('h')
-decode_uint16 = __simple_decoder('H')
-decode_int32 = __simple_decoder('i')
-decode_uint32 = __simple_decoder('I')
-decode_int64 = __simple_decoder('q')
-decode_uint64 = __simple_decoder('Q')
-decode_float32 = __simple_decoder('f')
-decode_float64 = __simple_decoder('d')
-decode_char = __simple_decoder('B')
-decode_byte = decode_int8
-
-
-def decode_bool(v: bytes) -> bool:
-    return bool(struct.unpack('<B')[0])
+decode_int8 = simple('int8')
+decode_uint8 = simple('uint8')
+decode_int16 = simple('int16')
+decode_uint16 = simple('uint16')
+decode_int32 = simple('int32')
+decode_uint32 = simple('uint32')
+decode_int64 = simple('int64')
+decode_uint64 = simple('uint64')
+decode_float32 = simple('float32')
+decode_float64 = simple('float64')
+decode_char = simple('char')
+decode_byte = simple('byte')
+decode_bool = simple('bool')
