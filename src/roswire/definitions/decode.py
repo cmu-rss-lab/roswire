@@ -25,28 +25,28 @@ _SIMPLE_TO_STRUCT = {
 }
 
 
-def simple(typ: str) -> Callable[[BytesIO], Any]:
-    """Returns a deserialiser for a specified simple type."""
+def decoder_decoder_simple(typ: str) -> Callable[[bytes], Any]:
+    """Returns a decoder for a specified simple type."""
     pattern = '<' + _SIMPLE_TO_STRUCT[typ]
-    def decoder(b: BytesIO) -> Any:
+    def decoder(v: bytes) -> Any:
         return struct.unpack(pattern)[0]
 
-    def bool_decoder(b: BytesIO) -> bool:
+    def bool_decoder(v: bytes) -> bool:
         return bool(struct.unpack(pattern)[0])
 
     return bool_decoder if typ == 'bool' else decoder
 
 
-decode_int8 = simple('int8')
-decode_uint8 = simple('uint8')
-decode_int16 = simple('int16')
-decode_uint16 = simple('uint16')
-decode_int32 = simple('int32')
-decode_uint32 = simple('uint32')
-decode_int64 = simple('int64')
-decode_uint64 = simple('uint64')
-decode_float32 = simple('float32')
-decode_float64 = simple('float64')
-decode_char = simple('char')
-decode_byte = simple('byte')
-decode_bool = simple('bool')
+decode_int8 = decoder_simple('int8')
+decode_uint8 = decoder_simple('uint8')
+decode_int16 = decoder_simple('int16')
+decode_uint16 = decoder_simple('uint16')
+decode_int32 = decoder_simple('int32')
+decode_uint32 = decoder_simple('uint32')
+decode_int64 = decoder_simple('int64')
+decode_uint64 = decoder_simple('uint64')
+decode_float32 = decoder_simple('float32')
+decode_float64 = decoder_simple('float64')
+decode_char = decoder_simple('char')
+decode_byte = decoder_simple('byte')
+decode_bool = decoder_simple('bool')
