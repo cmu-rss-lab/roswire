@@ -109,3 +109,18 @@ def decode_duration(b: bytes) -> Duration:
 
 def read_duration(b: BytesIO) -> Duration:
     return decode_duration(b.read(8))
+
+
+def decode_string(b: bytes) -> str:
+    return b.decode('utf-8')
+
+
+def read_fixed_length_string(size: int, b: BytesIO) -> str:
+    """Reads a fixed-length string from a bytestream."""
+    return decode_string(b.read(size))
+
+
+def read_string(b: BytesIO) -> str:
+    """Reads a variable-length string from a bytestream."""
+    size = read_uint32(b)
+    return read_fixed_string(b, size)
