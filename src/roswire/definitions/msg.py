@@ -14,7 +14,8 @@ from toposort import toposort_flatten as toposort
 
 from .base import is_builtin, Time, Duration
 from .decode import (is_simple, get_pattern, read_uint32,
-                     read_time, read_duration)
+                     read_time, read_duration,
+                     read_string, read_fixed_length_string)
 from ..proxy import FileProxy
 from .. import exceptions
 
@@ -283,12 +284,9 @@ class Message:
     @classmethod
     def _decode_string(cls, length: Optional[int], b: BytesIO) -> str:
         if length is None:
-            logger.debug("decoding string length")
-            length = read_uint32(b)
-            logger.debug("decoded string length: %d characters", length)
+            return read_string(b)
         else:
-            logger.debug("decoding fixed-length string")
-        return b.read(length).decode('utf-8')
+            return read_fixed_length_string(length, b)
 
     @classmethod
     def _decode_simple_array(cls, field: Field, b: BytesIO) -> List[Any]:
