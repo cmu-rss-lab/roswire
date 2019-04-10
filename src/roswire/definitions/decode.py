@@ -5,6 +5,7 @@ into Python data structures.
 """
 from typing import Optional, Iterator, Callable, Any, List
 from io import BytesIO
+import functools
 import struct
 
 from .base import Time, Duration
@@ -124,6 +125,15 @@ def read_string(b: BytesIO) -> str:
     """Reads a variable-length string from a bytestream."""
     size = read_uint32(b)
     return read_fixed_length_string(size, b)
+
+
+def string_reader(length: Optional[int] = None
+                  ) -> Callable[[BytesIO], str]:
+    """Returns a reader for (possibly fixed-length) strings."""
+    if length is None:
+        return read_string
+    else:
+        return functools.partial(read_fixed_length_string, length)
 
 
 def simple_array_reader(typ: str,

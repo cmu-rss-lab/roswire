@@ -15,7 +15,9 @@ from toposort import toposort_flatten as toposort
 from .base import is_builtin, Time, Duration
 from .decode import (is_simple, get_pattern, read_uint32,
                      read_time, read_duration,
-                     read_string, read_fixed_length_string)
+                     read_string, read_fixed_length_string,
+                     simple_array_reader,
+                     string_reader)
 from ..proxy import FileProxy
 from .. import exceptions
 
@@ -282,22 +284,6 @@ class Message:
         return d
 
     @classmethod
-    def _decode_string(cls, length: Optional[int], b: BytesIO) -> str:
-        if length is None:
-            return read_string(b)
-        else:
-            return read_fixed_length_string(length, b)
-
-    @classmethod
-    def _decode_simple_array(cls, field: Field, b: BytesIO) -> List[Any]:
-        length = read_uint32(b) if field.length is None else field.length
-        pattern = f"<{length}{get_pattern(field.base_type)}"
-        logger.debug("simple array pattern: %s", pattern)
-        num_bytes = struct.calcsize(pattern)
-        logger.debug("simple array size: %d bytes", num_bytes)
-        return list(struct.unpack(pattern, b.read(num_bytes)))
-
-    @classmethod
     def _decode_complex_array(cls,
                               name_to_type: Mapping[str, Type['Message']],
                               field: Field,
@@ -317,7 +303,7 @@ class Message:
                       b: BytesIO
                       ) -> List[Any]:
         if is_simple(field.base_type):
-            return cls._decode_simple_array(field, b)
+            return simple_array_reader(field.base_type, field.length)(b)
         else:
             return cls._decode_complex_array(name_to_type, field, b)
 
@@ -358,7 +344,7 @@ class Message:
         val: Any
         if field.typ == 'string':
             logger.debug("decoding string: %s", field)
-            val = cls._decode_string(field.length, b)
+            val = string_reader(field.length)(b)
         elif field.typ == 'time':
             logger.debug("decoding time: %s", field_fullname)
             val = read_time(b)
