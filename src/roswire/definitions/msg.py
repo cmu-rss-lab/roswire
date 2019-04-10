@@ -260,9 +260,9 @@ class Message:
                               b: BytesIO
                               ) -> List[Any]:
         # FIXME this doesn't handle Time or Duration
-        dec = functools.partialmethod(name_to_type[field.base_type].decode,
-                                      name_to_type,
-                                      b)
+        def dec():
+            return name_to_type[field.base_type].decode(name_to_type, b)
+
         length = read_uint32(b) if field.length is None else field.length
         return [dec() for i in range(length)]
 
