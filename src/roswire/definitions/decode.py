@@ -3,12 +3,14 @@
 This module provides code for decoding and deserialising binary ROS messages
 into Python data structures.
 """
-from typing import Optional, Iterator, Callable, Any, List
+from typing import Optional, Iterator, Callable, Any, List, Type, TypeVar
 from io import BytesIO
 import functools
 import struct
 
 from .base import Time, Duration
+
+T = TypeVar('T')
 
 _SIMPLE_TO_STRUCT = {
     'int8': 'b',
@@ -160,3 +162,20 @@ def simple_array_reader(typ: str,
         return list(struct.unpack(pattern, b.read(size)))
 
     return var_reader
+
+
+def complex_array_reader(factory: Callable[[BytesIO], T],
+                         length: Optional[int] = None
+                         ) -> Callable[[BytesIO], List[T]]:
+    """Returns a reader for a complex array."""
+    def read_fixed(length: int, b: BytesIO) -> List[T]:
+        return [factory(b) for i in range(length)]
+
+    def read_var(b: BytesIO) -> List[T]:
+        length = read_uint32(b)
+        return read_fixed(length, b)
+
+    if length is None:
+        return read_var
+    else:
+        return functools.partial(read_fixed, length)

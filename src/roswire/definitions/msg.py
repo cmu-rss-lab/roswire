@@ -1,7 +1,7 @@
 __all__ = ('Constant', 'ConstantValue', 'Field', 'MsgFormat', 'Message')
 
 from typing import (Type, Optional, Any, Union, Tuple, List, Dict, ClassVar,
-                    Collection, Set, Iterator, Mapping)
+                    Collection, Set, Iterator, Mapping, Callable)
 from io import BytesIO
 import logging
 import functools
@@ -17,6 +17,7 @@ from .decode import (is_simple, get_pattern, read_uint32,
                      read_time, read_duration,
                      read_string, read_fixed_length_string,
                      simple_array_reader,
+                     complex_array_reader,
                      string_reader)
 from ..proxy import FileProxy
 from .. import exceptions
@@ -289,12 +290,15 @@ class Message:
                               field: Field,
                               b: BytesIO
                               ) -> List[Any]:
-        # FIXME this doesn't handle Time or Duration
-        def dec():
-            return name_to_type[field.base_type].decode(name_to_type, b)
-
-        length = read_uint32(b) if field.length is None else field.length
-        return [dec() for i in range(length)]
+        factory: Callable[[BytesIO], Any]
+        if field.base_type == 'time':
+            factory = read_time
+        elif field.base_type == 'duration':
+            factory = read_duration
+        else:
+            factory = functools.partial(name_to_type[field.base_type].decode,
+                                        name_to_type)
+        return complex_array_reader(factory, field.length)(b)
 
     @classmethod
     def _decode_array(cls,
