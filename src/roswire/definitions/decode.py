@@ -123,4 +123,30 @@ def read_fixed_length_string(size: int, b: BytesIO) -> str:
 def read_string(b: BytesIO) -> str:
     """Reads a variable-length string from a bytestream."""
     size = read_uint32(b)
-    return read_fixed_length_string(b, size)
+    return read_fixed_length_string(size, b)
+
+
+def simple_array_reader(typ: str,
+                        length: Optional[int] = None
+                        ) -> Callable[[BytesIO], List[Any]]:
+    """Returns a reader for a simple array."""
+    base_pattern = get_pattern(typ)
+
+    # fixed length: precompute pattern
+    if length is not None:
+        pattern = f'<{size}{base_pattern}'
+        size = struct.calcsize(pattern)
+
+        def reader(b: BytesIO) -> List[Any]:
+            return list(struct.unpack(pattern, b.read(size)))
+
+        return reader
+
+    # variable length
+    def reader(b: BytesIO) -> List[Any]:
+        length = read_uint32(b)
+        pattern = f'<{size}{base_pattern}'
+        size = struct.calcsize(pattern)
+        return list(struct.unpack(pattern, b.read(size)))
+
+    return reader
