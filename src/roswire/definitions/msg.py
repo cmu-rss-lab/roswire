@@ -333,7 +333,7 @@ class Message:
         chunk: List[Tuple[Tuple[str, ...], Field]] = []
         for ctx, field in cls.format.flatten(name_to_format):
             if field.is_simple:
-                chunk.append(field)
+                chunk.append((ctx, field))
             else:
                 cls._decode_chunk(field_values, chunk, b)
                 chunk.clear()
