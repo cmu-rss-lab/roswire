@@ -137,16 +137,16 @@ def simple_array_reader(typ: str,
         pattern = f'<{length}{base_pattern}'
         size = struct.calcsize(pattern)
 
-        def reader(b: BytesIO) -> List[Any]:
+        def fixed_reader(b: BytesIO) -> List[Any]:
             return list(struct.unpack(pattern, b.read(size)))
 
-        return reader
+        return fixed_reader
 
     # variable length
-    def reader(b: BytesIO) -> List[Any]:
+    def var_reader(b: BytesIO) -> List[Any]:
         length = read_uint32(b)
         pattern = f'<{length}{base_pattern}'
         size = struct.calcsize(pattern)
         return list(struct.unpack(pattern, b.read(size)))
 
-    return reader
+    return var_reader
