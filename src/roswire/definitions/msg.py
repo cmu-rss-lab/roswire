@@ -255,7 +255,7 @@ class Message:
 
     @classmethod
     def _decode_complex_array(cls,
-                              name_to_type: Mapping[str, Type[Message]],
+                              name_to_type: Mapping[str, Type['Message']],
                               field: Field,
                               b: BytesIO
                               ) -> List[Any]:
@@ -268,7 +268,7 @@ class Message:
 
     @classmethod
     def _decode_array(cls,
-                      name_to_type: Mapping[str, Type[Message]],
+                      name_to_type: Mapping[str, Type['Message']],
                       field: Field,
                       b: BytesIO
                       ) -> List[Any]:
@@ -296,7 +296,7 @@ class Message:
 
     @classmethod
     def _decode_complex(cls,
-                        name_to_type: Mapping[str, Type[Message]],
+                        name_to_type: Mapping[str, Type['Message']],
                         field_buffer: Dict[str, Any],
                         ctx: Tuple[str, ...],
                         field: Field,
@@ -321,9 +321,9 @@ class Message:
 
     @classmethod
     def decode(cls,
-               name_to_type: Mapping[str, Type[Message]],
+               name_to_type: Mapping[str, Type['Message']],
                b: BytesIO
-               ) -> Message:
+               ) -> 'Message':
         name_to_format = {n: t.format for n, t in name_to_type.items()}
         field_values: Dict[str, Any] = {}
 
