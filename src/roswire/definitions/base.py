@@ -10,6 +10,8 @@ import struct
 
 import attr
 
+from .decode import is_simple, decode_uint32
+
 _SIMPLE_TYPE_TO_STRUCT = {
     'int8': 'b',
     'uint8': 'B',
@@ -89,15 +91,6 @@ def get_builtin(typ: str) -> Type:
 def get_pattern(typ: str) -> str:
     """Returns the struct pattern for a simple type."""
     return _SIMPLE_TYPE_TO_STRUCT[typ]
-
-
-def is_simple(typ: str) -> bool:
-    """Determines whether a given type is a simple primitive."""
-    return typ in _SIMPLE_TYPE_TO_STRUCT
-
-
-def decode_uint32(v: bytes) -> int:
-    return struct.unpack('<I', v)[0]
 
 
 def read_uint32(b: BytesIO) -> int:

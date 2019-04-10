@@ -25,6 +25,11 @@ _SIMPLE_TO_STRUCT = {
 }
 
 
+def is_simple(typ: str) -> bool:
+    """Determines whether a given type is a simple type."""
+    return typ in _SIMPLE_TO_STRUCT
+
+
 def decoder_simple(typ: str) -> Callable[[bytes], Any]:
     """Returns a decoder for a specified simple type."""
     pattern = '<' + _SIMPLE_TO_STRUCT[typ]
@@ -36,6 +41,11 @@ def decoder_simple(typ: str) -> Callable[[bytes], Any]:
         return bool(struct.unpack(pattern)[0])
 
     return bool_decoder if typ == 'bool' else decoder
+
+
+def reader_simple(typ: str) -> Callable[[BytesIO], Any]:
+    """Returns a reader for a specified simple type."""
+    raise NotImplementedError
 
 
 decode_int8 = decoder_simple('int8')
