@@ -30,6 +30,11 @@ def is_simple(typ: str) -> bool:
     return typ in _SIMPLE_TO_STRUCT
 
 
+def get_pattern(typ: str) -> str:
+    """Returns the struct pattern for a given simple type."""
+    return _SIMPLE_TO_STRUCT[typ]
+
+
 def decoder_simple(typ: str) -> Callable[[bytes], Any]:
     """Returns a decoder for a specified simple type."""
     pattern = '<' + _SIMPLE_TO_STRUCT[typ]
