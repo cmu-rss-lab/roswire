@@ -331,7 +331,7 @@ class Message:
         # - contiguous chunk of simple fields
         # - complex field
         chunk: List[Tuple[Tuple[str, ...], Field]] = []
-        for ctx, field in self.format.flatten(name_to_format):
+        for ctx, field in cls.format.flatten(name_to_format):
             if field.is_simple:
                 chunk.append(field)
             else:
