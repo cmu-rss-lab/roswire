@@ -208,7 +208,12 @@ class MsgFormat:
 
 
 class MessageBuffer:
-    def __init__(self) -> None:
+    def __init__(self,
+                 typ: Type['Message'],
+                 name_to_type: Mapping[str, Type['Message']]
+                 ) -> None:
+        self.__typ = typ
+        self.__name_to_type = name_to_type
         self.__contents: Dict[str, Any] = {}
 
     def write(self,
@@ -226,6 +231,18 @@ class MessageBuffer:
     @property
     def contents(self) -> Dict[str, Any]:
         return self.__contents
+
+    def __build(self, typ: Type['Message'], values: Dict[str, Any]) -> 'Message':
+        for n, v in values.items():
+            if isinstance(v, dict):
+                field = next(f for f in typ.format.fields if f.name == n)
+                vt = self.__name_to_type[field.typ]
+                values[n] = self.__build(vt, v)
+        logger.debug("building message [%s] with values: %s", typ, values)
+        return typ(**values)
+
+    def build(self) -> 'Message':
+        return self.__build(self.__typ, self.__contents)
 
 
 class Message:
@@ -324,7 +341,6 @@ class Message:
                          field_fullname, repr(value))
             msg_buffer.write(ctx, field, value)
 
-
     @classmethod
     def _decode_complex(cls,
                         name_to_type: Mapping[str, Type['Message']],
@@ -365,7 +381,7 @@ class Message:
         name_to_format = {n: t.format for n, t in name_to_type.items()}
         flattened_names = ['.'.join(ctx + (field.name,))
                            for ctx, field in cls.format.flatten(name_to_format)]
-        msg_buffer = MessageBuffer()
+        msg_buffer = MessageBuffer(cls, name_to_type)
 
         logger.debug("decoding message [%s]", cls.format.fullname)
         logger.debug("message fields [%s]: %s",
@@ -389,6 +405,6 @@ class Message:
         if chunk:
             cls._decode_chunk(msg_buffer, chunk, b)
 
-        # TODO construct message from message buffer
+        # construct message from message buffer
         logger.debug("message buffer: %s", msg_buffer.contents)
-        raise NotImplementedError
+        return msg_buffer.build()
