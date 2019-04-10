@@ -3,7 +3,7 @@
 This module provides code for decoding and deserialising binary ROS messages
 into Python data structures.
 """
-from typing import Optional, Iterator, Callable
+from typing import Optional, Iterator, Callable, Any
 from io import BytesIO
 import struct
 
@@ -35,10 +35,10 @@ def decoder_simple(typ: str) -> Callable[[bytes], Any]:
     pattern = '<' + _SIMPLE_TO_STRUCT[typ]
 
     def decoder(v: bytes) -> Any:
-        return struct.unpack(pattern)[0]
+        return struct.unpack(pattern, v)[0]
 
     def bool_decoder(v: bytes) -> bool:
-        return bool(struct.unpack(pattern)[0])
+        return bool(struct.unpack(pattern, v)[0])
 
     return bool_decoder if typ == 'bool' else decoder
 
