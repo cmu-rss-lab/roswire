@@ -97,7 +97,7 @@ def is_simple(typ: str) -> bool:
 
 
 def decode_uint32(v: bytes) -> int:
-    return struct.unpack('<B', v)[0]
+    return struct.unpack('<I', v)[0]
 
 
 def read_uint32(b: BytesIO) -> int:
