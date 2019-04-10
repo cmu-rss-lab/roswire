@@ -345,11 +345,15 @@ class Message:
         name_to_format = {n: t.format for n, t in name_to_type.items()}
         msg_buffer = MessageBuffer()
 
+        logger.debug("decoding [%s]", cls.format.fullname)
+
         # individually process each:
         # - contiguous chunk of simple fields
         # - complex field
         chunk: List[Tuple[Tuple[str, ...], Field]] = []
         for ctx, field in cls.format.flatten(name_to_format):
+            field_fullname = '.'.join(ctx + (field,))
+            logger.debug("decoding field [%s]", field_fullname)
             if field.is_simple:
                 chunk.append((ctx, field))
             else:
