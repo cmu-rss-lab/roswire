@@ -339,7 +339,7 @@ class Message:
                 chunk.clear()
                 cls._decode_complex(name_to_type, field_values, ctx, field, b)
         if chunk:
-            cls._decode_chunk(name_to_type, field_values, chunk, b)
+            cls._decode_chunk(field_values, chunk, b)
 
         # TODO construct message from field value buffer
         logger.debug("field value buffer: %s", field_values)
