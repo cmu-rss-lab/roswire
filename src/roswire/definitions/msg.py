@@ -12,9 +12,9 @@ import os
 import attr
 from toposort import toposort_flatten as toposort
 
-from .base import (is_builtin, Time, Duration,
-                   read_time, read_duration)
-from .decode import (is_simple, get_pattern, read_uint32)
+from .base import is_builtin, Time, Duration
+from .decode import (is_simple, get_pattern, read_uint32,
+                     read_time, read_duration)
 from ..proxy import FileProxy
 from .. import exceptions
 

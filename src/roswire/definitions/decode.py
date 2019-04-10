@@ -7,6 +7,8 @@ from typing import Optional, Iterator, Callable, Any
 from io import BytesIO
 import struct
 
+from .base import Time, Duration
+
 _SIMPLE_TO_STRUCT = {
     'int8': 'b',
     'uint8': 'B',
@@ -87,3 +89,23 @@ read_float64 = simple_reader('float64')
 read_char = simple_reader('char')
 read_byte = simple_reader('byte')
 read_bool = simple_reader('bool')
+
+
+def decode_time(b: bytes) -> Time:
+    secs = decode_uint32(b[0:4])
+    nsecs = decode_uint32(b[4:8])
+    return Time(secs, nsecs)
+
+
+def read_time(b: BytesIO) -> Time:
+    return decode_time(b.read(8))
+
+
+def decode_duration(b: bytes) -> Duration:
+    secs = decode_uint32(b[0:4])
+    nsecs = decode_uint32(b[4:8])
+    return Duration(secs, nsecs)
+
+
+def read_duration(b: BytesIO) -> Duration:
+    return decode_duration(b.read(8))
