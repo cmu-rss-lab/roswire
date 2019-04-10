@@ -274,7 +274,12 @@ class Message:
         # compute the struct pattern for the chunk
         typs = [field.typ for ctx, field in chunk]
         pattern = '<' + ''.join([get_pattern(t) for t in typs])
-        raise NotImplementedError
+        num_bytes = struct.calcsize(pattern)
+
+        # read struct into buffer
+        values = struct.unpack(pattern, b.read(num_bytes))
+        for ctx, field in chunk:
+            raise NotImplementedError
 
     @classmethod
     def _decode_complex(cls,
