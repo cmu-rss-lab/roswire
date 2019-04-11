@@ -37,11 +37,11 @@ def sized_encoder(encoder_content: Callable[[T], bytes],
 
 
 def writer(encoder: Callable[[Any], bytes]
-           ) -> Callable[[BinaryIO, Any], None]:
-    return lambda b, v: ignore(b.write(encoder(v)))
+           ) -> Callable[[Any, BinaryIO], None]:
+    return lambda v, b: ignore(b.write(encoder(v)))
 
 
-def simple_writer(typ: str) -> Callable[[BinaryIO, Any], None]:
+def simple_writer(typ: str) -> Callable[[Any, BinaryIO], None]:
     """Returns a writer for a specified simple type."""
     return writer(simple_encoder(typ))
 
@@ -106,9 +106,9 @@ def simple_array_writer(typ: str,
 
     if length is not None:
         pattern = f'<{length}{base_pattern}'
-        return lambda b, arr: ignore(struct.pack(pattern, *arr))
+        return lambda arr, b: ignore(struct.pack(pattern, *arr))
 
-    def var_writer(b: BinaryIO, arr: Sequence[Any]) -> None:
+    def var_writer(arr: Sequence[Any], b: BinaryIO) -> None:
         length = len(arr)
         write_uint32(b, length)
         pattern = f'<{length}{base_pattern}'
@@ -117,20 +117,20 @@ def simple_array_writer(typ: str,
     return var_writer
 
 
-def complex_array_writer(entry_writer: Callable[[BinaryIO, T], None],
+def complex_array_writer(entry_writer: Callable[[T, BinaryIO], None],
                          length: Optional[int] = None
-                         ) -> Callable[[BinaryIO, Sequence[T]], None]:
+                         ) -> Callable[[Sequence[T], BinaryIO], None]:
     """Returns a writer for a complex array."""
-    def write_content(b: BinaryIO, arr: Sequence[T]) -> None:
+    def write_content(arr: Sequence[T], b: BinaryIO) -> None:
         for v in arr:
-            entry_writer(b, v)
+            entry_writer(v, b)
 
     if length is not None:
         return write_content
 
-    def var_writer(b: BinaryIO, arr: Sequence[Any]) -> None:
+    def var_writer(arr: Sequence[Any], b: BinaryIO) -> None:
         length = len(arr)
-        write_uint32(b, length)
-        write_content(b, arr)
+        write_uint32(length, b)
+        write_content(arr, b)
 
     return var_writer
