@@ -14,6 +14,11 @@ from .decode import is_simple, get_pattern
 T = TypeVar('T')
 
 
+def ignore(val: Any) -> None:
+    """Used to prevent returning values in lambdas."""
+    return None
+
+
 def simple_encoder(typ: str) -> Callable[[Any], bytes]:
     """Returns an encoder for a specified simple type."""
     pattern = '<' + get_pattern(typ)
@@ -64,7 +69,7 @@ def encode_time(time: Time) -> bytes:
 
 
 def encode_duration(duration: Duration) -> bytes:
-    return encode_uint32(time.secs) + encode_uint32(time.nsecs)
+    return encode_uint32(duration.secs) + encode_uint32(duration.nsecs)
 
 
 write_int8 = simple_writer('int8')
@@ -98,22 +103,18 @@ def string_writer(length: Optional[int] = None
 
 def simple_array_writer(typ: str,
                         length: Optional[int] = None
-                        ) -> Callable[[BinaryIO, ], List[Any]]:
+                        ) -> Callable[[BinaryIO, Sequence[Any]], None]:
     """Returns a writer for a simple array."""
     base_pattern = get_pattern(typ)
 
     if length is not None:
         pattern = f'<{length}{base_pattern}'
-
-        def fixed_writer(b: BinaryIO, arr: Sequence[Any]) -> None:
-            return struct.pack(pattern, *arr)
-
-        return fixed_reader
+        return lambda b, arr: ignore(struct.pack(pattern, *arr))
 
     def var_writer(b: BinaryIO, arr: Sequence[Any]) -> None:
         length = len(arr)
-        write_uint32(length)
+        write_uint32(b, length)
         pattern = f'<{length}{base_pattern}'
-        return b.write(struct.pack(pattern, *arr))
+        b.write(struct.pack(pattern, *arr))
 
-    return var_reader
+    return var_writer
