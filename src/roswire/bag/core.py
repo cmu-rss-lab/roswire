@@ -6,10 +6,8 @@ from enum import Enum
 
 import attr
 
-from definitions.base import Time
-from definitions.msg import Message
-from definitions.decode import (decode_uint8, decode_uint32, decode_uint64,
-                                decode_str, decode_time)
+from ..definitions.base import Time
+from ..definitions.msg import Message
 
 
 class OpCode(Enum):

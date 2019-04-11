@@ -12,14 +12,14 @@ import heapq
 import attr
 
 from .core import *
-from definitions.base import Time
-from definitions.msg import Message
-from definitions.type_db import TypeDatabase
-from definitions.decode import (decode_uint8, read_uint8,
-                                decode_uint32, read_uint32,
-                                decode_uint64, read_uint64,
-                                decode_str,
-                                decode_time, read_time)
+from ..definitions.base import Time
+from ..definitions.msg import Message
+from ..definitions.type_db import TypeDatabase
+from ..definitions.decode import (decode_uint8, read_uint8,
+                                  decode_uint32, read_uint32,
+                                  decode_uint64, read_uint64,
+                                  decode_string,
+                                  decode_time, read_time)
 
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -105,7 +105,7 @@ class BagReader:
         return ptr.read(size)
 
     def _read_version(self) -> str:
-        return decode_str(self.__fp.readline()).rstrip()
+        return decode_string(self.__fp.readline()).rstrip()
 
     def _read_header(self,
                      op_expected: Optional[OpCode] = None,
@@ -120,7 +120,7 @@ class BagReader:
             name, sep, value = header[:size].partition(b'\x3d')
             if sep == '':
                 raise Exception('error reading header field')
-            fields[decode_str(name)] = value
+            fields[decode_string(name)] = value
             header = header[size:]
         if op_expected:
             assert 'op' in fields
@@ -146,17 +146,17 @@ class BagReader:
         callerid: Optional[str] = None
         latching: Optional[str] = None
         if 'callerid' in conn:
-            callerid = decode_str(conn['callerid'])
+            callerid = decode_string(conn['callerid'])
         if 'latching' in conn:
-            latching = decode_str(conn['latching'])
+            latching = decode_string(conn['latching'])
         return ConnectionInfo(conn=decode_uint32(header['conn']),
                               callerid=callerid,
                               latching=latching,
-                              topic=decode_str(header['topic']),
-                              topic_original=decode_str(conn['topic']),
-                              typ=decode_str(conn['type']),
-                              md5sum=decode_str(conn['md5sum']),
-                              message_definition=decode_str(conn['message_definition']))  # noqa
+                              topic=decode_string(header['topic']),
+                              topic_original=decode_string(conn['topic']),
+                              typ=decode_string(conn['type']),
+                              md5sum=decode_string(conn['md5sum']),
+                              message_definition=decode_string(conn['message_definition']))  # noqa
 
     def _read_chunk_info_record(self):
         header = self._read_header(OpCode.CHUNK_INFO)
@@ -185,7 +185,7 @@ class BagReader:
         self.__fp.seek(pos_record)
         header = self._read_header(OpCode.CHUNK)
         size_uncompressed = decode_uint32(header['size'])
-        compression = Compression(decode_str(header['compression']))
+        compression = Compression(decode_string(header['compression']))
         pos_data = self.__fp.tell()
 
         # determine the compressed size of the chunk data
