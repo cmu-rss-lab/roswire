@@ -50,6 +50,10 @@ def encode_time(time: Time) -> bytes:
     return encode_uint32(time.secs) + encode_uint32(time.nsecs)
 
 
+def encode_duration(duration: Duration) -> bytes:
+    return encode_uint32(time.secs) + encode_uint32(time.nsecs)
+
+
 write_int8 = simple_writer('int8')
 write_uint8 = simple_writer('uint8')
 write_int16 = simple_writer('int16')
@@ -64,3 +68,4 @@ write_char = simple_writer('char')
 write_byte = simple_writer('byte')
 write_bool = simple_writer('bool')
 write_time = writer(encode_time)
+write_duration = writer(encode_duration)
