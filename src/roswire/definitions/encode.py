@@ -11,11 +11,24 @@ import struct
 from .base import Time, Duration
 from .decode import is_simple, get_pattern
 
+T = TypeVar('T')
+
 
 def simple_encoder(typ: str) -> Callable[[Any], bytes]:
     """Returns an encoder for a specified simple type."""
     pattern = '<' + get_pattern(typ)
     return functools.partial(struct.pack, pattern)
+
+
+def sized_encoder(encoder_content: Callable[[T], bytes],
+                  get_size: Callable[[T], int]
+                  ) -> Callable[[T], bytes]:
+    def encoder(val: T) -> bytes:
+        bin_size = encode_uint32(get_size(val))
+        bin_content = encoder_content(val)
+        return bin_size + bin_content
+
+    return encoder
 
 
 def writer(encoder: Callable[[Any], bytes]
@@ -69,3 +82,15 @@ write_byte = simple_writer('byte')
 write_bool = simple_writer('bool')
 write_time = writer(encode_time)
 write_duration = writer(encode_duration)
+
+
+def string_writer(length: Optional[int] = None
+                  ) -> Callable[[BinaryIO], str]:
+    """Returns a writer for (possibly fixed-length) strings."""
+    encoder: Callable[[str], bytes]
+    encode_content: Callable[[str], bytes] = str.encode
+    if length is None:
+        encoder = sized_encoder(encode_content, str.__len__)
+    else:
+        encoder = encode_content
+    return writer(encoder)
