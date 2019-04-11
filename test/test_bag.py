@@ -21,10 +21,16 @@ def load_mavros_type_db() -> TypeDatabase:
 
 def test_from_file():
     db_type = load_mavros_type_db()
+    typ_mavlink = db_type['mavros_msgs/Mavlink']
     fn_bag = os.path.join(DIR_TEST, 'example.bag')
     bag = BagReader(fn_bag, db_type)
-    print(f"Index Pos: {bag.header.index_pos}")
-    print(f"Conn. Count: {bag.header.conn_count}")
-    print(f"Chunk Count: {bag.header.chunk_count}")
+    assert bag.header.index_pos == 189991
+    assert bag.header.conn_count == 7
+    assert bag.header.chunk_count == 1
+    assert bag.topics == {'/rosout', '/mavros/mission/waypoints',
+                          '/mavlink/from', '/diagnostics', '/rosout_agg',
+                          '/mavros/state'}
+
     msgs = list(bag.read_messages(['/mavlink/from']))
-    print(msgs[3])
+    assert all(m.topic == '/mavlink/from' for m in msgs)
+    assert all(isinstance(m.message, typ_mavlink) for m in msgs)
