@@ -252,4 +252,6 @@ class Message:
 
     def encode(self) -> bytes:
         """Returns a binary encoding of this message."""
-        return self.write(BytesIO()).getvalue()
+        b = BytesIO()
+        self.write(b)
+        return b.getvalue()
