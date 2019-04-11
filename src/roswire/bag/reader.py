@@ -9,8 +9,6 @@ import datetime
 import logging
 import heapq
 
-import attr
-
 from .core import *
 from ..definitions.base import Time
 from ..definitions.msg import Message
