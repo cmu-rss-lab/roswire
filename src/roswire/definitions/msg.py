@@ -13,9 +13,10 @@ import attr
 from toposort import toposort_flatten as toposort
 
 from .base import is_builtin, Time, Duration
-from .decode import (is_simple, get_pattern, read_uint32,
+from .decode import (is_simple,
                      read_time, read_duration,
                      read_string, read_fixed_length_string,
+                     simple_reader,
                      simple_array_reader,
                      complex_array_reader,
                      string_reader)
@@ -319,18 +320,8 @@ class Message:
                       ) -> None:
         chunk_names = ['.'.join(ctx + (field.name,)) for ctx, field in chunk]
         logger.debug("decoding chunk: %s", chunk_names)
-
-        # compute the struct pattern for the chunk
-        typs = [field.typ for ctx, field in chunk]
-        pattern = '<' + ''.join([get_pattern(t) for t in typs])
-        num_bytes = struct.calcsize(pattern)
-
-        # read struct into buffer
-        values = struct.unpack(pattern, b.read(num_bytes))
-        for value, (ctx, field) in zip(values, chunk):
-            field_fullname = '.'.join(ctx + (field.name,))
-            logger.debug("decoded simple field [%s]: %s",
-                         field_fullname, repr(value))
+        for ctx, field in chunk:
+            value = simple_reader(field.typ)(b)
             msg_buffer.write(ctx, field, value)
 
     @classmethod
