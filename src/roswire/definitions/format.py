@@ -74,8 +74,8 @@ class FormatDatabase:
     def from_dict(cls, d: Dict[str, Any]) -> 'FormatDatabase':
         """Loads a format database from a JSON document."""
         msg = {MsgFormat.from_dict(dd) for dd in d['messages']}
-        srv = {SrvFormat.from_dict(dd) for dd in d['messages']}
-        action = {ActionFormat.from_dict(dd) for dd in d['messages']}
+        srv = {SrvFormat.from_dict(dd) for dd in d['services']}
+        action = {ActionFormat.from_dict(dd) for dd in d['actions']}
         return FormatDatabase(msg, srv, action)
 
     def save(self, fn: str) -> None:
