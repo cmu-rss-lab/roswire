@@ -2,7 +2,7 @@
 __all__ = ('FormatDatabase',)
 
 from types import MappingProxyType
-from typing import Collection, Mapping, Dict, Set
+from typing import Collection, Mapping, Dict, Set, List, Any
 
 import yaml
 
