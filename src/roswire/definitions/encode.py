@@ -115,3 +115,22 @@ def simple_array_writer(typ: str,
         b.write(struct.pack(pattern, *arr))
 
     return var_writer
+
+
+def complex_array_writer(entry_writer: Callable[[BinaryIO, T], None],
+                         length: Optional[int] = None
+                         ) -> Callable[[BinaryIO, Sequence[T]], None]:
+    """Returns a writer for a complex array."""
+    def write_content(b: BinaryIO, arr: Sequence[T]) -> None:
+        for v in arr:
+            entry_writer(b, v)
+
+    if length is not None:
+        return write_content
+
+    def var_writer(b: BinaryIO, arr: Sequence[Any]) -> None:
+        length = len(arr)
+        write_uint32(b, length)
+        write_content(b, arr)
+
+    return var_writer
