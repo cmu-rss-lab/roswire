@@ -1,15 +1,19 @@
 __all__ = ('Constant', 'ConstantValue', 'Field', 'MsgFormat', 'Message')
 
 from typing import (Type, Optional, Any, Union, Tuple, List, Dict, ClassVar,
-                    Collection, Set, Iterator, Mapping)
+                    Collection, Set, Iterator, Mapping, Callable, BinaryIO)
+from io import BytesIO
 import logging
+import functools
+import struct
 import re
 import os
 
 import attr
 from toposort import toposort_flatten as toposort
 
-from .base import is_builtin, is_simple, Time, Duration
+from .base import is_builtin, Time, Duration
+from .decode import is_simple
 from ..proxy import FileProxy
 from .. import exceptions
 
@@ -204,9 +208,7 @@ class MsgFormat:
 
 
 class Message:
-    """
-    Base class used by all messages.
-    """
+    """Base class used by all messages."""
     format: ClassVar[MsgFormat]
 
     @staticmethod
@@ -235,3 +237,11 @@ class Message:
             val = getattr(self, field.name)
             d[name] = self._to_dict_value(val)
         return d
+
+    @classmethod
+    def read(cls, b: BinaryIO) -> 'Message':
+        raise NotImplementedError
+
+    @classmethod
+    def decode(cls, b: bytes) -> 'Message':
+        return cls.read(BytesIO(b))

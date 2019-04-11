@@ -1,25 +1,8 @@
-__all__ = ('Time', 'Duration', 'is_builtin', 'get_builtin', 'is_simple')
+__all__ = ('Time', 'Duration', 'is_builtin', 'get_builtin')
 
-from typing import Dict, Any, FrozenSet, Type
+from typing import Dict, Any, Type
 
 import attr
-
-_SIMPLE_TYPE_TO_STRUCT = {
-    'int8': 'b',
-    'uint8': 'B',
-    'bool': 'B',
-    'int16': 'h',
-    'uint16': 'H',
-    'int32': 'i',
-    'uint32': 'I',
-    'int64': 'q',
-    'uint64': 'Q',
-    'float32': 'f',
-    'float64': 'd',
-    # deprecated types
-    'char': 'B',  # unsigned
-    'byte': 'b'  # signed
-}
 
 
 @attr.s(frozen=True, slots=True)
@@ -78,8 +61,3 @@ def is_builtin(typ: str) -> bool:
 def get_builtin(typ: str) -> Type:
     """Returns the Python type that implements a given ROS type."""
     return _BUILTIN_TYPES[typ]
-
-
-def is_simple(typ: str) -> bool:
-    """Determines whether a given type is a simple primitive."""
-    return typ in _SIMPLE_TYPE_TO_STRUCT

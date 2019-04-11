@@ -1,18 +1,26 @@
 __all__ = ('TypeDatabase',)
 
 from typing import (Collection, Type, Mapping, Iterator, Dict, ClassVar, Any,
-                    Sequence)
+                    Sequence, Callable, BinaryIO)
+from collections import OrderedDict
 
 import attr
 
 from .msg import MsgFormat, Field, Message
 from .format import FormatDatabase
 from .base import Time, get_builtin
+from .decode import (is_simple,
+                     read_time,
+                     read_duration,
+                     simple_reader,
+                     string_reader,
+                     complex_array_reader,
+                     simple_array_reader)
 
 
 class TypeDatabase(Mapping[str, Type[Message]]):
-    @staticmethod
-    def build(db_format: FormatDatabase) -> 'TypeDatabase':
+    @classmethod
+    def build(cls, db_format: FormatDatabase) -> 'TypeDatabase':
         formats = list(db_format.messages.values())
         formats = MsgFormat.toposort(formats)
         name_to_type: Dict[str, Type[Message]] = {}
@@ -26,10 +34,61 @@ class TypeDatabase(Mapping[str, Type[Message]]):
                     f_base_typ = get_builtin(f.base_type)
                 ns[f.name] = attr.ib(type=f_base_typ)
             ns['format'] = fmt
+            ns['read'] = classmethod(cls._build_read(name_to_type, fmt))
             t: Type[Message] = type(fmt.name, (Message,), ns)
             t = attr.s(t, frozen=True, slots=True)
             name_to_type[fmt.fullname] = t
         return TypeDatabase(name_to_type.values())
+
+    @classmethod
+    def _build_read(cls,
+                    name_to_type: Mapping[str, Type[Message]],
+                    fmt: MsgFormat
+                    ) -> Callable[[Type[Message], BinaryIO], Message]:
+        """Builds a reader for a given message format."""
+        def get_factory(field: Field) -> Callable[[BinaryIO], Any]:
+            if field.is_simple:
+                return simple_reader(field.typ)
+            if field.typ == 'time':
+                return read_time
+            if field.typ == 'duration':
+                return read_duration
+            if field.typ == 'string':
+                return string_reader(field.length)
+            if field.is_array and is_simple(field.base_type):
+                return simple_array_reader(field.base_type, field.length)
+            if field.is_array and not is_simple(field.base_type):
+                entry_factory: Callable[[BinaryIO], Any]
+                if field.base_type == 'time':
+                    entry_factory = read_time
+                elif field.base_type == 'duration':
+                    entry_factory = read_duration
+                # FIXME how about arrays of fixed-length strings?
+                elif field.base_type == 'string':
+                    entry_factory = string_reader()
+                elif field.base_type in name_to_type:
+                    entry_factory = name_to_type[field.base_type].read
+                else:
+                    m = "unable to find factory for base type: {}"
+                    m = m.format(field.base_type)
+                    raise Exception(m)
+                return complex_array_reader(entry_factory, field.length)
+            if field.typ in name_to_type:
+                return name_to_type[field.typ].read
+            m = "unable to find factory for field: {field.name} [{field.typ}]"
+            raise Exception(m)
+
+        fields: OrderedDict[str, Callable[[BinaryIO], Any]] = OrderedDict()
+        for field in fmt.fields:
+            fields[field.name] = get_factory(field)
+
+        def reader(cls: Type[Message], b: BinaryIO) -> Message:
+            values: Dict[str, Any] = {}
+            for name, factory in fields.items():
+                values[name] = factory(b)
+            return cls(**values)  # type: ignore
+
+        return reader
 
     def __init__(self, types: Collection[Type[Message]]) -> None:
         self.__contents: Dict[str, Type[Message]] = \

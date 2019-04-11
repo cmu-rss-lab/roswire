@@ -3,120 +3,33 @@ __all__ = ('BagReader',)
 from typing import (Dict, Sequence, Union, Optional, Tuple, List, Type,
                     Callable, Collection, Set, Iterator)
 from io import BytesIO
-from enum import Enum
 import os
 import bz2
-import struct
 import datetime
 import logging
 import heapq
 
 import attr
 
-from .base import Time
-from .type_db import Message
+from .core import *
+from ..definitions.base import Time
+from ..definitions.msg import Message
+from ..definitions.type_db import TypeDatabase
+from ..definitions.decode import (decode_uint8, read_uint8,
+                                  decode_uint32, read_uint32,
+                                  decode_uint64, read_uint64,
+                                  decode_string,
+                                  decode_time, read_time)
+
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-def decode_uint8(v: bytes) -> int:
-    return struct.unpack('<B', v)[0]
-
-
-def decode_uint32(v: bytes) -> int:
-    return struct.unpack('<L', v)[0]
-
-
-def decode_uint64(v: bytes) -> int:
-    return struct.unpack('<LL', v)[0]
-
-
-def decode_str(v: bytes) -> str:
-    return v.decode('utf-8')
-
-
-def decode_time(v: bytes) -> Time:
-    return Time(decode_uint32(v[0:4]), decode_uint32(v[4:8]))
-
-
-class OpCode(Enum):
-    MESSAGE_DATA = b'\x02'
-    HEADER = b'\x03'
-    INDEX_DATA = b'\x04'
-    CHUNK = b'\x05'
-    CHUNK_INFO = b'\x06'
-    CONNECTION_INFO = b'\x07'
-
-    @property
-    def hex(self) -> str:
-        return f'0x{self.value.hex()}'
-
-
-class Compression(Enum):
-    NONE = 'none'
-    BZ2 = 'bz2'
-
-
-@attr.s(frozen=True, slots=True)
-class BagMessage:
-    topic: str = attr.ib()
-    time: Time = attr.ib()
-    # message/data
-
-
-@attr.s(frozen=True, slots=True)
-class ChunkConnection:
-    # connection id
-    uid: int = attr.ib()
-    # number of messages that arrived on this connection in the chunk
-    count: int = attr.ib()
-
-
-@attr.s(frozen=True, slots=True)
-class Chunk:
-    pos_record: int = attr.ib()
-    pos_data: int = attr.ib()
-    time_start: Time = attr.ib()
-    time_end: Time = attr.ib()
-    connections: Tuple[ChunkConnection, ...] = attr.ib(converter=tuple)
-    compression: Compression = attr.ib()
-    size_uncompressed: int = attr.ib()
-    size_compressed: int = attr.ib()
-
-
-@attr.s(frozen=True, slots=True)
-class ConnectionInfo:
-    conn: int = attr.ib()
-    topic: str = attr.ib()
-    topic_original: str = attr.ib()
-    typ: str = attr.ib()
-    md5sum: str = attr.ib()
-    message_definition: str = attr.ib()
-    callerid: Optional[str] = attr.ib()
-    latching: Optional[str] = attr.ib()
-
-
-@attr.s(frozen=True, slots=True)
-class BagHeader:
-    index_pos: int = attr.ib()
-    conn_count: int = attr.ib()
-    chunk_count: int = attr.ib()
-
-
-@attr.s(frozen=True, slots=True)
-class IndexEntry:
-    time: Time = attr.ib()
-    pos: int = attr.ib()
-    offset: int = attr.ib()
-
-
-Index = Dict[int, List[IndexEntry]]
-
-
 class BagReader:
-    def __init__(self, fn: str) -> None:
+    def __init__(self, fn: str, db_type: TypeDatabase) -> None:
         self.__fp = open(fn, 'rb')
+        self.__db_type = db_type
         self.__size_bytes: int = os.path.getsize(fn)
 
         version = self._read_version()
@@ -179,7 +92,7 @@ class BagReader:
 
     def _skip_sized(self, ptr=None) -> None:
         ptr = ptr if ptr else self.__fp
-        ptr.seek(self._read_uint32(), os.SEEK_CUR)
+        ptr.seek(read_uint32(ptr), os.SEEK_CUR)
 
     def _skip_record(self, ptr=None) -> None:
         self._skip_sized(ptr)
@@ -187,21 +100,12 @@ class BagReader:
 
     def _read_sized(self, ptr=None) -> bytes:
         ptr = ptr if ptr else self.__fp
-        size = self._read_uint32(ptr)
+        size = read_uint32(ptr)
         logger.debug("reading sized block: %d bytes", size)
         return ptr.read(size)
 
-    def _read_time(self, ptr=None) -> Time:
-        ptr = ptr if ptr else self.__fp
-        return decode_time(ptr.read(8))
-
-    def _read_uint32(self, ptr=None) -> int:
-        ptr = ptr if ptr else self.__fp
-        return decode_uint32(ptr.read(4))
-
-    def _read_version(self, ptr=None) -> str:
-        ptr = ptr if ptr else self.__fp
-        return decode_str(ptr.readline()).rstrip()
+    def _read_version(self) -> str:
+        return decode_string(self.__fp.readline()).rstrip()
 
     def _read_header(self,
                      op_expected: Optional[OpCode] = None,
@@ -216,7 +120,7 @@ class BagReader:
             name, sep, value = header[:size].partition(b'\x3d')
             if sep == '':
                 raise Exception('error reading header field')
-            fields[decode_str(name)] = value
+            fields[decode_string(name)] = value
             header = header[size:]
         if op_expected:
             assert 'op' in fields
@@ -242,17 +146,17 @@ class BagReader:
         callerid: Optional[str] = None
         latching: Optional[str] = None
         if 'callerid' in conn:
-            callerid = decode_str(conn['callerid'])
+            callerid = decode_string(conn['callerid'])
         if 'latching' in conn:
-            latching = decode_str(conn['latching'])
+            latching = decode_string(conn['latching'])
         return ConnectionInfo(conn=decode_uint32(header['conn']),
                               callerid=callerid,
                               latching=latching,
-                              topic=decode_str(header['topic']),
-                              topic_original=decode_str(conn['topic']),
-                              typ=decode_str(conn['type']),
-                              md5sum=decode_str(conn['md5sum']),
-                              message_definition=decode_str(conn['message_definition']))  # noqa
+                              topic=decode_string(header['topic']),
+                              topic_original=decode_string(conn['topic']),
+                              typ=decode_string(conn['type']),
+                              md5sum=decode_string(conn['md5sum']),
+                              message_definition=decode_string(conn['message_definition']))  # noqa
 
     def _read_chunk_info_record(self):
         header = self._read_header(OpCode.CHUNK_INFO)
@@ -281,11 +185,11 @@ class BagReader:
         self.__fp.seek(pos_record)
         header = self._read_header(OpCode.CHUNK)
         size_uncompressed = decode_uint32(header['size'])
-        compression = Compression(decode_str(header['compression']))
+        compression = Compression(decode_string(header['compression']))
         pos_data = self.__fp.tell()
 
         # determine the compressed size of the chunk data
-        size_compressed = self._read_uint32()
+        size_compressed = read_uint32(self.__fp)
 
         # restore the original position of the read pointer
         self.__fp.seek(pos_original)
@@ -328,10 +232,10 @@ class BagReader:
         count = decode_uint32(header['count'])
         assert ver == 1
 
-        self._read_uint32()  # skip size
+        read_uint32(self.__fp)  # skip size
         for i in range(count):
-            time = self._read_time()
-            offset = self._read_uint32()
+            time = read_time(self.__fp)
+            offset = read_uint32(self.__fp)
             entry = IndexEntry(time=time, pos=pos_chunk, offset=offset)
             index[uid].append(entry)
 
@@ -393,8 +297,13 @@ class BagReader:
         conn_info = self.__connections[conn_id]
         topic = conn_info.topic
         msg_typ_name = conn_info.typ
+        msg_typ = self.__db_type[msg_typ_name]
 
-        # TODO read and decode message content
+        # read the raw message data
+        raw = self._read_sized(bfr)
+        logger.debug("raw message: %s", raw)
+        content = msg_typ.read(BytesIO(raw))
+        logger.debug("decoded message: %s", content)
 
         logger.debug("TOPIC: %s (%s)", topic, msg_typ_name)
         msg = BagMessage(topic, t)
