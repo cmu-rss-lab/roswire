@@ -28,4 +28,5 @@ class BagWriter:
         Writes a sequence of messages to the bag.
         Any existing bag file contents will be overwritten.
         """
+        self.__fp.write('#ROSBAG V2.0\n'.encode('utf-8'))
         raise NotImplementedError
