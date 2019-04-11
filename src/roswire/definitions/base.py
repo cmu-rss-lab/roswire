@@ -1,6 +1,12 @@
-__all__ = ('Time', 'Duration', 'is_builtin', 'get_builtin', 'is_simple')
+__all__ = ('Time', 'Duration',
+           'is_builtin', 'get_builtin', 'is_simple', 'get_pattern',
+           'decode_uint32', 'read_uint32',
+           'decode_time', 'read_time',
+           'decode_duration', 'read_duration')
 
 from typing import Dict, Any, FrozenSet, Type
+from io import BytesIO
+import struct
 
 import attr
 
@@ -80,6 +86,39 @@ def get_builtin(typ: str) -> Type:
     return _BUILTIN_TYPES[typ]
 
 
+def get_pattern(typ: str) -> str:
+    """Returns the struct pattern for a simple type."""
+    return _SIMPLE_TYPE_TO_STRUCT[typ]
+
+
 def is_simple(typ: str) -> bool:
     """Determines whether a given type is a simple primitive."""
     return typ in _SIMPLE_TYPE_TO_STRUCT
+
+
+def decode_uint32(v: bytes) -> int:
+    return struct.unpack('<I', v)[0]
+
+
+def read_uint32(b: BytesIO) -> int:
+    return decode_uint32(b.read(4))
+
+
+def decode_time(b: bytes) -> Time:
+    secs = decode_uint32(b[0:4])
+    nsecs = decode_uint32(b[4:8])
+    return Time(secs, nsecs)
+
+
+def read_time(b: BytesIO) -> Time:
+    return decode_time(b.read(8))
+
+
+def decode_duration(b: bytes) -> Duration:
+    secs = decode_uint32(b[0:4])
+    nsecs = decode_uint32(b[4:8])
+    return Duration(secs, nsecs)
+
+
+def read_duration(b: BytesIO) -> Duration:
+    return decode_duration(b.read(8))

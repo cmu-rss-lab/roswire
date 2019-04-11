@@ -14,7 +14,8 @@ import heapq
 import attr
 
 from .base import Time
-from .type_db import Message
+from .msg import Message
+from .type_db import TypeDatabase
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -115,8 +116,9 @@ Index = Dict[int, List[IndexEntry]]
 
 
 class BagReader:
-    def __init__(self, fn: str) -> None:
+    def __init__(self, fn: str, db_type: TypeDatabase) -> None:
         self.__fp = open(fn, 'rb')
+        self.__db_type = db_type
         self.__size_bytes: int = os.path.getsize(fn)
 
         version = self._read_version()
@@ -393,8 +395,13 @@ class BagReader:
         conn_info = self.__connections[conn_id]
         topic = conn_info.topic
         msg_typ_name = conn_info.typ
+        msg_typ = self.__db_type[msg_typ_name]
 
-        # TODO read and decode message content
+        # read the raw message data
+        raw = self._read_sized(bfr)
+        logger.debug("raw message: %s", raw)
+        content = msg_typ.decode(self.__db_type, BytesIO(raw))
+        logger.debug("decoded message: %s", content)
 
         logger.debug("TOPIC: %s (%s)", topic, msg_typ_name)
         msg = BagMessage(topic, t)

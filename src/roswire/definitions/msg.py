@@ -2,14 +2,18 @@ __all__ = ('Constant', 'ConstantValue', 'Field', 'MsgFormat', 'Message')
 
 from typing import (Type, Optional, Any, Union, Tuple, List, Dict, ClassVar,
                     Collection, Set, Iterator, Mapping)
+from io import BytesIO
 import logging
+import functools
+import struct
 import re
 import os
 
 import attr
 from toposort import toposort_flatten as toposort
 
-from .base import is_builtin, is_simple, Time, Duration
+from .base import (is_builtin, is_simple, Time, Duration, read_uint32,
+                   read_time, read_duration, get_pattern)
 from ..proxy import FileProxy
 from .. import exceptions
 
@@ -203,10 +207,49 @@ class MsgFormat:
                 yield from fmt.flatten(name_to_format, ctx + (field.name,))
 
 
+class MessageBuffer:
+    def __init__(self,
+                 typ: Type['Message'],
+                 name_to_type: Mapping[str, Type['Message']]
+                 ) -> None:
+        self.__typ = typ
+        self.__name_to_type = name_to_type
+        self.__contents: Dict[str, Any] = {}
+
+    def write(self,
+              ctx: Tuple[str, ...],
+              field: Field,
+              value: Any
+              ) -> None:
+        d = self.__contents
+        for ancestor in ctx:
+            if ancestor not in d:
+                d[ancestor] = {}
+            d = d[ancestor]
+        d[field.name] = value
+
+    @property
+    def contents(self) -> Dict[str, Any]:
+        return self.__contents
+
+    def __build(self,
+                typ: Type['Message'],
+                values: Dict[str, Any]
+                ) -> 'Message':
+        for n, v in values.items():
+            if isinstance(v, dict):
+                field = next(f for f in typ.format.fields if f.name == n)
+                vt = self.__name_to_type[field.typ]
+                values[n] = self.__build(vt, v)
+        logger.debug("building message [%s] with values: %s", typ, values)
+        return typ(**values)  # type: ignore
+
+    def build(self) -> 'Message':
+        return self.__build(self.__typ, self.__contents)
+
+
 class Message:
-    """
-    Base class used by all messages.
-    """
+    """Base class used by all messages."""
     format: ClassVar[MsgFormat]
 
     @staticmethod
@@ -235,3 +278,136 @@ class Message:
             val = getattr(self, field.name)
             d[name] = self._to_dict_value(val)
         return d
+
+    @classmethod
+    def _decode_string(cls, length: Optional[int], b: BytesIO) -> str:
+        if length is None:
+            logger.debug("decoding string length")
+            length = read_uint32(b)
+            logger.debug("decoded string length: %d characters", length)
+        else:
+            logger.debug("decoding fixed-length string")
+        return b.read(length).decode('utf-8')
+
+    @classmethod
+    def _decode_simple_array(cls, field: Field, b: BytesIO) -> List[Any]:
+        length = read_uint32(b) if field.length is None else field.length
+        pattern = f"<{length}{get_pattern(field.base_type)}"
+        logger.debug("simple array pattern: %s", pattern)
+        num_bytes = struct.calcsize(pattern)
+        logger.debug("simple array size: %d bytes", num_bytes)
+        return list(struct.unpack(pattern, b.read(num_bytes)))
+
+    @classmethod
+    def _decode_complex_array(cls,
+                              name_to_type: Mapping[str, Type['Message']],
+                              field: Field,
+                              b: BytesIO
+                              ) -> List[Any]:
+        # FIXME this doesn't handle Time or Duration
+        def dec():
+            return name_to_type[field.base_type].decode(name_to_type, b)
+
+        length = read_uint32(b) if field.length is None else field.length
+        return [dec() for i in range(length)]
+
+    @classmethod
+    def _decode_array(cls,
+                      name_to_type: Mapping[str, Type['Message']],
+                      field: Field,
+                      b: BytesIO
+                      ) -> List[Any]:
+        if is_simple(field.base_type):
+            return cls._decode_simple_array(field, b)
+        else:
+            return cls._decode_complex_array(name_to_type, field, b)
+
+    @classmethod
+    def _decode_chunk(cls,
+                      msg_buffer: MessageBuffer,
+                      chunk: List[Tuple[Tuple[str, ...], Field]],
+                      b: BytesIO
+                      ) -> None:
+        chunk_names = ['.'.join(ctx + (field.name,)) for ctx, field in chunk]
+        logger.debug("decoding chunk: %s", chunk_names)
+
+        # compute the struct pattern for the chunk
+        typs = [field.typ for ctx, field in chunk]
+        pattern = '<' + ''.join([get_pattern(t) for t in typs])
+        num_bytes = struct.calcsize(pattern)
+
+        # read struct into buffer
+        values = struct.unpack(pattern, b.read(num_bytes))
+        for value, (ctx, field) in zip(values, chunk):
+            field_fullname = '.'.join(ctx + (field.name,))
+            logger.debug("decoded simple field [%s]: %s",
+                         field_fullname, repr(value))
+            msg_buffer.write(ctx, field, value)
+
+    @classmethod
+    def _decode_complex(cls,
+                        name_to_type: Mapping[str, Type['Message']],
+                        msg_buffer: MessageBuffer,
+                        ctx: Tuple[str, ...],
+                        field: Field,
+                        b: BytesIO
+                        ) -> None:
+        field_fullname = '.'.join(ctx + (field.name,))
+        logger.debug("decoding complex field [%s]", field_fullname)
+
+        # read the value for the field
+        val: Any
+        if field.typ == 'string':
+            logger.debug("decoding string: %s", field)
+            val = cls._decode_string(field.length, b)
+        elif field.typ == 'time':
+            logger.debug("decoding time: %s", field_fullname)
+            val = read_time(b)
+            logger.debug("decoded time [%s]: %s", field_fullname, val)
+        elif field.typ == 'duration':
+            logger.debug("decoding duration: %s", field_fullname)
+            val = read_duration(b)
+            logger.debug("decoded duration [%s]: %s", field_fullname, val)
+        elif field.is_array:
+            val = cls._decode_array(name_to_type, field, b)
+        else:
+            Exception("unexpected complex field: {field.name} [{field.typ}]")
+
+        # write the value to the buffer
+        msg_buffer.write(ctx, field, val)
+
+    @classmethod
+    def decode(cls,
+               name_to_type: Mapping[str, Type['Message']],
+               b: BytesIO
+               ) -> 'Message':
+        name_to_format = {n: t.format for n, t in name_to_type.items()}
+        flattened_names = ['.'.join(c + (f.name,))
+                           for c, f in cls.format.flatten(name_to_format)]
+        msg_buffer = MessageBuffer(cls, name_to_type)
+
+        logger.debug("decoding message [%s]", cls.format.fullname)
+        logger.debug("message fields [%s]: %s",
+                     cls.format.fullname, flattened_names)
+
+        # individually process each:
+        # - contiguous chunk of simple fields
+        # - complex field
+        chunk: List[Tuple[Tuple[str, ...], Field]] = []
+        for ctx, field in cls.format.flatten(name_to_format):
+            field_fullname = '.'.join(ctx + (field.name,))
+            logger.debug("decoding field [%s]", field_fullname)
+            if field.is_simple:
+                logger.debug("adding field to chunk [%s]", field_fullname)
+                chunk.append((ctx, field))
+            else:
+                if chunk:
+                    cls._decode_chunk(msg_buffer, chunk, b)
+                    chunk.clear()
+                cls._decode_complex(name_to_type, msg_buffer, ctx, field, b)
+        if chunk:
+            cls._decode_chunk(msg_buffer, chunk, b)
+
+        # construct message from message buffer
+        logger.debug("message buffer: %s", msg_buffer.contents)
+        return msg_buffer.build()
