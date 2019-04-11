@@ -13,13 +13,7 @@ import attr
 from toposort import toposort_flatten as toposort
 
 from .base import is_builtin, Time, Duration
-from .decode import (is_simple,
-                     read_time, read_duration,
-                     read_string, read_fixed_length_string,
-                     simple_reader,
-                     simple_array_reader,
-                     complex_array_reader,
-                     string_reader)
+from .decode import is_simple
 from ..proxy import FileProxy
 from .. import exceptions
 
@@ -243,72 +237,6 @@ class Message:
             val = getattr(self, field.name)
             d[name] = self._to_dict_value(val)
         return d
-
-    @classmethod
-    def _decode_complex_array(cls,
-                              name_to_type: Mapping[str, Type['Message']],
-                              field: Field,
-                              b: BytesIO
-                              ) -> List[Any]:
-        factory: Callable[[BytesIO], Any]
-        if field.base_type == 'time':
-            factory = read_time
-        elif field.base_type == 'duration':
-            factory = read_duration
-        else:
-            factory = functools.partial(name_to_type[field.base_type].decode,
-                                        name_to_type)
-        return complex_array_reader(factory, field.length)(b)
-
-    @classmethod
-    def _decode_array(cls,
-                      name_to_type: Mapping[str, Type['Message']],
-                      field: Field,
-                      b: BytesIO
-                      ) -> List[Any]:
-        if is_simple(field.base_type):
-            return simple_array_reader(field.base_type, field.length)(b)
-        else:
-            return cls._decode_complex_array(name_to_type, field, b)
-
-    @classmethod
-    def _decode_complex(cls,
-                        name_to_type: Mapping[str, Type['Message']],
-                        field: Field,
-                        b: BytesIO
-                        ) -> Any:
-        logger.debug("decoding complex field [%s]", field.name)
-        val: Any
-        if field.typ == 'string':
-            logger.debug("decoding string: %s", field)
-            return string_reader(field.length)(b)
-        if field.typ == 'time':
-            return read_time(b)
-        if field.typ == 'duration':
-            return read_duration(b)
-        if field.is_array:
-            return cls._decode_array(name_to_type, field, b)
-        if field.typ in name_to_type:
-            return name_to_type[field.typ].decode(name_to_type, b)
-
-        Exception("unexpected complex field: {field.name} [{field.typ}]")
-
-    @classmethod
-    def decode(cls,
-               name_to_type: Mapping[str, Type['Message']],
-               b: BytesIO
-               ) -> 'Message':
-        logger.debug("decoding message [%s]", cls.format.fullname)
-        values: Dict[str, Any] = {}
-        for field in cls.format.fields:
-            logger.debug("decoding field [%s]", field.name)
-            if field.is_simple:
-                value = simple_reader(field.typ)(b)
-            else:
-                value = cls._decode_complex(name_to_type, field, b)
-            logger.debug("decoded field [%s]: %s", field.name, repr(value))
-            values[field.name] = value
-        return cls(**values)  # type: ignore
 
     @classmethod
     def read(cls, b: BytesIO) -> 'Message':
