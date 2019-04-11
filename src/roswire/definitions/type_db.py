@@ -140,7 +140,7 @@ class TypeDatabase(Mapping[str, Type[Message]]):
 
         def writer(self: Message, b: BinaryIO) -> None:
             for name, field_writer in field_writers.items():
-                field_writer(getattr(b, name), b)
+                field_writer(getattr(self, name), b)
 
         return writer
 
