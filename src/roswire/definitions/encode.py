@@ -87,7 +87,7 @@ write_duration = writer(encode_duration)
 
 
 def string_writer(length: Optional[int] = None
-                  ) -> Callable[[BinaryIO, str], None]:
+                  ) -> Callable[[str, BinaryIO], None]:
     """Returns a writer for (possibly fixed-length) strings."""
     encoder: Callable[[str], bytes]
     encode_content: Callable[[str], bytes] = str.encode
@@ -100,7 +100,7 @@ def string_writer(length: Optional[int] = None
 
 def simple_array_writer(typ: str,
                         length: Optional[int] = None
-                        ) -> Callable[[BinaryIO, Sequence[Any]], None]:
+                        ) -> Callable[[Sequence[Any], BinaryIO], None]:
     """Returns a writer for a simple array."""
     base_pattern = get_pattern(typ)
 
@@ -110,7 +110,7 @@ def simple_array_writer(typ: str,
 
     def var_writer(arr: Sequence[Any], b: BinaryIO) -> None:
         length = len(arr)
-        write_uint32(b, length)
+        write_uint32(length, b)
         pattern = f'<{length}{base_pattern}'
         b.write(struct.pack(pattern, *arr))
 
