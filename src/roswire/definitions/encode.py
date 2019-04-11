@@ -18,14 +18,18 @@ def simple_encoder(typ: str) -> Callable[[Any], bytes]:
     return functools.partial(struct.pack, pattern)
 
 
-def simple_writer(typ: str) -> Callable[[BinaryIO, Any], None]:
-    """Returns a writer for a specified simple type."""
-    encoder = simple_encoder(typ)
-
+def writer(encoder: Callable[[Any], bytes]
+           ) -> Callable[[BinaryIO, Any], None]:
     def write(b: BinaryIO, v: Any) -> None:
         b.write(encoder(v))
 
     return write
+
+
+def simple_writer(typ: str) -> Callable[[BinaryIO, Any], None]:
+    """Returns a writer for a specified simple type."""
+    return writer(simple_encoder(typ))
+
 
 encode_int8 = simple_encoder('int8')
 encode_uint8 = simple_encoder('uint8')
@@ -41,6 +45,11 @@ encode_char = simple_encoder('char')
 encode_byte = simple_encoder('byte')
 encode_bool = simple_encoder('bool')
 
+
+def encode_time(time: Time) -> bytes:
+    return encode_uint32(time.secs) + encode_uint32(time.nsecs)
+
+
 write_int8 = simple_writer('int8')
 write_uint8 = simple_writer('uint8')
 write_int16 = simple_writer('int16')
@@ -54,7 +63,4 @@ write_float64 = simple_writer('float64')
 write_char = simple_writer('char')
 write_byte = simple_writer('byte')
 write_bool = simple_writer('bool')
-
-
-def encode_time(time: Time) -> bytes:
-    return encode_uint32(time.secs) + encode_uint32(time.nsecs)
+write_time = writer(encode_time)
