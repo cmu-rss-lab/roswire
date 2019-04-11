@@ -41,6 +41,7 @@ class TypeDatabase(Mapping[str, Type[Message]]):
                 ns[f.name] = attr.ib(type=f_base_typ)
             ns['format'] = fmt
             ns['read'] = classmethod(cls._build_read(name_to_type, fmt))
+            ns['write'] = cls._build_write(name_to_type, fmt)
             t: Type[Message] = type(fmt.name, (Message,), ns)
             t = attr.s(t, frozen=True, slots=True)
             name_to_type[fmt.fullname] = t
@@ -50,7 +51,7 @@ class TypeDatabase(Mapping[str, Type[Message]]):
     def _build_read(cls,
                     name_to_type: Mapping[str, Type[Message]],
                     fmt: MsgFormat
-                    ) -> Callable[[Type[Message], BinaryIO], Message]:
+                    ) -> Callable[[Message, BinaryIO], None]:
         """Builds a reader for a given message format."""
         def get_factory(field: Field) -> Callable[[BinaryIO], Any]:
             if field.is_simple:
@@ -100,9 +101,9 @@ class TypeDatabase(Mapping[str, Type[Message]]):
     def _build_write(cls,
                      name_to_type: Mapping[str, Type[Message]],
                      fmt: MsgFormat
-                     ) -> Callable[[BinaryIO, Any], None]:
+                     ) -> Callable[[Any, BinaryIO], None]:
         """Builds a write for a given message format."""
-        def get_field_writer(field: Field) -> Callable[[BinaryIO, Any], None]:
+        def get_field_writer(field: Field) -> Callable[[Any, BinaryIO], None]:
             if field.is_simple:
                 return simple_writer(field.typ)
             if field.typ == 'time':
@@ -132,7 +133,7 @@ class TypeDatabase(Mapping[str, Type[Message]]):
             m = "unable to find writer for field: {field.name} [{field.typ}]"
             raise Exception(m)
 
-        field_writers: OrderedDict[str, Callable[[BinaryIO, Any], None]] = \
+        field_writers: OrderedDict[str, Callable[[Any, BinaryIO], None]] = \
             OrderedDict()
         for field in fmt.fields:
             field_writers[field.name] = get_field_writer(field)
