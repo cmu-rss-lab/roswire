@@ -64,15 +64,27 @@ class FormatDatabase:
     def actions(self) -> Mapping[str, ActionFormat]:
         return self.__actions
 
-    def to_dict(self) -> Dict[str, Any]:
-        """Returns a dictionary-based description of this database."""
-        d: Dict[str, Any] = {}
-        d['messages'] = {n: m.to_dict() for n, m in self.__messages.items()}
-        d['services'] = {n: s.to_dict() for n, s in self.__services.items()}
-        d['actions'] = {n: a.to_dict() for n, a in self.__actions.items()}
-        return d
+    def to_dict(self) -> List[Any]:
+        """Returns a JSON description of this database."""
+        return {'messages': [m.to_dict() for m in self.__messages.values()],
+                'services': [s.to_dict() for s in self.__services.values()],
+                'actions': [a.to_dict() for a in self.__actions.values()]}
+
+    @classmethod
+    def from_dict(cls, d: List[Any]) -> 'FormatDatabase':
+        """Loads a format database from a JSON document."""
+        msg = [MsgFormat.from_dict(dd) for dd in d['messages']]
+        srv = [SrvFormat.from_dict(dd) for dd in d['messages']]
+        action = [ActionFormat.from_dict(dd) for dd in d['messages']]
+        return MessageFormat(msg, srv, action)
 
     def save(self, fn: str) -> None:
         """Saves the contents of this format database to disk."""
         with open(fn, 'w') as f:
             yaml.dump(self.to_dict(), f, default_flow_style=False)
+
+    @classmethod
+    def load(cls, fn: str) -> 'FormatDatabase':
+        """Loads a format database from a given file on disk."""
+        with open(fn, 'r') as f:
+            return cls.from_dict(yaml.load(f))
