@@ -245,3 +245,7 @@ class Message:
     @classmethod
     def decode(cls, b: bytes) -> 'Message':
         return cls.read(BytesIO(b))
+
+    def write(self, b: BinaryIO) -> None:
+        """Writes a binary encoding of this message to a given stream."""
+        raise NotImplementedError
