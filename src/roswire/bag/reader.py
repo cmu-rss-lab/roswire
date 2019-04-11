@@ -15,8 +15,11 @@ from .core import *
 from definitions.base import Time
 from definitions.msg import Message
 from definitions.type_db import TypeDatabase
-from definitions.decode import (decode_uint8, decode_uint32, decode_uint64,
-                                decode_str, decode_time)
+from definitions.decode import (decode_uint8, read_uint8,
+                                decode_uint32, read_uint32,
+                                decode_uint64, read_uint64,
+                                decode_str,
+                                decode_time, read_time)
 
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -102,16 +105,13 @@ class BagReader:
         return ptr.read(size)
 
     def _read_time(self, ptr=None) -> Time:
-        ptr = ptr if ptr else self.__fp
-        return decode_time(ptr.read(8))
+        return read_time(ptr = ptr if ptr else self.__fp)
 
     def _read_uint32(self, ptr=None) -> int:
-        ptr = ptr if ptr else self.__fp
-        return decode_uint32(ptr.read(4))
+        return read_uint32(ptr if ptr else self.__fp)
 
-    def _read_version(self, ptr=None) -> str:
-        ptr = ptr if ptr else self.__fp
-        return decode_str(ptr.readline()).rstrip()
+    def _read_version(self) -> str:
+        return decode_str(self.__fp.readline()).rstrip()
 
     def _read_header(self,
                      op_expected: Optional[OpCode] = None,
