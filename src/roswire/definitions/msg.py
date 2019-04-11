@@ -241,3 +241,7 @@ class Message:
     @classmethod
     def read(cls, b: BytesIO) -> 'Message':
         raise NotImplementedError
+
+    @classmethod
+    def decode(cls, b: bytes) -> 'Message':
+        return cls.read(BytesIO(b))
