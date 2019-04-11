@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
 __all__ = ('FormatDatabase',)
 
 from types import MappingProxyType
 from typing import Collection, Mapping, Dict, Set
+
+import yaml
 
 from .msg import MsgFormat
 from .srv import SrvFormat
@@ -60,3 +63,16 @@ class FormatDatabase:
     @property
     def actions(self) -> Mapping[str, ActionFormat]:
         return self.__actions
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Returns a dictionary-based description of this database."""
+        d: Dict[str, Any] = {}
+        d['messages'] = {n: m.to_dict() for n, m in self.__messages.items()}
+        d['services'] = {n: s.to_dict() for n, s in self.__services.items()}
+        d['actions'] = {n: a.to_dict() for n, a in self.__actions.items()}
+        return d
+
+    def save(self, fn: str) -> None:
+        """Saves the contents of this format database to disk."""
+        with open(fn, 'w') as f:
+            yaml.dump(self.to_dict(), f, default_flow_style=False)
