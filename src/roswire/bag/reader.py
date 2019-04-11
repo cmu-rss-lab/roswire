@@ -92,7 +92,7 @@ class BagReader:
 
     def _skip_sized(self, ptr=None) -> None:
         ptr = ptr if ptr else self.__fp
-        ptr.seek(self._read_uint32(), os.SEEK_CUR)
+        ptr.seek(read_uint32(ptr), os.SEEK_CUR)
 
     def _skip_record(self, ptr=None) -> None:
         self._skip_sized(ptr)
@@ -100,15 +100,9 @@ class BagReader:
 
     def _read_sized(self, ptr=None) -> bytes:
         ptr = ptr if ptr else self.__fp
-        size = self._read_uint32(ptr)
+        size = read_uint32(ptr)
         logger.debug("reading sized block: %d bytes", size)
         return ptr.read(size)
-
-    def _read_time(self, ptr=None) -> Time:
-        return read_time(ptr = ptr if ptr else self.__fp)
-
-    def _read_uint32(self, ptr=None) -> int:
-        return read_uint32(ptr if ptr else self.__fp)
 
     def _read_version(self) -> str:
         return decode_str(self.__fp.readline()).rstrip()
@@ -195,7 +189,7 @@ class BagReader:
         pos_data = self.__fp.tell()
 
         # determine the compressed size of the chunk data
-        size_compressed = self._read_uint32()
+        size_compressed = read_uint32(self.__fp)
 
         # restore the original position of the read pointer
         self.__fp.seek(pos_original)
@@ -238,10 +232,10 @@ class BagReader:
         count = decode_uint32(header['count'])
         assert ver == 1
 
-        self._read_uint32()  # skip size
+        read_uint32(self.__fp)  # skip size
         for i in range(count):
-            time = self._read_time()
-            offset = self._read_uint32()
+            time = read_time(self.__fp)
+            offset = read_uint32(self.__fp)
             entry = IndexEntry(time=time, pos=pos_chunk, offset=offset)
             index[uid].append(entry)
 
