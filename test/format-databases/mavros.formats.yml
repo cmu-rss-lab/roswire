@@ -1,0 +1,3750 @@
+actions:
+- goal:
+    fields:
+    - name: target_frame
+      type: string
+    - name: source_frame
+      type: string
+    - name: source_time
+      type: time
+    - name: timeout
+      type: duration
+    - name: target_time
+      type: time
+    - name: fixed_frame
+      type: string
+    - name: advanced
+      type: bool
+    name: LookupTransformGoal
+    package: tf2_msgs
+  name: LookupTransform
+  package: tf2_msgs
+  result:
+    fields:
+    - name: transform
+      type: geometry_msgs/TransformStamped
+    - name: error
+      type: tf2_msgs/TF2Error
+    name: LookupTransformResult
+    package: tf2_msgs
+- goal:
+    fields:
+    - name: a
+      type: int64
+    - name: b
+      type: int64
+    name: TwoIntsGoal
+    package: actionlib
+  name: TwoInts
+  package: actionlib
+  result:
+    fields:
+    - name: sum
+      type: int64
+    name: TwoIntsResult
+    package: actionlib
+- goal:
+    constants:
+    - name: TERMINATE_SUCCESS
+      type: int32
+      value: '0'
+    - name: TERMINATE_ABORTED
+      type: int32
+      value: '1'
+    - name: TERMINATE_REJECTED
+      type: int32
+      value: '2'
+    - name: TERMINATE_LOSE
+      type: int32
+      value: '3'
+    - name: TERMINATE_DROP
+      type: int32
+      value: '4'
+    - name: TERMINATE_EXCEPTION
+      type: int32
+      value: '5'
+    fields:
+    - name: terminate_status
+      type: int32
+    - name: ignore_cancel
+      type: bool
+    - name: result_text
+      type: string
+    - name: the_result
+      type: int32
+    - name: is_simple_client
+      type: bool
+    - name: delay_accept
+      type: duration
+    - name: delay_terminate
+      type: duration
+    - name: pause_status
+      type: duration
+    name: TestRequestGoal
+    package: actionlib
+  name: TestRequest
+  package: actionlib
+  result:
+    fields:
+    - name: the_result
+      type: int32
+    - name: is_simple_server
+      type: bool
+    name: TestRequestResult
+    package: actionlib
+- feedback:
+    name: GetMapFeedback
+    package: nav_msgs
+  goal:
+    name: GetMapGoal
+    package: nav_msgs
+  name: GetMap
+  package: nav_msgs
+  result:
+    fields:
+    - name: map
+      type: nav_msgs/OccupancyGrid
+    name: GetMapResult
+    package: nav_msgs
+- feedback:
+    fields:
+    - name: feedback
+      type: int32
+    name: TestFeedback
+    package: actionlib
+  goal:
+    fields:
+    - name: goal
+      type: int32
+    name: TestGoal
+    package: actionlib
+  name: Test
+  package: actionlib
+  result:
+    fields:
+    - name: result
+      type: int32
+    name: TestResult
+    package: actionlib
+messages:
+- fields:
+  - name: linear
+    type: geometry_msgs/Vector3
+  - name: angular
+    type: geometry_msgs/Vector3
+  name: Twist
+  package: geometry_msgs
+- fields:
+  - name: force
+    type: geometry_msgs/Vector3
+  - name: torque
+    type: geometry_msgs/Vector3
+  name: Wrench
+  package: geometry_msgs
+- fields:
+  - name: r
+    type: float32
+  - name: g
+    type: float32
+  - name: b
+    type: float32
+  - name: a
+    type: float32
+  name: ColorRGBA
+  package: std_msgs
+- fields:
+  - name: topic
+    type: string
+  name: DemuxDeleteRequest
+  package: topic_tools
+- fields:
+  - name: success
+    type: bool
+  - name: r_errno
+    type: int32
+  name: FileTruncateResponse
+  package: mavros_msgs
+- fields:
+  - name: layout
+    type: std_msgs/MultiArrayLayout
+  - name: data
+    type: uint16[]
+  name: UInt16MultiArray
+  package: std_msgs
+- fields:
+  - name: param_id
+    type: string
+  name: ParamGetRequest
+  package: mavros_msgs
+- fields:
+  - name: param_id
+    type: string
+  - name: value
+    type: mavros_msgs/ParamValue
+  name: ParamSetRequest
+  package: mavros_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: wrench
+    type: geometry_msgs/Wrench
+  name: WrenchStamped
+  package: geometry_msgs
+- fields:
+  - name: layout
+    type: std_msgs/MultiArrayLayout
+  - name: data
+    type: float64[]
+  name: Float64MultiArray
+  package: std_msgs
+- fields:
+  - name: layout
+    type: std_msgs/MultiArrayLayout
+  - name: data
+    type: int8[]
+  name: Int8MultiArray
+  package: std_msgs
+- constants:
+  - name: KEEP_ALIVE
+    type: uint8
+    value: '0'
+  - name: UPDATE
+    type: uint8
+    value: '1'
+  fields:
+  - name: server_id
+    type: string
+  - name: seq_num
+    type: uint64
+  - name: type
+    type: uint8
+  - name: markers
+    type: visualization_msgs/InteractiveMarker[]
+  - name: poses
+    type: visualization_msgs/InteractiveMarkerPose[]
+  - name: erases
+    type: string[]
+  name: InteractiveMarkerUpdate
+  package: visualization_msgs
+- fields:
+  - name: trigger_enable
+    type: bool
+  - name: integration_time
+    type: float32
+  name: CommandTriggerControlRequest
+  package: mavros_msgs
+- fields:
+  - name: array
+    type: sensor_msgs/JoyFeedback[]
+  name: JoyFeedbackArray
+  package: sensor_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: angle_min
+    type: float32
+  - name: angle_max
+    type: float32
+  - name: angle_increment
+    type: float32
+  - name: time_increment
+    type: float32
+  - name: scan_time
+    type: float32
+  - name: range_min
+    type: float32
+  - name: range_max
+    type: float32
+  - name: ranges
+    type: float32[]
+  - name: intensities
+    type: float32[]
+  name: LaserScan
+  package: sensor_msgs
+- fields:
+  - name: feedback
+    type: int32
+  name: TestFeedback
+  package: actionlib
+- fields:
+  - name: data
+    type: uint16
+  name: UInt16
+  package: std_msgs
+- fields:
+  - name: linear
+    type: geometry_msgs/Vector3
+  - name: angular
+    type: geometry_msgs/Vector3
+  name: Accel
+  package: geometry_msgs
+- fields:
+  - name: data
+    type: duration
+  name: Duration
+  package: std_msgs
+- fields:
+  - name: x
+    type: float64
+  - name: y
+    type: float64
+  - name: theta
+    type: float64
+  name: Pose2D
+  package: geometry_msgs
+- fields:
+  - name: broadcast
+    type: bool
+  - name: frame
+    type: uint8
+  - name: command
+    type: uint16
+  - name: current
+    type: uint8
+  - name: autocontinue
+    type: uint8
+  - name: param1
+    type: float32
+  - name: param2
+    type: float32
+  - name: param3
+    type: float32
+  - name: param4
+    type: float32
+  - name: x
+    type: int32
+  - name: y
+    type: int32
+  - name: z
+    type: float32
+  name: CommandIntRequest
+  package: mavros_msgs
+- fields:
+  - name: data
+    type: float32
+  name: Float32
+  package: std_msgs
+- name: Empty
+  package: std_msgs
+- fields:
+  - name: loggers
+    type: roscpp/Logger[]
+  name: GetLoggersResponse
+  package: roscpp
+- fields:
+  - name: success
+    type: bool
+  - name: wp_received
+    type: uint32
+  name: WaypointPullResponse
+  package: mavros_msgs
+- fields:
+  - name: start
+    type: geometry_msgs/PoseStamped
+  - name: goal
+    type: geometry_msgs/PoseStamped
+  - name: tolerance
+    type: float32
+  name: GetPlanRequest
+  package: nav_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: child_frame_id
+    type: string
+  - name: transform
+    type: geometry_msgs/Transform
+  name: TransformStamped
+  package: geometry_msgs
+- fields:
+  - name: file_path
+    type: string
+  name: FileCloseRequest
+  package: mavros_msgs
+- constants:
+  - name: TYPE_FILE
+    type: uint8
+    value: '0'
+  - name: TYPE_DIRECTORY
+    type: uint8
+    value: '1'
+  fields:
+  - name: name
+    type: string
+  - name: type
+    type: uint8
+  - name: size
+    type: uint64
+  name: FileEntry
+  package: mavros_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: height
+    type: uint32
+  - name: width
+    type: uint32
+  - name: fields
+    type: sensor_msgs/PointField[]
+  - name: is_bigendian
+    type: bool
+  - name: point_step
+    type: uint32
+  - name: row_step
+    type: uint32
+  - name: data
+    type: uint8[]
+  - name: is_dense
+    type: bool
+  name: PointCloud2
+  package: sensor_msgs
+- fields:
+  - name: data
+    type: char
+  name: Char
+  package: std_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: name
+    type: string[]
+  - name: position
+    type: float64[]
+  - name: velocity
+    type: float64[]
+  - name: effort
+    type: float64[]
+  name: JointState
+  package: sensor_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: airspeed
+    type: float32
+  - name: groundspeed
+    type: float32
+  - name: heading
+    type: int16
+  - name: throttle
+    type: float32
+  - name: altitude
+    type: float32
+  - name: climb
+    type: float32
+  name: VFR_HUD
+  package: mavros_msgs
+- fields:
+  - name: twist
+    type: geometry_msgs/Twist
+  - name: covariance
+    type: float64[36]
+  name: TwistWithCovariance
+  package: geometry_msgs
+- fields:
+  - name: success
+    type: bool
+  - name: result
+    type: uint8
+  name: CommandLongResponse
+  package: mavros_msgs
+- fields:
+  - name: success
+    type: bool
+  - name: value
+    type: mavros_msgs/ParamValue
+  name: ParamSetResponse
+  package: mavros_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: height
+    type: uint32
+  - name: width
+    type: uint32
+  - name: distortion_model
+    type: string
+  - name: D
+    type: float64[]
+  - name: K
+    type: float64[9]
+  - name: R
+    type: float64[9]
+  - name: P
+    type: float64[12]
+  - name: binning_x
+    type: uint32
+  - name: binning_y
+    type: uint32
+  - name: roi
+    type: sensor_msgs/RegionOfInterest
+  name: CameraInfo
+  package: sensor_msgs
+- fields:
+  - name: layout
+    type: std_msgs/MultiArrayLayout
+  - name: data
+    type: int64[]
+  name: Int64MultiArray
+  package: std_msgs
+- fields:
+  - name: dim
+    type: std_msgs/MultiArrayDimension[]
+  - name: data_offset
+    type: uint32
+  name: MultiArrayLayout
+  package: std_msgs
+- constants:
+  - name: FEEDBACK
+    type: uint8
+    value: '0'
+  - name: ROSRUN
+    type: uint8
+    value: '1'
+  - name: ROSLAUNCH
+    type: uint8
+    value: '2'
+  fields:
+  - name: id
+    type: uint32
+  - name: parent_id
+    type: uint32
+  - name: title
+    type: string
+  - name: command
+    type: string
+  - name: command_type
+    type: uint8
+  name: MenuEntry
+  package: visualization_msgs
+- fields:
+  - name: data
+    type: string
+  name: String
+  package: std_msgs
+- fields:
+  - name: frame_stamp
+    type: time
+  - name: frame_seq_id
+    type: int32
+  name: CamIMUStamp
+  package: mavros_msgs
+- fields:
+  - name: layout
+    type: std_msgs/MultiArrayLayout
+  - name: data
+    type: uint8[]
+  name: UInt8MultiArray
+  package: std_msgs
+- fields:
+  - name: x_offset
+    type: uint32
+  - name: y_offset
+    type: uint32
+  - name: height
+    type: uint32
+  - name: width
+    type: uint32
+  - name: do_rectify
+    type: bool
+  name: RegionOfInterest
+  package: sensor_msgs
+- constants:
+  - name: FRAME_GLOBAL
+    type: uint8
+    value: '0'
+  - name: FRAME_LOCAL_NED
+    type: uint8
+    value: '1'
+  - name: FRAME_MISSION
+    type: uint8
+    value: '2'
+  - name: FRAME_GLOBAL_REL_ALT
+    type: uint8
+    value: '3'
+  - name: FRAME_LOCAL_ENU
+    type: uint8
+    value: '4'
+  fields:
+  - name: frame
+    type: uint8
+  - name: command
+    type: uint16
+  - name: is_current
+    type: bool
+  - name: autocontinue
+    type: bool
+  - name: param1
+    type: float32
+  - name: param2
+    type: float32
+  - name: param3
+    type: float32
+  - name: param4
+    type: float32
+  - name: x_lat
+    type: float64
+  - name: y_long
+    type: float64
+  - name: z_alt
+    type: float64
+  name: Waypoint
+  package: mavros_msgs
+- fields:
+  - name: data
+    type: uint8
+  name: UInt8
+  package: std_msgs
+- fields:
+  - name: key
+    type: string
+  - name: value
+    type: string
+  name: KeyValue
+  package: diagnostic_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: format
+    type: string
+  - name: data
+    type: uint8[]
+  name: CompressedImage
+  package: sensor_msgs
+- constants:
+  - name: NO_ERROR
+    type: uint8
+    value: '0'
+  - name: LOOKUP_ERROR
+    type: uint8
+    value: '1'
+  - name: CONNECTIVITY_ERROR
+    type: uint8
+    value: '2'
+  - name: EXTRAPOLATION_ERROR
+    type: uint8
+    value: '3'
+  - name: INVALID_ARGUMENT_ERROR
+    type: uint8
+    value: '4'
+  - name: TIMEOUT_ERROR
+    type: uint8
+    value: '5'
+  - name: TRANSFORM_ERROR
+    type: uint8
+    value: '6'
+  fields:
+  - name: error
+    type: uint8
+  - name: error_string
+    type: string
+  name: TF2Error
+  package: tf2_msgs
+- fields:
+  - name: stamp
+    type: time
+  - name: id
+    type: string
+  name: GoalID
+  package: actionlib_msgs
+- constants:
+  - name: COVARIANCE_TYPE_UNKNOWN
+    type: uint8
+    value: '0'
+  - name: COVARIANCE_TYPE_APPROXIMATED
+    type: uint8
+    value: '1'
+  - name: COVARIANCE_TYPE_DIAGONAL_KNOWN
+    type: uint8
+    value: '2'
+  - name: COVARIANCE_TYPE_KNOWN
+    type: uint8
+    value: '3'
+  fields:
+  - name: header
+    type: std_msgs/Header
+  - name: status
+    type: sensor_msgs/NavSatStatus
+  - name: latitude
+    type: float64
+  - name: longitude
+    type: float64
+  - name: altitude
+    type: float64
+  - name: position_covariance
+    type: float64[9]
+  - name: position_covariance_type
+    type: uint8
+  name: NavSatFix
+  package: sensor_msgs
+- fields:
+  - name: data
+    type: uint32
+  name: UInt32
+  package: std_msgs
+- fields:
+  - name: map_load_time
+    type: time
+  - name: resolution
+    type: float32
+  - name: width
+    type: uint32
+  - name: height
+    type: uint32
+  - name: origin
+    type: geometry_msgs/Pose
+  name: MapMetaData
+  package: nav_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: illuminance
+    type: float64
+  - name: variance
+    type: float64
+  name: Illuminance
+  package: sensor_msgs
+- fields:
+  - name: data
+    type: bool
+  name: SetBoolRequest
+  package: std_srvs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: cell_width
+    type: float32
+  - name: cell_height
+    type: float32
+  - name: cells
+    type: geometry_msgs/Point[]
+  name: GridCells
+  package: nav_msgs
+- constants:
+  - name: KEEP_ALIVE
+    type: uint8
+    value: '0'
+  - name: POSE_UPDATE
+    type: uint8
+    value: '1'
+  - name: MENU_SELECT
+    type: uint8
+    value: '2'
+  - name: BUTTON_CLICK
+    type: uint8
+    value: '3'
+  - name: MOUSE_DOWN
+    type: uint8
+    value: '4'
+  - name: MOUSE_UP
+    type: uint8
+    value: '5'
+  fields:
+  - name: header
+    type: std_msgs/Header
+  - name: client_id
+    type: string
+  - name: marker_name
+    type: string
+  - name: control_name
+    type: string
+  - name: event_type
+    type: uint8
+  - name: pose
+    type: geometry_msgs/Pose
+  - name: menu_entry_id
+    type: uint32
+  - name: mouse_point
+    type: geometry_msgs/Point
+  - name: mouse_point_valid
+    type: bool
+  name: InteractiveMarkerFeedback
+  package: visualization_msgs
+- fields:
+  - name: prev_topic
+    type: string
+  name: MuxSelectResponse
+  package: topic_tools
+- constants:
+  - name: OK
+    type: byte
+    value: '0'
+  - name: WARN
+    type: byte
+    value: '1'
+  - name: ERROR
+    type: byte
+    value: '2'
+  - name: STALE
+    type: byte
+    value: '3'
+  fields:
+  - name: level
+    type: byte
+  - name: name
+    type: string
+  - name: message
+    type: string
+  - name: hardware_id
+    type: string
+  - name: values
+    type: diagnostic_msgs/KeyValue[]
+  name: DiagnosticStatus
+  package: diagnostic_msgs
+- fields:
+  - name: a
+    type: int64
+  - name: b
+    type: int64
+  name: TwoIntsGoal
+  package: actionlib
+- name: GetMapFeedback
+  package: nav_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: pose
+    type: geometry_msgs/Pose
+  - name: name
+    type: string
+  name: InteractiveMarkerPose
+  package: visualization_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: orientation
+    type: geometry_msgs/Quaternion
+  - name: orientation_covariance
+    type: float64[9]
+  - name: angular_velocity
+    type: geometry_msgs/Vector3
+  - name: angular_velocity_covariance
+    type: float64[9]
+  - name: linear_acceleration
+    type: geometry_msgs/Vector3
+  - name: linear_acceleration_covariance
+    type: float64[9]
+  name: Imu
+  package: sensor_msgs
+- fields:
+  - name: data
+    type: uint64
+  name: UInt64
+  package: std_msgs
+- constants:
+  - name: DEBUG
+    type: byte
+    value: '1 #debug level'
+  - name: INFO
+    type: byte
+    value: '2  #general level'
+  - name: WARN
+    type: byte
+    value: '4  #warning level'
+  - name: ERROR
+    type: byte
+    value: '8 #error level'
+  - name: FATAL
+    type: byte
+    value: '16 #fatal/critical level'
+  fields:
+  - name: header
+    type: std_msgs/Header
+  - name: level
+    type: byte
+  - name: name
+    type: string
+  - name: msg
+    type: string
+  - name: file
+    type: string
+  - name: function
+    type: string
+  - name: line
+    type: uint32
+  - name: topics
+    type: string[]
+  name: Log
+  package: rosgraph_msgs
+- constants:
+  - name: STATUS_NO_FIX
+    type: int8
+    value: '-1        # unable to fix position'
+  - name: STATUS_FIX
+    type: int8
+    value: '0        # unaugmented fix'
+  - name: STATUS_SBAS_FIX
+    type: int8
+    value: '1        # with satellite-based augmentation'
+  - name: STATUS_GBAS_FIX
+    type: int8
+    value: '2        # with ground-based augmentation'
+  - name: SERVICE_GPS
+    type: uint16
+    value: '1'
+  - name: SERVICE_GLONASS
+    type: uint16
+    value: '2'
+  - name: SERVICE_COMPASS
+    type: uint16
+    value: '4      # includes BeiDou.'
+  - name: SERVICE_GALILEO
+    type: uint16
+    value: '8'
+  fields:
+  - name: status
+    type: int8
+  - name: service
+    type: uint16
+  name: NavSatStatus
+  package: sensor_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: pose
+    type: geometry_msgs/Pose
+  - name: name
+    type: string
+  - name: description
+    type: string
+  - name: scale
+    type: float32
+  - name: menu_entries
+    type: visualization_msgs/MenuEntry[]
+  - name: controls
+    type: visualization_msgs/InteractiveMarkerControl[]
+  name: InteractiveMarker
+  package: visualization_msgs
+- fields:
+  - name: logger
+    type: string
+  - name: level
+    type: string
+  name: SetLoggerLevelRequest
+  package: roscpp
+- fields:
+  - name: points
+    type: geometry_msgs/Point32[]
+  name: Polygon
+  package: geometry_msgs
+- fields:
+  - name: crc32
+    type: uint32
+  - name: success
+    type: bool
+  - name: r_errno
+    type: int32
+  name: FileChecksumResponse
+  package: mavros_msgs
+- fields:
+  - name: success
+    type: bool
+  - name: message
+    type: string
+  name: SetBoolResponse
+  package: std_srvs
+- fields:
+  - name: success
+    type: bool
+  - name: r_errno
+    type: int32
+  name: FileCloseResponse
+  package: mavros_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: integration_time_us
+    type: uint32
+  - name: integrated_x
+    type: float32
+  - name: integrated_y
+    type: float32
+  - name: integrated_xgyro
+    type: float32
+  - name: integrated_ygyro
+    type: float32
+  - name: integrated_zgyro
+    type: float32
+  - name: temperature
+    type: int16
+  - name: quality
+    type: uint8
+  - name: time_delta_distance_us
+    type: uint32
+  - name: distance
+    type: float32
+  name: OpticalFlowRad
+  package: mavros_msgs
+- fields:
+  - name: transforms
+    type: geometry_msgs/TransformStamped[]
+  name: TFMessage
+  package: tf2_msgs
+- name: WaypointPullRequest
+  package: mavros_msgs
+- fields:
+  - name: file_path
+    type: string
+  - name: offset
+    type: uint64
+  - name: data
+    type: uint8[]
+  name: FileWriteRequest
+  package: mavros_msgs
+- fields:
+  - name: success
+    type: bool
+  name: SetMapResponse
+  package: nav_msgs
+- fields:
+  - name: topic
+    type: string
+  name: DemuxSelectRequest
+  package: topic_tools
+- fields:
+  - name: x
+    type: float64
+  - name: y
+    type: float64
+  - name: z
+    type: float64
+  name: Vector3
+  package: geometry_msgs
+- fields:
+  - name: min_pitch
+    type: float32
+  - name: yaw
+    type: float32
+  - name: latitude
+    type: float32
+  - name: longitude
+    type: float32
+  - name: altitude
+    type: float32
+  name: CommandTOLRequest
+  package: mavros_msgs
+- fields:
+  - name: map
+    type: nav_msgs/OccupancyGrid
+  name: GetMapResponse
+  package: nav_msgs
+- fields:
+  - name: result
+    type: int32
+  name: TestResult
+  package: actionlib
+- fields:
+  - name: position
+    type: geometry_msgs/Point
+  - name: orientation
+    type: geometry_msgs/Quaternion
+  name: Pose
+  package: geometry_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: polygon
+    type: geometry_msgs/Polygon
+  name: PolygonStamped
+  package: geometry_msgs
+- fields:
+  - name: success
+    type: bool
+  name: CommandIntResponse
+  package: mavros_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: fluid_pressure
+    type: float64
+  - name: variance
+    type: float64
+  name: FluidPressure
+  package: sensor_msgs
+- fields:
+  - name: layout
+    type: std_msgs/MultiArrayLayout
+  - name: data
+    type: uint32[]
+  name: UInt32MultiArray
+  package: std_msgs
+- fields:
+  - name: frame_yaml
+    type: string
+  name: FrameGraphResponse
+  package: tf2_msgs
+- fields:
+  - name: success
+    type: bool
+  - name: r_errno
+    type: int32
+  name: FileRenameResponse
+  package: mavros_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: relative_humidity
+    type: float64
+  - name: variance
+    type: float64
+  name: RelativeHumidity
+  package: sensor_msgs
+- fields:
+  - name: file_path
+    type: string
+  - name: offset
+    type: uint64
+  - name: size
+    type: uint64
+  name: FileReadRequest
+  package: mavros_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: x
+    type: float32
+  - name: y
+    type: float32
+  - name: z
+    type: float32
+  - name: r
+    type: float32
+  - name: buttons
+    type: uint16
+  name: ManualControl
+  package: mavros_msgs
+- fields:
+  - name: goal
+    type: int32
+  name: TestGoal
+  package: actionlib
+- constants:
+  - name: MODE_READ
+    type: uint8
+    value: "0\t# open for read"
+  - name: MODE_WRITE
+    type: uint8
+    value: "1\t# open for write"
+  - name: MODE_CREATE
+    type: uint8
+    value: "2\t# do creat()"
+  fields:
+  - name: file_path
+    type: string
+  - name: mode
+    type: uint8
+  name: FileOpenRequest
+  package: mavros_msgs
+- fields:
+  - name: topic
+    type: string
+  name: MuxAddRequest
+  package: topic_tools
+- fields:
+  - name: topic
+    type: string
+  - name: node_pub
+    type: string
+  - name: node_sub
+    type: string
+  - name: window_start
+    type: time
+  - name: window_stop
+    type: time
+  - name: delivered_msgs
+    type: int32
+  - name: dropped_msgs
+    type: int32
+  - name: traffic
+    type: int32
+  - name: period_mean
+    type: duration
+  - name: period_stddev
+    type: duration
+  - name: period_max
+    type: duration
+  - name: stamp_age_mean
+    type: duration
+  - name: stamp_age_stddev
+    type: duration
+  - name: stamp_age_max
+    type: duration
+  name: TopicStatistics
+  package: rosgraph_msgs
+- fields:
+  - name: translation
+    type: geometry_msgs/Vector3
+  - name: rotation
+    type: geometry_msgs/Quaternion
+  name: Transform
+  package: geometry_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: child_frame_id
+    type: string
+  - name: pose
+    type: geometry_msgs/PoseWithCovariance
+  - name: twist
+    type: geometry_msgs/TwistWithCovariance
+  name: Odometry
+  package: nav_msgs
+- constants:
+  - name: PENDING
+    type: uint8
+    value: '0   # The goal has yet to be processed by the action server'
+  - name: ACTIVE
+    type: uint8
+    value: '1   # The goal is currently being processed by the action server'
+  - name: PREEMPTED
+    type: uint8
+    value: '2   # The goal received a cancel request after it started executing'
+  - name: SUCCEEDED
+    type: uint8
+    value: '3   # The goal was achieved successfully by the action server (Terminal
+      State)'
+  - name: ABORTED
+    type: uint8
+    value: '4   # The goal was aborted during execution by the action server due'
+  - name: REJECTED
+    type: uint8
+    value: '5   # The goal was rejected by the action server without being processed,'
+  - name: PREEMPTING
+    type: uint8
+    value: '6   # The goal received a cancel request after it started executing'
+  - name: RECALLING
+    type: uint8
+    value: '7   # The goal received a cancel request before it started executing,'
+  - name: RECALLED
+    type: uint8
+    value: '8   # The goal received a cancel request before it started executing'
+  - name: LOST
+    type: uint8
+    value: '9   # An action client can determine that a goal is LOST. This should
+      not be'
+  fields:
+  - name: goal_id
+    type: actionlib_msgs/GoalID
+  - name: status
+    type: uint8
+  - name: text
+    type: string
+  name: GoalStatus
+  package: actionlib_msgs
+- fields:
+  - name: value
+    type: bool
+  name: CommandBoolRequest
+  package: mavros_msgs
+- fields:
+  - name: markers
+    type: visualization_msgs/Marker[]
+  name: MarkerArray
+  package: visualization_msgs
+- fields:
+  - name: success
+    type: bool
+  - name: r_errno
+    type: int32
+  name: FileMakeDirResponse
+  package: mavros_msgs
+- fields:
+  - name: layout
+    type: std_msgs/MultiArrayLayout
+  - name: data
+    type: uint64[]
+  name: UInt64MultiArray
+  package: std_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: time_ref
+    type: time
+  - name: source
+    type: string
+  name: TimeReference
+  package: sensor_msgs
+- constants:
+  - name: FRAME_LOCAL_NED
+    type: uint8
+    value: '1'
+  - name: FRAME_LOCAL_OFFSET_NED
+    type: uint8
+    value: '7'
+  - name: FRAME_BODY_NED
+    type: uint8
+    value: '8'
+  - name: FRAME_BODY_OFFSET_NED
+    type: uint8
+    value: '9'
+  - name: IGNORE_PX
+    type: uint16
+    value: "1\t# Position ignore flags"
+  - name: IGNORE_PY
+    type: uint16
+    value: '2'
+  - name: IGNORE_PZ
+    type: uint16
+    value: '4'
+  - name: IGNORE_VX
+    type: uint16
+    value: "8\t# Velocity vector ignore flags"
+  - name: IGNORE_VY
+    type: uint16
+    value: '16'
+  - name: IGNORE_VZ
+    type: uint16
+    value: '32'
+  - name: IGNORE_AFX
+    type: uint16
+    value: "64\t# Acceleration/Force vector ignore flags"
+  - name: IGNORE_AFY
+    type: uint16
+    value: '128'
+  - name: IGNORE_AFZ
+    type: uint16
+    value: '256'
+  - name: FORCE
+    type: uint16
+    value: "512\t# Force in af vector flag"
+  - name: IGNORE_YAW
+    type: uint16
+    value: '1024'
+  - name: IGNORE_YAW_RATE
+    type: uint16
+    value: '2048'
+  fields:
+  - name: header
+    type: std_msgs/Header
+  - name: coordinate_frame
+    type: uint8
+  - name: type_mask
+    type: uint16
+  - name: position
+    type: geometry_msgs/Point
+  - name: velocity
+    type: geometry_msgs/Vector3
+  - name: acceleration_or_force
+    type: geometry_msgs/Vector3
+  - name: yaw
+    type: float32
+  - name: yaw_rate
+    type: float32
+  name: PositionTarget
+  package: mavros_msgs
+- constants:
+  - name: INT8
+    type: uint8
+    value: '1'
+  - name: UINT8
+    type: uint8
+    value: '2'
+  - name: INT16
+    type: uint8
+    value: '3'
+  - name: UINT16
+    type: uint8
+    value: '4'
+  - name: INT32
+    type: uint8
+    value: '5'
+  - name: UINT32
+    type: uint8
+    value: '6'
+  - name: FLOAT32
+    type: uint8
+    value: '7'
+  - name: FLOAT64
+    type: uint8
+    value: '8'
+  fields:
+  - name: name
+    type: string
+  - name: offset
+    type: uint32
+  - name: datatype
+    type: uint8
+  - name: count
+    type: uint32
+  name: PointField
+  package: sensor_msgs
+- fields:
+  - name: layout
+    type: std_msgs/MultiArrayLayout
+  - name: data
+    type: int32[]
+  name: Int32MultiArray
+  package: std_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: vector
+    type: geometry_msgs/Vector3
+  name: Vector3Stamped
+  package: geometry_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: poses
+    type: geometry_msgs/PoseStamped[]
+  name: Path
+  package: nav_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: points
+    type: geometry_msgs/Point32[]
+  - name: channels
+    type: sensor_msgs/ChannelFloat32[]
+  name: PointCloud
+  package: sensor_msgs
+- constants:
+  - name: STREAM_ALL
+    type: uint8
+    value: '0'
+  - name: STREAM_RAW_SENSORS
+    type: uint8
+    value: '1'
+  - name: STREAM_EXTENDED_STATUS
+    type: uint8
+    value: '2'
+  - name: STREAM_RC_CHANNELS
+    type: uint8
+    value: '3'
+  - name: STREAM_RAW_CONTROLLER
+    type: uint8
+    value: '4'
+  - name: STREAM_POSITION
+    type: uint8
+    value: '6'
+  - name: STREAM_EXTRA1
+    type: uint8
+    value: '10'
+  - name: STREAM_EXTRA2
+    type: uint8
+    value: '11'
+  - name: STREAM_EXTRA3
+    type: uint8
+    value: '12'
+  fields:
+  - name: stream_id
+    type: uint8
+  - name: message_rate
+    type: uint16
+  - name: on_off
+    type: bool
+  name: StreamRateRequest
+  package: mavros_msgs
+- fields:
+  - name: success
+    type: bool
+  - name: r_errno
+    type: int32
+  name: FileWriteResponse
+  package: mavros_msgs
+- constants:
+  - name: IGNORE_ROLL_RATE
+    type: uint8
+    value: "1\t# body_rate.x"
+  - name: IGNORE_PITCH_RATE
+    type: uint8
+    value: "2\t# body_rate.y"
+  - name: IGNORE_YAW_RATE
+    type: uint8
+    value: "4\t# body_rate.z"
+  - name: IGNORE_THRUST
+    type: uint8
+    value: '64'
+  - name: IGNORE_ATTITUDE
+    type: uint8
+    value: "128\t# orientation field"
+  fields:
+  - name: header
+    type: std_msgs/Header
+  - name: type_mask
+    type: uint8
+  - name: orientation
+    type: geometry_msgs/Quaternion
+  - name: body_rate
+    type: geometry_msgs/Vector3
+  - name: thrust
+    type: float32
+  name: AttitudeTarget
+  package: mavros_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: magnetic_field
+    type: geometry_msgs/Vector3
+  - name: magnetic_field_covariance
+    type: float64[9]
+  name: MagneticField
+  package: sensor_msgs
+- fields:
+  - name: wp_seq
+    type: uint16
+  name: WaypointSetCurrentRequest
+  package: mavros_msgs
+- fields:
+  - name: data
+    type: int32
+  name: Int32
+  package: std_msgs
+- constants:
+  - name: INHERIT
+    type: uint8
+    value: '0 '
+  - name: FIXED
+    type: uint8
+    value: '1'
+  - name: VIEW_FACING
+    type: uint8
+    value: '2'
+  - name: NONE
+    type: uint8
+    value: '0 '
+  - name: MENU
+    type: uint8
+    value: '1'
+  - name: BUTTON
+    type: uint8
+    value: '2'
+  - name: MOVE_AXIS
+    type: uint8
+    value: '3 '
+  - name: MOVE_PLANE
+    type: uint8
+    value: '4'
+  - name: ROTATE_AXIS
+    type: uint8
+    value: '5'
+  - name: MOVE_ROTATE
+    type: uint8
+    value: '6'
+  - name: MOVE_3D
+    type: uint8
+    value: '7'
+  - name: ROTATE_3D
+    type: uint8
+    value: '8'
+  - name: MOVE_ROTATE_3D
+    type: uint8
+    value: '9'
+  fields:
+  - name: name
+    type: string
+  - name: orientation
+    type: geometry_msgs/Quaternion
+  - name: orientation_mode
+    type: uint8
+  - name: interaction_mode
+    type: uint8
+  - name: always_visible
+    type: bool
+  - name: markers
+    type: visualization_msgs/Marker[]
+  - name: independent_marker_orientation
+    type: bool
+  - name: description
+    type: string
+  name: InteractiveMarkerControl
+  package: visualization_msgs
+- fields:
+  - name: the_result
+    type: int32
+  - name: is_simple_server
+    type: bool
+  name: TestRequestResult
+  package: actionlib
+- fields:
+  - name: x
+    type: float64
+  - name: y
+    type: float64
+  - name: z
+    type: float64
+  name: Point
+  package: geometry_msgs
+- fields:
+  - name: data
+    type: int16
+  name: Int16
+  package: std_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: vibration
+    type: geometry_msgs/Vector3
+  - name: clipping
+    type: float32[3]
+  name: Vibration
+  package: mavros_msgs
+- fields:
+  - name: success
+    type: bool
+  - name: r_errno
+    type: int32
+  name: FileRemoveResponse
+  package: mavros_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: monotonic
+    type: float32
+  - name: amsl
+    type: float32
+  - name: local
+    type: float32
+  - name: relative
+    type: float32
+  - name: terrain
+    type: float32
+  - name: bottom_clearance
+    type: float32
+  name: Altitude
+  package: mavros_msgs
+- fields:
+  - name: layout
+    type: std_msgs/MultiArrayLayout
+  - name: data
+    type: int16[]
+  name: Int16MultiArray
+  package: std_msgs
+- fields:
+  - name: echoes
+    type: float32[]
+  name: LaserEcho
+  package: sensor_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: joint_names
+    type: string[]
+  - name: transforms
+    type: geometry_msgs/Transform[]
+  - name: twist
+    type: geometry_msgs/Twist[]
+  - name: wrench
+    type: geometry_msgs/Wrench[]
+  name: MultiDOFJointState
+  package: sensor_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: twist
+    type: geometry_msgs/Twist
+  name: TwistStamped
+  package: geometry_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: accel
+    type: geometry_msgs/AccelWithCovariance
+  name: AccelWithCovarianceStamped
+  package: geometry_msgs
+- constants:
+  - name: TERMINATE_SUCCESS
+    type: int32
+    value: '0'
+  - name: TERMINATE_ABORTED
+    type: int32
+    value: '1'
+  - name: TERMINATE_REJECTED
+    type: int32
+    value: '2'
+  - name: TERMINATE_LOSE
+    type: int32
+    value: '3'
+  - name: TERMINATE_DROP
+    type: int32
+    value: '4'
+  - name: TERMINATE_EXCEPTION
+    type: int32
+    value: '5'
+  fields:
+  - name: terminate_status
+    type: int32
+  - name: ignore_cancel
+    type: bool
+  - name: result_text
+    type: string
+  - name: the_result
+    type: int32
+  - name: is_simple_client
+    type: bool
+  - name: delay_accept
+    type: duration
+  - name: delay_terminate
+    type: duration
+  - name: pause_status
+    type: duration
+  name: TestRequestGoal
+  package: actionlib
+- fields:
+  - name: load_namespace
+    type: string
+  name: AddDiagnosticsRequest
+  package: diagnostic_msgs
+- fields:
+  - name: integer
+    type: int64
+  - name: real
+    type: float64
+  name: ParamValue
+  package: mavros_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: is_valid
+    type: bool
+  - name: len
+    type: uint8
+  - name: seq
+    type: uint8
+  - name: sysid
+    type: uint8
+  - name: compid
+    type: uint8
+  - name: msgid
+    type: uint8
+  - name: checksum
+    type: uint16
+  - name: payload64
+    type: uint64[]
+  name: Mavlink
+  package: mavros_msgs
+- fields:
+  - name: prev_topic
+    type: string
+  name: DemuxSelectResponse
+  package: topic_tools
+- fields:
+  - name: x
+    type: float64
+  - name: y
+    type: float64
+  - name: z
+    type: float64
+  - name: w
+    type: float64
+  name: Quaternion
+  package: geometry_msgs
+- fields:
+  - name: success
+    type: bool
+  - name: result
+    type: uint8
+  name: CommandTriggerControlResponse
+  package: mavros_msgs
+- fields:
+  - name: success
+    type: bool
+  name: WaypointSetCurrentResponse
+  package: mavros_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: info
+    type: nav_msgs/MapMetaData
+  - name: data
+    type: int8[]
+  name: OccupancyGrid
+  package: nav_msgs
+- constants:
+  - name: MAV_MODE_PREFLIGHT
+    type: uint8
+    value: '0'
+  - name: MAV_MODE_STABILIZE_DISARMED
+    type: uint8
+    value: '80'
+  - name: MAV_MODE_STABILIZE_ARMED
+    type: uint8
+    value: '208'
+  - name: MAV_MODE_MANUAL_DISARMED
+    type: uint8
+    value: '64'
+  - name: MAV_MODE_MANUAL_ARMED
+    type: uint8
+    value: '192'
+  - name: MAV_MODE_GUIDED_DISARMED
+    type: uint8
+    value: '88'
+  - name: MAV_MODE_GUIDED_ARMED
+    type: uint8
+    value: '216'
+  - name: MAV_MODE_AUTO_DISARMED
+    type: uint8
+    value: '92'
+  - name: MAV_MODE_AUTO_ARMED
+    type: uint8
+    value: '220'
+  - name: MAV_MODE_TEST_DISARMED
+    type: uint8
+    value: '66'
+  - name: MAV_MODE_TEST_ARMED
+    type: uint8
+    value: '194'
+  fields:
+  - name: base_mode
+    type: uint8
+  - name: custom_mode
+    type: string
+  name: SetModeRequest
+  package: mavros_msgs
+- name: WaypointClearRequest
+  package: mavros_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: poses
+    type: geometry_msgs/Pose[]
+  name: PoseArray
+  package: geometry_msgs
+- fields:
+  - name: topic
+    type: string
+  name: DemuxAddRequest
+  package: topic_tools
+- fields:
+  - name: data
+    type: byte
+  name: Byte
+  package: std_msgs
+- fields:
+  - name: x
+    type: float32
+  - name: y
+    type: float32
+  - name: z
+    type: float32
+  name: Point32
+  package: geometry_msgs
+- constants:
+  - name: ARROW
+    type: uint8
+    value: '0'
+  - name: CUBE
+    type: uint8
+    value: '1'
+  - name: SPHERE
+    type: uint8
+    value: '2'
+  - name: CYLINDER
+    type: uint8
+    value: '3'
+  - name: LINE_STRIP
+    type: uint8
+    value: '4'
+  - name: LINE_LIST
+    type: uint8
+    value: '5'
+  - name: CUBE_LIST
+    type: uint8
+    value: '6'
+  - name: SPHERE_LIST
+    type: uint8
+    value: '7'
+  - name: POINTS
+    type: uint8
+    value: '8'
+  - name: TEXT_VIEW_FACING
+    type: uint8
+    value: '9'
+  - name: MESH_RESOURCE
+    type: uint8
+    value: '10'
+  - name: TRIANGLE_LIST
+    type: uint8
+    value: '11'
+  - name: ADD
+    type: uint8
+    value: '0'
+  - name: MODIFY
+    type: uint8
+    value: '0'
+  - name: DELETE
+    type: uint8
+    value: '2'
+  fields:
+  - name: header
+    type: std_msgs/Header
+  - name: ns
+    type: string
+  - name: id
+    type: int32
+  - name: type
+    type: int32
+  - name: action
+    type: int32
+  - name: pose
+    type: geometry_msgs/Pose
+  - name: scale
+    type: geometry_msgs/Vector3
+  - name: color
+    type: std_msgs/ColorRGBA
+  - name: lifetime
+    type: duration
+  - name: frame_locked
+    type: bool
+  - name: points
+    type: geometry_msgs/Point[]
+  - name: colors
+    type: std_msgs/ColorRGBA[]
+  - name: text
+    type: string
+  - name: mesh_resource
+    type: string
+  - name: mesh_use_embedded_materials
+    type: bool
+  name: Marker
+  package: visualization_msgs
+- fields:
+  - name: data
+    type: uint8[]
+  - name: success
+    type: bool
+  - name: r_errno
+    type: int32
+  name: FileReadResponse
+  package: mavros_msgs
+- fields:
+  - name: old_path
+    type: string
+  - name: new_path
+    type: string
+  name: FileRenameRequest
+  package: mavros_msgs
+- fields:
+  - name: data
+    type: float64
+  name: Float64
+  package: std_msgs
+- fields:
+  - name: file_path
+    type: string
+  - name: length
+    type: uint64
+  name: FileTruncateRequest
+  package: mavros_msgs
+- constants:
+  - name: TYPE_LED
+    type: uint8
+    value: '0'
+  - name: TYPE_RUMBLE
+    type: uint8
+    value: '1'
+  - name: TYPE_BUZZER
+    type: uint8
+    value: '2'
+  fields:
+  - name: type
+    type: uint8
+  - name: id
+    type: uint8
+  - name: intensity
+    type: float32
+  name: JoyFeedback
+  package: sensor_msgs
+- fields:
+  - name: id
+    type: string
+  - name: passed
+    type: byte
+  - name: status
+    type: diagnostic_msgs/DiagnosticStatus[]
+  name: SelfTestResponse
+  package: diagnostic_msgs
+- constants:
+  - name: CMD_DO_SET_MODE
+    type: uint16
+    value: '176'
+  - name: CMD_DO_JUMP
+    type: uint16
+    value: '177'
+  - name: CMD_DO_CHANGE_SPEED
+    type: uint16
+    value: '178'
+  - name: CMD_DO_SET_HOME
+    type: uint16
+    value: '179'
+  - name: CMD_DO_SET_RELAY
+    type: uint16
+    value: '181'
+  - name: CMD_DO_REPEAT_RELAY
+    type: uint16
+    value: '182'
+  - name: CMD_DO_SET_SERVO
+    type: uint16
+    value: '183'
+  - name: CMD_DO_REPEAT_SERVO
+    type: uint16
+    value: '184'
+  - name: CMD_DO_CONTROL_VIDEO
+    type: uint16
+    value: '200'
+  - name: CMD_DO_SET_ROI
+    type: uint16
+    value: '201'
+  - name: CMD_DO_MOUNT_CONTROL
+    type: uint16
+    value: '205'
+  - name: CMD_DO_SET_CAM_TRIGG_DIST
+    type: uint16
+    value: '206'
+  - name: CMD_DO_FENCE_ENABLE
+    type: uint16
+    value: '207'
+  - name: CMD_DO_PARACHUTE
+    type: uint16
+    value: '208'
+  - name: CMD_DO_INVERTED_FLIGHT
+    type: uint16
+    value: '210'
+  - name: CMD_DO_MOUNT_CONTROL_QUAT
+    type: uint16
+    value: '220'
+  - name: CMD_PREFLIGHT_CALIBRATION
+    type: uint16
+    value: '241'
+  - name: CMD_MISSION_START
+    type: uint16
+    value: '300'
+  - name: CMD_COMPONENT_ARM_DISARM
+    type: uint16
+    value: '400'
+  - name: CMD_START_RX_PAIR
+    type: uint16
+    value: '500'
+  - name: CMD_REQUEST_AUTOPILOT_CAPABILITIES
+    type: uint16
+    value: '520'
+  - name: CMD_DO_TRIGGER_CONTROL
+    type: uint16
+    value: '2003'
+  - name: NAV_WAYPOINT
+    type: uint16
+    value: '16'
+  - name: NAV_LOITER_UNLIM
+    type: uint16
+    value: '17'
+  - name: NAV_LOITER_TURNS
+    type: uint16
+    value: '18'
+  - name: NAV_LOITER_TIME
+    type: uint16
+    value: '19'
+  - name: NAV_RETURN_TO_LAUNCH
+    type: uint16
+    value: '20'
+  - name: NAV_LAND
+    type: uint16
+    value: '21'
+  - name: NAV_TAKEOFF
+    type: uint16
+    value: '22'
+  name: CommandCode
+  package: mavros_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: status_list
+    type: actionlib_msgs/GoalStatus[]
+  name: GoalStatusArray
+  package: actionlib_msgs
+- fields:
+  - name: current_gps
+    type: bool
+  - name: latitude
+    type: float32
+  - name: longitude
+    type: float32
+  - name: altitude
+    type: float32
+  name: CommandHomeRequest
+  package: mavros_msgs
+- fields:
+  - name: success
+    type: bool
+  - name: result
+    type: uint8
+  name: CommandTOLResponse
+  package: mavros_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: rssi
+    type: uint8
+  - name: remrssi
+    type: uint8
+  - name: txbuf
+    type: uint8
+  - name: noise
+    type: uint8
+  - name: remnoise
+    type: uint8
+  - name: rxerrors
+    type: uint16
+  - name: fixed
+    type: uint16
+  - name: rssi_dbm
+    type: float32
+  - name: remrssi_dbm
+    type: float32
+  name: RadioStatus
+  package: mavros_msgs
+- fields:
+  - name: clock
+    type: time
+  name: Clock
+  package: rosgraph_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: quaternion
+    type: geometry_msgs/Quaternion
+  name: QuaternionStamped
+  package: geometry_msgs
+- constants:
+  - name: CHAN_RELEASE
+    type: uint16
+    value: '0'
+  - name: CHAN_NOCHANGE
+    type: uint16
+    value: '65535'
+  fields:
+  - name: channels
+    type: uint16[8]
+  name: OverrideRCIn
+  package: mavros_msgs
+- fields:
+  - name: file_path
+    type: string
+  name: FileChecksumRequest
+  package: mavros_msgs
+- constants:
+  - name: ULTRASOUND
+    type: uint8
+    value: '0'
+  - name: INFRARED
+    type: uint8
+    value: '1'
+  fields:
+  - name: header
+    type: std_msgs/Header
+  - name: radiation_type
+    type: uint8
+  - name: field_of_view
+    type: float32
+  - name: min_range
+    type: float32
+  - name: max_range
+    type: float32
+  - name: range
+    type: float32
+  name: Range
+  package: sensor_msgs
+- fields:
+  - name: seq
+    type: uint32
+  - name: stamp
+    type: time
+  - name: frame_id
+    type: string
+  name: Header
+  package: std_msgs
+- name: GetMapGoal
+  package: nav_msgs
+- fields:
+  - name: target_frame
+    type: string
+  - name: source_frame
+    type: string
+  - name: source_time
+    type: time
+  - name: timeout
+    type: duration
+  - name: target_time
+    type: time
+  - name: fixed_frame
+    type: string
+  - name: advanced
+    type: bool
+  name: LookupTransformGoal
+  package: tf2_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: axes
+    type: float32[]
+  - name: buttons
+    type: int32[]
+  name: Joy
+  package: sensor_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: height
+    type: uint32
+  - name: width
+    type: uint32
+  - name: encoding
+    type: string
+  - name: is_bigendian
+    type: uint8
+  - name: step
+    type: uint32
+  - name: data
+    type: uint8[]
+  name: Image
+  package: sensor_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: temperature
+    type: float64
+  - name: variance
+    type: float64
+  name: Temperature
+  package: sensor_msgs
+- fields:
+  - name: layout
+    type: std_msgs/MultiArrayLayout
+  - name: data
+    type: byte[]
+  name: ByteMultiArray
+  package: std_msgs
+- fields:
+  - name: data
+    type: time
+  name: Time
+  package: std_msgs
+- fields:
+  - name: list
+    type: mavros_msgs/FileEntry[]
+  - name: success
+    type: bool
+  - name: r_errno
+    type: int32
+  name: FileListResponse
+  package: mavros_msgs
+- fields:
+  - name: success
+    type: bool
+  - name: result
+    type: uint8
+  name: CommandBoolResponse
+  package: mavros_msgs
+- fields:
+  - name: dot_graph
+    type: string
+  name: FrameGraphResponse
+  package: tf
+- fields:
+  - name: success
+    type: bool
+  - name: value
+    type: mavros_msgs/ParamValue
+  name: ParamGetResponse
+  package: mavros_msgs
+- fields:
+  - name: dir_path
+    type: string
+  name: FileRemoveDirRequest
+  package: mavros_msgs
+- fields:
+  - name: force_pull
+    type: bool
+  name: ParamPullRequest
+  package: mavros_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: status
+    type: diagnostic_msgs/DiagnosticStatus[]
+  name: DiagnosticArray
+  package: diagnostic_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: angle_min
+    type: float32
+  - name: angle_max
+    type: float32
+  - name: angle_increment
+    type: float32
+  - name: time_increment
+    type: float32
+  - name: scan_time
+    type: float32
+  - name: range_min
+    type: float32
+  - name: range_max
+    type: float32
+  - name: ranges
+    type: sensor_msgs/LaserEcho[]
+  - name: intensities
+    type: sensor_msgs/LaserEcho[]
+  name: MultiEchoLaserScan
+  package: sensor_msgs
+- fields:
+  - name: data
+    type: bool
+  name: Bool
+  package: std_msgs
+- name: ParamPushRequest
+  package: mavros_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: accel
+    type: geometry_msgs/Accel
+  name: AccelStamped
+  package: geometry_msgs
+- fields:
+  - name: file_path
+    type: string
+  name: FileRemoveRequest
+  package: mavros_msgs
+- fields:
+  - name: broadcast
+    type: bool
+  - name: command
+    type: uint16
+  - name: confirmation
+    type: uint8
+  - name: param1
+    type: float32
+  - name: param2
+    type: float32
+  - name: param3
+    type: float32
+  - name: param4
+    type: float32
+  - name: param5
+    type: float32
+  - name: param6
+    type: float32
+  - name: param7
+    type: float32
+  name: CommandLongRequest
+  package: mavros_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: point
+    type: geometry_msgs/Point
+  name: PointStamped
+  package: geometry_msgs
+- fields:
+  - name: accel
+    type: geometry_msgs/Accel
+  - name: covariance
+    type: float64[36]
+  name: AccelWithCovariance
+  package: geometry_msgs
+- constants:
+  - name: POWER_SUPPLY_STATUS_UNKNOWN
+    type: uint8
+    value: '0'
+  - name: POWER_SUPPLY_STATUS_CHARGING
+    type: uint8
+    value: '1'
+  - name: POWER_SUPPLY_STATUS_DISCHARGING
+    type: uint8
+    value: '2'
+  - name: POWER_SUPPLY_STATUS_NOT_CHARGING
+    type: uint8
+    value: '3'
+  - name: POWER_SUPPLY_STATUS_FULL
+    type: uint8
+    value: '4'
+  - name: POWER_SUPPLY_HEALTH_UNKNOWN
+    type: uint8
+    value: '0'
+  - name: POWER_SUPPLY_HEALTH_GOOD
+    type: uint8
+    value: '1'
+  - name: POWER_SUPPLY_HEALTH_OVERHEAT
+    type: uint8
+    value: '2'
+  - name: POWER_SUPPLY_HEALTH_DEAD
+    type: uint8
+    value: '3'
+  - name: POWER_SUPPLY_HEALTH_OVERVOLTAGE
+    type: uint8
+    value: '4'
+  - name: POWER_SUPPLY_HEALTH_UNSPEC_FAILURE
+    type: uint8
+    value: '5'
+  - name: POWER_SUPPLY_HEALTH_COLD
+    type: uint8
+    value: '6'
+  - name: POWER_SUPPLY_HEALTH_WATCHDOG_TIMER_EXPIRE
+    type: uint8
+    value: '7'
+  - name: POWER_SUPPLY_HEALTH_SAFETY_TIMER_EXPIRE
+    type: uint8
+    value: '8'
+  - name: POWER_SUPPLY_TECHNOLOGY_UNKNOWN
+    type: uint8
+    value: '0'
+  - name: POWER_SUPPLY_TECHNOLOGY_NIMH
+    type: uint8
+    value: '1'
+  - name: POWER_SUPPLY_TECHNOLOGY_LION
+    type: uint8
+    value: '2'
+  - name: POWER_SUPPLY_TECHNOLOGY_LIPO
+    type: uint8
+    value: '3'
+  - name: POWER_SUPPLY_TECHNOLOGY_LIFE
+    type: uint8
+    value: '4'
+  - name: POWER_SUPPLY_TECHNOLOGY_NICD
+    type: uint8
+    value: '5'
+  - name: POWER_SUPPLY_TECHNOLOGY_LIMN
+    type: uint8
+    value: '6'
+  fields:
+  - name: header
+    type: std_msgs/Header
+  - name: voltage
+    type: float32
+  - name: current
+    type: float32
+  - name: charge
+    type: float32
+  - name: capacity
+    type: float32
+  - name: design_capacity
+    type: float32
+  - name: percentage
+    type: float32
+  - name: power_supply_status
+    type: uint8
+  - name: power_supply_health
+    type: uint8
+  - name: power_supply_technology
+    type: uint8
+  - name: present
+    type: bool
+  - name: cell_voltage
+    type: float32[]
+  - name: location
+    type: string
+  - name: serial_number
+    type: string
+  name: BatteryState
+  package: sensor_msgs
+- fields:
+  - name: label
+    type: string
+  - name: size
+    type: uint32
+  - name: stride
+    type: uint32
+  name: MultiArrayDimension
+  package: std_msgs
+- fields:
+  - name: success
+    type: bool
+  name: SetModeResponse
+  package: mavros_msgs
+- fields:
+  - name: success
+    type: bool
+  - name: status_message
+    type: string
+  name: SetCameraInfoResponse
+  package: sensor_msgs
+- constants:
+  - name: FRAME_GLOBAL_INT
+    type: uint8
+    value: '5'
+  - name: FRAME_GLOBAL_REL_ALT
+    type: uint8
+    value: '6'
+  - name: FRAME_GLOBAL_TERRAIN_ALT
+    type: uint8
+    value: '11'
+  - name: IGNORE_LATITUDE
+    type: uint16
+    value: "1\t# Position ignore flags"
+  - name: IGNORE_LONGITUDE
+    type: uint16
+    value: '2'
+  - name: IGNORE_ALTITUDE
+    type: uint16
+    value: '4'
+  - name: IGNORE_VX
+    type: uint16
+    value: "8\t# Velocity vector ignore flags"
+  - name: IGNORE_VY
+    type: uint16
+    value: '16'
+  - name: IGNORE_VZ
+    type: uint16
+    value: '32'
+  - name: IGNORE_AFX
+    type: uint16
+    value: "64\t# Acceleration/Force vector ignore flags"
+  - name: IGNORE_AFY
+    type: uint16
+    value: '128'
+  - name: IGNORE_AFZ
+    type: uint16
+    value: '256'
+  - name: FORCE
+    type: uint16
+    value: "512\t# Force in af vector flag"
+  - name: IGNORE_YAW
+    type: uint16
+    value: '1024'
+  - name: IGNORE_YAW_RATE
+    type: uint16
+    value: '2048'
+  fields:
+  - name: header
+    type: std_msgs/Header
+  - name: coordinate_frame
+    type: uint8
+  - name: type_mask
+    type: uint16
+  - name: latitude
+    type: float64
+  - name: longitude
+    type: float64
+  - name: altitude
+    type: float32
+  - name: velocity
+    type: geometry_msgs/Vector3
+  - name: acceleration_or_force
+    type: geometry_msgs/Vector3
+  - name: yaw
+    type: float32
+  - name: yaw_rate
+    type: float32
+  name: GlobalPositionTarget
+  package: mavros_msgs
+- fields:
+  - name: plan
+    type: nav_msgs/Path
+  name: GetPlanResponse
+  package: nav_msgs
+- fields:
+  - name: topic
+    type: string
+  name: MuxSelectRequest
+  package: topic_tools
+- fields:
+  - name: waypoints
+    type: mavros_msgs/Waypoint[]
+  name: WaypointList
+  package: mavros_msgs
+- fields:
+  - name: sum
+    type: int64
+  name: TwoIntsResult
+  package: actionlib
+- fields:
+  - name: camera_info
+    type: sensor_msgs/CameraInfo
+  name: SetCameraInfoRequest
+  package: sensor_msgs
+- fields:
+  - name: success
+    type: bool
+  - name: message
+    type: string
+  name: TriggerResponse
+  package: std_srvs
+- fields:
+  - name: data
+    type: int8
+  name: Int8
+  package: std_msgs
+- fields:
+  - name: data
+    type: int64
+  name: Int64
+  package: std_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: channels
+    type: uint16[]
+  name: RCOut
+  package: mavros_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: twist
+    type: geometry_msgs/TwistWithCovariance
+  name: TwistWithCovarianceStamped
+  package: geometry_msgs
+- fields:
+  - name: success
+    type: bool
+  name: WaypointClearResponse
+  package: mavros_msgs
+- fields:
+  - name: server_id
+    type: string
+  - name: seq_num
+    type: uint64
+  - name: markers
+    type: visualization_msgs/InteractiveMarker[]
+  name: InteractiveMarkerInit
+  package: visualization_msgs
+- fields:
+  - name: success
+    type: bool
+  - name: param_received
+    type: uint32
+  name: ParamPullResponse
+  package: mavros_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: roll_ailerons
+    type: float32
+  - name: pitch_elevator
+    type: float32
+  - name: yaw_rudder
+    type: float32
+  - name: throttle
+    type: float32
+  - name: aux1
+    type: float32
+  - name: aux2
+    type: float32
+  - name: aux3
+    type: float32
+  - name: aux4
+    type: float32
+  - name: mode
+    type: uint8
+  - name: nav_mode
+    type: uint8
+  name: HilControls
+  package: mavros_msgs
+- constants:
+  - name: PX4_MIX_FLIGHT_CONTROL
+    type: uint8
+    value: '0'
+  - name: PX4_MIX_FLIGHT_CONTROL_VTOL_ALT
+    type: uint8
+    value: '1'
+  - name: PX4_MIX_PAYLOAD
+    type: uint8
+    value: '2'
+  - name: PX4_MIX_MANUAL_PASSTHROUGH
+    type: uint8
+    value: '3'
+  fields:
+  - name: header
+    type: std_msgs/Header
+  - name: group_mix
+    type: uint8
+  - name: controls
+    type: float32[8]
+  name: ActuatorControl
+  package: mavros_msgs
+- fields:
+  - name: dir_path
+    type: string
+  name: FileListRequest
+  package: mavros_msgs
+- fields:
+  - name: layout
+    type: std_msgs/MultiArrayLayout
+  - name: data
+    type: float32[]
+  name: Float32MultiArray
+  package: std_msgs
+- fields:
+  - name: dir_path
+    type: string
+  name: FileMakeDirRequest
+  package: mavros_msgs
+- fields:
+  - name: map
+    type: nav_msgs/OccupancyGrid
+  - name: initial_pose
+    type: geometry_msgs/PoseWithCovarianceStamped
+  name: SetMapRequest
+  package: nav_msgs
+- fields:
+  - name: m
+    type: float64
+  - name: com
+    type: geometry_msgs/Vector3
+  - name: ixx
+    type: float64
+  - name: ixy
+    type: float64
+  - name: ixz
+    type: float64
+  - name: iyy
+    type: float64
+  - name: iyz
+    type: float64
+  - name: izz
+    type: float64
+  name: Inertia
+  package: geometry_msgs
+- fields:
+  - name: success
+    type: bool
+  - name: message
+    type: string
+  name: AddDiagnosticsResponse
+  package: diagnostic_msgs
+- fields:
+  - name: success
+    type: bool
+  - name: wp_transfered
+    type: uint32
+  name: WaypointPushResponse
+  package: mavros_msgs
+- fields:
+  - name: waypoints
+    type: mavros_msgs/Waypoint[]
+  name: WaypointPushRequest
+  package: mavros_msgs
+- constants:
+  - name: CIRCLE
+    type: uint8
+    value: '0'
+  - name: LINE_STRIP
+    type: uint8
+    value: '1'
+  - name: LINE_LIST
+    type: uint8
+    value: '2'
+  - name: POLYGON
+    type: uint8
+    value: '3'
+  - name: POINTS
+    type: uint8
+    value: '4'
+  - name: ADD
+    type: uint8
+    value: '0'
+  - name: REMOVE
+    type: uint8
+    value: '1'
+  fields:
+  - name: header
+    type: std_msgs/Header
+  - name: ns
+    type: string
+  - name: id
+    type: int32
+  - name: type
+    type: int32
+  - name: action
+    type: int32
+  - name: position
+    type: geometry_msgs/Point
+  - name: scale
+    type: float32
+  - name: outline_color
+    type: std_msgs/ColorRGBA
+  - name: filled
+    type: uint8
+  - name: fill_color
+    type: std_msgs/ColorRGBA
+  - name: lifetime
+    type: duration
+  - name: points
+    type: geometry_msgs/Point[]
+  - name: outline_colors
+    type: std_msgs/ColorRGBA[]
+  name: ImageMarker
+  package: visualization_msgs
+- fields:
+  - name: name
+    type: string
+  - name: level
+    type: string
+  name: Logger
+  package: roscpp
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: pose
+    type: geometry_msgs/PoseWithCovariance
+  name: PoseWithCovarianceStamped
+  package: geometry_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: latitude
+    type: float64
+  - name: longitude
+    type: float64
+  - name: altitude
+    type: float32
+  - name: position
+    type: geometry_msgs/Vector3
+  - name: orientation
+    type: geometry_msgs/Quaternion
+  - name: approach
+    type: geometry_msgs/Vector3
+  name: HomePosition
+  package: mavros_msgs
+- fields:
+  - name: name
+    type: string
+  - name: values
+    type: float32[]
+  name: ChannelFloat32
+  package: sensor_msgs
+- fields:
+  - name: success
+    type: bool
+  - name: result
+    type: uint8
+  name: CommandHomeResponse
+  package: mavros_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: connected
+    type: bool
+  - name: armed
+    type: bool
+  - name: guided
+    type: bool
+  - name: mode
+    type: string
+  name: State
+  package: mavros_msgs
+- fields:
+  - name: success
+    type: bool
+  - name: param_transfered
+    type: uint32
+  name: ParamPushResponse
+  package: mavros_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: inertia
+    type: geometry_msgs/Inertia
+  name: InertiaStamped
+  package: geometry_msgs
+- constants:
+  - name: VTOL_STATE_UNDEFINED
+    type: uint8
+    value: '0'
+  - name: VTOL_STATE_TRANSITION_TO_FW
+    type: uint8
+    value: '1'
+  - name: VTOL_STATE_TRANSITION_TO_MC
+    type: uint8
+    value: '2'
+  - name: VTOL_STATE_MC
+    type: uint8
+    value: '3'
+  - name: VTOL_STATE_FW
+    type: uint8
+    value: '4'
+  - name: LANDED_STATE_UNDEFINED
+    type: uint8
+    value: '0'
+  - name: LANDED_STATE_ON_GROUND
+    type: uint8
+    value: '1'
+  - name: LANDED_STATE_IN_AIR
+    type: uint8
+    value: '2'
+  fields:
+  - name: header
+    type: std_msgs/Header
+  - name: vtol_state
+    type: uint8
+  - name: landed_state
+    type: uint8
+  name: ExtendedState
+  package: mavros_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: voltage
+    type: float32
+  - name: current
+    type: float32
+  - name: remaining
+    type: float32
+  name: BatteryStatus
+  package: mavros_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: rssi
+    type: uint8
+  - name: channels
+    type: uint16[]
+  name: RCIn
+  package: mavros_msgs
+- fields:
+  - name: map
+    type: nav_msgs/OccupancyGrid
+  name: GetMapResult
+  package: nav_msgs
+- name: GetMapRequest
+  package: nav_msgs
+- fields:
+  - name: topics
+    type: string[]
+  name: DemuxListResponse
+  package: topic_tools
+- fields:
+  - name: transforms
+    type: geometry_msgs/TransformStamped[]
+  name: tfMessage
+  package: tf
+- fields:
+  - name: success
+    type: bool
+  - name: r_errno
+    type: int32
+  name: FileRemoveDirResponse
+  package: mavros_msgs
+- fields:
+  - name: header
+    type: std_msgs/Header
+  - name: pose
+    type: geometry_msgs/Pose
+  name: PoseStamped
+  package: geometry_msgs
+- fields:
+  - name: transform
+    type: geometry_msgs/TransformStamped
+  - name: error
+    type: tf2_msgs/TF2Error
+  name: LookupTransformResult
+  package: tf2_msgs
+- fields:
+  - name: topic
+    type: string
+  name: MuxDeleteRequest
+  package: topic_tools
+- fields:
+  - name: topics
+    type: string[]
+  name: MuxListResponse
+  package: topic_tools
+- fields:
+  - name: size
+    type: uint32
+  - name: success
+    type: bool
+  - name: r_errno
+    type: int32
+  name: FileOpenResponse
+  package: mavros_msgs
+- fields:
+  - name: pose
+    type: geometry_msgs/Pose
+  - name: covariance
+    type: float64[36]
+  name: PoseWithCovariance
+  package: geometry_msgs
+services:
+- name: WaypointSetCurrent
+  package: mavros_msgs
+  request:
+    fields:
+    - name: wp_seq
+      type: uint16
+    name: WaypointSetCurrentRequest
+    package: mavros_msgs
+  response:
+    fields:
+    - name: success
+      type: bool
+    name: WaypointSetCurrentResponse
+    package: mavros_msgs
+- name: ParamPull
+  package: mavros_msgs
+  request:
+    fields:
+    - name: force_pull
+      type: bool
+    name: ParamPullRequest
+    package: mavros_msgs
+  response:
+    fields:
+    - name: success
+      type: bool
+    - name: param_received
+      type: uint32
+    name: ParamPullResponse
+    package: mavros_msgs
+- name: DemuxDelete
+  package: topic_tools
+  request:
+    fields:
+    - name: topic
+      type: string
+    name: DemuxDeleteRequest
+    package: topic_tools
+- name: MuxList
+  package: topic_tools
+  response:
+    fields:
+    - name: topics
+      type: string[]
+    name: MuxListResponse
+    package: topic_tools
+- name: FileMakeDir
+  package: mavros_msgs
+  request:
+    fields:
+    - name: dir_path
+      type: string
+    name: FileMakeDirRequest
+    package: mavros_msgs
+  response:
+    fields:
+    - name: success
+      type: bool
+    - name: r_errno
+      type: int32
+    name: FileMakeDirResponse
+    package: mavros_msgs
+- name: MuxDelete
+  package: topic_tools
+  request:
+    fields:
+    - name: topic
+      type: string
+    name: MuxDeleteRequest
+    package: topic_tools
+- name: CommandHome
+  package: mavros_msgs
+  request:
+    fields:
+    - name: current_gps
+      type: bool
+    - name: latitude
+      type: float32
+    - name: longitude
+      type: float32
+    - name: altitude
+      type: float32
+    name: CommandHomeRequest
+    package: mavros_msgs
+  response:
+    fields:
+    - name: success
+      type: bool
+    - name: result
+      type: uint8
+    name: CommandHomeResponse
+    package: mavros_msgs
+- name: GetPlan
+  package: nav_msgs
+  request:
+    fields:
+    - name: start
+      type: geometry_msgs/PoseStamped
+    - name: goal
+      type: geometry_msgs/PoseStamped
+    - name: tolerance
+      type: float32
+    name: GetPlanRequest
+    package: nav_msgs
+  response:
+    fields:
+    - name: plan
+      type: nav_msgs/Path
+    name: GetPlanResponse
+    package: nav_msgs
+- name: CommandBool
+  package: mavros_msgs
+  request:
+    fields:
+    - name: value
+      type: bool
+    name: CommandBoolRequest
+    package: mavros_msgs
+  response:
+    fields:
+    - name: success
+      type: bool
+    - name: result
+      type: uint8
+    name: CommandBoolResponse
+    package: mavros_msgs
+- name: SetBool
+  package: std_srvs
+  request:
+    fields:
+    - name: data
+      type: bool
+    name: SetBoolRequest
+    package: std_srvs
+  response:
+    fields:
+    - name: success
+      type: bool
+    - name: message
+      type: string
+    name: SetBoolResponse
+    package: std_srvs
+- name: FileWrite
+  package: mavros_msgs
+  request:
+    fields:
+    - name: file_path
+      type: string
+    - name: offset
+      type: uint64
+    - name: data
+      type: uint8[]
+    name: FileWriteRequest
+    package: mavros_msgs
+  response:
+    fields:
+    - name: success
+      type: bool
+    - name: r_errno
+      type: int32
+    name: FileWriteResponse
+    package: mavros_msgs
+- name: FileList
+  package: mavros_msgs
+  request:
+    fields:
+    - name: dir_path
+      type: string
+    name: FileListRequest
+    package: mavros_msgs
+  response:
+    fields:
+    - name: list
+      type: mavros_msgs/FileEntry[]
+    - name: success
+      type: bool
+    - name: r_errno
+      type: int32
+    name: FileListResponse
+    package: mavros_msgs
+- name: WaypointPull
+  package: mavros_msgs
+  request:
+    name: WaypointPullRequest
+    package: mavros_msgs
+  response:
+    fields:
+    - name: success
+      type: bool
+    - name: wp_received
+      type: uint32
+    name: WaypointPullResponse
+    package: mavros_msgs
+- name: FrameGraph
+  package: tf2_msgs
+  response:
+    fields:
+    - name: frame_yaml
+      type: string
+    name: FrameGraphResponse
+    package: tf2_msgs
+- name: CommandLong
+  package: mavros_msgs
+  request:
+    fields:
+    - name: broadcast
+      type: bool
+    - name: command
+      type: uint16
+    - name: confirmation
+      type: uint8
+    - name: param1
+      type: float32
+    - name: param2
+      type: float32
+    - name: param3
+      type: float32
+    - name: param4
+      type: float32
+    - name: param5
+      type: float32
+    - name: param6
+      type: float32
+    - name: param7
+      type: float32
+    name: CommandLongRequest
+    package: mavros_msgs
+  response:
+    fields:
+    - name: success
+      type: bool
+    - name: result
+      type: uint8
+    name: CommandLongResponse
+    package: mavros_msgs
+- name: FileRemoveDir
+  package: mavros_msgs
+  request:
+    fields:
+    - name: dir_path
+      type: string
+    name: FileRemoveDirRequest
+    package: mavros_msgs
+  response:
+    fields:
+    - name: success
+      type: bool
+    - name: r_errno
+      type: int32
+    name: FileRemoveDirResponse
+    package: mavros_msgs
+- name: FileTruncate
+  package: mavros_msgs
+  request:
+    fields:
+    - name: file_path
+      type: string
+    - name: length
+      type: uint64
+    name: FileTruncateRequest
+    package: mavros_msgs
+  response:
+    fields:
+    - name: success
+      type: bool
+    - name: r_errno
+      type: int32
+    name: FileTruncateResponse
+    package: mavros_msgs
+- name: Trigger
+  package: std_srvs
+  response:
+    fields:
+    - name: success
+      type: bool
+    - name: message
+      type: string
+    name: TriggerResponse
+    package: std_srvs
+- name: GetLoggers
+  package: roscpp
+  response:
+    fields:
+    - name: loggers
+      type: roscpp/Logger[]
+    name: GetLoggersResponse
+    package: roscpp
+- name: FrameGraph
+  package: tf
+  response:
+    fields:
+    - name: dot_graph
+      type: string
+    name: FrameGraphResponse
+    package: tf
+- name: SetMap
+  package: nav_msgs
+  request:
+    fields:
+    - name: map
+      type: nav_msgs/OccupancyGrid
+    - name: initial_pose
+      type: geometry_msgs/PoseWithCovarianceStamped
+    name: SetMapRequest
+    package: nav_msgs
+  response:
+    fields:
+    - name: success
+      type: bool
+    name: SetMapResponse
+    package: nav_msgs
+- name: FileRename
+  package: mavros_msgs
+  request:
+    fields:
+    - name: old_path
+      type: string
+    - name: new_path
+      type: string
+    name: FileRenameRequest
+    package: mavros_msgs
+  response:
+    fields:
+    - name: success
+      type: bool
+    - name: r_errno
+      type: int32
+    name: FileRenameResponse
+    package: mavros_msgs
+- name: FileChecksum
+  package: mavros_msgs
+  request:
+    fields:
+    - name: file_path
+      type: string
+    name: FileChecksumRequest
+    package: mavros_msgs
+  response:
+    fields:
+    - name: crc32
+      type: uint32
+    - name: success
+      type: bool
+    - name: r_errno
+      type: int32
+    name: FileChecksumResponse
+    package: mavros_msgs
+- name: ParamSet
+  package: mavros_msgs
+  request:
+    fields:
+    - name: param_id
+      type: string
+    - name: value
+      type: mavros_msgs/ParamValue
+    name: ParamSetRequest
+    package: mavros_msgs
+  response:
+    fields:
+    - name: success
+      type: bool
+    - name: value
+      type: mavros_msgs/ParamValue
+    name: ParamSetResponse
+    package: mavros_msgs
+- name: DemuxSelect
+  package: topic_tools
+  request:
+    fields:
+    - name: topic
+      type: string
+    name: DemuxSelectRequest
+    package: topic_tools
+  response:
+    fields:
+    - name: prev_topic
+      type: string
+    name: DemuxSelectResponse
+    package: topic_tools
+- name: WaypointClear
+  package: mavros_msgs
+  request:
+    name: WaypointClearRequest
+    package: mavros_msgs
+  response:
+    fields:
+    - name: success
+      type: bool
+    name: WaypointClearResponse
+    package: mavros_msgs
+- name: WaypointPush
+  package: mavros_msgs
+  request:
+    fields:
+    - name: waypoints
+      type: mavros_msgs/Waypoint[]
+    name: WaypointPushRequest
+    package: mavros_msgs
+  response:
+    fields:
+    - name: success
+      type: bool
+    - name: wp_transfered
+      type: uint32
+    name: WaypointPushResponse
+    package: mavros_msgs
+- name: FileClose
+  package: mavros_msgs
+  request:
+    fields:
+    - name: file_path
+      type: string
+    name: FileCloseRequest
+    package: mavros_msgs
+  response:
+    fields:
+    - name: success
+      type: bool
+    - name: r_errno
+      type: int32
+    name: FileCloseResponse
+    package: mavros_msgs
+- name: MuxAdd
+  package: topic_tools
+  request:
+    fields:
+    - name: topic
+      type: string
+    name: MuxAddRequest
+    package: topic_tools
+- name: SetCameraInfo
+  package: sensor_msgs
+  request:
+    fields:
+    - name: camera_info
+      type: sensor_msgs/CameraInfo
+    name: SetCameraInfoRequest
+    package: sensor_msgs
+  response:
+    fields:
+    - name: success
+      type: bool
+    - name: status_message
+      type: string
+    name: SetCameraInfoResponse
+    package: sensor_msgs
+- name: FileRemove
+  package: mavros_msgs
+  request:
+    fields:
+    - name: file_path
+      type: string
+    name: FileRemoveRequest
+    package: mavros_msgs
+  response:
+    fields:
+    - name: success
+      type: bool
+    - name: r_errno
+      type: int32
+    name: FileRemoveResponse
+    package: mavros_msgs
+- name: ParamPush
+  package: mavros_msgs
+  request:
+    name: ParamPushRequest
+    package: mavros_msgs
+  response:
+    fields:
+    - name: success
+      type: bool
+    - name: param_transfered
+      type: uint32
+    name: ParamPushResponse
+    package: mavros_msgs
+- name: GetMap
+  package: nav_msgs
+  request:
+    name: GetMapRequest
+    package: nav_msgs
+  response:
+    fields:
+    - name: map
+      type: nav_msgs/OccupancyGrid
+    name: GetMapResponse
+    package: nav_msgs
+- name: CommandInt
+  package: mavros_msgs
+  request:
+    fields:
+    - name: broadcast
+      type: bool
+    - name: frame
+      type: uint8
+    - name: command
+      type: uint16
+    - name: current
+      type: uint8
+    - name: autocontinue
+      type: uint8
+    - name: param1
+      type: float32
+    - name: param2
+      type: float32
+    - name: param3
+      type: float32
+    - name: param4
+      type: float32
+    - name: x
+      type: int32
+    - name: y
+      type: int32
+    - name: z
+      type: float32
+    name: CommandIntRequest
+    package: mavros_msgs
+  response:
+    fields:
+    - name: success
+      type: bool
+    name: CommandIntResponse
+    package: mavros_msgs
+- name: CommandTriggerControl
+  package: mavros_msgs
+  request:
+    fields:
+    - name: trigger_enable
+      type: bool
+    - name: integration_time
+      type: float32
+    name: CommandTriggerControlRequest
+    package: mavros_msgs
+  response:
+    fields:
+    - name: success
+      type: bool
+    - name: result
+      type: uint8
+    name: CommandTriggerControlResponse
+    package: mavros_msgs
+- name: SetLoggerLevel
+  package: roscpp
+  request:
+    fields:
+    - name: logger
+      type: string
+    - name: level
+      type: string
+    name: SetLoggerLevelRequest
+    package: roscpp
+- name: CommandTOL
+  package: mavros_msgs
+  request:
+    fields:
+    - name: min_pitch
+      type: float32
+    - name: yaw
+      type: float32
+    - name: latitude
+      type: float32
+    - name: longitude
+      type: float32
+    - name: altitude
+      type: float32
+    name: CommandTOLRequest
+    package: mavros_msgs
+  response:
+    fields:
+    - name: success
+      type: bool
+    - name: result
+      type: uint8
+    name: CommandTOLResponse
+    package: mavros_msgs
+- name: MuxSelect
+  package: topic_tools
+  request:
+    fields:
+    - name: topic
+      type: string
+    name: MuxSelectRequest
+    package: topic_tools
+  response:
+    fields:
+    - name: prev_topic
+      type: string
+    name: MuxSelectResponse
+    package: topic_tools
+- name: Empty
+  package: std_srvs
+- name: ParamGet
+  package: mavros_msgs
+  request:
+    fields:
+    - name: param_id
+      type: string
+    name: ParamGetRequest
+    package: mavros_msgs
+  response:
+    fields:
+    - name: success
+      type: bool
+    - name: value
+      type: mavros_msgs/ParamValue
+    name: ParamGetResponse
+    package: mavros_msgs
+- name: AddDiagnostics
+  package: diagnostic_msgs
+  request:
+    fields:
+    - name: load_namespace
+      type: string
+    name: AddDiagnosticsRequest
+    package: diagnostic_msgs
+  response:
+    fields:
+    - name: success
+      type: bool
+    - name: message
+      type: string
+    name: AddDiagnosticsResponse
+    package: diagnostic_msgs
+- name: StreamRate
+  package: mavros_msgs
+  request:
+    constants:
+    - name: STREAM_ALL
+      type: uint8
+      value: '0'
+    - name: STREAM_RAW_SENSORS
+      type: uint8
+      value: '1'
+    - name: STREAM_EXTENDED_STATUS
+      type: uint8
+      value: '2'
+    - name: STREAM_RC_CHANNELS
+      type: uint8
+      value: '3'
+    - name: STREAM_RAW_CONTROLLER
+      type: uint8
+      value: '4'
+    - name: STREAM_POSITION
+      type: uint8
+      value: '6'
+    - name: STREAM_EXTRA1
+      type: uint8
+      value: '10'
+    - name: STREAM_EXTRA2
+      type: uint8
+      value: '11'
+    - name: STREAM_EXTRA3
+      type: uint8
+      value: '12'
+    fields:
+    - name: stream_id
+      type: uint8
+    - name: message_rate
+      type: uint16
+    - name: on_off
+      type: bool
+    name: StreamRateRequest
+    package: mavros_msgs
+- name: SelfTest
+  package: diagnostic_msgs
+  response:
+    fields:
+    - name: id
+      type: string
+    - name: passed
+      type: byte
+    - name: status
+      type: diagnostic_msgs/DiagnosticStatus[]
+    name: SelfTestResponse
+    package: diagnostic_msgs
+- name: FileRead
+  package: mavros_msgs
+  request:
+    fields:
+    - name: file_path
+      type: string
+    - name: offset
+      type: uint64
+    - name: size
+      type: uint64
+    name: FileReadRequest
+    package: mavros_msgs
+  response:
+    fields:
+    - name: data
+      type: uint8[]
+    - name: success
+      type: bool
+    - name: r_errno
+      type: int32
+    name: FileReadResponse
+    package: mavros_msgs
+- name: DemuxList
+  package: topic_tools
+  response:
+    fields:
+    - name: topics
+      type: string[]
+    name: DemuxListResponse
+    package: topic_tools
+- name: DemuxAdd
+  package: topic_tools
+  request:
+    fields:
+    - name: topic
+      type: string
+    name: DemuxAddRequest
+    package: topic_tools
+- name: FileOpen
+  package: mavros_msgs
+  request:
+    constants:
+    - name: MODE_READ
+      type: uint8
+      value: "0\t# open for read"
+    - name: MODE_WRITE
+      type: uint8
+      value: "1\t# open for write"
+    - name: MODE_CREATE
+      type: uint8
+      value: "2\t# do creat()"
+    fields:
+    - name: file_path
+      type: string
+    - name: mode
+      type: uint8
+    name: FileOpenRequest
+    package: mavros_msgs
+  response:
+    fields:
+    - name: size
+      type: uint32
+    - name: success
+      type: bool
+    - name: r_errno
+      type: int32
+    name: FileOpenResponse
+    package: mavros_msgs
+- name: Empty
+  package: roscpp
+- name: SetMode
+  package: mavros_msgs
+  request:
+    constants:
+    - name: MAV_MODE_PREFLIGHT
+      type: uint8
+      value: '0'
+    - name: MAV_MODE_STABILIZE_DISARMED
+      type: uint8
+      value: '80'
+    - name: MAV_MODE_STABILIZE_ARMED
+      type: uint8
+      value: '208'
+    - name: MAV_MODE_MANUAL_DISARMED
+      type: uint8
+      value: '64'
+    - name: MAV_MODE_MANUAL_ARMED
+      type: uint8
+      value: '192'
+    - name: MAV_MODE_GUIDED_DISARMED
+      type: uint8
+      value: '88'
+    - name: MAV_MODE_GUIDED_ARMED
+      type: uint8
+      value: '216'
+    - name: MAV_MODE_AUTO_DISARMED
+      type: uint8
+      value: '92'
+    - name: MAV_MODE_AUTO_ARMED
+      type: uint8
+      value: '220'
+    - name: MAV_MODE_TEST_DISARMED
+      type: uint8
+      value: '66'
+    - name: MAV_MODE_TEST_ARMED
+      type: uint8
+      value: '194'
+    fields:
+    - name: base_mode
+      type: uint8
+    - name: custom_mode
+      type: string
+    name: SetModeRequest
+    package: mavros_msgs
+  response:
+    fields:
+    - name: success
+      type: bool
+    name: SetModeResponse
+    package: mavros_msgs
