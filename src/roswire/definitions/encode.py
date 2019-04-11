@@ -38,10 +38,7 @@ def sized_encoder(encoder_content: Callable[[T], bytes],
 
 def writer(encoder: Callable[[Any], bytes]
            ) -> Callable[[BinaryIO, Any], None]:
-    def write(b: BinaryIO, v: Any) -> None:
-        b.write(encoder(v))
-
-    return write
+    return lambda b, v: ignore(b.write(encoder(v)))
 
 
 def simple_writer(typ: str) -> Callable[[BinaryIO, Any], None]:
