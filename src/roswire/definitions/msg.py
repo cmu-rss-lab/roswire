@@ -249,3 +249,7 @@ class Message:
     def write(self, b: BinaryIO) -> None:
         """Writes a binary encoding of this message to a given stream."""
         raise NotImplementedError
+
+    def encode(self) -> bytes:
+        """Returns a binary encoding of this message."""
+        return self.write(BytesIO()).getvalue()
