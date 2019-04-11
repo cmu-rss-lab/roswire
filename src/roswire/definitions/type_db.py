@@ -1,9 +1,8 @@
 __all__ = ('TypeDatabase',)
 
 from typing import (Collection, Type, Mapping, Iterator, Dict, ClassVar, Any,
-                    Sequence, Callable)
+                    Sequence, Callable, BinaryIO)
 from collections import OrderedDict
-from io import BytesIO
 
 import attr
 
@@ -45,9 +44,9 @@ class TypeDatabase(Mapping[str, Type[Message]]):
     def _build_read(cls,
                     name_to_type: Mapping[str, Type[Message]],
                     fmt: MsgFormat
-                    ) -> Callable[[Type[Message], BytesIO], Message]:
+                    ) -> Callable[[Type[Message], BinaryIO], Message]:
         """Builds a reader for a given message format."""
-        def get_factory(field: Field) -> Callable[[BytesIO], Any]:
+        def get_factory(field: Field) -> Callable[[BinaryIO], Any]:
             if field.is_simple:
                 return simple_reader(field.typ)
             if field.typ == 'time':
@@ -59,7 +58,7 @@ class TypeDatabase(Mapping[str, Type[Message]]):
             if field.is_array and is_simple(field.base_type):
                 return simple_array_reader(field.base_type, field.length)
             if field.is_array and not is_simple(field.base_type):
-                entry_factory: Callable[[BytesIO], Any]
+                entry_factory: Callable[[BinaryIO], Any]
                 if field.base_type == 'time':
                     entry_factory = read_time
                 elif field.base_type == 'duration':
@@ -79,11 +78,11 @@ class TypeDatabase(Mapping[str, Type[Message]]):
             m = "unable to find factory for field: {field.name} [{field.typ}]"
             raise Exception(m)
 
-        fields: OrderedDict[str, Callable[[BytesIO], Any]] = OrderedDict()
+        fields: OrderedDict[str, Callable[[BinaryIO], Any]] = OrderedDict()
         for field in fmt.fields:
             fields[field.name] = get_factory(field)
 
-        def reader(cls: Type[Message], b: BytesIO) -> Message:
+        def reader(cls: Type[Message], b: BinaryIO) -> Message:
             values: Dict[str, Any] = {}
             for name, factory in fields.items():
                 values[name] = factory(b)

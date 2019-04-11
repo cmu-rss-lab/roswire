@@ -3,8 +3,8 @@
 This module provides code for decoding and deserialising binary ROS messages
 into Python data structures.
 """
-from typing import Optional, Iterator, Callable, Any, List, Type, TypeVar
-from io import BytesIO
+from typing import (Optional, Iterator, Callable, Any, List, Type, TypeVar,
+                    BinaryIO)
 import functools
 import struct
 
@@ -53,13 +53,13 @@ def simple_decoder(typ: str) -> Callable[[bytes], Any]:
     return bool_decoder if typ == 'bool' else decoder
 
 
-def simple_reader(typ: str) -> Callable[[BytesIO], Any]:
+def simple_reader(typ: str) -> Callable[[BinaryIO], Any]:
     """Returns a reader for a specified simple type."""
     pattern = '<' + get_pattern(typ)
     decoder = simple_decoder(typ)
     size = struct.calcsize(pattern)
 
-    def reader(b: BytesIO) -> Any:
+    def reader(b: BinaryIO) -> Any:
         return decoder(b.read(size))
 
     return reader
@@ -100,7 +100,7 @@ def decode_time(b: bytes) -> Time:
     return Time(secs, nsecs)
 
 
-def read_time(b: BytesIO) -> Time:
+def read_time(b: BinaryIO) -> Time:
     return decode_time(b.read(8))
 
 
@@ -110,7 +110,7 @@ def decode_duration(b: bytes) -> Duration:
     return Duration(secs, nsecs)
 
 
-def read_duration(b: BytesIO) -> Duration:
+def read_duration(b: BinaryIO) -> Duration:
     return decode_duration(b.read(8))
 
 
@@ -118,19 +118,19 @@ def decode_string(b: bytes) -> str:
     return b.decode('utf-8')
 
 
-def read_fixed_length_string(size: int, b: BytesIO) -> str:
+def read_fixed_length_string(size: int, b: BinaryIO) -> str:
     """Reads a fixed-length string from a bytestream."""
     return decode_string(b.read(size))
 
 
-def read_string(b: BytesIO) -> str:
+def read_string(b: BinaryIO) -> str:
     """Reads a variable-length string from a bytestream."""
     size = read_uint32(b)
     return read_fixed_length_string(size, b)
 
 
 def string_reader(length: Optional[int] = None
-                  ) -> Callable[[BytesIO], str]:
+                  ) -> Callable[[BinaryIO], str]:
     """Returns a reader for (possibly fixed-length) strings."""
     if length is None:
         return read_string
@@ -140,7 +140,7 @@ def string_reader(length: Optional[int] = None
 
 def simple_array_reader(typ: str,
                         length: Optional[int] = None
-                        ) -> Callable[[BytesIO], List[Any]]:
+                        ) -> Callable[[BinaryIO], List[Any]]:
     """Returns a reader for a simple array."""
     base_pattern = get_pattern(typ)
 
@@ -149,13 +149,13 @@ def simple_array_reader(typ: str,
         pattern = f'<{length}{base_pattern}'
         size = struct.calcsize(pattern)
 
-        def fixed_reader(b: BytesIO) -> List[Any]:
+        def fixed_reader(b: BinaryIO) -> List[Any]:
             return list(struct.unpack(pattern, b.read(size)))
 
         return fixed_reader
 
     # variable length
-    def var_reader(b: BytesIO) -> List[Any]:
+    def var_reader(b: BinaryIO) -> List[Any]:
         length = read_uint32(b)
         pattern = f'<{length}{base_pattern}'
         size = struct.calcsize(pattern)
@@ -164,14 +164,14 @@ def simple_array_reader(typ: str,
     return var_reader
 
 
-def complex_array_reader(factory: Callable[[BytesIO], T],
+def complex_array_reader(factory: Callable[[BinaryIO], T],
                          length: Optional[int] = None
-                         ) -> Callable[[BytesIO], List[T]]:
+                         ) -> Callable[[BinaryIO], List[T]]:
     """Returns a reader for a complex array."""
-    def read_fixed(length: int, b: BytesIO) -> List[T]:
+    def read_fixed(length: int, b: BinaryIO) -> List[T]:
         return [factory(b) for i in range(length)]
 
-    def read_var(b: BytesIO) -> List[T]:
+    def read_var(b: BinaryIO) -> List[T]:
         length = read_uint32(b)
         return read_fixed(length, b)
 

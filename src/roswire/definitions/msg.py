@@ -1,7 +1,7 @@
 __all__ = ('Constant', 'ConstantValue', 'Field', 'MsgFormat', 'Message')
 
 from typing import (Type, Optional, Any, Union, Tuple, List, Dict, ClassVar,
-                    Collection, Set, Iterator, Mapping, Callable)
+                    Collection, Set, Iterator, Mapping, Callable, BinaryIO)
 from io import BytesIO
 import logging
 import functools
@@ -239,7 +239,7 @@ class Message:
         return d
 
     @classmethod
-    def read(cls, b: BytesIO) -> 'Message':
+    def read(cls, b: BinaryIO) -> 'Message':
         raise NotImplementedError
 
     @classmethod
