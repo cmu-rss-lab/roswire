@@ -13,11 +13,11 @@ import heapq
 
 import attr
 
-from .base import Time
-from .msg import Message
-from .type_db import TypeDatabase
-from .decode import (decode_uint8, decode_uint32, decode_uint64, decode_str,
-                     decode_time)
+from definitions.base import Time
+from definitions.msg import Message
+from definitions.type_db import TypeDatabase
+from definitions.decode import (decode_uint8, decode_uint32, decode_uint64,
+                                decode_str, decode_time)
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

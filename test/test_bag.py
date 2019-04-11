@@ -3,7 +3,7 @@ import logging
 
 import pytest
 
-from roswire.definitions.bag import BagReader
+from roswire.bag import BagReader
 
 from test_basic import build_ardu
 
