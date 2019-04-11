@@ -64,19 +64,19 @@ class FormatDatabase:
     def actions(self) -> Mapping[str, ActionFormat]:
         return self.__actions
 
-    def to_dict(self) -> List[Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Returns a JSON description of this database."""
         return {'messages': [m.to_dict() for m in self.__messages.values()],
                 'services': [s.to_dict() for s in self.__services.values()],
                 'actions': [a.to_dict() for a in self.__actions.values()]}
 
     @classmethod
-    def from_dict(cls, d: List[Any]) -> 'FormatDatabase':
+    def from_dict(cls, d: Dict[str, Any]) -> 'FormatDatabase':
         """Loads a format database from a JSON document."""
-        msg = [MsgFormat.from_dict(dd) for dd in d['messages']]
-        srv = [SrvFormat.from_dict(dd) for dd in d['messages']]
-        action = [ActionFormat.from_dict(dd) for dd in d['messages']]
-        return MessageFormat(msg, srv, action)
+        msg = {MsgFormat.from_dict(dd) for dd in d['messages']}
+        srv = {SrvFormat.from_dict(dd) for dd in d['messages']}
+        action = {ActionFormat.from_dict(dd) for dd in d['messages']}
+        return FormatDatabase(msg, srv, action)
 
     def save(self, fn: str) -> None:
         """Saves the contents of this format database to disk."""
