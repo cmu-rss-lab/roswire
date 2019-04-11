@@ -4,7 +4,7 @@ This module provides code for encoding and serialising Python data structures
 into their corresponding ROS binary representations.
 """
 from typing import (Optional, Iterator, Callable, Any, List, Type, TypeVar,
-                    BinaryIO)
+                    BinaryIO, Sequence)
 import functools
 import struct
 
@@ -85,7 +85,7 @@ write_duration = writer(encode_duration)
 
 
 def string_writer(length: Optional[int] = None
-                  ) -> Callable[[BinaryIO], str]:
+                  ) -> Callable[[BinaryIO, str], None]:
     """Returns a writer for (possibly fixed-length) strings."""
     encoder: Callable[[str], bytes]
     encode_content: Callable[[str], bytes] = str.encode
@@ -94,3 +94,26 @@ def string_writer(length: Optional[int] = None
     else:
         encoder = encode_content
     return writer(encoder)
+
+
+def simple_array_writer(typ: str,
+                        length: Optional[int] = None
+                        ) -> Callable[[BinaryIO, ], List[Any]]:
+    """Returns a writer for a simple array."""
+    base_pattern = get_pattern(typ)
+
+    if length is not None:
+        pattern = f'<{length}{base_pattern}'
+
+        def fixed_writer(b: BinaryIO, arr: Sequence[Any]) -> None:
+            return struct.pack(pattern, *arr)
+
+        return fixed_reader
+
+    def var_writer(b: BinaryIO, arr: Sequence[Any]) -> None:
+        length = len(arr)
+        write_uint32(length)
+        pattern = f'<{length}{base_pattern}'
+        return b.write(struct.pack(pattern, *arr))
+
+    return var_reader
