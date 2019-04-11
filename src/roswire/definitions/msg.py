@@ -309,3 +309,7 @@ class Message:
             logger.debug("decoded field [%s]: %s", field.name, repr(value))
             values[field.name] = value
         return cls(**values)  # type: ignore
+
+    @classmethod
+    def read(cls, b: BytesIO) -> 'Message':
+        raise NotImplementedError
