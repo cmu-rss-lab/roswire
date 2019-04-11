@@ -51,7 +51,7 @@ class TypeDatabase(Mapping[str, Type[Message]]):
     def _build_read(cls,
                     name_to_type: Mapping[str, Type[Message]],
                     fmt: MsgFormat
-                    ) -> Callable[[Message, BinaryIO], None]:
+                    ) -> Callable[[Type[Message], BinaryIO], Message]:
         """Builds a reader for a given message format."""
         def get_factory(field: Field) -> Callable[[BinaryIO], Any]:
             if field.is_simple:
@@ -115,7 +115,7 @@ class TypeDatabase(Mapping[str, Type[Message]]):
             if field.is_array and is_simple(field.base_type):
                 return simple_array_writer(field.base_type, field.length)
             if field.is_array and not is_simple(field.base_type):
-                entry_writer: Callable[[BinaryIO, Any], None]
+                entry_writer: Callable[[Any, BinaryIO], None]
                 if field.base_type == 'time':
                     entry_writer = write_time
                 elif field.base_type == 'duration':
@@ -127,7 +127,7 @@ class TypeDatabase(Mapping[str, Type[Message]]):
                     entry_writer = name_to_type[field.base_type].write
                 else:
                     raise Exception(f"unable to find writer: {field.typ}")
-                return complex_array_reader(entry_factory, field.length)
+                return complex_array_writer(entry_writer, field.length)
             if field.typ in name_to_type:
                 return name_to_type[field.typ].write
             m = "unable to find writer for field: {field.name} [{field.typ}]"

@@ -117,11 +117,11 @@ def simple_array_writer(typ: str,
     return var_writer
 
 
-def complex_array_writer(entry_writer: Callable[[T, BinaryIO], None],
+def complex_array_writer(entry_writer: Callable[[Any, BinaryIO], None],
                          length: Optional[int] = None
-                         ) -> Callable[[Sequence[T], BinaryIO], None]:
+                         ) -> Callable[[Any, BinaryIO], None]:
     """Returns a writer for a complex array."""
-    def write_content(arr: Sequence[T], b: BinaryIO) -> None:
+    def write_content(arr: Sequence[Any], b: BinaryIO) -> None:
         for v in arr:
             entry_writer(v, b)
 
