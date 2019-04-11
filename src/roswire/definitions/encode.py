@@ -54,3 +54,7 @@ write_float64 = simple_writer('float64')
 write_char = simple_writer('char')
 write_byte = simple_writer('byte')
 write_bool = simple_writer('bool')
+
+
+def encode_time(time: Time) -> bytes:
+    return encode_uint32(time.secs) + encode_uint32(time.nsecs)
