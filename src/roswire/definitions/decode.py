@@ -3,8 +3,8 @@
 This module provides code for decoding and deserialising binary ROS messages
 into Python data structures.
 """
-from typing import (Optional, Iterator, Callable, Any, List, Type, TypeVar,
-                    OrderedDict)
+from typing import Optional, Iterator, Callable, Any, List, Type, TypeVar
+from collections import OrderedDict
 from io import BytesIO
 import functools
 import struct
@@ -184,9 +184,9 @@ def complex_array_reader(factory: Callable[[BytesIO], T],
 
 def message_reader(factory: Type[T],
                    fields: OrderedDict[str, Callable[[BytesIO], Any]]
-                   ) -> T:
+                   ) -> Callable[[BytesIO], T]:
     def read(b: BytesIO) -> T:
-        values = {f.name: c(b) for f, c in fields.items()}
-        return factory(**values)
+        values = {f: c(b) for f, c in fields.items()}
+        return factory(**values)  # type: ignore
 
     return read
