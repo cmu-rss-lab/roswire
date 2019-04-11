@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __all__ = ('BagReader',)
 
 from typing import (Dict, Sequence, Union, Optional, Tuple, List, Type,
