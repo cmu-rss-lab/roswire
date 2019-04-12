@@ -90,6 +90,7 @@ class Field:
 class MsgFormat:
     package: str = attr.ib()
     name: str = attr.ib()
+    definition: str = attr.ib()
     fields: Tuple[Field, ...] = attr.ib(converter=tuple)
     constants: Tuple[Constant, ...] = attr.ib(converter=tuple)
 
@@ -166,7 +167,7 @@ class MsgFormat:
             else:
                 raise exceptions.ParsingError(f"failed to parse line: {line}")
 
-        return MsgFormat(package, name, fields, constants)  # type: ignore
+        return MsgFormat(package, name, text, fields, constants)  # type: ignore
 
     @staticmethod
     def from_dict(d: Dict[str, Any],
@@ -178,13 +179,15 @@ class MsgFormat:
             package = d['package']
         if not name:
             name = d['name']
+        definitions = d['definition']
         fields = [Field.from_dict(dd) for dd in d.get('fields', [])]
         constants = [Constant.from_dict(dd) for dd in d.get('constants', [])]
-        return MsgFormat(package, name, fields, constants)  # type: ignore  # noqa
+        return MsgFormat(package, name, definition, fields, constants)  # type: ignore  # noqa
 
     def to_dict(self) -> Dict[str, Any]:
         d: Dict[str, Any] = {'package': self.package,
-                             'name': self.name}
+                             'name': self.name,
+                             'definition': self.definition}
         if self.fields:
             d['fields'] = [f.to_dict() for f in self.fields]
         if self.constants:
