@@ -177,7 +177,16 @@ class BagWriter:
                                 conn: int,
                                 entries: List[IndexEntry]
                                 ) -> None:
-        raise NotImplementedError
+        num_entries = len(entries)
+        size_data = num_entries * 12
+        self._write_header(OpCode.INDEX_DATA, {
+            'ver': BIN_INDEX_VERSION,
+            'conn': encode_uint32(conn),
+            'count': encode_uint32(num_entries)})
+        write_uint32(size_data, self.__fp)
+        for entry in entries:
+            write_time(entry.time, self.__fp)
+            write_uint32(entry.offset, self.__fp)
 
     def _write_chunk(self,
                      compression: Compression,
