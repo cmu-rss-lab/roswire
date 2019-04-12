@@ -296,3 +296,6 @@ class BagWriter:
 
         # fix the header
         self._write_header_record()
+
+    def close(self) -> None:
+        self.__fp.close()
