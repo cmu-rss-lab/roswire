@@ -14,6 +14,7 @@ from .. import exceptions
 class SrvFormat:
     package = attr.ib(type=str)
     name = attr.ib(type=str)
+    definition = attr.ib(type=str)
     request = attr.ib(type=Optional[MsgFormat])
     response = attr.ib(type=Optional[MsgFormat])
 
@@ -60,7 +61,7 @@ class SrvFormat:
         if s_res:
             res = MsgFormat.from_string(package, name_res, s_res)
 
-        return SrvFormat(package, name, req, res)  # type: ignore
+        return SrvFormat(package, name, s, req, res)  # type: ignore
 
     @staticmethod
     def from_dict(d: Dict[str, Any],
@@ -70,6 +71,7 @@ class SrvFormat:
         req: Optional[MsgFormat] = None
         res: Optional[MsgFormat] = None
         name: str = d['name']
+        definition: str = d['definition']
         if package is None:
             assert d['package'] is not None
             package = d['package']
@@ -83,11 +85,12 @@ class SrvFormat:
                                       package=package,
                                       name=f'{name}Response')
 
-        return SrvFormat(package, name, req, res)
+        return SrvFormat(package, name, definition, req, res)
 
     def to_dict(self) -> Dict[str, Any]:
         d: Dict[str, Any] = {'package': self.package,
-                             'name': self.name}
+                             'name': self.name,
+                             'definition': self.definition}
         if self.request:
             d['request'] = self.request.to_dict()
         if self.response:

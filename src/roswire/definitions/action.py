@@ -17,6 +17,7 @@ class ActionFormat:
     """
     package = attr.ib(type=str)
     name = attr.ib(type=str)
+    definition = attr.ib(type=str)
     goal = attr.ib(type=MsgFormat)
     feedback = attr.ib(type=Optional[MsgFormat])
     result = attr.ib(type=Optional[MsgFormat])
@@ -75,7 +76,7 @@ class ActionFormat:
         else:
             res = None
 
-        return ActionFormat(package, name, goal, feed, res)
+        return ActionFormat(package, name, s, goal, feed, res)
 
     @staticmethod
     def from_dict(d: Dict[str, Any],
@@ -83,6 +84,7 @@ class ActionFormat:
                   package: Optional[str] = None
                   ) -> 'ActionFormat':
         name: str = d['name']
+        definition: str = d['definition']
         if package is None:
             assert d['package'] is not None
             package = d['package']
@@ -101,11 +103,12 @@ class ActionFormat:
                                        package=package,
                                        name=f'{name}Feedback')
 
-        return ActionFormat(package, name, goal, feed, res)
+        return ActionFormat(package, name, definition, goal, feed, res)
 
     def to_dict(self) -> Dict[str, Any]:
         d = {'package': self.package,
              'name': self.name,
+             'definition': self.definition,
              'goal': self.goal.to_dict()}
         if self.feedback:
             d['feedback'] = self.feedback.to_dict()
