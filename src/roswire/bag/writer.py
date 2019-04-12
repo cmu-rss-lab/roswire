@@ -53,10 +53,10 @@ class BagWriter:
 
     def _write_header_record(self) -> None:
         self.__fp.seek(self.__pos_header)
-        self._write_header(OpCode.HEADER,
-            {'index_pos': encode_uint64(self.__pos_index),
-             'conn_count': encode_uint32(len(self.__connections)),
-             'chunk_count': encode_uint32(len(self.__chunks))})
+        self._write_header(OpCode.HEADER, {
+            'index_pos': encode_uint64(self.__pos_index),
+            'conn_count': encode_uint32(len(self.__connections)),
+            'chunk_count': encode_uint32(len(self.__chunks))})
 
         # ensure the bag header record is 4096 characters long by padding it
         # with ASCII space characters (0x20) where necessary.
@@ -82,8 +82,9 @@ class BagWriter:
         # for now, we write a bogus header and size field
         # once we've finished writing the data, we'll correct them
         pos_header = self.__fp.tell()
-        self._write_header(OpCode.CHUNK, {'compression': bin_compression,
-                                          'size': encode_uint32(0)})
+        self._write_header(OpCode.CHUNK, {
+            'compression': bin_compression,
+            'size': encode_uint32(0)})
         write_uint32(0, self.__fp)
         pos_data = self.__fp.tell()
 
@@ -97,9 +98,9 @@ class BagWriter:
 
         # update header and size
         self.__fp.seek(pos_header)
-        self._write_header(OpCode.CHUNK,
-            {'compression': bin_compression,
-             'size': encode_uint32(size_uncompressed)})
+        self._write_header(OpCode.CHUNK, {
+            'compression': bin_compression,
+            'size': encode_uint32(size_uncompressed)})
         write_uint32(size_compressed, self.__fp)
         self.__fp.seek(pos_end)
 
