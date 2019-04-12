@@ -130,10 +130,6 @@ class BagWriter:
                             ) -> Chunk:
         bin_compression = compression.value.encode('utf-8')
 
-        # TODO keep track of earliest and latest message in bag
-        time_start = Time(0, 0)
-        time_end = Time(0, 0)
-
         # for now, we write a bogus header and size field
         # once we've finished writing the data, we'll correct them
         pos_header = self.__fp.tell()
@@ -145,6 +141,12 @@ class BagWriter:
 
         # write chunk contents
         index = self._write_chunk_data(messages)
+
+        # determine time of earliest and latest message in the bag
+        time_start = time_end = Time(0, 0)
+        for time in (e.time for ci in index.values() for e in ci):
+            time_start = min(time, time_start)
+            time_end = max(time, time_end)
 
         # compute chunk size
         pos_end = self.__fp.tell()
