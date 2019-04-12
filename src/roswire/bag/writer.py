@@ -249,7 +249,7 @@ class BagWriter:
         return self.__connections[topic]
 
     def _write_chunk_info_record(self, chunk: Chunk) -> None:
-        num_connections = 0  # TODO
+        num_connections = len(chunk.connections)
         pos_header = self.__fp.tell()
         self._write_header(OpCode.CHUNK_INFO, {
             'ver': BIN_CHUNK_INFO_VERSION,
