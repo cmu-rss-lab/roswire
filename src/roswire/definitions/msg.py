@@ -50,7 +50,7 @@ class Constant:
         return f"{self.typ} {self.name}={str(self.value)}"
 
 
-@attr.s(frozen=True)
+@attr.s(frozen=True, str=False)
 class Field:
     typ: str = attr.ib()
     name: str = attr.ib()
@@ -87,6 +87,9 @@ class Field:
     def to_dict(self) -> Dict[str, str]:
         return {'type': self.typ,
                 'name': self.name}
+
+    def __str__(self) -> str:
+        return f"{self.typ} {self.name}"
 
 
 @attr.s(frozen=True)
