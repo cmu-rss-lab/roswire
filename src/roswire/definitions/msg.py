@@ -88,6 +88,10 @@ class Field:
         return {'type': self.typ,
                 'name': self.name}
 
+    def without_package_name(self) -> 'Field':
+        typ = self.typ.partition('/')[2] if '/' in self.typ else self.typ
+        return Field(typ, self.name)
+
     def __str__(self) -> str:
         return f"{self.typ} {self.name}"
 
