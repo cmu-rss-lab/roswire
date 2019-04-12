@@ -25,7 +25,26 @@ class BagWriter:
         return self.__fn
 
     def _write_header(self, code: OpCode, fields: Dict[str, bytes]) -> None:
-        raise NotImplementedError
+        # write a length of zero for now and correct that length once the
+        # fields have been written
+        pos_size = self.__fp.tell()
+        write_uint32(0, self.__fp)
+        pos_content = self.__fp.tell()
+
+        fields['op'] = code.value
+        for name, bin_value in fields.items():
+            bin_name = f'{name}='.encode('utf-8')
+            size_field = len(bin_name) + len(bin_value)
+            write_uint32(size_field, self.__fp)
+            self.__fp.write(bin_name)
+            self.__fp.write(bin_value)
+
+        # correct the length
+        pos_end = self.__fp.tell()
+        size_total = pos_end - pos_content
+        self.__fp.seek(pos_size)
+        write_uint32(size_total, self.__fp)
+        self.__fp.seek(pos_end)
 
     def _write_header_record(self,
                              pos_index: int,
