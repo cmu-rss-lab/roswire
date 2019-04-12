@@ -3,7 +3,6 @@ __all__ = ('TypeDatabase',)
 from typing import (Collection, Type, Mapping, Iterator, Dict, ClassVar, Any,
                     Sequence, Callable, BinaryIO, List)
 from collections import OrderedDict
-import hashlib
 
 import attr
 
@@ -43,35 +42,12 @@ class TypeDatabase(Mapping[str, Type[Message]]):
             ns['format'] = fmt
             ns['read'] = classmethod(cls._build_read(name_to_type, fmt))
             ns['write'] = cls._build_write(name_to_type, fmt)
-            md5 = cls._compute_md5(name_to_type, fmt)
+            md5 = fmt.md5sum(db_format.messages)
             ns['md5sum'] = classmethod(lambda cls, md5=md5: md5)
             t: Type[Message] = type(fmt.name, (Message,), ns)
             t = attr.s(t, frozen=True, slots=True)
             name_to_type[fmt.fullname] = t
         return TypeDatabase(name_to_type.values())
-
-    @classmethod
-    def _compute_md5(cls,
-                    name_to_type: Mapping[str, Type[Message]],
-                    fmt: MsgFormat
-                    ) -> str:
-        """Computes the md5sum for a given message format."""
-        # build the MD5 text
-        # - remove comments
-        # - remove whitespace
-        # - package names of dependencies removed
-        # - constants reordered ahead of other declarations
-        md5_text = '\n'.join(
-            [str(c) for c in fmt.constants] +
-            [str(f.without_package_name()) for f in fmt.fields])
-        md5_sum = hashlib.md5(md5_text.encode('utf-8')).hexdigest()
-        # append md5sum for each embedded message type
-        # TODO how should we handle Header?
-        for f in fmt.fields:
-            if f.typ not in name_to_type:
-                continue
-            md5_sum += name_to_type[f.typ].md5sum()
-        return md5_sum
 
     @classmethod
     def _build_read(cls,

@@ -5,6 +5,7 @@ from typing import (Type, Optional, Any, Union, Tuple, List, Dict, ClassVar,
 from io import BytesIO
 import logging
 import functools
+import hashlib
 import struct
 import re
 import os
@@ -218,6 +219,26 @@ class MsgFormat:
             else:
                 fmt = name_to_format[field.typ]
                 yield from fmt.flatten(name_to_format, ctx + (field.name,))
+
+    def md5text(self, name_to_msg: Mapping[str, 'MsgFormat']) -> str:
+        """Computes the MD5 text for this format."""
+        lines: List[str] = []
+        lines += [str(c) for c in self.constants]
+        lines += [str(f.without_package_name()) for f in self.fields]
+        txt = '\n'.join(lines)
+
+        # append md5sum for each embedded message type
+        for f in self.fields:
+            if f.base_type not in name_to_msg:
+                continue
+            txt += name_to_msg[f.base_type].md5text(name_to_msg)
+
+        return txt
+
+    def md5sum(self, name_to_msg: Mapping[str, 'MsgFormat']) -> str:
+        """Computes the MD5 sum for this format."""
+        txt = self.md5text(name_to_msg)
+        return hashlib.md5(txt.encode('utf-8')).hexdigest()       
 
 
 class Message:
