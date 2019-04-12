@@ -31,7 +31,7 @@ R_BLANK = re.compile(f"^\s*{R_COMMENT}$")
 ConstantValue = Union[str, int, float]
 
 
-@attr.s(frozen=True)
+@attr.s(frozen=True, str=False)
 class Constant:
     typ = attr.ib(type=str)
     name = attr.ib(type=str)
@@ -45,6 +45,9 @@ class Constant:
         return {'type': self.typ,
                 'name': self.name,
                 'value': self.value}
+
+    def __str__(self) -> str:
+        return f"{self.typ} {self.name}={str(self.value)}"
 
 
 @attr.s(frozen=True)
