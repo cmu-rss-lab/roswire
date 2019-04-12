@@ -224,21 +224,22 @@ class MsgFormat:
         """Computes the MD5 text for this format."""
         lines: List[str] = []
         lines += [str(c) for c in self.constants]
-        lines += [str(f.without_package_name()) for f in self.fields]
-        txt = '\n'.join(lines)
-
-        # append md5sum for each embedded message type
         for f in self.fields:
-            if f.base_type not in name_to_msg:
-                continue
-            txt += name_to_msg[f.base_type].md5text(name_to_msg)
-
-        return txt
+            if is_builtin(f.base_type):
+                lines += [str(f.without_package_name())]
+            else:
+                f_md5 = name_to_msg[f.base_type].md5sum(name_to_msg)
+                lines += [f'{f_md5} {f.name}']
+        return '\n'.join(lines)
 
     def md5sum(self, name_to_msg: Mapping[str, 'MsgFormat']) -> str:
         """Computes the MD5 sum for this format."""
+        logger.debug("generating md5sum: %s", self.fullname)
         txt = self.md5text(name_to_msg)
-        return hashlib.md5(txt.encode('utf-8')).hexdigest()       
+        logger.debug("generated md5 text [%s]:\n%s", self.fullname, txt)
+        md5sum = hashlib.md5(txt.encode('utf-8')).hexdigest()
+        logger.debug("generated md5sum [%s]: %s", self.fullname, md5sum)
+        return md5sum
 
 
 class Message:
