@@ -167,7 +167,7 @@ class MsgFormat:
             else:
                 raise exceptions.ParsingError(f"failed to parse line: {line}")
 
-        return MsgFormat(package, name, text, fields, constants)  # type: ignore
+        return MsgFormat(package, name, text, fields, constants)  # type: ignore  # noqa
 
     @staticmethod
     def from_dict(d: Dict[str, Any],
