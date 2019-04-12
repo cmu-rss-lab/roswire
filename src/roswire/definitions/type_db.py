@@ -43,7 +43,7 @@ class TypeDatabase(Mapping[str, Type[Message]]):
             ns['read'] = classmethod(cls._build_read(name_to_type, fmt))
             ns['write'] = cls._build_write(name_to_type, fmt)
             md5 = cls._compute_md5(name_to_type, fmt)
-            ns['md5'] = classmethod(property(lambda cls, md5=md5: md5))
+            ns['md5'] = property(classmethod(lambda cls, md5=md5: md5))
             t: Type[Message] = type(fmt.name, (Message,), ns)
             t = attr.s(t, frozen=True, slots=True)
             name_to_type[fmt.fullname] = t

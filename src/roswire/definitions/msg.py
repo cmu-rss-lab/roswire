@@ -242,7 +242,6 @@ class Message:
         return d
 
     @classmethod
-    @property
     def md5sum(cls) -> str:
         """Returns the md5sum for this message type."""
         raise NotImplementedError
