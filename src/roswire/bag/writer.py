@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 __all__ = ('BagWriter',)
 
-from typing import BinaryIO
+from typing import BinaryIO, Iterable
 
 from .core import BagMessage, OpCode
+from ..definitions.encode import *
 
 
 class BagWriter:
