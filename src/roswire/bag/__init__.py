@@ -1,3 +1,4 @@
-__all__ = ('BagReader',)
+__all__ = ('BagReader', 'BagWriter')
 
 from .reader import BagReader
+from .writer import BagWriter

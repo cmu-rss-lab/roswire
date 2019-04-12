@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __all__ = ('BagReader',)
 
 from typing import (Dict, Sequence, Union, Optional, Tuple, List, Type,
@@ -8,8 +9,6 @@ import bz2
 import datetime
 import logging
 import heapq
-
-import attr
 
 from .core import *
 from ..definitions.base import Time
