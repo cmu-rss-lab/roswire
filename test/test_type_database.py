@@ -133,6 +133,7 @@ def test_md5sum():
     check('mavros_msgs/CommandCode', 'f7e54ea3892a961cc44c9350fdb0855e')
     check('geometry_msgs/Quaternion', 'a779879fadf0160734f906b8c19c7004')
     check('geometry_msgs/Vector3', '4a842b65f413084dc2b10fb484ea7f17')
+    check('geometry_msgs/Wrench', '4f539cf138b23283b520fd271b567936')
     check('geometry_msgs/Transform', 'ac9eff44abf714214112b05d54a3cf9b')
     check('geometry_msgs/TransformStamped', 'b5764a33bfeb3588febc2682852579b0')
     check('tf/tfMessage', '94810edda583a504dfda3829e70d7eec')
