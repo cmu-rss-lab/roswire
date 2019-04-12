@@ -42,10 +42,20 @@ class TypeDatabase(Mapping[str, Type[Message]]):
             ns['format'] = fmt
             ns['read'] = classmethod(cls._build_read(name_to_type, fmt))
             ns['write'] = cls._build_write(name_to_type, fmt)
+            md5 = cls._compute_md5(name_to_type, fmt)
+            ns['md5'] = classmethod(property(lambda cls, md5=md5: md5))
             t: Type[Message] = type(fmt.name, (Message,), ns)
             t = attr.s(t, frozen=True, slots=True)
             name_to_type[fmt.fullname] = t
         return TypeDatabase(name_to_type.values())
+
+    @classmethod
+    def _compute_md5(cls,
+                    name_to_type: Mapping[str, Type[Message]],
+                    fmt: MsgFormat
+                    ) -> str:
+        """Computes the md5sum for a given message format."""
+        raise NotImplementedError
 
     @classmethod
     def _build_read(cls,
