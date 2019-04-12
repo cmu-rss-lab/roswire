@@ -179,7 +179,7 @@ class MsgFormat:
             package = d['package']
         if not name:
             name = d['name']
-        definitions = d['definition']
+        definition = d['definition']
         fields = [Field.from_dict(dd) for dd in d.get('fields', [])]
         constants = [Constant.from_dict(dd) for dd in d.get('constants', [])]
         return MsgFormat(package, name, definition, fields, constants)  # type: ignore  # noqa
