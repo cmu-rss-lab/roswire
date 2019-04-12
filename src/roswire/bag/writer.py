@@ -260,9 +260,9 @@ class BagWriter:
 
         size_data = num_connections * 8
         write_uint32(size_data, self.__fp)
-
-        # TODO write connection counts
-        raise NotImplementedError
+        for connection in chunk.connections:
+            write_uint32(connection.uid, self.__fp)
+            write_uint32(connection.count, self.__fp)
 
     def _write_index(self) -> None:
         for connection in self.__connections.values():
