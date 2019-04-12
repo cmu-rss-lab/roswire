@@ -177,7 +177,7 @@ class BagWriter:
         if topic not in self.__connections:
             msg_format = typ.format
             md5sum = "TODO"  # FIXME implement
-            message_definition = "TODO"  # FIXME implement
+            message_definition = typ.format.definition
             conn = len(self.__connections)
             info = ConnectionInfo(conn=conn,
                                   topic=topic,
