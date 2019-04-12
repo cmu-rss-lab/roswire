@@ -3,7 +3,7 @@ __all__ = ('BagWriter',)
 
 from typing import BinaryIO, Iterable
 
-from .core import BagMessage, OpCode
+from .core import BagMessage, OpCode, Dict
 from ..definitions.encode import *
 
 
@@ -24,13 +24,16 @@ class BagWriter:
     def filename(self) -> str:
         return self.__fn
 
+    def _write_header(self, code: OpCode, fields: Dict[str, bytes]) -> None:
+        raise NotImplementedError
+
     def _write_header_record(self,
                              pos_index: int,
                              conn_count: int,
                              chunk_count: int
                              ) -> None:
         self.__fp.seek(self.__pos_header)
-        self._write_record_header(OpCode.HEADER,
+        self._write_header(OpCode.HEADER,
             {'index_pos': encode_uint64(pos_index),
              'conn_count': encode_uint32(conn_count),
              'chunk_count': encode_uint32(chunk_count)})
