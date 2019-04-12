@@ -9,9 +9,10 @@ https://github.com/ros/ros_comm/blob/melodic-devel/tools/rosbag/src/rosbag/bag.p
 """
 __all__ = ('BagWriter',)
 
-from typing import BinaryIO, Iterable, Dict
+from typing import BinaryIO, Iterable, Dict, Type
 
 from .core import (BagMessage, OpCode, Compression, ConnectionInfo, Chunk)
+from ..definitions import Message
 from ..definitions.encode import *
 
 
@@ -167,8 +168,29 @@ class BagWriter:
         write_uint32(size_data, self.__fp)
         self.__fp.seek(pos_end)
 
-    def _get_connection(self, topic: str) -> ConnectionInfo:
-        raise NotImplementedError
+    def _get_connection(self,
+                        topic: str,
+                        typ: Type[Message]
+                        ) -> ConnectionInfo:
+        # if there isn't a connection for the topic, create one and write a
+        # connection record.
+        if topic not in self.__connections:
+            msg_format = typ.format
+            md5sum = "TODO"  # FIXME implement
+            message_definition = "TODO"  # FIXME implement
+            conn = len(self.__connections)
+            info = ConnectionInfo(conn=conn,
+                                  topic=topic,
+                                  topic_original=topic,
+                                  typ=msg_format.fullname,
+                                  md5sum=md5sum,
+                                  message_definition=message_definition,
+                                  callerid=None,
+                                  latching=None)
+            self.__connections[topic] = info
+            self._write_connection_record(info)
+
+        return self.__connections[topic]
 
     def _write_chunk_info_record(self, chunk: Chunk) -> None:
         raise NotImplementedError
