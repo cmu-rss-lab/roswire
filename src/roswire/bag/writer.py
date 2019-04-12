@@ -11,7 +11,8 @@ __all__ = ('BagWriter',)
 
 from typing import BinaryIO, Iterable, Dict, Type
 
-from .core import (BagMessage, OpCode, Compression, ConnectionInfo, Chunk)
+from .core import (BagMessage, OpCode, Compression, ConnectionInfo, Chunk,
+                   Index, IndexEntry)
 from ..definitions import Message
 from ..definitions.encode import *
 
@@ -84,7 +85,11 @@ class BagWriter:
         padding = b'\x20' * size_padding
         self.__fp.write(padding)
 
-    def _write_message(self, message: BagMessage) -> None:
+    def _write_message(self,
+                       offset: int,
+                       index: Index,
+                       message: BagMessage,
+                       ) -> None:
         typ = message.message.__class__
         connection = self._get_connection(message.topic, typ)
 
@@ -98,12 +103,26 @@ class BagWriter:
         write_uint32(size_data, self.__fp)
         self.__fp.write(bin_data)
 
-        # TODO update index
+        # update index
+        index_entry = IndexEntry(time=message.time,
+                                 pos=pos_header,
+                                 offset=offset)
+        if connection.conn not in index:
+            index[connection.conn] = []
+        index[connection.conn].append(index_entry)
 
-    def _write_chunk_data(self, messages: Iterable[BagMessage]) -> None:
+    def _write_chunk_data(self, messages: Iterable[BagMessage]) -> Index:
+        index: Index = {}
+        pos_start = self.__fp.tell()
+        pos_end = pos_start
+        offset = 0
         for m in messages:
-            self._write_message(m)
-        raise NotImplementedError
+            self._write_message(offset, index, m)
+            pos_end = self.__fp.tell()
+            size_record = pos_end - pos_start
+            offset += size_record
+            pos_start = pos_end
+        return index
 
     def _write_chunk_record(self,
                             compression: Compression,
@@ -125,7 +144,7 @@ class BagWriter:
         pos_data = self.__fp.tell()
 
         # write chunk contents
-        self._write_chunk_data(messages)
+        index = self._write_chunk_data(messages)
 
         # compute chunk size
         pos_end = self.__fp.tell()
