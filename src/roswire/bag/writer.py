@@ -3,7 +3,7 @@ __all__ = ('BagWriter',)
 
 from typing import BinaryIO, Iterable, Dict
 
-from .core import BagMessage, OpCode, Compression
+from .core import (BagMessage, OpCode, Compression, ConnectionInfo, Chunk)
 from ..definitions.encode import *
 
 
@@ -19,6 +19,11 @@ class BagWriter:
     def __init__(self, fn: str) -> None:
         self.__fn = fn
         self.__fp: BinaryIO = open(fn, 'wb')
+        self.__connections: List[ConnectionInfo] = []
+        self.__chunks: List[Chunk] = []
+        self.__pos_header = 0
+        self.__pos_chunks = 0
+        self.__pos_index = 0
 
     @property
     def filename(self) -> str:
@@ -46,16 +51,12 @@ class BagWriter:
         write_uint32(size_total, self.__fp)
         self.__fp.seek(pos_end)
 
-    def _write_header_record(self,
-                             pos_index: int,
-                             conn_count: int,
-                             chunk_count: int
-                             ) -> None:
+    def _write_header_record(self) -> None:
         self.__fp.seek(self.__pos_header)
         self._write_header(OpCode.HEADER,
-            {'index_pos': encode_uint64(pos_index),
-             'conn_count': encode_uint32(conn_count),
-             'chunk_count': encode_uint32(chunk_count)})
+            {'index_pos': encode_uint64(self.__pos_index),
+             'conn_count': encode_uint32(len(self.__connections)),
+             'chunk_count': encode_uint32(len(self.__chunks))})
 
         # ensure the bag header record is 4096 characters long by padding it
         # with ASCII space characters (0x20) where necessary.
@@ -102,6 +103,18 @@ class BagWriter:
         write_uint32(size_compressed, self.__fp)
         self.__fp.seek(pos_end)
 
+    def _write_connection_record(self, conn: ConnectionInfo) -> None:
+        raise NotImplementedError
+
+    def _write_chunk_info_record(self, chunk: Chunk) -> None:
+        raise NotImplementedError
+
+    def _write_index(self) -> None:
+        for connection in self.__connections:
+            self._write_connection_record(connection)
+        for chunk in self.__chunks:
+            self._write_chunk_info_record(chunk)
+
     def write(self, messages: Iterable[BagMessage]) -> None:
         """
         Writes a sequence of messages to the bag.
@@ -112,12 +125,17 @@ class BagWriter:
 
         # create a placeholder header for now
         self.__pos_header = self.__fp.tell()
-        self._write_header_record(0, 0, 0)
+        self._write_header_record()
 
         # for now, we write to a single, uncompressed chunk
         # each chunk record is followed by a sequence of IndexData record
         # - each connection in the chunk is represented by an IndexData record
+        self.__pos_chunks = self.__fp.tell()
         self._write_chunk(Compression.NONE, messages)
 
         # write index
-        raise NotImplementedError
+        self.__pos_index = self.__fp.tell()
+        self._write_index()
+
+        # fix the header
+        self._write_header_record()
