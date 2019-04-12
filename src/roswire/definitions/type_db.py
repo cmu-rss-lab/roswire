@@ -3,6 +3,7 @@ __all__ = ('TypeDatabase',)
 from typing import (Collection, Type, Mapping, Iterator, Dict, ClassVar, Any,
                     Sequence, Callable, BinaryIO, List)
 from collections import OrderedDict
+import hashlib
 
 import attr
 
@@ -60,8 +61,17 @@ class TypeDatabase(Mapping[str, Type[Message]]):
         # - remove whitespace
         # - package names of dependencies removed
         # - constants reordered ahead of other declarations
-        md5_text_lines: List[str] = []
-        raise NotImplementedError
+        md5_text = '\n'.join(
+            [str(c) for c in fmt.constants] +
+            [str(f.without_package_name()) for f in fmt.fields])
+        md5_sum = hashlib.md5(md5_text.encode('utf-8')).hexdigest()
+        # append md5sum for each embedded message type
+        # TODO how should we handle Header?
+        for f in fmt.fields:
+            if f.typ not in name_to_type:
+                continue
+            md5_sum += name_to_type[f.typ].md5sum()
+        return md5_sum
 
     @classmethod
     def _build_read(cls,
