@@ -37,14 +37,18 @@ class BagWriter:
     def filename(self) -> str:
         return self.__fn
 
-    def _write_header(self, code: OpCode, fields: Dict[str, bytes]) -> None:
+    def _write_header(self,
+                      code: Optional[OpCode],
+                      fields: Dict[str, bytes]
+                      ) -> None:
         # write a length of zero for now and correct that length once the
         # fields have been written
         pos_size = self.__fp.tell()
         write_uint32(0, self.__fp)
         pos_content = self.__fp.tell()
 
-        fields['op'] = code.value
+        if code:
+            fields['op'] = code.value
         for name, bin_value in fields.items():
             bin_name = f'{name}='.encode('utf-8')
             size_field = len(bin_name) + len(bin_value)
@@ -143,7 +147,6 @@ class BagWriter:
         pos_size = self.__fp.tell()
         write_uint32(0, self.__fp)
 
-        # FIXME don't write opcode
         # write the connection header
         header_conn: Dict[str, bytes] = {}
         header_conn['topic'] = conn.topic_original.encode('utf-8')
@@ -155,6 +158,7 @@ class BagWriter:
             header_conn['callerid'] = conn.callerid.encode('utf-8')
         if conn.latching is not None:
             header_conn['latching'] = conn.latching.encode('utf-8')
+        self._write_header(None, header_conn)
 
         # update the record size
         pos_end = self.__fp.tell()
