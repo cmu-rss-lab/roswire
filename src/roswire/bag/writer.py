@@ -83,8 +83,12 @@ class BagWriter:
     def _write_chunk_record(self,
                             compression: Compression,
                             messages: Iterable[BagMessage]
-                            ) -> None:
+                            ) -> Chunk:
         bin_compression = compression.value.encode('utf-8')
+
+        # TODO keep track of earliest and latest message in bag
+        time_start = Time(0, 0)
+        time_end = Time(0, 0)
 
         # for now, we write a bogus header and size field
         # once we've finished writing the data, we'll correct them
@@ -111,15 +115,24 @@ class BagWriter:
         write_uint32(size_compressed, self.__fp)
         self.__fp.seek(pos_end)
 
+        # return a description of the chunk
+        return Chunk(pos_record=pos_header,
+                     pos_data=pos_data,
+                     time_start=time_start,
+                     time_end=time_end,
+                     connections=[],  # FIXME
+                     compression=compression,
+                     size_compressed=size_compressed,
+                     size_uncompressed=size_uncompressed)
+
     def _write_chunk(self,
                      compression: Compression,
                      messages: Iterable[BagMessage]
                      ) -> None:
         # TODO for now, we only support uncompressed writing
         assert compression == Compression.NONE
-        self._write_chunk_record(compression, messages)
-
-        # TODO update __chunks
+        chunk = self._write_chunk_record(compression, messages)
+        self.__chunks.append(chunk)
 
         # TODO write connection indices
 
