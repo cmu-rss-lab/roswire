@@ -12,7 +12,7 @@ __all__ = ('BagWriter',)
 from typing import BinaryIO, Iterable, Dict, Type, Tuple
 
 from .core import (BagMessage, OpCode, Compression, ConnectionInfo, Chunk,
-                   Index, IndexEntry)
+                   Index, IndexEntry, ChunkConnection)
 from ..definitions import Message
 from ..definitions.encode import *
 
@@ -163,11 +163,13 @@ class BagWriter:
         self.__fp.seek(pos_end)
 
         # build a description of the chunk
-        chunk = Chunk(pos_record=pos_header,
+        conns = [ChunkConnection(conn, len(entries))
+                 for conn, entries in index.items()]
+        chunk = Chunk(pos_record=pos_header,  # type: ignore
                       pos_data=pos_data,
                       time_start=time_start,
                       time_end=time_end,
-                      connections=[],  # FIXME
+                      connections=conns,
                       compression=compression,
                       size_compressed=size_compressed,
                       size_uncompressed=size_uncompressed)
