@@ -84,7 +84,25 @@ class BagWriter:
         padding = b'\x20' * size_padding
         self.__fp.write(padding)
 
+    def _write_message(self, message: BagMessage) -> None:
+        typ = message.message.__class__
+        connection = self._get_connection(message.topic, typ)
+
+        pos_header = self.__fp.tell()
+        self._write_header(OpCode.MESSAGE_DATA, {
+            'conn': encode_uint32(connection.conn),
+            'time': encode_time(message.time)})
+
+        bin_data = message.message.encode()
+        size_data = len(bin_data)
+        write_uint32(size_data, self.__fp)
+        self.__fp.write(bin_data)
+
+        # TODO update index
+
     def _write_chunk_data(self, messages: Iterable[BagMessage]) -> None:
+        for m in messages:
+            self._write_message(m)
         raise NotImplementedError
 
     def _write_chunk_record(self,
