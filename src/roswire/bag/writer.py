@@ -176,13 +176,12 @@ class BagWriter:
         # connection record.
         if topic not in self.__connections:
             msg_format = typ.format
-            md5sum = "TODO"  # FIXME implement
             conn = len(self.__connections)
             info = ConnectionInfo(conn=conn,
                                   topic=topic,
                                   topic_original=topic,
                                   typ=msg_format.fullname,
-                                  md5sum=md5sum,
+                                  md5sum=typ.md5sum(),
                                   message_definition=msg_format.definition,
                                   callerid=None,
                                   latching=None)
