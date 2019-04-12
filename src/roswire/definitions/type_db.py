@@ -1,7 +1,7 @@
 __all__ = ('TypeDatabase',)
 
 from typing import (Collection, Type, Mapping, Iterator, Dict, ClassVar, Any,
-                    Sequence, Callable, BinaryIO)
+                    Sequence, Callable, BinaryIO, List)
 from collections import OrderedDict
 
 import attr
@@ -42,6 +42,8 @@ class TypeDatabase(Mapping[str, Type[Message]]):
             ns['format'] = fmt
             ns['read'] = classmethod(cls._build_read(name_to_type, fmt))
             ns['write'] = cls._build_write(name_to_type, fmt)
+            md5 = fmt.md5sum(db_format.messages)
+            ns['md5sum'] = classmethod(lambda cls, md5=md5: md5)
             t: Type[Message] = type(fmt.name, (Message,), ns)
             t = attr.s(t, frozen=True, slots=True)
             name_to_type[fmt.fullname] = t

@@ -5,6 +5,7 @@ from roswire.definitions import (PackageDatabase, FormatDatabase, TypeDatabase,
                                  MsgFormat, Time)
 
 from test_file import build_file_proxy
+from test_bag import load_mavros_type_db
 
 
 def test_build():
@@ -119,3 +120,23 @@ string frame_id
          'frame_id': 'foo'}
     assert m.to_dict() == d
     assert db_type.from_dict(fmt, d) == m
+
+
+def test_md5sum():
+    db_type = load_mavros_type_db()
+    
+    def check(name: str, md5sum_expected: str) -> None:
+        assert db_type[name].md5sum() == md5sum_expected
+
+    check('std_msgs/Header', '2176decaecbce78abc3b96ef049fabed')
+    check('std_msgs/Duration', '3e286caf4241d664e55f3ad380e2ae46')
+    check('mavros_msgs/CommandCode', 'f7e54ea3892a961cc44c9350fdb0855e')
+    check('geometry_msgs/Quaternion', 'a779879fadf0160734f906b8c19c7004')
+    check('geometry_msgs/Vector3', '4a842b65f413084dc2b10fb484ea7f17')
+    check('geometry_msgs/Wrench', '4f539cf138b23283b520fd271b567936')
+    check('geometry_msgs/Transform', 'ac9eff44abf714214112b05d54a3cf9b')
+    check('geometry_msgs/TransformStamped', 'b5764a33bfeb3588febc2682852579b0')
+    check('tf/tfMessage', '94810edda583a504dfda3829e70d7eec')
+    check('visualization_msgs/InteractiveMarkerPose', 'a6e6833209a196a38d798dadb02c81f8')
+    check('mavros_msgs/State', '9e3d873fae342c8f48a8bd64c53d991e')
+    check('mavros_msgs/Mavlink', '6dd71a38b8541fdc2de89a548c7dbc2f')
