@@ -15,6 +15,8 @@ from .core import (BagMessage, OpCode, Compression, ConnectionInfo, Chunk)
 from ..definitions import Message
 from ..definitions.encode import *
 
+BIN_CHUNK_INFO_VERSION = encode_uint32(1)
+
 
 class BagWriter:
     """
@@ -191,6 +193,19 @@ class BagWriter:
         return self.__connections[topic]
 
     def _write_chunk_info_record(self, chunk: Chunk) -> None:
+        num_connections = 0  # TODO
+        pos_header = self.__fp.tell()
+        self._write_header(OpCode.CHUNK_INFO, {
+            'ver': BIN_CHUNK_INFO_VERSION,
+            'chunk_pos': encode_uint64(chunk.pos_record),
+            'start_time': encode_time(chunk.time_start),
+            'end_time': encode_time(chunk.time_end),
+            'count': encode_uint32(num_connections)})
+
+        size_data = num_connections * 8
+        write_uint32(size_data, self.__fp)
+
+        # TODO write connection counts
         raise NotImplementedError
 
     def _write_index(self) -> None:
