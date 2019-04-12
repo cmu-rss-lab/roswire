@@ -27,7 +27,7 @@ class BagWriter:
     def __init__(self, fn: str) -> None:
         self.__fn = fn
         self.__fp: BinaryIO = open(fn, 'wb')
-        self.__connections: List[ConnectionInfo] = []
+        self.__connections: Dict[str, ConnectionInfo] = {}
         self.__chunks: List[Chunk] = []
         self.__pos_header = 0
         self.__pos_chunks = 0
@@ -167,11 +167,14 @@ class BagWriter:
         write_uint32(size_data, self.__fp)
         self.__fp.seek(pos_end)
 
+    def _get_connection(self, topic: str) -> ConnectionInfo:
+        raise NotImplementedError
+
     def _write_chunk_info_record(self, chunk: Chunk) -> None:
         raise NotImplementedError
 
     def _write_index(self) -> None:
-        for connection in self.__connections:
+        for connection in self.__connections.values():
             self._write_connection_record(connection)
         for chunk in self.__chunks:
             self._write_chunk_info_record(chunk)
