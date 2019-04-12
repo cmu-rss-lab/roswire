@@ -86,8 +86,8 @@ class BagWriter:
         write_uint32(0, self.__fp)
         pos_data = self.__fp.tell()
 
-        # TODO write chunk contents
-        raise NotImplementedError
+        # write chunk contents
+        self._write_chunk_data(messages)
 
         # compute chunk size
         pos_end = self.__fp.tell()
