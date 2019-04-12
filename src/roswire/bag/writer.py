@@ -68,6 +68,9 @@ class BagWriter:
         padding = b'\x20' * size_padding
         self.__fp.write(padding)
 
+    def _write_chunk_data(self, messages: Iterable[BagMessage]) -> None:
+        return
+
     def _write_chunk(self,
                      compression: Compression,
                      messages: Iterable[BagMessage]) -> None:
@@ -104,6 +107,7 @@ class BagWriter:
         Writes a sequence of messages to the bag.
         Any existing bag file contents will be overwritten.
         """
+        self.__fp.truncate(0)
         self.__fp.write('#ROSBAG V2.0\n'.encode('utf-8'))
 
         # create a placeholder header for now
