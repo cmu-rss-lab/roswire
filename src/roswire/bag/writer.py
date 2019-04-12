@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 __all__ = ('BagWriter',)
 
-from typing import BinaryIO, Iterable
+from typing import BinaryIO, Iterable, Dict
 
-from .core import BagMessage, OpCode, Dict
+from .core import BagMessage, OpCode, Compression
 from ..definitions.encode import *
 
 
@@ -68,6 +68,37 @@ class BagWriter:
         padding = b'\x20' * size_padding
         self.__fp.write(padding)
 
+    def _write_chunk(self,
+                     compression: Compression,
+                     messages: Iterable[BagMessage]) -> None:
+        # TODO for now, we only support uncompressed writing
+        assert compression == Compression.NONE
+        bin_compression = compression.value.encode('utf-8')
+
+        # for now, we write a bogus header and size field
+        # once we've finished writing the data, we'll correct them
+        pos_header = self.__fp.tell()
+        self._write_header(OpCode.CHUNK, {'compression': bin_compression,
+                                          'size': encode_uint32(0)})
+        write_uint32(0, self.__fp)
+        pos_data = self.__fp.tell()
+
+        # TODO write chunk contents
+        raise NotImplementedError
+
+        # compute chunk size
+        pos_end = self.__fp.tell()
+        size_compressed = pos_end - pos_data
+        size_uncompressed = size_compressed
+
+        # update header and size
+        self.__fp.seek(pos_header)
+        self._write_header(OpCode.CHUNK,
+            {'compression': bin_compression,
+             'size': encode_uint32(size_uncompressed)})
+        write_uint32(size_compressed, self.__fp)
+        self.__fp.seek(pos_end)
+
     def write(self, messages: Iterable[BagMessage]) -> None:
         """
         Writes a sequence of messages to the bag.
@@ -79,7 +110,10 @@ class BagWriter:
         self.__pos_header = self.__fp.tell()
         self._write_header_record(0, 0, 0)
 
-        # write chunks
-        raise NotImplementedError
+        # for now, we write to a single, uncompressed chunk
+        # each chunk record is followed by a sequence of IndexData record
+        # - each connection in the chunk is represented by an IndexData record
+        self._write_chunk(Compression.NONE, messages)
 
         # write index
+        raise NotImplementedError
