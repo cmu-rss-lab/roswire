@@ -130,6 +130,12 @@ def test_md5sum():
 
     check('std_msgs/Header', '2176decaecbce78abc3b96ef049fabed')
     check('std_msgs/Duration', '3e286caf4241d664e55f3ad380e2ae46')
-    check('mavros_msgs/Mavlink', '6dd71a38b8541fdc2de89a548c7dbc2f')
     check('mavros_msgs/CommandCode', 'f7e54ea3892a961cc44c9350fdb0855e')
+    check('geometry_msgs/Quaternion', 'a779879fadf0160734f906b8c19c7004')
+    check('geometry_msgs/Vector3', '4a842b65f413084dc2b10fb484ea7f17')
+    check('geometry_msgs/Transform', 'ac9eff44abf714214112b05d54a3cf9b')
+    check('geometry_msgs/TransformStamped', 'b5764a33bfeb3588febc2682852579b0')
+    check('tf/tfMessage', '94810edda583a504dfda3829e70d7eec')
+    check('visualization_msgs/InteractiveMarkerPose', 'a6e6833209a196a38d798dadb02c81f8')
     check('mavros_msgs/State', '9e3d873fae342c8f48a8bd64c53d991e')
+    check('mavros_msgs/Mavlink', '6dd71a38b8541fdc2de89a548c7dbc2f')
