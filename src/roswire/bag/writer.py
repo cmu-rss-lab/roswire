@@ -9,7 +9,7 @@ https://github.com/ros/ros_comm/blob/melodic-devel/tools/rosbag/src/rosbag/bag.p
 """
 __all__ = ('BagWriter',)
 
-from typing import BinaryIO, Iterable, Dict, Type
+from typing import BinaryIO, Iterable, Dict, Type, Tuple
 
 from .core import (BagMessage, OpCode, Compression, ConnectionInfo, Chunk,
                    Index, IndexEntry)
@@ -17,6 +17,7 @@ from ..definitions import Message
 from ..definitions.encode import *
 
 BIN_CHUNK_INFO_VERSION = encode_uint32(1)
+BIN_INDEX_VERSION = encode_uint32(1)
 
 
 class BagWriter:
@@ -127,7 +128,7 @@ class BagWriter:
     def _write_chunk_record(self,
                             compression: Compression,
                             messages: Iterable[BagMessage]
-                            ) -> Chunk:
+                            ) -> Tuple[Chunk, Index]:
         bin_compression = compression.value.encode('utf-8')
 
         # for now, we write a bogus header and size field
@@ -161,15 +162,22 @@ class BagWriter:
         write_uint32(size_compressed, self.__fp)
         self.__fp.seek(pos_end)
 
-        # return a description of the chunk
-        return Chunk(pos_record=pos_header,
-                     pos_data=pos_data,
-                     time_start=time_start,
-                     time_end=time_end,
-                     connections=[],  # FIXME
-                     compression=compression,
-                     size_compressed=size_compressed,
-                     size_uncompressed=size_uncompressed)
+        # build a description of the chunk
+        chunk = Chunk(pos_record=pos_header,
+                      pos_data=pos_data,
+                      time_start=time_start,
+                      time_end=time_end,
+                      connections=[],  # FIXME
+                      compression=compression,
+                      size_compressed=size_compressed,
+                      size_uncompressed=size_uncompressed)
+        return chunk, index
+
+    def _write_connection_index(self,
+                                conn: int,
+                                entries: List[IndexEntry]
+                                ) -> None:
+        raise NotImplementedError
 
     def _write_chunk(self,
                      compression: Compression,
@@ -177,10 +185,10 @@ class BagWriter:
                      ) -> None:
         # TODO for now, we only support uncompressed writing
         assert compression == Compression.NONE
-        chunk = self._write_chunk_record(compression, messages)
+        chunk, index = self._write_chunk_record(compression, messages)
         self.__chunks.append(chunk)
-
-        # TODO write connection indices
+        for conn, entries in index.items():
+            self._write_connection_index(conn, entries)
 
     def _write_connection_record(self, conn: ConnectionInfo) -> None:
         self._write_header(OpCode.CONNECTION_INFO, {
