@@ -137,7 +137,20 @@ class BagWriter:
         # TODO write connection indices
 
     def _write_connection_record(self, conn: ConnectionInfo) -> None:
-        raise NotImplementedError
+        self._write_header(OpCode.CONNECTION_INFO, {
+            'conn': encode_uint32(conn.conn),
+            'topic': conn.topic.encode('utf-8')})
+        pos_size = self.__fp.tell()
+        write_uint32(0, self.__fp)
+
+        # TODO write the connection header
+
+        # update the record size
+        pos_end = self.__fp.tell()
+        size_data = pos_end - pos_size
+        self.__fp.seek(pos_size)
+        write_uint32(size_data, self.__fp)
+        self.__fp.seek(pos_end)
 
     def _write_chunk_info_record(self, chunk: Chunk) -> None:
         raise NotImplementedError
