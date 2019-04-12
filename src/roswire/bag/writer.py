@@ -143,7 +143,18 @@ class BagWriter:
         pos_size = self.__fp.tell()
         write_uint32(0, self.__fp)
 
-        # TODO write the connection header
+        # FIXME don't write opcode
+        # write the connection header
+        header_conn: Dict[str, bytes] = {}
+        header_conn['topic'] = conn.topic_original.encode('utf-8')
+        header_conn['type'] = conn.typ.encode('utf-8')
+        header_conn['md5sum'] = conn.md5sum.encode('utf-8')
+        header_conn['message_definition'] = \
+            conn.message_definition.encode('utf-8')
+        if conn.callerid is not None:
+            header_conn['callerid'] = conn.callerid.encode('utf-8')
+        if conn.latching is not None:
+            header_conn['latching'] = conn.latching.encode('utf-8')
 
         # update the record size
         pos_end = self.__fp.tell()
