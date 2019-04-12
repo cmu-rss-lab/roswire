@@ -1,4 +1,12 @@
 # -*- coding: utf-8 -*-
+"""
+This module provides a bag file writer that writes the contents of a bag to a
+binary file on disk.
+
+See
+---
+https://github.com/ros/ros_comm/blob/melodic-devel/tools/rosbag/src/rosbag/bag.py
+"""
 __all__ = ('BagWriter',)
 
 from typing import BinaryIO, Iterable, Dict
@@ -70,13 +78,12 @@ class BagWriter:
         self.__fp.write(padding)
 
     def _write_chunk_data(self, messages: Iterable[BagMessage]) -> None:
-        return
+        raise NotImplementedError
 
-    def _write_chunk(self,
-                     compression: Compression,
-                     messages: Iterable[BagMessage]) -> None:
-        # TODO for now, we only support uncompressed writing
-        assert compression == Compression.NONE
+    def _write_chunk_record(self,
+                            compression: Compression,
+                            messages: Iterable[BagMessage]
+                            ) -> None:
         bin_compression = compression.value.encode('utf-8')
 
         # for now, we write a bogus header and size field
@@ -103,6 +110,18 @@ class BagWriter:
             'size': encode_uint32(size_uncompressed)})
         write_uint32(size_compressed, self.__fp)
         self.__fp.seek(pos_end)
+
+    def _write_chunk(self,
+                     compression: Compression,
+                     messages: Iterable[BagMessage]
+                     ) -> None:
+        # TODO for now, we only support uncompressed writing
+        assert compression == Compression.NONE
+        self._write_chunk_record(compression, messages)
+
+        # TODO update __chunks
+
+        # TODO write connection indices
 
     def _write_connection_record(self, conn: ConnectionInfo) -> None:
         raise NotImplementedError
