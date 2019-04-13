@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __all__ = ('BagReader',)
 
 from typing import (Dict, Sequence, Union, Optional, Tuple, List, Type,
@@ -8,8 +9,6 @@ import bz2
 import datetime
 import logging
 import heapq
-
-import attr
 
 from .core import *
 from ..definitions.base import Time
@@ -301,13 +300,9 @@ class BagReader:
 
         # read the raw message data
         raw = self._read_sized(bfr)
-        logger.debug("raw message: %s", raw)
         content = msg_typ.read(BytesIO(raw))
-        logger.debug("decoded message: %s", content)
-
-        logger.debug("TOPIC: %s (%s)", topic, msg_typ_name)
-        msg = BagMessage(topic, t)
-        logger.debug(msg)
+        msg = BagMessage(topic, t, content)
+        logger.debug("decoded message: %s", msg)
         return msg
 
     def read_messages(self,

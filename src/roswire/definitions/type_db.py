@@ -1,7 +1,7 @@
 __all__ = ('TypeDatabase',)
 
 from typing import (Collection, Type, Mapping, Iterator, Dict, ClassVar, Any,
-                    Sequence, Callable, BinaryIO)
+                    Sequence, Callable, BinaryIO, List)
 from collections import OrderedDict
 
 import attr
@@ -16,6 +16,12 @@ from .decode import (is_simple,
                      string_reader,
                      complex_array_reader,
                      simple_array_reader)
+from .encode import (write_time,
+                     write_duration,
+                     simple_writer,
+                     string_writer,
+                     complex_array_writer,
+                     simple_array_writer)
 
 
 class TypeDatabase(Mapping[str, Type[Message]]):
@@ -35,6 +41,9 @@ class TypeDatabase(Mapping[str, Type[Message]]):
                 ns[f.name] = attr.ib(type=f_base_typ)
             ns['format'] = fmt
             ns['read'] = classmethod(cls._build_read(name_to_type, fmt))
+            ns['write'] = cls._build_write(name_to_type, fmt)
+            md5 = fmt.md5sum(db_format.messages)
+            ns['md5sum'] = classmethod(lambda cls, md5=md5: md5)
             t: Type[Message] = type(fmt.name, (Message,), ns)
             t = attr.s(t, frozen=True, slots=True)
             name_to_type[fmt.fullname] = t
@@ -89,6 +98,53 @@ class TypeDatabase(Mapping[str, Type[Message]]):
             return cls(**values)  # type: ignore
 
         return reader
+
+    @classmethod
+    def _build_write(cls,
+                     name_to_type: Mapping[str, Type[Message]],
+                     fmt: MsgFormat
+                     ) -> Callable[[Any, BinaryIO], None]:
+        """Builds a write for a given message format."""
+        def get_field_writer(field: Field) -> Callable[[Any, BinaryIO], None]:
+            if field.is_simple:
+                return simple_writer(field.typ)
+            if field.typ == 'time':
+                return write_time
+            if field.typ == 'duration':
+                return write_duration
+            if field.typ == 'string':
+                return string_writer(field.length)
+            if field.is_array and is_simple(field.base_type):
+                return simple_array_writer(field.base_type, field.length)
+            if field.is_array and not is_simple(field.base_type):
+                entry_writer: Callable[[Any, BinaryIO], None]
+                if field.base_type == 'time':
+                    entry_writer = write_time
+                elif field.base_type == 'duration':
+                    entry_writer = write_duration
+                # FIXME how about arrays of fixed-length strings?
+                elif field.base_type == 'string':
+                    entry_writer = string_writer()
+                elif field.base_type in name_to_type:
+                    entry_writer = name_to_type[field.base_type].write
+                else:
+                    raise Exception(f"unable to find writer: {field.typ}")
+                return complex_array_writer(entry_writer, field.length)
+            if field.typ in name_to_type:
+                return name_to_type[field.typ].write
+            m = "unable to find writer for field: {field.name} [{field.typ}]"
+            raise Exception(m)
+
+        field_writers: OrderedDict[str, Callable[[Any, BinaryIO], None]] = \
+            OrderedDict()
+        for field in fmt.fields:
+            field_writers[field.name] = get_field_writer(field)
+
+        def writer(self: Message, b: BinaryIO) -> None:
+            for name, field_writer in field_writers.items():
+                field_writer(getattr(self, name), b)
+
+        return writer
 
     def __init__(self, types: Collection[Type[Message]]) -> None:
         self.__contents: Dict[str, Type[Message]] = \

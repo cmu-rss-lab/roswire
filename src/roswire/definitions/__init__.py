@@ -1,4 +1,4 @@
-from .base import Time
+from .base import Time, Duration
 from .msg import Constant, ConstantValue, Field, MsgFormat, Message
 from .srv import SrvFormat
 from .action import ActionFormat

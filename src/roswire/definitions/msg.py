@@ -5,6 +5,7 @@ from typing import (Type, Optional, Any, Union, Tuple, List, Dict, ClassVar,
 from io import BytesIO
 import logging
 import functools
+import hashlib
 import struct
 import re
 import os
@@ -31,7 +32,7 @@ R_BLANK = re.compile(f"^\s*{R_COMMENT}$")
 ConstantValue = Union[str, int, float]
 
 
-@attr.s(frozen=True)
+@attr.s(frozen=True, str=False)
 class Constant:
     typ = attr.ib(type=str)
     name = attr.ib(type=str)
@@ -46,8 +47,11 @@ class Constant:
                 'name': self.name,
                 'value': self.value}
 
+    def __str__(self) -> str:
+        return f"{self.typ} {self.name}={str(self.value)}"
 
-@attr.s(frozen=True)
+
+@attr.s(frozen=True, str=False)
 class Field:
     typ: str = attr.ib()
     name: str = attr.ib()
@@ -85,11 +89,19 @@ class Field:
         return {'type': self.typ,
                 'name': self.name}
 
+    def without_package_name(self) -> 'Field':
+        typ = self.typ.partition('/')[2] if '/' in self.typ else self.typ
+        return Field(typ, self.name)
+
+    def __str__(self) -> str:
+        return f"{self.typ} {self.name}"
+
 
 @attr.s(frozen=True)
 class MsgFormat:
     package: str = attr.ib()
     name: str = attr.ib()
+    definition: str = attr.ib()
     fields: Tuple[Field, ...] = attr.ib(converter=tuple)
     constants: Tuple[Constant, ...] = attr.ib(converter=tuple)
 
@@ -166,7 +178,7 @@ class MsgFormat:
             else:
                 raise exceptions.ParsingError(f"failed to parse line: {line}")
 
-        return MsgFormat(package, name, fields, constants)  # type: ignore
+        return MsgFormat(package, name, text, fields, constants)  # type: ignore  # noqa
 
     @staticmethod
     def from_dict(d: Dict[str, Any],
@@ -178,13 +190,15 @@ class MsgFormat:
             package = d['package']
         if not name:
             name = d['name']
+        definition = d['definition']
         fields = [Field.from_dict(dd) for dd in d.get('fields', [])]
         constants = [Constant.from_dict(dd) for dd in d.get('constants', [])]
-        return MsgFormat(package, name, fields, constants)  # type: ignore  # noqa
+        return MsgFormat(package, name, definition, fields, constants)  # type: ignore  # noqa
 
     def to_dict(self) -> Dict[str, Any]:
         d: Dict[str, Any] = {'package': self.package,
-                             'name': self.name}
+                             'name': self.name,
+                             'definition': self.definition}
         if self.fields:
             d['fields'] = [f.to_dict() for f in self.fields]
         if self.constants:
@@ -205,6 +219,27 @@ class MsgFormat:
             else:
                 fmt = name_to_format[field.typ]
                 yield from fmt.flatten(name_to_format, ctx + (field.name,))
+
+    def md5text(self, name_to_msg: Mapping[str, 'MsgFormat']) -> str:
+        """Computes the MD5 text for this format."""
+        lines: List[str] = []
+        lines += [str(c) for c in self.constants]
+        for f in self.fields:
+            if is_builtin(f.base_type):
+                lines += [str(f.without_package_name())]
+            else:
+                f_md5 = name_to_msg[f.base_type].md5sum(name_to_msg)
+                lines += [f'{f_md5} {f.name}']
+        return '\n'.join(lines)
+
+    def md5sum(self, name_to_msg: Mapping[str, 'MsgFormat']) -> str:
+        """Computes the MD5 sum for this format."""
+        logger.debug("generating md5sum: %s", self.fullname)
+        txt = self.md5text(name_to_msg)
+        logger.debug("generated md5 text [%s]:\n%s", self.fullname, txt)
+        md5sum = hashlib.md5(txt.encode('utf-8')).hexdigest()
+        logger.debug("generated md5sum [%s]: %s", self.fullname, md5sum)
+        return md5sum
 
 
 class Message:
@@ -239,9 +274,24 @@ class Message:
         return d
 
     @classmethod
+    def md5sum(cls) -> str:
+        """Returns the md5sum for this message type."""
+        raise NotImplementedError
+
+    @classmethod
     def read(cls, b: BinaryIO) -> 'Message':
         raise NotImplementedError
 
     @classmethod
     def decode(cls, b: bytes) -> 'Message':
         return cls.read(BytesIO(b))
+
+    def write(self, b: BinaryIO) -> None:
+        """Writes a binary encoding of this message to a given stream."""
+        raise NotImplementedError
+
+    def encode(self) -> bytes:
+        """Returns a binary encoding of this message."""
+        b = BytesIO()
+        self.write(b)
+        return b.getvalue()

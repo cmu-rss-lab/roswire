@@ -32,7 +32,7 @@ class Compression(Enum):
 class BagMessage:
     topic: str = attr.ib()
     time: Time = attr.ib()
-    # message/data
+    message: Message = attr.ib()
 
 
 @attr.s(frozen=True, slots=True)
