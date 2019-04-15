@@ -7,6 +7,7 @@ __all__ = (
     'NodeProxy',
     'ROSProxy',
     'BagRecorderProxy',
+    'BagPlayerProxy',
     'FileProxy',
     'ContainerProxy',
     'ContainerProxyManager'
@@ -23,7 +24,7 @@ from .shell import ShellProxy
 from .file import FileProxy
 from .container import ContainerProxy, ContainerProxyManager
 from .parameters import ParameterServerProxy
-from .bag import BagRecorderProxy
+from .bag import BagRecorderProxy, BagPlayerProxy
 from .node import NodeProxy, NodeManagerProxy
 from .service import ServiceManagerProxy
 from ..description import SystemDescription
@@ -38,12 +39,14 @@ class ROSProxy:
     def __init__(self,
                  description: SystemDescription,
                  shell: ShellProxy,
+                 files: FileProxy,
                  ws_host: str,
                  ip_address: str,
                  port: int = 11311
                  ) -> None:
         self.__description = description
         self.__shell = shell
+        self.__files = files
         self.__ws_host = ws_host
         self.__caller_id = '/roswire'
         self.__port = port
@@ -116,3 +119,23 @@ class ROSProxy:
                                 self.__shell,
                                 self.__nodes,
                                 exclude_topics=exclude_topics)
+
+    def playback(self, fn: str, *, file_on_host: bool = True) -> None:
+        """Provides an interface to rosbag for replaying bag files."""
+        fn_ctr: str
+        delete_file_after_use: bool = False
+        if file_on_host:
+            if fn.startswith(self.__ws_host):
+                fn_ctr = os.path.join('/.roswire', fn[len(self.__ws_host):])
+            # copy the content of the bag to a temporary file
+            # TODO ensure file is destroyed
+            else:
+                delete_file_after_use = True
+                fn_ctr = self.__files.tempfile(suffix='.bag')
+                self.__files.copy_from_host(fn, fn_ctr)
+        else:
+            fn_ctr = fn
+        return BagPlayerProxy(fn_ctr,
+                              self.__shell,
+                              self.__files,
+                              delete_file_after_use=delete_file_after_use)
