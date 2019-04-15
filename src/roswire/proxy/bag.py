@@ -1,5 +1,5 @@
 # http://wiki.ros.org/Bags/Format/2.0
-__all__ = ['BagRecorderProxy']
+__all__ = ('BagRecorderProxy', 'BagPlayerProxy')
 
 from typing import Optional, Collection
 import logging
@@ -15,6 +15,15 @@ from .. import exceptions
 
 logger = logging.getLogger(__name__)  # type: logging.Logger
 logger.setLevel(logging.DEBUG)
+
+
+class BagPlayerProxy:
+    def __init__(self,
+                 fn_dest: str,
+                 ws_host: str,
+                 shell: ShellProxy
+                 ) -> None:
+        return
 
 
 class BagRecorderProxy:
@@ -55,16 +64,12 @@ class BagRecorderProxy:
 
     @property
     def started(self) -> bool:
-        """
-        Indicates whether or not recording has started.
-        """
+        """Indicates whether or not recording has started."""
         return self.__started
 
     @property
     def stopped(self) -> bool:
-        """
-        Indicates whether or not recording has stopped.
-        """
+        """Indicates whether or not recording has stopped."""
         return self.__stopped
 
     def __enter__(self) -> 'BagRecorderProxy':
@@ -80,8 +85,7 @@ class BagRecorderProxy:
             self.stop(save=should_save)
 
     def start(self) -> None:
-        """
-        Starts recording to the bag.
+        """Starts recording to the bag.
 
         Raises:
             RecorderAlreadyStarted: if the recorder has already been started.
@@ -99,8 +103,7 @@ class BagRecorderProxy:
             logger.debug("started bag recording")
 
     def stop(self, save: bool = True) -> None:
-        """
-        Stops recording to the bag.
+        """Stops recording to the bag.
 
         Parameters:
             save: specifies whether the bag file should be saved to disk.
