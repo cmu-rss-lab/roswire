@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # http://wiki.ros.org/Bags/Format/2.0
 __all__ = ('BagRecorderProxy', 'BagPlayerProxy')
 
@@ -13,7 +14,7 @@ from .shell import ShellProxy, Popen
 from .node import NodeManagerProxy
 from .. import exceptions
 
-logger = logging.getLogger(__name__)  # type: logging.Logger
+logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
