@@ -18,12 +18,9 @@ logger.setLevel(logging.DEBUG)
 
 
 class BagPlayerProxy:
-    def __init__(self,
-                 fn_host: str,
-                 ws_host: str,
-                 shell: ShellProxy
-                 nodes: NodeManagerProxy
-                 ) -> None:
+    def __init__(self, fn_container: str, shell: ShellProxy) -> None:
+        self.__fn_container = fn_container
+        self.__shell = shell
         self.__started = False
         self.__stopped = False
         self.__process: Optional[Popen] = None
