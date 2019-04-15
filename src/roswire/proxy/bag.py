@@ -10,6 +10,7 @@ import pathlib
 import threading
 import os
 
+from .file import FileProxy
 from .shell import ShellProxy, Popen
 from .node import NodeManagerProxy
 from .. import exceptions
@@ -26,6 +27,7 @@ class BagPlayerProxy:
                  *,
                  delete_file_after_use: bool = False
                  ) -> None:
+        self.__lock = threading.Lock()
         self.__fn_container = fn_container
         self.__shell = shell
         self.__files = files
@@ -44,7 +46,7 @@ class BagPlayerProxy:
         """Indicates whether or not playback has stopped."""
         return self.__stopped
 
-    def __enter__(self) -> 'BagPlaybackProxy':
+    def __enter__(self) -> 'BagPlayerProxy':
         self.start()
         return self
 
@@ -75,6 +77,7 @@ class BagPlayerProxy:
                 raise exceptions.PlayerAlreadyStopped
             if not self.__started:
                 raise exceptions.PlayerNotStarted
+            assert self.__process
             self.__process.kill()
             self.__process = None
             if self.__delete_file_after_use:
