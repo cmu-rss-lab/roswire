@@ -10,7 +10,7 @@ class PlayerAlreadyStarted(ROSWireException):
     """Playback has already started."""
 
 
-class PlaybackAlreadyStopped(ROSWireException):
+class PlayerAlreadyStopped(ROSWireException):
     """Playback has already stopped."""
 
 
