@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __all__ = (
     'ShellProxy',
     'ServiceManagerProxy',
@@ -33,9 +34,7 @@ logger.setLevel(logging.DEBUG)
 
 
 class ROSProxy:
-    """
-    Provides access to a remote ROS master via XML-RPC.
-    """
+    """Provides access to a remote ROS master via XML-RPC."""
     def __init__(self,
                  description: SystemDescription,
                  shell: ShellProxy,
@@ -66,37 +65,27 @@ class ROSProxy:
 
     @property
     def uri(self) -> str:
-        """
-        The URI of the ROS Master.
-        """
+        """The URI of the ROS Master."""
         return self.__uri
 
     @property
     def nodes(self) -> NodeManagerProxy:
-        """
-        Provides access to the nodes running on this ROS master.
-        """
+        """Provides access to the nodes running on this ROS master."""
         return self.__nodes
 
     @property
     def services(self) -> ServiceManagerProxy:
-        """
-        Provides access to the services advertised on this ROS master.
-        """
+        """Provides access to the services advertised on this ROS master."""
         return self.__services
 
     @property
     def parameters(self) -> ParameterServerProxy:
-        """
-        Provides access to the parameter server for this ROS Master.
-        """
+        """Provides access to the parameter server for this ROS Master."""
         return self.__parameters
 
     @property
     def connection(self) -> xmlrpc.client.ServerProxy:
-        """
-        The XML-RPC connection to the ROS master.
-        """
+        """The XML-RPC connection to the ROS master."""
         return self.__connection
 
     @property
@@ -111,9 +100,7 @@ class ROSProxy:
                *args: str,
                **kwargs: Union[int, str]
                ) -> None:
-        """
-        Provides an interface to roslaunch.
-        """
+        """Provides an interface to roslaunch."""
         assert len(args) in [1, 2]
         launch_args = [f'{arg}:={val}' for arg, val in kwargs.items()]
         cmd = ' '.join(['roslaunch'] + list(args) + launch_args)
@@ -123,18 +110,9 @@ class ROSProxy:
                fn: str,
                exclude_topics: Optional[Collection[str]] = None
                ) -> BagRecorderProxy:
-        """
-        Provides an interface to rosbag for recording ROS topics.
-        """
+        """Provides an interface to rosbag for recording ROS topics."""
         return BagRecorderProxy(fn,
                                 self.__ws_host,
                                 self.__shell,
                                 self.__nodes,
                                 exclude_topics=exclude_topics)
-
-
-# TODO CoverageProxy
-# - instrument: Python, C/C++
-# - deinstrument
-# - extract
-# - flush
