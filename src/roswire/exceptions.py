@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 class ROSWireException(Exception):
     """Base class used by all ROSWire exceptions."""
 
