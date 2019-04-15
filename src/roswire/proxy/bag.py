@@ -19,9 +19,17 @@ logger.setLevel(logging.DEBUG)
 
 
 class BagPlayerProxy:
-    def __init__(self, fn_container: str, shell: ShellProxy) -> None:
+    def __init__(self,
+                 fn_container: str,
+                 shell: ShellProxy,
+                 files: FileProxy,
+                 *,
+                 delete_file_after_use: bool = False
+                 ) -> None:
         self.__fn_container = fn_container
         self.__shell = shell
+        self.__files = files
+        self.__delete_file_after_use = delete_file_after_use
         self.__started = False
         self.__stopped = False
         self.__process: Optional[Popen] = None
@@ -69,6 +77,8 @@ class BagPlayerProxy:
                 raise exceptions.PlayerNotStarted
             self.__process.kill()
             self.__process = None
+            if self.__delete_file_after_use:
+                self.__files.remove(self.__fn_container)
             self.__stopped = True
         logger.debug("stopped bag playback")
 
