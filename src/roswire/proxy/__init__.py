@@ -120,15 +120,17 @@ class ROSProxy:
                                 self.__nodes,
                                 exclude_topics=exclude_topics)
 
-    def playback(self, fn: str, *, file_on_host: bool = True) -> None:
+    def playback(self,
+                 fn: str,
+                 *,
+                 file_on_host: bool = True
+                 ) -> BagPlayerProxy:
         """Provides an interface to rosbag for replaying bag files."""
         fn_ctr: str
         delete_file_after_use: bool = False
         if file_on_host:
             if fn.startswith(self.__ws_host):
                 fn_ctr = os.path.join('/.roswire', fn[len(self.__ws_host):])
-            # copy the content of the bag to a temporary file
-            # TODO ensure file is destroyed
             else:
                 delete_file_after_use = True
                 fn_ctr = self.__files.tempfile(suffix='.bag')
