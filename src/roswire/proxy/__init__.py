@@ -133,7 +133,7 @@ class ROSProxy:
                 fn_ctr = os.path.join('/.roswire', fn[len(self.__ws_host):])
             else:
                 delete_file_after_use = True
-                fn_ctr = self.__files.tempfile(suffix='.bag')
+                fn_ctr = self.__files.mktemp(suffix='.bag')
                 self.__files.copy_from_host(fn, fn_ctr)
         else:
             fn_ctr = fn
