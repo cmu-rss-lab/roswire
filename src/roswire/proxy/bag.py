@@ -9,7 +9,7 @@ import pathlib
 import threading
 import os
 
-from .shell import ShellProxy
+from .shell import ShellProxy, Popen
 from .node import NodeManagerProxy
 from .. import exceptions
 
@@ -19,11 +19,60 @@ logger.setLevel(logging.DEBUG)
 
 class BagPlayerProxy:
     def __init__(self,
-                 fn_dest: str,
+                 fn_host: str,
                  ws_host: str,
                  shell: ShellProxy
+                 nodes: NodeManagerProxy
                  ) -> None:
-        return
+        self.__started = False
+        self.__stopped = False
+        self.__process: Optional[Popen] = None
+
+    @property
+    def started(self) -> bool:
+        """Indicates whether or not playback has started."""
+        return self.__started
+
+    @property
+    def stopped(self) -> bool:
+        """Indicates whether or not playback has stopped."""
+        return self.__stopped
+
+    def __enter__(self) -> 'BagPlaybackProxy':
+        self.start()
+        return self
+
+    def start(self) -> None:
+        """Starts playback from the bag.
+
+        Raises:
+            PlayerAlreadyStarted: if the player has already started.
+        """
+        logger.debug("starting bag playback")
+        with self.__lock:
+            if self.__started:
+                raise exceptions.PlayerAlreadyStarted
+            self.__started = True
+            cmd: str = f"rosbag play -q {self.__fn_container}"
+            self.__process = self.__shell.popen(cmd)
+            logger.debug("started bag playback")
+
+    def stop(self) -> None:
+        """Stops playback from the bag.
+
+        Raises:
+            PlayerAlreadyStopped: if the player has already been stopped.
+        """
+        logger.debug("stopping bag playback")
+        with self.__lock:
+            if self.__stopped:
+                raise exceptions.PlayerAlreadyStopped
+            if not self.__started:
+                raise exceptions.PlayerNotStarted
+            self.__process.kill()
+            self.__process = None
+            self.__stopped = True
+        logger.debug("stopped bag playback")
 
 
 class BagRecorderProxy:
