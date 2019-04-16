@@ -53,6 +53,7 @@ class System:
         try:
             yield ROSProxy(description=self.description,
                            shell=self.shell,
+                           files=self.files,
                            ws_host=self.ws_host,
                            ip_address=self.ip_address,
                            port=port)

@@ -1,5 +1,18 @@
+# -*- coding: utf-8 -*-
 class ROSWireException(Exception):
     """Base class used by all ROSWire exceptions."""
+
+
+class PlayerNotStarted(ROSWireException):
+    """Playback has not begun."""
+
+
+class PlayerAlreadyStarted(ROSWireException):
+    """Playback has already started."""
+
+
+class PlayerAlreadyStopped(ROSWireException):
+    """Playback has already stopped."""
 
 
 class RecorderAlreadyStarted(ROSWireException):

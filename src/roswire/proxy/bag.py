@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 # http://wiki.ros.org/Bags/Format/2.0
-__all__ = ['BagRecorderProxy']
+__all__ = ('BagRecorderProxy', 'BagPlayerProxy')
 
 from typing import Optional, Collection
 import logging
@@ -9,12 +10,80 @@ import pathlib
 import threading
 import os
 
-from .shell import ShellProxy
+from .file import FileProxy
+from .shell import ShellProxy, Popen
 from .node import NodeManagerProxy
 from .. import exceptions
 
-logger = logging.getLogger(__name__)  # type: logging.Logger
+logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
+
+
+class BagPlayerProxy:
+    def __init__(self,
+                 fn_container: str,
+                 shell: ShellProxy,
+                 files: FileProxy,
+                 *,
+                 delete_file_after_use: bool = False
+                 ) -> None:
+        self.__lock = threading.Lock()
+        self.__fn_container = fn_container
+        self.__shell = shell
+        self.__files = files
+        self.__delete_file_after_use = delete_file_after_use
+        self.__started = False
+        self.__stopped = False
+        self.__process: Optional[Popen] = None
+
+    @property
+    def started(self) -> bool:
+        """Indicates whether or not playback has started."""
+        return self.__started
+
+    @property
+    def stopped(self) -> bool:
+        """Indicates whether or not playback has stopped."""
+        return self.__stopped
+
+    def __enter__(self) -> 'BagPlayerProxy':
+        self.start()
+        return self
+
+    def start(self) -> None:
+        """Starts playback from the bag.
+
+        Raises:
+            PlayerAlreadyStarted: if the player has already started.
+        """
+        logger.debug("starting bag playback")
+        with self.__lock:
+            if self.__started:
+                raise exceptions.PlayerAlreadyStarted
+            self.__started = True
+            cmd: str = f"rosbag play -q {self.__fn_container}"
+            self.__process = self.__shell.popen(cmd)
+            logger.debug("started bag playback")
+
+    def stop(self) -> None:
+        """Stops playback from the bag.
+
+        Raises:
+            PlayerAlreadyStopped: if the player has already been stopped.
+        """
+        logger.debug("stopping bag playback")
+        with self.__lock:
+            if self.__stopped:
+                raise exceptions.PlayerAlreadyStopped
+            if not self.__started:
+                raise exceptions.PlayerNotStarted
+            assert self.__process
+            self.__process.kill()
+            self.__process = None
+            if self.__delete_file_after_use:
+                self.__files.remove(self.__fn_container)
+            self.__stopped = True
+        logger.debug("stopped bag playback")
 
 
 class BagRecorderProxy:
@@ -55,16 +124,12 @@ class BagRecorderProxy:
 
     @property
     def started(self) -> bool:
-        """
-        Indicates whether or not recording has started.
-        """
+        """Indicates whether or not recording has started."""
         return self.__started
 
     @property
     def stopped(self) -> bool:
-        """
-        Indicates whether or not recording has stopped.
-        """
+        """Indicates whether or not recording has stopped."""
         return self.__stopped
 
     def __enter__(self) -> 'BagRecorderProxy':
@@ -80,8 +145,7 @@ class BagRecorderProxy:
             self.stop(save=should_save)
 
     def start(self) -> None:
-        """
-        Starts recording to the bag.
+        """Starts recording to the bag.
 
         Raises:
             RecorderAlreadyStarted: if the recorder has already been started.
@@ -99,8 +163,7 @@ class BagRecorderProxy:
             logger.debug("started bag recording")
 
     def stop(self, save: bool = True) -> None:
-        """
-        Stops recording to the bag.
+        """Stops recording to the bag.
 
         Parameters:
             save: specifies whether the bag file should be saved to disk.
