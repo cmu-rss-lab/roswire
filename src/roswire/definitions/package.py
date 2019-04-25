@@ -96,7 +96,7 @@ class PackageDatabase(Mapping[str, Package]):
             print("P: {}".format(path))
             code, _, _ = shell.execute('test -f {}/package.xml'.format(path))
             print("code: {}".format(code))
-            if code != 0:
+            if code == 0:
                 paths.append(path)
             else:
                 code, dirs_str, _ = shell.execute('ls -d {}/*'.format(path))
