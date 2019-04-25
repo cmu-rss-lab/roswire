@@ -81,10 +81,15 @@ class Popen:
             self.__shell.send_signal(pid, sig)
 
     def kill(self) -> None:
+        """Kills the process via a SIGKILL signal."""
         self.send_signal(signal.SIGKILL)
 
     def terminate(self) -> None:
         self.send_signal(signal.SIGTERM)
+
+    def poll(self) -> Optional[int]:
+        """Checks if the process has terminated and returns its returncode."""
+        return self.returncode
 
 
 class ShellProxy:
