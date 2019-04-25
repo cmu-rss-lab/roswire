@@ -83,7 +83,7 @@ class Package:
 
 class PackageDatabase(Mapping[str, Package]):
     @staticmethod
-    def paths(shell: ShellProxy) -> List[str]:
+    def paths(shell: ShellProxy, file_proxy: FileProxy) -> List[str]:
         """
         Parses the contents of the ROS_PACKAGE_PATH environment variable for a
         given shell.
@@ -94,21 +94,16 @@ class PackageDatabase(Mapping[str, Package]):
         package_paths: List[str] = path_str.strip().split(':')
         paths: List[str] = []
         for path in package_paths:
-            cmd = f'test -f {shlex.quote(path)}/package.xml'
-            code, _, _ = shell.execute(cmd)
-            if code == 0:
+            if file_proxy.isfile(f'{path}/package.xml'):
                 paths.append(path)
             else:
-                cmd = f'ls -d {shlex.quote(path)}/*'
-                code, dirs_str, _ = shell.execute(cmd)
-                if code != 0:
+                try:
+                    dirs: List[str] = file_proxy.listdir(path, absolute=True)
+                except OSError:
                     # Not a directory
                     continue
-                dirs: List[str] = dirs_str.strip().split('\n')
                 for d in dirs:
-                    cmd = f'test -f {shlex.quote(d)}/package.xml'
-                    code, _, _ = shell.execute(cmd)
-                    if code == 0:
+                    if file_proxy.isfile(f'{d}/package.xml'):
                         paths.append(d)
         return paths
 
