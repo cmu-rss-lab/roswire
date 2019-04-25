@@ -20,3 +20,6 @@ def test_description():
     assert set(desc.formats.messages) == {'something'}
     assert set(desc.formats.actions) == {'something'}
     assert set(desc.formats.services) == {'something'}
+
+if __name__ == "__main__":
+    test_description()
