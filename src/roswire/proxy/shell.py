@@ -114,6 +114,7 @@ class Popen:
             if time_limit and stopwatch.duration > time_limit:
                 raise TimeoutExpired(self.args, time_limit)
             time.sleep(0.05)
+        assert self.returncode is not None
         return self.returncode
 
 
