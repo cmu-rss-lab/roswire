@@ -92,6 +92,7 @@ class PackageDatabase(Mapping[str, Package]):
             raise Exception("unexpected error when fetching ROS_PACKAGE_PATH")
         package_paths: List[str] = path_str.strip().split(':')
         paths: List[str] = []
+        print("PP: {}".format(package_paths))
         for path in package_paths:
             print("P: {}".format(path))
             code, _, _ = shell.execute('test -f {}/package.xml'.format(path))
@@ -104,6 +105,7 @@ class PackageDatabase(Mapping[str, Package]):
                 if code != 0:
                     continue
                 dirs: List[str] = path_str.strip().split('\n')
+                print("DIRS: {}".format(dirs))
                 package_paths.extend(dirs)
                 print("PP: {}".format(package_paths))
         return paths
