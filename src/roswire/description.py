@@ -153,7 +153,7 @@ class SystemDescriptionManager:
         """
         sha256 = self.__containers.image_sha256(image_or_tag)
         with self.__containers.launch(image_or_tag) as container:
-            paths = PackageDatabase.paths(container.shell)
+            paths = PackageDatabase.paths(container.shell, container.files)
             db_package = PackageDatabase.from_paths(container.files, paths)
         db_format = FormatDatabase.build(db_package)
         db_type = TypeDatabase.build(db_format)

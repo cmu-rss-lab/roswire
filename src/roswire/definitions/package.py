@@ -5,6 +5,7 @@ from typing import (Tuple, List, Dict, Union, Any, Iterator, Collection,
 import os
 
 import attr
+import shlex
 
 from .msg import MsgFormat
 from .srv import SrvFormat
@@ -82,7 +83,7 @@ class Package:
 
 class PackageDatabase(Mapping[str, Package]):
     @staticmethod
-    def paths(shell: ShellProxy) -> List[str]:
+    def paths(shell: ShellProxy, files: FileProxy) -> List[str]:
         """
         Parses the contents of the ROS_PACKAGE_PATH environment variable for a
         given shell.
@@ -90,7 +91,16 @@ class PackageDatabase(Mapping[str, Package]):
         code, path_str, duration = shell.execute('echo "${ROS_PACKAGE_PATH}"')
         if code != 0:
             raise Exception("unexpected error when fetching ROS_PACKAGE_PATH")
-        paths: List[str] = path_str.strip().split(':')
+        package_paths: List[str] = path_str.strip().split(':')
+        paths: List[str] = []
+        for path in package_paths:
+            try:
+                all_packages = files.find(path, 'package.xml')
+            except OSError:
+                # path is not a directory
+                continue
+            package_dirs = [os.path.dirname(p) for p in all_packages]
+            paths.extend(package_dirs)
         return paths
 
     @staticmethod

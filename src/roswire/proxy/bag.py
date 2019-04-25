@@ -8,6 +8,7 @@ import shutil
 import time
 import pathlib
 import threading
+import subprocess
 import os
 
 from .file import FileProxy
@@ -50,11 +51,32 @@ class BagPlayerProxy:
         self.start()
         return self
 
+    def wait(self, time_limit: Optional[float] = None) -> None:
+        """Blocks until playback has finished.
+
+        Parameters
+        ----------
+        time_limit: Optional[float] = None
+            an optional time limit.
+
+        Raises
+        ------
+        PlayerTimeout:
+            if playback did not finish within the provided timeout.
+        """
+        assert self.__process
+        try:
+            self.__process.wait(time_limit)
+        except subprocess.TimeoutExpired:
+            raise exceptions.PlayerTimeout
+
     def start(self) -> None:
         """Starts playback from the bag.
 
-        Raises:
-            PlayerAlreadyStarted: if the player has already started.
+        Raises
+        ------
+        PlayerAlreadyStarted:
+            if the player has already started.
         """
         logger.debug("starting bag playback")
         with self.__lock:
@@ -95,17 +117,22 @@ class BagRecorderProxy:
                  exclude_topics: Optional[Collection[str]] = None
                  ) -> None:
         """
-        Note:
+        Notes
+        -----
             This object should not be constructed directly.
 
-        Parameters:
-            fn_dest: the destination filepath for the bag (on the host).
-            ws_host: the workspace directory for the associated container (on
-                the host).
-            shell: a shell proxy.
-            nodes: access to nodes for the associated ROS graph.
-            excluded_topics: an optional list of topics that should be excluded
-                from the bag.
+        Parameters
+        ----------
+        fn_dest: str
+            the destination filepath for the bag (on the host).
+        ws_host: str
+            the workspace directory for the associated container (on the host).
+        shell: ShellProxy
+            a shell proxy.
+        nodes: NodeManagerProxy
+            access to nodes for the associated ROS graph.
+        excluded_topics: Optional[Collection[str]] = None
+            an optional list of topics that should be excluded from the bag.
         """
         self.__lock: threading.Lock = threading.Lock()
         self.__started: bool = False
@@ -147,8 +174,10 @@ class BagRecorderProxy:
     def start(self) -> None:
         """Starts recording to the bag.
 
-        Raises:
-            RecorderAlreadyStarted: if the recorder has already been started.
+        Raises
+        ------
+        RecorderAlreadyStarted:
+            if the recorder has already been started.
         """
         logger.debug("starting bag recording")
         with self.__lock:
@@ -165,11 +194,15 @@ class BagRecorderProxy:
     def stop(self, save: bool = True) -> None:
         """Stops recording to the bag.
 
-        Parameters:
-            save: specifies whether the bag file should be saved to disk.
+        Parameters
+        ----------
+        save: bool
+            specifies whether the bag file should be saved to disk.
 
-        Raises:
-            RecorderAlreadyStopped: if this recorder has already been stopped.
+        Raises
+        ------
+        RecorderAlreadyStopped:
+            if this recorder has already been stopped.
         """
         logger.debug("stopping bag recording")
         with self.__lock:

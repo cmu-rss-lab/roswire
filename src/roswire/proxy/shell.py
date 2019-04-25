@@ -2,10 +2,12 @@ __all__ = ('ShellProxy',)
 
 from typing import Tuple, Optional, Dict, Any, Iterator
 from timeit import default_timer as timer
+from subprocess import TimeoutExpired
 import os
 import shlex
 import logging
 import threading
+import time
 import signal
 
 from docker import DockerClient
@@ -67,6 +69,7 @@ class Popen:
 
     @property
     def finished(self) -> bool:
+        """True if the process has exited; False if not."""
         return self.returncode is not None
 
     @property
@@ -81,10 +84,38 @@ class Popen:
             self.__shell.send_signal(pid, sig)
 
     def kill(self) -> None:
+        """Kills the process via a SIGKILL signal."""
         self.send_signal(signal.SIGKILL)
 
     def terminate(self) -> None:
+        """Terminates the process via a SIGTERM signal."""
         self.send_signal(signal.SIGTERM)
+
+    def poll(self) -> Optional[int]:
+        """Checks if the process has terminated and returns its returncode."""
+        return self.returncode
+
+    def wait(self, time_limit: Optional[float] = None) -> int:
+        """Blocks until the process has terminated.
+
+        Parameters
+        ----------
+        time_limit: Optional[float] = None
+            An optional time limit.
+
+        Raises
+        ------
+        subprocess.TimeoutExpired:
+            if the process does not terminate within the specified timeout.
+        """
+        stopwatch = Stopwatch()
+        stopwatch.start()
+        while not self.finished:
+            if time_limit and stopwatch.duration > time_limit:
+                raise TimeoutExpired(self.args, time_limit)
+            time.sleep(0.05)
+        assert self.returncode is not None
+        return self.returncode
 
 
 class ShellProxy:
