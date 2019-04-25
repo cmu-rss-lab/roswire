@@ -15,6 +15,10 @@ class PlayerAlreadyStopped(ROSWireException):
     """Playback has already stopped."""
 
 
+class PlayerTimeout(ROSWireException):
+    """Playback did not complete within the specified timeout."""
+
+
 class RecorderAlreadyStarted(ROSWireException):
     """Recording has already started."""
 
