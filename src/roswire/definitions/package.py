@@ -102,7 +102,7 @@ class PackageDatabase(Mapping[str, Package]):
                 code, dirs_str, _ = shell.execute('ls -d {}/*'.format(path))
                 print("dirs_str: {}".format(dirs_str))
                 if code != 0:
-                    raise Exception("unexpected error when listing directories")
+                    continue
                 dirs: List[str] = path_str.strip().split('\n')
                 package_paths.extend(dirs)
                 print("PP: {}".format(package_paths))
