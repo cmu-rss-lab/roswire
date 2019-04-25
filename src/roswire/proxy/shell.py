@@ -67,6 +67,7 @@ class Popen:
 
     @property
     def finished(self) -> bool:
+        """True if the process has exited; False if not."""
         return self.returncode is not None
 
     @property
@@ -81,10 +82,16 @@ class Popen:
             self.__shell.send_signal(pid, sig)
 
     def kill(self) -> None:
+        """Kills the process via a SIGKILL signal."""
         self.send_signal(signal.SIGKILL)
 
     def terminate(self) -> None:
+        """Terminates the process via a SIGTERM signal."""
         self.send_signal(signal.SIGTERM)
+
+    def poll(self) -> Optional[int]:
+        """Checks if the process has terminated and returns its returncode."""
+        return self.returncode
 
 
 class ShellProxy:
