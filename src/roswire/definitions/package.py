@@ -94,11 +94,13 @@ class PackageDatabase(Mapping[str, Package]):
         package_paths: List[str] = path_str.strip().split(':')
         paths: List[str] = []
         for path in package_paths:
-            code, _, _ = shell.execute(f'test -f {shlex.quote(path)}/package.xml')
+            cmd = f'test -f {shlex.quote(path)}/package.xml'
+            code, _, _ = shell.execute(cmd)
             if code == 0:
                 paths.append(path)
             else:
-                code, dirs_str, _ = shell.execute(f'ls -d {shlex.quote(path)}/*')
+                cmd = f'ls -d {shlex.quote(path)}/*'
+                code, dirs_str, _ = shell.execute(cmd)
                 if code != 0:
                     # Not a directory
                     continue
