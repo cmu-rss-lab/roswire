@@ -103,7 +103,8 @@ class PackageDatabase(Mapping[str, Package]):
                     continue
                 dirs: List[str] = dirs_str.strip().split('\n')
                 for d in dirs:
-                    code, _, _ = shell.execute('test -f {}/package.xml'.format(d))
+                    cmd = 'test -f {}/package.xml'.format(d)
+                    code, _, _ = shell.execute(cmd)
                     if code == 0:
                         paths.append(d)
         return paths
