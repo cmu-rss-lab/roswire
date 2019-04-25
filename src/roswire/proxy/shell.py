@@ -67,6 +67,7 @@ class Popen:
 
     @property
     def finished(self) -> bool:
+        """True if the process has exited; False if not."""
         return self.returncode is not None
 
     @property
@@ -85,6 +86,7 @@ class Popen:
         self.send_signal(signal.SIGKILL)
 
     def terminate(self) -> None:
+        """Terminates the process via a SIGTERM signal."""
         self.send_signal(signal.SIGTERM)
 
     def poll(self) -> Optional[int]:
