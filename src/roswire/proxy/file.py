@@ -186,6 +186,28 @@ class FileProxy:
         code, output, duration = self.__shell.execute(cmd)
         return code == 0
 
+    def find(self,
+             path: str,
+             filename: str
+             ) -> List[str]:
+        """
+        Returns a list of files that match the provided filename
+        in a given directory recursively.
+
+        Parameters:
+            path: absolute path to the directory.
+            filename: the name of the file to match.
+
+        Raises:
+            OSError: if find operation is not successful.
+        """
+        cmd = f'find {shlex.quote(path)} -name {shlex.quote(filename)}'
+        code, output, duration = self.__shell.execute(cmd)
+        if code != 0:
+            raise OSError(f"Find operation was unsuccessful on {path}")
+        paths: List[str] = output.replace('\r', '').split('\n')
+        return paths
+
     def listdir(self,
                 d: str,
                 *,
