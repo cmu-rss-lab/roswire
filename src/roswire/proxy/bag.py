@@ -8,6 +8,7 @@ import shutil
 import time
 import pathlib
 import threading
+import subprocess
 import os
 
 from .file import FileProxy
@@ -63,6 +64,7 @@ class BagPlayerProxy:
         PlayerTimeout:
             if playback did not finish within the provided timeout.
         """
+        assert self.__process
         try:
             self.__process.wait(time_limit)
         except subprocess.TimeoutExpired:
