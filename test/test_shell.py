@@ -7,7 +7,7 @@ from roswire.proxy import ShellProxy
 from test_basic import build_shell_proxy
 
 
-def test_exists():
+def test_wait():
     with build_shell_proxy() as shell:
         p = shell.popen('sleep 30 && echo "hello world"')
         with pytest.raises(subprocess.TimeoutExpired):
