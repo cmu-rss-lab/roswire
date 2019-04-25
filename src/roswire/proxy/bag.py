@@ -50,6 +50,10 @@ class BagPlayerProxy:
         self.start()
         return self
 
+    def wait(self) -> None:
+        """Blocks until playback has finished."""
+        self.__process.wait()
+
     def start(self) -> None:
         """Starts playback from the bag.
 
