@@ -104,7 +104,7 @@ class PackageDatabase(Mapping[str, Package]):
                 print("dirs_str: {}".format(dirs_str))
                 if code != 0:
                     continue
-                dirs: List[str] = path_str.strip().split('\n')
+                dirs: List[str] = dirs_str.strip().split('\n')
                 print("DIRS: {}".format(dirs))
                 package_paths.extend(dirs)
                 print("PP: {}".format(package_paths))
