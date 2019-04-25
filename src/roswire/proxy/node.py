@@ -64,6 +64,14 @@ class NodeProxy:
         assert pid > 0
         return pid
 
+    def is_alive(self) -> bool:
+        try:
+            pid = self.pid
+        except ROSWireException:
+            return False
+        retcode, _, _ = self.__shell.execute(f'kill -0 {pid}')
+        return int(retcode) == 0
+
     def shutdown(self) -> None:
         self.__shell.execute(f'rosnode kill {self.name}')
 
