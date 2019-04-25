@@ -5,6 +5,7 @@ from typing import (Tuple, List, Dict, Union, Any, Iterator, Collection,
 import os
 
 import attr
+import shlex
 
 from .msg import MsgFormat
 from .srv import SrvFormat
@@ -93,17 +94,17 @@ class PackageDatabase(Mapping[str, Package]):
         package_paths: List[str] = path_str.strip().split(':')
         paths: List[str] = []
         for path in package_paths:
-            code, _, _ = shell.execute('test -f {}/package.xml'.format(path))
+            code, _, _ = shell.execute(f'test -f {shlex.quote(path)}/package.xml')
             if code == 0:
                 paths.append(path)
             else:
-                code, dirs_str, _ = shell.execute('ls -d {}/*'.format(path))
+                code, dirs_str, _ = shell.execute(f'ls -d {shlex.quote(path)}/*')
                 if code != 0:
                     # Not a directory
                     continue
                 dirs: List[str] = dirs_str.strip().split('\n')
                 for d in dirs:
-                    cmd = 'test -f {}/package.xml'.format(d)
+                    cmd = f'test -f {shlex.quote(d)}/package.xml'
                     code, _, _ = shell.execute(cmd)
                     if code == 0:
                         paths.append(d)
