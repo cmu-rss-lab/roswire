@@ -19,6 +19,14 @@ def test_exists():
         assert not files.exists('/ros_ws/entrypoint.shhhhh')
 
 
+def test_find():
+    with build_file_proxy() as files:
+        assert files.find('/', 'pkgs.rosinstall') == ['/ros_ws/pkgs.rosinstall']
+        assert len(files.find('/ros_ws', 'package.xml')) == 83
+        with pytest.raises(OSError):
+            files.find('/dummy_dir', 'file')
+
+
 def test_isfile():
     with build_file_proxy() as files:
         assert not files.isfile('/foo')
