@@ -1,13 +1,44 @@
-diff --git a/rospy_tutorials/001_talker_listener/listener.py b/rospy_tutorials/001_talker_listener/listener.py
-index ed27e1e..27d81da 100755
---- a/rospy_tutorials/001_talker_listener/listener.py
-+++ b/rospy_tutorials/001_talker_listener/listener.py
-@@ -41,6 +41,8 @@ from std_msgs.msg import String
+diff --git a/roscpp_tutorials/listener/listener.cpp b/roscpp_tutorials/listener/listener.cpp
+index d6c3278..8d1d379 100644
+--- a/roscpp_tutorials/listener/listener.cpp
++++ b/roscpp_tutorials/listener/listener.cpp
+@@ -29,6 +29,8 @@
+ #include "ros/ros.h"
+ #include "std_msgs/String.h"
  
- def callback(data):
-     rospy.loginfo(rospy.get_caller_id() + 'I heard %s', data.data)
-+    num = int(data.data[len('hello world '):])
-+    rospy.loginfo('Dumb bug %d', 500 / (num % 100))
++#include <stdlib.h>
++
+ /**
+  * This tutorial demonstrates simple receipt of messages over the ROS system.
+  */
+@@ -36,6 +38,9 @@
+ void chatterCallback(const std_msgs::String::ConstPtr& msg)
+ {
+   ROS_INFO("I heard: [%s]", msg->data.c_str());
++  int num = atoi(msg->data.substr(12).c_str());
++  if(1 / num > 0.02)
++     ROS_INFO("number smaller than 50");
+ }
+ // %EndTag(CALLBACK)%
  
- def listener():
+diff --git a/roscpp_tutorials/talker/talker.cpp b/roscpp_tutorials/talker/talker.cpp
+index f0899ac..1a9361f 100644
+--- a/roscpp_tutorials/talker/talker.cpp
++++ b/roscpp_tutorials/talker/talker.cpp
+@@ -32,6 +32,7 @@
+ #include "std_msgs/String.h"
+ // %EndTag(MSG_HEADER)%
+ 
++#include <stdlib.h>
+ #include <sstream>
+ 
+ /**
+@@ -103,7 +104,7 @@ int main(int argc, char **argv)
+     std_msgs::String msg;
+ 
+     std::stringstream ss;
+-    ss << "hello world " << count;
++    ss << "hello world " << rand() % 1000;
+     msg.data = ss.str();
+ // %EndTag(FILL_MESSAGE)%
  
