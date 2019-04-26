@@ -1,0 +1,13 @@
+diff --git a/rospy_tutorials/001_talker_listener/listener.py b/rospy_tutorials/001_talker_listener/listener.py
+index ed27e1e..27d81da 100755
+--- a/rospy_tutorials/001_talker_listener/listener.py
++++ b/rospy_tutorials/001_talker_listener/listener.py
+@@ -41,6 +41,8 @@ from std_msgs.msg import String
+ 
+ def callback(data):
+     rospy.loginfo(rospy.get_caller_id() + 'I heard %s', data.data)
++    num = int(data.data[len('hello world '):])
++    rospy.loginfo('Dumb bug %d', 500 / (num % 100))
+ 
+ def listener():
+ 
