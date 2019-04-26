@@ -17,6 +17,16 @@ def test_description():
     rsw = ROSWire()
     desc = rsw.descriptions.build(NAME_IMAGE, save=False)
     assert set(desc.packages) == {
+        'nodelet_core',
+        'ros_core',
+        'ros_comm',
+        'ros_base',
+        'ros_tutorials',
+        'common_tutorials',
+        'roscpp_core',
+        'bond_core',
+        'ros',
+        'common_msgs',
         'actionlib',
         'actionlib_msgs',
         'actionlib_tutorials',
