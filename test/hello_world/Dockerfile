@@ -1,4 +1,4 @@
-FROM ros:indigo
+FROM ros:indigo as base
 
 ENV ROS_WSPACE "/ros_ws"
 WORKDIR "${ROS_WSPACE}"
@@ -32,3 +32,14 @@ exec \"\$@\"" > "${ROS_WSPACE}/entrypoint.sh" \
  && chmod +x "${ROS_WSPACE}/entrypoint.sh"
 ENTRYPOINT ["/ros_ws/entrypoint.sh"]
 CMD ["/bin/bash"]
+
+
+FROM base as buggy
+
+COPY bug.diff ${ROS_WSPACE}
+COPY bug.bag ${ROS_WSPACE}
+COPY non-bug.bag ${ROS_WSPACE}
+RUN cd ${ROS_WSPACE}/src/ros_tutorials/ && \
+    git apply ${ROS_WSPACE}/bug.diff && \
+    cd ${ROS_WSPACE} && \
+    /bin/bash -c "source /opt/ros/indigo/setup.bash && catkin_make"
