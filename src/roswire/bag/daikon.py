@@ -3,13 +3,14 @@
 This module provides functionality for converting the contents of ROS bag
 files into Daikon trace (and declaration) files.
 """
+__all__ = ('bag_to_decls',)
+
 from typing import Dict, Type, Set, FrozenSet, Tuple
 
 import attr
 
 from .reader import BagReader
-from ..definitions import Message, MsgFormat
-from ..description import SystemDescription
+from ..definitions import Message, MsgFormat, TypeDatabase
 
 
 @attr.s(frozen=True, str=False)
@@ -70,17 +71,15 @@ def topic_to_ppt(topic_name: str,
     return GenericProgramPoint(topic_name, decls)
 
 
-def bag_to_decls(fn_bag: str,
-                 sys_desc: SystemDescription
-                 ) -> Declarations:
+def bag_to_decls(fn_bag: str, db_type: TypeDatabase) -> Declarations:
     """Builds a .decls file for a given ROS bag.
 
     Parameters
     ----------
     fn_bag: str
         the path to the bag file.
-    sys_desc: SystemDescription
-        a description of the system used to produce the bag.
+    db_type: TypeDatabase
+        a database of types for the system used to produce the bag.
 
     Returns
     -------
@@ -88,7 +87,7 @@ def bag_to_decls(fn_bag: str,
         a declarations description.
     """
     # determine the set of topics (and their types) represented in the bag
-    reader = BagReader(fn_bag, sys_desc)
+    reader = BagReader(fn_bag, db_type)
     topic_to_type = reader.topics_to_types
 
     # transform each topic to a program point
