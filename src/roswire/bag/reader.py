@@ -85,6 +85,11 @@ class BagReader:
         """The names of all topics represented in this bag."""
         return set(c.topic for c in self.connections)
 
+    @propety
+    def topics_to_types(self) -> Dict[str, Type[Message]]:
+        """A mapping from topics to their respective types."""
+        return {c.topic: self.__db_type[c.typ] for c in self.connections}
+
     def _seek(self, pos: int, ptr=None) -> None:
         ptr = ptr if ptr else self.__fp
         ptr.seek(pos)
