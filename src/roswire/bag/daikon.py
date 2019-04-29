@@ -3,10 +3,28 @@
 This module provides functionality for converting the contents of ROS bag
 files into Daikon trace (and declaration) files.
 """
-from typing import Dict, Type
+from typing import Dict, Type, Set, FrozenSet
+
+import attr
 
 from ..definitions import Message, MsgFormat
 from ..description import SystemDescription
+
+
+@attr.s(frozen=True)
+class VarDecl:
+    name: str = attr.ib()
+
+
+@attr.s(frozen=True)
+class GenericProgramPoint:
+    name: str = attr.ib()
+    variables: FrozenSet[VarDecl] = attr.ib(converter=frozenset)
+
+
+@attr.s(frozen=True)
+class Declarations:
+    points: FrozenSet[GenericProgramPoint] = attr.ib(converter=frozenset)
 
 
 def build_decls(fn_bag: str,
@@ -24,11 +42,17 @@ def build_decls(fn_bag: str,
     sys_desc: SystemDescription
         a description of the system used to produce the bag.
     """
-    # create a program point for each topic
+    # transform each topic to a program point
+    ppts: Set[GenericProgramPoint] = set()
     topic_to_type: Dict[str, Type[Message]] = {}
     for topic_name, topic_type in topic_to_type.items():
+        var_decls: Set[VarDecl] = set()
         topic_fmt: MsgFormat = topic_type.format
         for field_ctx, field in topic_fmt.flatten(sys_desc.formats.messages):
             field_name = '.'.join(field_ctx) + field.name
+            decl = VarDecl(field_name)
+            var_decls.add(decl)
+        ppt = GenericProgramPoint(topic_name, var_decls)
+        ppts.add(ppt)
 
     raise NotImplementedError
