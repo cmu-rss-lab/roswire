@@ -85,7 +85,7 @@ class BagReader:
         """The names of all topics represented in this bag."""
         return set(c.topic for c in self.connections)
 
-    @propety
+    @property
     def topics_to_types(self) -> Dict[str, Type[Message]]:
         """A mapping from topics to their respective types."""
         return {c.topic: self.__db_type[c.typ] for c in self.connections}
