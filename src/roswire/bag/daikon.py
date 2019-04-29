@@ -16,6 +16,8 @@ from ..definitions import Message, MsgFormat, TypeDatabase
 @attr.s(frozen=True, str=False)
 class VarDecl:
     name: str = attr.ib()
+    dec_type: str = attr.ib()
+    rep_type: str = attr.ib()
 
     @property
     def lines(self) -> List[str]:
@@ -66,9 +68,11 @@ def topic_to_ppt(topic_name: str,
     decls: Set[VarDecl] = set()
     for field_ctx, field in topic_fmt.flatten(sys_desc.formats.messages):
         field_name = '.'.join(field_ctx) + field.name
+        dec_type = 'bool'  # TODO
+        rep_type = 'bool'  # TODO
         decl = VarDecl(field_name)
         decls.add(decl)
-    return GenericProgramPoint(topic_name, decls)
+    return GenericProgramPoint(topic_name, decls)  # type: ignore
 
 
 def bag_to_decls(fn_bag: str, db_type: TypeDatabase) -> Declarations:
@@ -96,4 +100,4 @@ def bag_to_decls(fn_bag: str, db_type: TypeDatabase) -> Declarations:
         ppt = topic_to_ppt(topic_name, topic_type.format)
         ppts.add(ppt)
 
-    return Declarations(ppts)
+    return Declarations(ppts)  # type: ignore
