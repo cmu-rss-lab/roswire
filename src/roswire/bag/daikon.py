@@ -70,20 +70,22 @@ def topic_to_ppt(topic_name: str,
     return GenericProgramPoint(topic_name, decls)
 
 
-def build_decls(fn_bag: str,
-                fn_decls: str,
-                sys_desc: SystemDescription
-                ) -> None:
+def bag_to_decls(fn_bag: str,
+                 sys_desc: SystemDescription
+                 ) -> Declarations:
     """Builds a .decls file for a given ROS bag.
 
     Parameters
     ----------
     fn_bag: str
         the path to the bag file.
-    fn_decls: str
-        the path to the .decls file that should be created.
     sys_desc: SystemDescription
         a description of the system used to produce the bag.
+
+    Returns
+    -------
+    Declarations:
+        a declarations description.
     """
     # determine the set of topics (and their types) represented in the bag
     reader = BagReader(fn_bag, sys_desc)
@@ -95,4 +97,4 @@ def build_decls(fn_bag: str,
         ppt = topic_to_ppt(topic_name, topic_type.format)
         ppts.add(ppt)
 
-    raise NotImplementedError
+    return Declarations(ppts)
