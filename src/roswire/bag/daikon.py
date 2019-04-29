@@ -71,7 +71,7 @@ def topic_to_ppt(topic_name: str,
         dec_type = 'bool'  # TODO
         rep_type = 'bool'  # TODO
         decl = VarDecl(field_name)
-        decls.add(decl)
+        decls.add(decl, dec_type, rep_type)
     return GenericProgramPoint(topic_name, decls)  # type: ignore
 
 
