@@ -10,7 +10,8 @@ from typing import Dict, Type, Set, FrozenSet, List
 import attr
 
 from .reader import BagReader
-from ..definitions import Message, MsgFormat, TypeDatabase
+from ..description import SystemDescription
+from ..definitions import Message, MsgFormat
 
 
 @attr.s(frozen=True, str=False)
@@ -62,7 +63,8 @@ class Declarations:
 
 
 def topic_to_ppt(topic_name: str,
-                 topic_fmt: MsgFormat
+                 topic_fmt: MsgFormat,
+                 sys_desc: SystemDescription
                  ) -> GenericProgramPoint:
     """Creates a program point for a given ROS topic."""
     decls: Set[VarDecl] = set()
@@ -75,15 +77,15 @@ def topic_to_ppt(topic_name: str,
     return GenericProgramPoint(topic_name, decls)  # type: ignore
 
 
-def bag_to_decls(fn_bag: str, db_type: TypeDatabase) -> Declarations:
+def bag_to_decls(fn_bag: str, sys_desc: SystemDescription) -> Declarations:
     """Builds a .decls file for a given ROS bag.
 
     Parameters
     ----------
     fn_bag: str
         the path to the bag file.
-    db_type: TypeDatabase
-        a database of types for the system used to produce the bag.
+    sys_desc: SystemDescription
+        a description of the system used to produce the bag.
 
     Returns
     -------
@@ -91,13 +93,13 @@ def bag_to_decls(fn_bag: str, db_type: TypeDatabase) -> Declarations:
         a declarations description.
     """
     # determine the set of topics (and their types) represented in the bag
-    reader = BagReader(fn_bag, db_type)
+    reader = BagReader(fn_bag, sys_desc.types)
     topic_to_type = reader.topics_to_types
 
     # transform each topic to a program point
     ppts: Set[GenericProgramPoint] = set()
     for topic_name, topic_type in topic_to_type.items():
-        ppt = topic_to_ppt(topic_name, topic_type.format)
+        ppt = topic_to_ppt(topic_name, topic_type.format, sys_desc)
         ppts.add(ppt)
 
     return Declarations(ppts)  # type: ignore
