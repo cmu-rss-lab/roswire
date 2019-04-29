@@ -7,6 +7,7 @@ from typing import Dict, Type, Set, FrozenSet, Tuple
 
 import attr
 
+from .reader import BagReader
 from ..definitions import Message, MsgFormat
 from ..description import SystemDescription
 
@@ -84,10 +85,14 @@ def build_decls(fn_bag: str,
     sys_desc: SystemDescription
         a description of the system used to produce the bag.
     """
+    # determine the set of topics (and their types) represented in the bag
+    reader = BagReader(fn_bag, sys_desc)
+    topic_to_type = reader.topics_to_types
+
     # transform each topic to a program point
     ppts: Set[GenericProgramPoint] = set()
-    topic_to_type: Dict[str, Type[Message]] = {}
     for topic_name, topic_type in topic_to_type.items():
         ppt = topic_to_ppt(topic_name, topic_type.format)
         ppts.add(ppt)
+
     raise NotImplementedError
