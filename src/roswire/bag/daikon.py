@@ -3,7 +3,7 @@
 This module provides functionality for converting the contents of ROS bag
 files into Daikon trace (and declaration) files.
 """
-from typing import Dict, Type, Set, FrozenSet
+from typing import Dict, Type, Set, FrozenSet, Tuple
 
 import attr
 
@@ -11,20 +11,50 @@ from ..definitions import Message, MsgFormat
 from ..description import SystemDescription
 
 
-@attr.s(frozen=True)
+@attr.s(frozen=True, str=False)
 class VarDecl:
     name: str = attr.ib()
 
+    @property
+    def lines(self) -> List[str]:
+        return [f'variable {self.name}',
+                '  var-kind variable',
+                f'  dec-type {self.dec_type}',
+                f'  rep-type {self.rep_type}']
 
-@attr.s(frozen=True)
+    def __str__(self) -> str:
+        return '\n'.join(self.lines)
+
+
+@attr.s(frozen=True, str=False)
 class GenericProgramPoint:
     name: str = attr.ib()
     variables: FrozenSet[VarDecl] = attr.ib(converter=frozenset)
 
+    @property
+    def lines(self) -> List[str]:
+        ls = [f'ppt {self.name}:::POINT', 'ppt-type point']
+        for var in self.variables:
+            ls += var.lines
+        return ls
 
-@attr.s(frozen=True)
+    def __str__(self) -> str:
+        return '\n'.join(self.lines)
+
+
+@attr.s(frozen=True, str=False)
 class Declarations:
     points: FrozenSet[GenericProgramPoint] = attr.ib(converter=frozenset)
+
+    @property
+    def lines(self) -> List[str]:
+        ls = ['decl-version 2.0', 'var-comparability none']
+        for ppt in self.points:
+            ls += ppt.lines
+        return ls
+
+    def __str__(self) -> str:
+        return '\n'.join(self.lines)
 
 
 def build_decls(fn_bag: str,
@@ -54,5 +84,4 @@ def build_decls(fn_bag: str,
             var_decls.add(decl)
         ppt = GenericProgramPoint(topic_name, var_decls)
         ppts.add(ppt)
-
     raise NotImplementedError
