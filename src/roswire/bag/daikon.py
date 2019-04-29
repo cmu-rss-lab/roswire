@@ -57,6 +57,18 @@ class Declarations:
         return '\n'.join(self.lines)
 
 
+def topic_to_ppt(topic_name: str,
+                 topic_fmt: MsgFormat
+                 ) -> GenericProgramPoint:
+    """Creates a program point for a given ROS topic."""
+    decls: Set[VarDecl] = set()
+    for field_ctx, field in topic_fmt.flatten(sys_desc.formats.messages):
+        field_name = '.'.join(field_ctx) + field.name
+        decl = VarDecl(field_name)
+        decls.add(decl)
+    return GenericProgramPoint(topic_name, decls)
+
+
 def build_decls(fn_bag: str,
                 fn_decls: str,
                 sys_desc: SystemDescription
@@ -76,12 +88,6 @@ def build_decls(fn_bag: str,
     ppts: Set[GenericProgramPoint] = set()
     topic_to_type: Dict[str, Type[Message]] = {}
     for topic_name, topic_type in topic_to_type.items():
-        var_decls: Set[VarDecl] = set()
-        topic_fmt: MsgFormat = topic_type.format
-        for field_ctx, field in topic_fmt.flatten(sys_desc.formats.messages):
-            field_name = '.'.join(field_ctx) + field.name
-            decl = VarDecl(field_name)
-            var_decls.add(decl)
-        ppt = GenericProgramPoint(topic_name, var_decls)
+        ppt = topic_to_ppt(topic_name, topic_type.format)
         ppts.add(ppt)
     raise NotImplementedError
