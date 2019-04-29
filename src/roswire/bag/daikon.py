@@ -5,7 +5,7 @@ files into Daikon trace (and declaration) files.
 """
 __all__ = ('bag_to_decls',)
 
-from typing import Dict, Type, Set, FrozenSet, Tuple
+from typing import Dict, Type, Set, FrozenSet, List
 
 import attr
 
