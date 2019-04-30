@@ -51,6 +51,13 @@ class BagPlayerProxy:
         self.start()
         return self
 
+    def __exit__(self, ex_type, ex_val, ex_tb) -> None:
+        if ex_type is not None:
+            logger.error("error occurred during bag playback",
+                         exc_info=(ex_type, ex_val, ex_tb))
+        if not self.stopped:
+            self.stop()
+
     def wait(self, time_limit: Optional[float] = None) -> None:
         """Blocks until playback has finished.
 
