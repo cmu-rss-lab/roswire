@@ -109,7 +109,7 @@ class TraceWriter:
         self.__filename = filename
         self.__fp = open(filename, 'w')
 
-    def add(self, ppt: GenericProgramPoint, vals: Mapping[str, Any])) -> None:
+    def add(self, ppt: GenericProgramPoint, vals: Mapping[str, Any]) -> None:
         """Writes an entry to the trace file."""
         fp = self.__fp
         lines: List[str] = [ppt.fullname]
