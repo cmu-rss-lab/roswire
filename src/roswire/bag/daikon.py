@@ -13,6 +13,7 @@ __all__ = ('bag_to_decls', 'bag_to_daikon')
 
 from typing import (Dict, Type, Set, FrozenSet, List, Union, Iterator,
                     Collection, Mapping)
+from collections import OrderedDict
 from functools import reduce
 
 import attr
@@ -76,7 +77,7 @@ class GenericProgramPoint:
 
 class Declarations(Mapping[str, GenericProgramPoint]):
     def __init__(self, points: Collection[GenericProgramPoint]) -> None:
-        self.__points = {p.name: p for p in points}
+        self.__points = OrderedDict((p.name, p) for p in points)
 
     def __len__(self) -> int:
         return len(self.__points)
