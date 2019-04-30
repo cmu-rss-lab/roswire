@@ -5,7 +5,7 @@ files into Daikon trace (and declaration) files.
 """
 __all__ = ('bag_to_decls', 'bag_to_daikon')
 
-from typing import Dict, Type, Set, FrozenSet, List, Union
+from typing import (Dict, Type, Set, FrozenSet, List, Union, Iterator, Collection)
 
 import attr
 
@@ -66,14 +66,23 @@ class GenericProgramPoint:
         return '\n'.join(self.lines)
 
 
-@attr.s(frozen=True, str=False)
-class Declarations:
-    points: FrozenSet[GenericProgramPoint] = attr.ib(converter=frozenset)
+class Declarations(Mapping[str, GenericProgramPoint]):
+    def __init__(self, points: Collection[GenericProgramPoint]) -> None:
+        self.__points = {p.name: p for p in points}
+
+    def __len__(self) -> int:
+        return len(self.__points)
+
+    def __getitem__(self, name: str) -> GenericProgramPoint:
+        return self.__points[name]
+
+    def __iter__(self) -> Iterator[str]:
+        yield from self.__points
 
     @property
     def lines(self) -> List[str]:
         ls = ['decl-version 2.0', 'var-comparability none']
-        for ppt in self.points:
+        for ppt in self.values():
             ls += ppt.lines
         return ls
 
@@ -182,5 +191,8 @@ def bag_to_daikon(fn_bag: str,
     decls = bag_to_decls(fn_bag, sys_desc)
     decls.save(fn_decls)
 
-    bag_reader =
-    for message in 
+    trace_writer = TraceWriter(fn_dtrace)
+    bag_reader = BagReader(fn_bag, sys_desc.types)
+    for message in bag_reader:
+        ppt = decls[message.topic]
+        pass
