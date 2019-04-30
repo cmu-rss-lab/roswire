@@ -134,9 +134,12 @@ class ROSProxy:
             else:
                 delete_file_after_use = True
                 fn_ctr = self.__files.mktemp(suffix='.bag')
+                logger.debug("copying bag from host [%s] to container [%s]",
+                             fn, fn_ctr)
                 self.__files.copy_from_host(fn, fn_ctr)
         else:
             fn_ctr = fn
+        logger.debug("playing back bag file: %s", fn_ctr)
         return BagPlayerProxy(fn_ctr,
                               self.__shell,
                               self.__files,
