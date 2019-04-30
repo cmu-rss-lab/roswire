@@ -69,7 +69,9 @@ def topic_to_ppt(topic_name: str,
     """Creates a program point for a given ROS topic."""
     decls: Set[VarDecl] = set()
     for field_ctx, field in topic_fmt.flatten(sys_desc.formats.messages):
-        field_name = '.'.join(field_ctx) + field.name
+        field_name = field.name
+        if field_ctx:
+            field_name = f"{'.'.join(field_ctx)}.{field_name}"
         dec_type = 'bool'  # TODO
         rep_type = 'bool'  # TODO
         decl = VarDecl(field_name, dec_type, rep_type)
