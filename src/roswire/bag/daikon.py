@@ -116,12 +116,16 @@ class TraceWriter:
         fp = self.__fp
         lines: List[str] = [ppt.fullname]
         for var_name, var_val in vals.items():
-            if isinstance(str_val, bool):
-                str_val = 'true' if str_val else 'false'
+            if isinstance(var_val, bool):
+                str_val = 'true' if var_val else 'false'
+            elif isinstance(var_val, str):
+                str_val = var_val.replace('\\', '\\\\')
+                str_val = str_val.replace('"', '\\"')
+                str_val = f'"{str_val}"'
             else:
                 str_val = str(var_val)
             lines += [var_name, str_val, '1']
-        self.__fp.writelines(lines)
+        self.__fp.writelines(f'{l}\n' for l in lines)
         self.__fp.write('\n')
 
     def close(self) -> None:
@@ -200,17 +204,13 @@ def bag_to_daikon(fn_bag: str,
     decls.save(fn_decls)
 
     def read_val(m: Message, name_field: str) -> str:
-        val = reduce(getattr, name_field.split('.'), m)
-        if isinstance(val, bool):
-            return 'true' if val else 'false'
-        else:
-            return str(val)
+        return reduce(getattr, name_field.split('.'), m)
 
     trace_writer = TraceWriter(fn_dtrace)
     bag_reader = BagReader(fn_bag, sys_desc.types)
     for message in bag_reader:
         ppt = decls[message.topic]
         vals = {}
-        for var_decl in ppt.decls:
+        for var_decl in ppt.variables:
             vals[var_decl.name] = read_val(message.message, var_decl.name)
         trace_writer.add(ppt, vals)
