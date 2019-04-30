@@ -400,13 +400,13 @@ class FileProxy:
         """
         template = shlex.quote(f"{prefix if prefix else 'tmp'}.XXXXXXXXXX")
         cmd_parts = ['mktemp', template]
+        dirname = dirname if dirname else '/tmp'
         if suffix:
             cmd_parts += ['--suffix', shlex.quote(suffix)]
-        if dirname:
-            cmd_parts += ['-p', shlex.quote(dirname)]
-            if not self.isdir(dirname):
-                m = f'directory does not exist: {dirname}'
-                raise FileNotFoundError(m)
+        cmd_parts += ['-p', shlex.quote(dirname)]
+        if not self.isdir(dirname):
+            m = f'directory does not exist: {dirname}'
+            raise FileNotFoundError(m)
         cmd = ' '.join(cmd_parts)
 
         code, output, duration = self.__shell.execute(cmd)

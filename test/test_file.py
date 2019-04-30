@@ -22,7 +22,7 @@ def test_exists():
 def test_find():
     with build_file_proxy() as files:
         assert files.find('/', 'pkgs.rosinstall') == ['/ros_ws/pkgs.rosinstall']
-        assert len(files.find('/ros_ws', 'package.xml')) == 83
+        assert len(files.find('/ros_ws', 'package.xml')) == 154
         with pytest.raises(OSError):
             files.find('/dummy_dir', 'file')
 
@@ -336,6 +336,8 @@ def test_mktemp():
         # create a temporary file
         fn = files.mktemp()
         assert files.isfile(fn)
+        assert os.path.isabs(fn)  # bug #193
+        assert fn.startswith('/tmp/')  # bug #193
 
         # use specified dir
         d = '/boop'
