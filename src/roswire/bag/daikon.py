@@ -76,6 +76,10 @@ class Declarations:
     def __str__(self) -> str:
         return '\n'.join(self.lines)
 
+    def save(self, filename: str) -> None:
+        with open(filename, 'w') as f:
+            f.write(str(self))
+
 
 def topic_to_ppt(topic_name: str,
                  topic_fmt: MsgFormat,
@@ -125,3 +129,12 @@ def bag_to_decls(fn_bag: str, sys_desc: SystemDescription) -> Declarations:
         ppts.add(ppt)
 
     return Declarations(ppts)  # type: ignore
+
+
+def bag_to_daikon(fn_bag: str,
+                  fn_dtrace: str,
+                  fn_decls: str,
+                  sys_desc: SystemDescription
+                  ) -> None:
+    decls = bag_to_decls(fn_bag, sys_desc)
+    decls.save(fn_decls)
