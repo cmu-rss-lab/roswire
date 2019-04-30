@@ -336,6 +336,8 @@ def test_mktemp():
         # create a temporary file
         fn = files.mktemp()
         assert files.isfile(fn)
+        assert os.path.isabs(fn)  # bug #193
+        assert fn.startswith('/tmp/')  # bug #193
 
         # use specified dir
         d = '/boop'
