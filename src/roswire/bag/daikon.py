@@ -3,7 +3,7 @@
 This module provides functionality for converting the contents of ROS bag
 files into Daikon trace (and declaration) files.
 """
-__all__ = ('bag_to_decls',)
+__all__ = ('bag_to_decls', 'bag_to_daikon')
 
 from typing import Dict, Type, Set, FrozenSet, List
 
@@ -136,5 +136,18 @@ def bag_to_daikon(fn_bag: str,
                   fn_decls: str,
                   sys_desc: SystemDescription
                   ) -> None:
+    """Transforms a ROS bag into a Daikon trace.
+
+    Parameters
+    ----------
+    fn_bag: str
+        the path to the bag file.
+    fn_dtrace: str
+        the path to the output Daikon trace file.
+    fn_decls: str
+        the path to the output Daikon decls file.
+    sys_desc: SystemDescription
+        a description of the system used to produce the bag.
+    """
     decls = bag_to_decls(fn_bag, sys_desc)
     decls.save(fn_decls)
