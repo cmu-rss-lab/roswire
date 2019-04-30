@@ -38,7 +38,8 @@ class TypeDatabase(Mapping[str, Type[Message]]):
                     f_base_typ = name_to_type[f.base_type]
                 else:
                     f_base_typ = get_builtin(f.base_type)
-                ns[f.name] = attr.ib(type=f_base_typ)
+                converter = tuple if f.is_array else None
+                ns[f.name] = attr.ib(type=f_base_typ, converter=converter)
             ns['format'] = fmt
             ns['read'] = classmethod(cls._build_read(name_to_type, fmt))
             ns['write'] = cls._build_write(name_to_type, fmt)
