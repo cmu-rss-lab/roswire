@@ -12,7 +12,7 @@ https://plse.cs.washington.edu/daikon/download/doc/developer/File-formats.html#D
 __all__ = ('bag_to_decls', 'bag_to_daikon')
 
 from typing import (Dict, Type, Set, FrozenSet, List, Union, Iterator,
-                    Collection)
+                    Collection, Mapping)
 from functools import reduce
 
 import attr
