@@ -14,6 +14,21 @@ from ..description import SystemDescription
 from ..definitions import Message, MsgFormat
 
 
+TYPE_TO_DAIKON = {
+    'bool': 'boolean',
+    'int8': 'byte',
+    'uint8': 'byte',
+    'int16': 'short',
+    'uint16': 'short',
+    'int32': 'int',
+    'uint32': 'int',
+    'int64': 'long',
+    'uint64': 'long',
+    'float32': 'double',
+    'float64': 'double',
+    'string': 'java.lang.String'}
+
+
 @attr.s(frozen=True, str=False)
 class VarDecl:
     name: str = attr.ib()
@@ -69,11 +84,16 @@ def topic_to_ppt(topic_name: str,
     """Creates a program point for a given ROS topic."""
     decls: Set[VarDecl] = set()
     for field_ctx, field in topic_fmt.flatten(sys_desc.formats.messages):
+        if field.typ not in TYPE_TO_DAIKON:
+            continue
+
         field_name = field.name
         if field_ctx:
             field_name = f"{'.'.join(field_ctx)}.{field_name}"
-        dec_type = 'bool'  # TODO
-        rep_type = 'bool'  # TODO
+
+        field_type = TYPE_TO_DAIKON[field.typ]
+        dec_type = field_type
+        rep_type = field_type
         decl = VarDecl(field_name, dec_type, rep_type)
         decls.add(decl)
     return GenericProgramPoint(topic_name, decls)  # type: ignore
