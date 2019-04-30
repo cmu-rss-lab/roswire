@@ -12,7 +12,7 @@ https://plse.cs.washington.edu/daikon/download/doc/developer/File-formats.html#D
 __all__ = ('bag_to_decls', 'bag_to_daikon')
 
 from typing import (Dict, Type, Set, FrozenSet, List, Union, Iterator,
-                    Collection, Mapping)
+                    Collection, Mapping, Any)
 from collections import OrderedDict
 from functools import reduce
 
@@ -109,10 +109,7 @@ class TraceWriter:
         self.__filename = filename
         self.__fp = open(filename, 'w')
 
-    def add(self,
-            ppt: GenericProgramPoint,
-            vals: Dict[str, Union[bool, float, str, str]]
-            ) -> None:
+    def add(self, ppt: GenericProgramPoint, vals: Mapping[str, Any])) -> None:
         """Writes an entry to the trace file."""
         fp = self.__fp
         lines: List[str] = [ppt.fullname]
@@ -204,7 +201,7 @@ def bag_to_daikon(fn_bag: str,
     decls = bag_to_decls(fn_bag, sys_desc)
     decls.save(fn_decls)
 
-    def read_val(m: Message, name_field: str) -> str:
+    def read_val(m: Message, name_field: str) -> Any:
         return reduce(getattr, name_field.split('.'), m)
 
     trace_writer = TraceWriter(fn_dtrace)
