@@ -6,7 +6,8 @@ import yaml
 import pytest
 
 from roswire.bag import BagReader, BagWriter
-from roswire.definitions import TypeDatabase, FormatDatabase
+from roswire.description import SystemDescription
+from roswire.definitions import TypeDatabase, FormatDatabase, PackageDatabase
 
 from test_basic import build_ardu
 
@@ -18,6 +19,18 @@ def load_mavros_type_db() -> TypeDatabase:
                                 'format-databases/mavros.formats.yml')
     db_format = FormatDatabase.load(fn_db_format)
     return TypeDatabase.build(db_format)
+
+
+def load_mavros_description() -> SystemDescription:
+    fn_db_format = os.path.join(DIR_TEST,
+                                'format-databases/mavros.formats.yml')
+    db_format = FormatDatabase.load(fn_db_format)
+    db_type = TypeDatabase.build(db_format)
+    desc = SystemDescription(sha256='foo',
+                         types=db_type,
+                         formats=db_format,
+                         packages=PackageDatabase([]))
+    return desc
 
 
 def check_example_bag(db_type: TypeDatabase, bag: BagReader) -> None:
