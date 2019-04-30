@@ -2,10 +2,18 @@
 """
 This module provides functionality for converting the contents of ROS bag
 files into Daikon trace (and declaration) files.
+
+Right now, this module does not handle arrays, timestamps, and durations.
+
+References
+----------
+https://plse.cs.washington.edu/daikon/download/doc/developer/File-formats.html#Data-trace-records
 """
 __all__ = ('bag_to_decls', 'bag_to_daikon')
 
-from typing import (Dict, Type, Set, FrozenSet, List, Union, Iterator, Collection)
+from typing import (Dict, Type, Set, FrozenSet, List, Union, Iterator,
+                    Collection)
+from functools import reduce
 
 import attr
 
@@ -191,8 +199,18 @@ def bag_to_daikon(fn_bag: str,
     decls = bag_to_decls(fn_bag, sys_desc)
     decls.save(fn_decls)
 
+    def read_val(m: Message, name_field: str) -> str:
+        val = reduce(getattr, name_field.split('.'), m)
+        if isinstance(val, bool):
+            return 'true' if val else 'false'
+        else:
+            return str(val)
+
     trace_writer = TraceWriter(fn_dtrace)
     bag_reader = BagReader(fn_bag, sys_desc.types)
     for message in bag_reader:
         ppt = decls[message.topic]
-        pass
+        vals = {}
+        for var_decl in ppt.decls:
+            vals[var_decl.name] = read_val(message.message, var_decl.name)
+        trace_writer.add(ppt, vals)
