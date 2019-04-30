@@ -5,7 +5,7 @@ files into Daikon trace (and declaration) files.
 """
 __all__ = ('bag_to_decls', 'bag_to_daikon')
 
-from typing import Dict, Type, Set, FrozenSet, List
+from typing import Dict, Type, Set, FrozenSet, List, Union
 
 import attr
 
@@ -53,10 +53,14 @@ class GenericProgramPoint:
 
     @property
     def lines(self) -> List[str]:
-        ls = [f'ppt {self.name}:::POINT', 'ppt-type point']
+        ls = [f'ppt {self.fullname}', 'ppt-type point']
         for var in self.variables:
             ls += var.lines
         return ls
+
+    @property
+    def fullname(self) -> str:
+        return f'{self.name}:::POINT'
 
     def __str__(self) -> str:
         return '\n'.join(self.lines)
@@ -79,6 +83,32 @@ class Declarations:
     def save(self, filename: str) -> None:
         with open(filename, 'w') as f:
             f.write(str(self))
+
+
+class TraceWriter:
+    """Used to write to Daikon trace files."""
+    def __init__(self, filename: str) -> None:
+        self.__filename = filename
+        self.__fp = open(filename, 'w')
+
+    def add(self,
+            ppt: GenericProgramPoint,
+            vals: Dict[str, Union[bool, float, str, str]]
+            ) -> None:
+        """Writes an entry to the trace file."""
+        fp = self.__fp
+        lines: List[str] = [ppt.fullname]
+        for var_name, var_val in vals.items():
+            if isinstance(str_val, bool):
+                str_val = 'true' if str_val else 'false'
+            else:
+                str_val = str(var_val)
+            lines += [var_name, str_val, '1']
+        self.__fp.writelines(lines)
+        self.__fp.write('\n')
+
+    def close(self) -> None:
+        self.__fp.close()
 
 
 def topic_to_ppt(topic_name: str,
@@ -151,3 +181,6 @@ def bag_to_daikon(fn_bag: str,
     """
     decls = bag_to_decls(fn_bag, sys_desc)
     decls.save(fn_decls)
+
+    bag_reader =
+    for message in 
