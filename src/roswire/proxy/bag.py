@@ -77,6 +77,7 @@ class BagPlayerProxy:
         try:
             self.__process.wait(time_limit)
             retcode = self.__process.returncode
+            assert retcode is not None
             if retcode != 0:
                 out = '\n'.join(self.__process.stream)
                 raise exceptions.PlayerFailure(retcode, out)
