@@ -15,6 +15,16 @@ class PlayerAlreadyStopped(ROSWireException):
     """Playback has already stopped."""
 
 
+class PlayerFailure(ROSWireException):
+    """An unexpected error occurred during playback."""
+    def __init__(self, retcode: int, stdout: str) -> None:
+        self.retcode = retcode
+        self.stdout = stdout
+        msg = "unexpected failure during bag playback [return code: {}]:\n{}"
+        msg = msg.format(retcode, stdout)
+        super().__init__(msg)
+
+
 class PlayerTimeout(ROSWireException):
     """Playback did not complete within the specified timeout."""
 
