@@ -51,6 +51,13 @@ class BagPlayerProxy:
         self.start()
         return self
 
+    def __exit__(self, ex_type, ex_val, ex_tb) -> None:
+        if ex_type is not None:
+            logger.error("error occurred during bag playback",
+                         exc_info=(ex_type, ex_val, ex_tb))
+        if not self.stopped:
+            self.stop()
+
     def wait(self, time_limit: Optional[float] = None) -> None:
         """Blocks until playback has finished.
 
@@ -63,10 +70,17 @@ class BagPlayerProxy:
         ------
         PlayerTimeout:
             if playback did not finish within the provided timeout.
+        PlayerFailure:
+            if an unexpected occurred during playback.
         """
         assert self.__process
         try:
             self.__process.wait(time_limit)
+            retcode = self.__process.returncode
+            assert retcode is not None
+            if retcode != 0:
+                out = '\n'.join(self.__process.stream)
+                raise exceptions.PlayerFailure(retcode, out)
         except subprocess.TimeoutExpired:
             raise exceptions.PlayerTimeout
 
