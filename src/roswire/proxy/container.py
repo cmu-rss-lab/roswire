@@ -38,7 +38,9 @@ class ContainerProxy:
 
         info = api_docker.inspect_container(container_docker.id)
         self.__pid = int(info['Pid'])
-        self.__shell = ShellProxy(self.__api_docker, self.__container_docker)
+        self.__shell = ShellProxy(self.__api_docker,
+                                  self.__container_docker,
+                                  self.__pid)
         self.__files = FileProxy(self.__container_docker, self.__shell)
 
     @property

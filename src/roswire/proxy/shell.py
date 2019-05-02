@@ -120,18 +120,20 @@ class Popen:
 
 
 class ShellProxy:
-    """
-    Provides shell access for a given BugZoo container.
-    """
+    """Provides shell access for a given Docker container."""
     def __init__(self,
                  api_docker: DockerAPIClient,
-                 container_docker: DockerContainer
+                 container_docker: DockerContainer,
+                 container_pid: int
                  ) -> None:
         self.__api_docker = api_docker
         self.__container_docker = container_docker
+        self.__container_pid = container_pid
 
     def local_to_host_pid(self, pid_local: int) -> int:
         """Finds the host PID for a process inside this shell."""
+        for p in psutil.process_iter():
+            print(p.info)
         raise NotImplementedError
 
     def send_signal(self, pid: int, sig: int) -> None:
