@@ -1,6 +1,6 @@
 __all__ = ('NodeManagerProxy', 'NodeProxy')
 
-from typing import Iterator, Set, Mapping
+from typing import Iterator, Set, Mapping, Optional
 from urllib.parse import urlparse
 import xmlrpc.client
 import logging
@@ -65,7 +65,7 @@ class NodeProxy:
         if self.__pid_host is None:
             self.__pid_host = self.__shell.local_to_host_pid(self.pid)
             assert self.__pid_host is not None
-        return pid_host
+        return self.__pid_host
 
     def is_alive(self) -> bool:
         # TODO check start time to ensure this is the same process!
