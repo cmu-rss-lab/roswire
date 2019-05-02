@@ -29,6 +29,7 @@ class NodeProxy:
         self.__name = name
         self.__url = url_host_network
         self.__shell = shell
+        self.__pid_host: Optional[int] = None
 
     @property
     def api(self) -> xmlrpc.client.ServerProxy:
@@ -59,8 +60,9 @@ class NodeProxy:
     @property
     def pid_host(self) -> int:
         """The host PID of the main process for this node."""
-        pid_host = self.__shell.local_to_host_pid(self.pid)
-        assert pid_host is not None
+        if self.__pid_host is None
+            self.__pid_host = self.__shell.local_to_host_pid(self.pid)
+            assert self.__pid_host is not None
         return pid_host
 
     def is_alive(self) -> bool:
