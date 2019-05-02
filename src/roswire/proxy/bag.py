@@ -60,7 +60,7 @@ class BagPlayerProxy:
 
     def finished(self) -> bool:
         """Checks whether playback has completed."""
-        p = self.__process.finished
+        p = self.__process
         return p.finished if p else False
 
     def wait(self, time_limit: Optional[float] = None) -> None:
