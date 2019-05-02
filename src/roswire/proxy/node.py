@@ -45,7 +45,7 @@ class NodeProxy:
 
     @property
     def url(self) -> str:
-        """The URL that should be used to access this node from the host network."""
+        """URL used to access this node from the host network."""
         return self.__url
 
     @property
