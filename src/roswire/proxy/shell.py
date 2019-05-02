@@ -10,6 +10,7 @@ import threading
 import time
 import signal
 
+import psutil
 from docker import DockerClient
 from docker import APIClient as DockerAPIClient
 from docker.models.containers import Container as DockerContainer
