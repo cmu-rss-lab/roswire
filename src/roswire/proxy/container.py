@@ -37,7 +37,7 @@ class ContainerProxy:
         self.__ws_host = ws_host
 
         info = api_docker.inspect_container(container_docker.id)
-        self.__pid = int(info['Pid'])
+        self.__pid = int(info['State']['Pid'])
         self.__shell = ShellProxy(self.__api_docker,
                                   self.__container_docker,
                                   self.__pid)
