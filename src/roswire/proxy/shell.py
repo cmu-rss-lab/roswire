@@ -129,6 +129,10 @@ class ShellProxy:
         self.__api_docker = api_docker
         self.__container_docker = container_docker
 
+    def local_to_host_pid(self, pid_local: int) -> int:
+        """Finds the host PID for a process inside this shell."""
+        raise NotImplementedError
+
     def send_signal(self, pid: int, sig: int) -> None:
         self.execute(f'kill -{sig} {pid}', user='root')
 
