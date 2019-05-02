@@ -1,9 +1,11 @@
-__all__ = ['NodeManagerProxy', 'NodeProxy']
+__all__ = ('NodeManagerProxy', 'NodeProxy')
 
-from typing import Iterator, Set, Mapping
+from typing import Iterator, Set, Mapping, Optional
 from urllib.parse import urlparse
 import xmlrpc.client
 import logging
+
+import psutil
 
 from .shell import ShellProxy
 from ..exceptions import ROSWireException, NodeNotFoundError
@@ -29,33 +31,26 @@ class NodeProxy:
         self.__name = name
         self.__url = url_host_network
         self.__shell = shell
+        self.__pid_host: Optional[int] = None
 
     @property
     def api(self) -> xmlrpc.client.ServerProxy:
-        """
-        Provides access to the XML-RPC API for this node.
-        """
+        """Provides access to the XML-RPC API for this node."""
         return xmlrpc.client.ServerProxy(self.url)
 
     @property
     def name(self) -> str:
-        """
-        The fully qualified name of this node.
-        """
+        """The fully qualified name of this node."""
         return self.__name
 
     @property
     def url(self) -> str:
-        """
-        The URL that should be used to access this node from the host network.
-        """
+        """URL used to access this node from the host network."""
         return self.__url
 
     @property
     def pid(self) -> int:
-        """
-        The PID of the main process for this node.
-        """
+        """The container PID of the main process for this node."""
         code, status, pid = self.api.getPid('/.roswire')
         if code != 1:
             m = f"failed to obtain PID [{self.name}]: {status} (code: {code})"
@@ -64,13 +59,20 @@ class NodeProxy:
         assert pid > 0
         return pid
 
+    @property
+    def pid_host(self) -> int:
+        """The host PID of the main process for this node."""
+        if self.__pid_host is None:
+            self.__pid_host = self.__shell.local_to_host_pid(self.pid)
+            assert self.__pid_host is not None
+        return self.__pid_host
+
     def is_alive(self) -> bool:
+        # TODO check start time to ensure this is the same process!
         try:
-            pid = self.pid
+            return psutil.pid_exists(self.pid_host)
         except ROSWireException:
             return False
-        retcode, _, _ = self.__shell.execute(f'kill -0 {pid}')
-        return int(retcode) == 0
 
     def shutdown(self) -> None:
         self.__shell.execute(f'rosnode kill {self.name}')
