@@ -62,7 +62,7 @@ class NodeProxy:
     @property
     def pid_host(self) -> int:
         """The host PID of the main process for this node."""
-        if self.__pid_host is None
+        if self.__pid_host is None:
             self.__pid_host = self.__shell.local_to_host_pid(self.pid)
             assert self.__pid_host is not None
         return pid_host
