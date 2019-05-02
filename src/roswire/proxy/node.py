@@ -32,30 +32,22 @@ class NodeProxy:
 
     @property
     def api(self) -> xmlrpc.client.ServerProxy:
-        """
-        Provides access to the XML-RPC API for this node.
-        """
+        """Provides access to the XML-RPC API for this node."""
         return xmlrpc.client.ServerProxy(self.url)
 
     @property
     def name(self) -> str:
-        """
-        The fully qualified name of this node.
-        """
+        """The fully qualified name of this node."""
         return self.__name
 
     @property
     def url(self) -> str:
-        """
-        The URL that should be used to access this node from the host network.
-        """
+        """The URL that should be used to access this node from the host network."""
         return self.__url
 
     @property
     def pid(self) -> int:
-        """
-        The PID of the main process for this node.
-        """
+        """The container PID of the main process for this node."""
         code, status, pid = self.api.getPid('/.roswire')
         if code != 1:
             m = f"failed to obtain PID [{self.name}]: {status} (code: {code})"
@@ -63,6 +55,13 @@ class NodeProxy:
         assert isinstance(pid, int)
         assert pid > 0
         return pid
+
+    @property
+    def pid_host(self) -> int:
+        """The host PID of the main process for this node."""
+        pid_host = self.__shell.local_to_host_pid(self.pid)
+        assert pid_host is not None
+        return pid_host
 
     def is_alive(self) -> bool:
         try:
