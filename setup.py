@@ -23,6 +23,7 @@ setup(
         'ruamel.yaml>=0.15.89',
         'toposort~=1.5',
         'docker~=3.7.2',
+        'psutil~=5.6.2',
         'pyyaml~=5.1'
     ],
     setup_requires=[

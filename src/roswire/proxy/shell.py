@@ -1,6 +1,6 @@
 __all__ = ('ShellProxy',)
 
-from typing import Tuple, Optional, Dict, Any, Iterator
+from typing import Tuple, Optional, Dict, Any, Iterator, List
 from timeit import default_timer as timer
 from subprocess import TimeoutExpired
 import os
@@ -10,6 +10,7 @@ import threading
 import time
 import signal
 
+import psutil
 from docker import DockerClient
 from docker import APIClient as DockerAPIClient
 from docker.models.containers import Container as DockerContainer
@@ -119,15 +120,46 @@ class Popen:
 
 
 class ShellProxy:
-    """
-    Provides shell access for a given BugZoo container.
-    """
+    """Provides shell access for a given Docker container."""
     def __init__(self,
                  api_docker: DockerAPIClient,
-                 container_docker: DockerContainer
+                 container_docker: DockerContainer,
+                 container_pid: int
                  ) -> None:
         self.__api_docker = api_docker
         self.__container_docker = container_docker
+        self.__container_pid = container_pid
+
+    def exec_id_to_host_pid(self, exec_id: str) -> int:
+        """Returns the host PID for a given exec command."""
+        return self.__api_docker.exec_inspect(exec_id)['Pid']
+
+    def local_to_host_pid(self, pid_local: int) -> Optional[int]:
+        """Finds the host PID for a process inside this shell."""
+        ctr_pids = [self.__container_pid]
+        info = self.__api_docker.inspect_container(self.__container_docker.id)
+        ctr_pids += [self.exec_id_to_host_pid(i) for i in info['ExecIDs']]
+
+        # obtain a list of all processes inside this container
+        ctr_procs: List[psutil.Process] = []
+        for pid in ctr_pids:
+            proc = psutil.Process(pid)
+            ctr_procs.append(proc)
+            ctr_procs += proc.children(recursive=True)
+
+        # read /proc/PID/status to find the namespace mapping
+        for proc in ctr_procs:
+            fn_proc = f'/proc/{proc.pid}/status'
+            with open(fn_proc, 'r') as fh_proc:
+                lines = filter(lambda l: l.startswith('NSpid'),
+                               fh_proc.readlines())
+                for line in lines:
+                    proc_host_pid, proc_local_pid = \
+                        [int(p) for p in line.strip().split('\t')[1:3]]
+                    if proc_local_pid == pid_local:
+                        return proc_host_pid
+
+        return None
 
     def send_signal(self, pid: int, sig: int) -> None:
         self.execute(f'kill -{sig} {pid}', user='root')
