@@ -1,4 +1,6 @@
 import subprocess
+import time
+import os
 
 import pytest
 
@@ -16,3 +18,10 @@ def test_wait():
 
         p = shell.popen('sleep 10 && exit 1')
         assert p.wait() == 1
+
+
+def test_local_to_host_pid():
+    with build_shell_proxy() as shell:
+        p = shell.popen('sleep 60')
+        pid_host = shell.local_to_host_pid(p.pid)
+        assert pid_host is not None
