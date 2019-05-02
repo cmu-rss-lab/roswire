@@ -134,7 +134,7 @@ class ShellProxy:
         """Returns the host PID for a given exec command."""
         return self.__api_docker.exec_inspect(exec_id)['Pid']
 
-    def local_to_host_pid(self, pid_local: int) -> int:
+    def local_to_host_pid(self, pid_local: int) -> Optional[int]:
         """Finds the host PID for a process inside this shell."""
         container_pids = [self.__container_pid]
         info = self.__api_docker.inspect_container(self.__container_docker.id)
@@ -147,9 +147,19 @@ class ShellProxy:
             container_processes.append(proc)
             container_processes += proc.children(recursive=True)
 
-        for p in container_processes:
-            print(p)
-        raise NotImplementedError
+        # read /proc/PID/status to find the namespace mapping
+        for proc in container_processes:
+            fn_proc = f'/proc/{proc.pid}/status'
+            with open(fn_proc, 'r') as fh_proc:
+                lines = filter(lambda l: l.startswith('NSpid'),
+                               fh_proc.readlines())
+                for line in lines:
+                    proc_host_pid, proc_local_pid = \
+                        [int(p) for p in line.strip().split('\t')[1:3]]
+                    if proc_local_pid == pid_local:
+                        return proc_host_pid
+
+        return None
 
     def send_signal(self, pid: int, sig: int) -> None:
         self.execute(f'kill -{sig} {pid}', user='root')
