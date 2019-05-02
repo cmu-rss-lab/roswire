@@ -1,6 +1,6 @@
 __all__ = ('ShellProxy',)
 
-from typing import Tuple, Optional, Dict, Any, Iterator
+from typing import Tuple, Optional, Dict, Any, Iterator, List
 from timeit import default_timer as timer
 from subprocess import TimeoutExpired
 import os
@@ -130,25 +130,25 @@ class ShellProxy:
         self.__container_docker = container_docker
         self.__container_pid = container_pid
 
-    def exec_id_to_host_pid(self, exec_id: str) -> Optional[int]:
+    def exec_id_to_host_pid(self, exec_id: str) -> int:
         """Returns the host PID for a given exec command."""
         return self.__api_docker.exec_inspect(exec_id)['Pid']
 
     def local_to_host_pid(self, pid_local: int) -> Optional[int]:
         """Finds the host PID for a process inside this shell."""
-        container_pids = [self.__container_pid]
+        ctr_pids = [self.__container_pid]
         info = self.__api_docker.inspect_container(self.__container_docker.id)
-        container_pids += [self.exec_id_to_host_pid(i) for i in info['ExecIDs']]
+        ctr_pids += [self.exec_id_to_host_pid(i) for i in info['ExecIDs']]
 
         # obtain a list of all processes inside this container
-        container_processes: List[psutil.Process] = []
-        for pid in container_pids:
+        ctr_procs: List[psutil.Process] = []
+        for pid in ctr_pids:
             proc = psutil.Process(pid)
-            container_processes.append(proc)
-            container_processes += proc.children(recursive=True)
+            ctr_procs.append(proc)
+            ctr_procs += proc.children(recursive=True)
 
         # read /proc/PID/status to find the namespace mapping
-        for proc in container_processes:
+        for proc in ctr_procs:
             fn_proc = f'/proc/{proc.pid}/status'
             with open(fn_proc, 'r') as fh_proc:
                 lines = filter(lambda l: l.startswith('NSpid'),
