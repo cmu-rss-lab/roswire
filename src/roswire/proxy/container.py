@@ -35,12 +35,20 @@ class ContainerProxy:
         self.__api_docker = api_docker
         self.__container_docker = container_docker
         self.__ws_host = ws_host
+
+        info = api_docker.inspect_container(container_docker.id)
+        self.__pid = int(info['Pid'])
         self.__shell = ShellProxy(self.__api_docker, self.__container_docker)
         self.__files = FileProxy(self.__container_docker, self.__shell)
 
     @property
     def uuid(self) -> UUID:
         return self.__uuid
+
+    @property
+    def pid(self) -> int:
+        """The PID of this container process on the host machine."""
+        return self.__pid
 
     @property
     def shell(self) -> ShellProxy:
