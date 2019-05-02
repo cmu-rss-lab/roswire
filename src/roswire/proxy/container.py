@@ -53,6 +53,11 @@ class ContainerProxy:
         return self.__pid
 
     @property
+    def exec_id_to_pid(self) -> Optional[int]:
+        """Returns the host PID for a given exec command."""
+        return self.__api_docker.exec_inspect(exec_id)['Pid']
+
+    @property
     def shell(self) -> ShellProxy:
         return self.__shell
 

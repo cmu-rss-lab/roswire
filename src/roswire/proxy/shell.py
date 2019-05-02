@@ -130,10 +130,25 @@ class ShellProxy:
         self.__container_docker = container_docker
         self.__container_pid = container_pid
 
+    def exec_id_to_host_pid(self, exec_id: str) -> Optional[int]:
+        """Returns the host PID for a given exec command."""
+        return self.__api_docker.exec_inspect(exec_id)['Pid']
+
     def local_to_host_pid(self, pid_local: int) -> int:
         """Finds the host PID for a process inside this shell."""
-        for p in psutil.process_iter():
-            print(p.info)
+        container_pids = [self.__container_pid]
+        info = self.__api_docker.inspect_container(self.__container_docker.id)
+        container_pids += [self.exec_id_to_host_pid(i) for i in info['ExecIDs']]
+
+        # obtain a list of all processes inside this container
+        container_processes: List[psutil.Process] = []
+        for pid in container_pids:
+            proc = psutil.Process(pid)
+            container_processes.append(proc)
+            container_processes += proc.children(recursive=True)
+
+        for p in container_processes:
+            print(p)
         raise NotImplementedError
 
     def send_signal(self, pid: int, sig: int) -> None:
