@@ -1,9 +1,11 @@
-__all__ = ['NodeManagerProxy', 'NodeProxy']
+__all__ = ('NodeManagerProxy', 'NodeProxy')
 
 from typing import Iterator, Set, Mapping
 from urllib.parse import urlparse
 import xmlrpc.client
 import logging
+
+import psutil
 
 from .shell import ShellProxy
 from ..exceptions import ROSWireException, NodeNotFoundError
@@ -66,12 +68,11 @@ class NodeProxy:
         return pid_host
 
     def is_alive(self) -> bool:
+        # TODO check start time to ensure this is the same process!
         try:
-            pid = self.pid
+            return psutil.pid_exists(self.pid_host)
         except ROSWireException:
             return False
-        retcode, _, _ = self.__shell.execute(f'kill -0 {pid}')
-        return int(retcode) == 0
 
     def shutdown(self) -> None:
         self.__shell.execute(f'rosnode kill {self.name}')
