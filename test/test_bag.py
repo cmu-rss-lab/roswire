@@ -35,13 +35,11 @@ def load_mavros_description() -> SystemDescription:
 
 def check_example_bag(db_type: TypeDatabase, bag: BagReader) -> None:
     typ_mavlink = db_type['mavros_msgs/Mavlink']
-    assert bag.header.index_pos == 189991
-    assert bag.header.conn_count == 7
-    assert bag.header.chunk_count == 1
     assert bag.topics == {'/rosout', '/mavros/mission/waypoints',
                           '/mavlink/from', '/diagnostics', '/rosout_agg',
                           '/mavros/state'}
-
+    assert bag.header.chunk_count == 1
+    assert bag.header.conn_count == 6
     msgs = list(bag.read_messages(['/mavlink/from']))
     assert all(m.topic == '/mavlink/from' for m in msgs)
     assert all(isinstance(m.message, typ_mavlink) for m in msgs)
@@ -67,8 +65,29 @@ def test_write():
         bag.write(messages)
         bag.close()
 
-        # try to read the bag again
-        reader = BagReader(os.path.join(DIR_TEST, 'example.bag'), db_type)
+        reader = BagReader(fn_bag, db_type)
         check_example_bag(db_type, reader)
+    finally:
+        os.remove(fn_bag)
+
+
+def test_simple_write():
+    db_type = load_mavros_type_db()
+
+    # load the messages from the example bag
+    reader = BagReader(os.path.join(DIR_TEST, 'simple.bag'), db_type)
+    messages = list(reader)
+
+    fn_bag = tempfile.mkstemp(suffix='.bag')[1]
+    try:
+        bag = BagWriter(fn_bag)
+        bag.write(messages)
+        bag.close()
+
+        reader = BagReader(fn_bag, db_type)
+        assert reader.header.chunk_count == 1
+        assert reader.header.conn_count == 1
+        assert reader.topics == {'/hello'}
+        msgs = list(reader.read_messages('/hello'))
     finally:
         os.remove(fn_bag)

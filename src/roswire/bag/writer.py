@@ -10,6 +10,7 @@ https://github.com/ros/ros_comm/blob/melodic-devel/tools/rosbag/src/rosbag/bag.p
 __all__ = ('BagWriter',)
 
 from typing import BinaryIO, Iterable, Dict, Type, Tuple
+import logging
 
 from .core import (BagMessage, OpCode, Compression, ConnectionInfo, Chunk,
                    Index, IndexEntry, ChunkConnection)
@@ -18,6 +19,9 @@ from ..definitions.encode import *
 
 BIN_CHUNK_INFO_VERSION = encode_uint32(1)
 BIN_INDEX_VERSION = encode_uint32(1)
+
+logger: logging.Logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 class BagWriter:
@@ -69,6 +73,7 @@ class BagWriter:
         self.__fp.seek(pos_end)
 
     def _write_header_record(self) -> None:
+        logger.debug("writing bag header record")
         self.__fp.seek(self.__pos_header)
         self._write_header(OpCode.HEADER, {
             'index_pos': encode_uint64(self.__pos_index),
@@ -85,6 +90,7 @@ class BagWriter:
         write_uint32(size_padding, self.__fp)
         padding = b'\x20' * size_padding
         self.__fp.write(padding)
+        logger.debug("wrote bag header record")
 
     def _write_message(self,
                        offset: int,
@@ -93,6 +99,7 @@ class BagWriter:
                        ) -> None:
         typ = message.message.__class__
         connection = self._get_connection(message.topic, typ)
+        logger.debug("writing message on connection [%s]", connection.topic)
 
         pos_header = self.__fp.tell()
         self._write_header(OpCode.MESSAGE_DATA, {
@@ -113,6 +120,7 @@ class BagWriter:
         index[connection.conn].append(index_entry)
 
     def _write_chunk_data(self, messages: Iterable[BagMessage]) -> Index:
+        logger.debug("writing messages to chunk")
         index: Index = {}
         pos_start = self.__fp.tell()
         pos_end = pos_start
@@ -123,6 +131,7 @@ class BagWriter:
             size_record = pos_end - pos_start
             offset += size_record
             pos_start = pos_end
+        logger.debug("wrote messages to chunk")
         return index
 
     def _write_chunk_record(self,
@@ -179,6 +188,7 @@ class BagWriter:
                                 conn: int,
                                 entries: List[IndexEntry]
                                 ) -> None:
+        logger.debug("writing connection index [%d]", conn)
         num_entries = len(entries)
         size_data = num_entries * 12
         self._write_header(OpCode.INDEX_DATA, {
@@ -205,8 +215,6 @@ class BagWriter:
         self._write_header(OpCode.CONNECTION_INFO, {
             'conn': encode_uint32(conn.conn),
             'topic': conn.topic.encode('utf-8')})
-        pos_size = self.__fp.tell()
-        write_uint32(0, self.__fp)
 
         # write the connection header
         header_conn: Dict[str, bytes] = {}
@@ -220,13 +228,6 @@ class BagWriter:
         if conn.latching is not None:
             header_conn['latching'] = conn.latching.encode('utf-8')
         self._write_header(None, header_conn)
-
-        # update the record size
-        pos_end = self.__fp.tell()
-        size_data = pos_end - pos_size
-        self.__fp.seek(pos_size)
-        write_uint32(size_data, self.__fp)
-        self.__fp.seek(pos_end)
 
     def _get_connection(self,
                         topic: str,
