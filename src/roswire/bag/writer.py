@@ -10,6 +10,7 @@ https://github.com/ros/ros_comm/blob/melodic-devel/tools/rosbag/src/rosbag/bag.p
 __all__ = ('BagWriter',)
 
 from typing import BinaryIO, Iterable, Dict, Type, Tuple
+import logging
 
 from .core import (BagMessage, OpCode, Compression, ConnectionInfo, Chunk,
                    Index, IndexEntry, ChunkConnection)
@@ -18,6 +19,9 @@ from ..definitions.encode import *
 
 BIN_CHUNK_INFO_VERSION = encode_uint32(1)
 BIN_INDEX_VERSION = encode_uint32(1)
+
+logger: logging.Logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 class BagWriter:
@@ -179,6 +183,7 @@ class BagWriter:
                                 conn: int,
                                 entries: List[IndexEntry]
                                 ) -> None:
+        logger.debug("writing connection index [%d]", conn)
         num_entries = len(entries)
         size_data = num_entries * 12
         self._write_header(OpCode.INDEX_DATA, {
@@ -205,8 +210,6 @@ class BagWriter:
         self._write_header(OpCode.CONNECTION_INFO, {
             'conn': encode_uint32(conn.conn),
             'topic': conn.topic.encode('utf-8')})
-        pos_size = self.__fp.tell()
-        write_uint32(0, self.__fp)
 
         # write the connection header
         header_conn: Dict[str, bytes] = {}
@@ -220,13 +223,6 @@ class BagWriter:
         if conn.latching is not None:
             header_conn['latching'] = conn.latching.encode('utf-8')
         self._write_header(None, header_conn)
-
-        # update the record size
-        pos_end = self.__fp.tell()
-        size_data = pos_end - pos_size
-        self.__fp.seek(pos_size)
-        write_uint32(size_data, self.__fp)
-        self.__fp.seek(pos_end)
 
     def _get_connection(self,
                         topic: str,
@@ -287,6 +283,8 @@ class BagWriter:
         # for now, we write to a single, uncompressed chunk
         # each chunk record is followed by a sequence of IndexData record
         # - each connection in the chunk is represented by an IndexData record
+        # FIXME
+        messages = [messages[0]]
         self.__pos_chunks = self.__fp.tell()
         self._write_chunk(Compression.NONE, messages)
 
