@@ -35,13 +35,11 @@ def load_mavros_description() -> SystemDescription:
 
 def check_example_bag(db_type: TypeDatabase, bag: BagReader) -> None:
     typ_mavlink = db_type['mavros_msgs/Mavlink']
-    assert bag.header.index_pos == 189991
-    assert bag.header.conn_count == 7
-    assert bag.header.chunk_count == 1
     assert bag.topics == {'/rosout', '/mavros/mission/waypoints',
                           '/mavlink/from', '/diagnostics', '/rosout_agg',
                           '/mavros/state'}
-
+    assert bag.header.chunk_count == 1
+    assert bag.header.conn_count == 6
     msgs = list(bag.read_messages(['/mavlink/from']))
     assert all(m.topic == '/mavlink/from' for m in msgs)
     assert all(isinstance(m.message, typ_mavlink) for m in msgs)
