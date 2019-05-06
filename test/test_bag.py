@@ -89,8 +89,7 @@ def test_simple_write():
         reader = BagReader(fn_bag, db_type)
         assert reader.header.chunk_count == 1
         assert reader.header.conn_count == 1
-        assert reader.header.topics == {'/hello'}
-        msgs = list(bag.read_messages('/hello'))
-        assert all(isinstance(m.message, str) for m in msgs)
+        assert reader.topics == {'/hello'}
+        msgs = list(reader.read_messages('/hello'))
     finally:
         os.remove(fn_bag)
