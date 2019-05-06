@@ -73,6 +73,7 @@ class BagWriter:
         self.__fp.seek(pos_end)
 
     def _write_header_record(self) -> None:
+        logger.debug("writing bag header record")
         self.__fp.seek(self.__pos_header)
         self._write_header(OpCode.HEADER, {
             'index_pos': encode_uint64(self.__pos_index),
@@ -89,6 +90,7 @@ class BagWriter:
         write_uint32(size_padding, self.__fp)
         padding = b'\x20' * size_padding
         self.__fp.write(padding)
+        logger.debug("wrote bag header record")
 
     def _write_message(self,
                        offset: int,
@@ -97,6 +99,7 @@ class BagWriter:
                        ) -> None:
         typ = message.message.__class__
         connection = self._get_connection(message.topic, typ)
+        logger.debug("writing message on connection [%s]", connection.topic)
 
         pos_header = self.__fp.tell()
         self._write_header(OpCode.MESSAGE_DATA, {
@@ -117,6 +120,7 @@ class BagWriter:
         index[connection.conn].append(index_entry)
 
     def _write_chunk_data(self, messages: Iterable[BagMessage]) -> Index:
+        logger.debug("writing messages to chunk")
         index: Index = {}
         pos_start = self.__fp.tell()
         pos_end = pos_start
@@ -127,6 +131,7 @@ class BagWriter:
             size_record = pos_end - pos_start
             offset += size_record
             pos_start = pos_end
+        logger.debug("wrote messages to chunk")
         return index
 
     def _write_chunk_record(self,
@@ -283,8 +288,6 @@ class BagWriter:
         # for now, we write to a single, uncompressed chunk
         # each chunk record is followed by a sequence of IndexData record
         # - each connection in the chunk is represented by an IndexData record
-        # FIXME
-        messages = [messages[0]]
         self.__pos_chunks = self.__fp.tell()
         self._write_chunk(Compression.NONE, messages)
 
