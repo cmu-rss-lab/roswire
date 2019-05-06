@@ -5,11 +5,12 @@ import tempfile
 import yaml
 import pytest
 
+from roswire import ROSWire
 from roswire.bag import BagReader, BagWriter
 from roswire.description import SystemDescription
 from roswire.definitions import TypeDatabase, FormatDatabase, PackageDatabase
 
-from test_basic import build_ardu
+from test_basic import build_ardu, build_hello_world
 
 DIR_TEST = os.path.dirname(__file__)
 
@@ -91,3 +92,14 @@ def test_simple_write():
         msgs = list(reader.read_messages('/hello'))
     finally:
         os.remove(fn_bag)
+
+
+def test_bag_replay():
+    fn_bag = os.path.join(DIR_TEST, 'hello_world/bug.bag')
+    with build_hello_world() as (sut, ros):
+        with ros.playback(fn_bag) as player:
+            player.wait()_
+            popen = player._process
+            out = '\n'.join(popen.stream)
+            assert 'error' not in out
+            assert 'Done' in out
