@@ -1,4 +1,5 @@
 from typing import Iterator, Tuple
+import os
 import contextlib
 import logging
 import time
@@ -11,6 +12,8 @@ from roswire import ROSWire, ROSProxy, System, SystemDescription
 from roswire.proxy import ShellProxy, FileProxy, ContainerProxy
 from roswire.description import SystemDescription
 from roswire.definitions import TypeDatabase, FormatDatabase, PackageDatabase
+
+DIR_TEST = os.path.dirname(__file__)
 
 
 def load_hello_world_type_db() -> TypeDatabase:
@@ -58,15 +61,6 @@ def build_hello_world() -> Iterator[Tuple[System, ROSProxy]]:
     image = 'roswire/helloworld:buggy'
     desc = load_hello_world_description()
     with rsw.launch(image, desc) as sut:
-        with sut.roscore() as ros:
-            time.sleep(5)
-            yield (sut, ros)
-
-
-@contextlib.contextmanager
-def build_hello_world() -> Iterator[Tuple[System, ROSProxy]]:
-    rsw = ROSWire()
-    with rsw.launch('roswire/helloworld:buggy') as sut:
         with sut.roscore() as ros:
             time.sleep(5)
             yield (sut, ros)
