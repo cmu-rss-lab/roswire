@@ -35,7 +35,7 @@ class BagPlayerProxy:
         self.__delete_file_after_use = delete_file_after_use
         self.__started = False
         self.__stopped = False
-        self.__process: Optional[Popen] = None
+        self._process: Optional[Popen] = None
 
     @property
     def started(self) -> bool:
@@ -60,7 +60,7 @@ class BagPlayerProxy:
 
     def finished(self) -> bool:
         """Checks whether playback has completed."""
-        p = self.__process
+        p = self._process
         return p.finished if p else False
 
     def wait(self, time_limit: Optional[float] = None) -> None:
@@ -78,13 +78,13 @@ class BagPlayerProxy:
         PlayerFailure:
             if an unexpected occurred during playback.
         """
-        assert self.__process
+        assert self._process
         try:
-            self.__process.wait(time_limit)
-            retcode = self.__process.returncode
+            self._process.wait(time_limit)
+            retcode = self._process.returncode
             assert retcode is not None
             if retcode != 0:
-                out = '\n'.join(self.__process.stream)
+                out = '\n'.join(self._process.stream)
                 raise exceptions.PlayerFailure(retcode, out)
         except subprocess.TimeoutExpired:
             raise exceptions.PlayerTimeout
@@ -103,7 +103,7 @@ class BagPlayerProxy:
                 raise exceptions.PlayerAlreadyStarted
             self.__started = True
             cmd: str = f"rosbag play -q {self.__fn_container}"
-            self.__process = self.__shell.popen(cmd)
+            self._process = self.__shell.popen(cmd)
             logger.debug("started bag playback")
 
     def stop(self) -> None:
@@ -118,9 +118,11 @@ class BagPlayerProxy:
                 raise exceptions.PlayerAlreadyStopped
             if not self.__started:
                 raise exceptions.PlayerNotStarted
-            assert self.__process
-            self.__process.kill()
-            self.__process = None
+            assert self._process
+            self._process.kill()
+            out = '\n'.join(list(self._process.stream))
+            logger.debug("player output:\n%s", out)
+            self._process = None
             if self.__delete_file_after_use:
                 self.__files.remove(self.__fn_container)
             self.__stopped = True
