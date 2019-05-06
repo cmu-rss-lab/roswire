@@ -67,8 +67,30 @@ def test_write():
         bag.write(messages)
         bag.close()
 
-        # try to read the bag again
-        reader = BagReader(os.path.join(DIR_TEST, 'example.bag'), db_type)
+        reader = BagReader(fn_bag, db_type)
         check_example_bag(db_type, reader)
+    finally:
+        os.remove(fn_bag)
+
+
+def test_simple_write():
+    db_type = load_mavros_type_db()
+
+    # load the messages from the example bag
+    reader = BagReader(os.path.join(DIR_TEST, 'simple.bag'), db_type)
+    messages = list(reader)
+
+    fn_bag = tempfile.mkstemp(suffix='.bag')[1]
+    try:
+        bag = BagWriter(fn_bag)
+        bag.write(messages)
+        bag.close()
+
+        reader = BagReader(fn_bag, db_type)
+        assert reader.header.chunk_count == 1
+        assert reader.header.conn_count == 1
+        assert reader.header.topics == {'/hello'}
+        msgs = list(bag.read_messages('/hello'))
+        assert all(isinstance(m.message, str) for m in msgs)
     finally:
         os.remove(fn_bag)
