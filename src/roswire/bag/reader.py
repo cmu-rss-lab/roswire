@@ -147,6 +147,8 @@ class BagReader:
     def _read_connection_record(self) -> ConnectionInfo:
         header = self._read_header(OpCode.CONNECTION_INFO)
         conn = self._read_header()
+        logger.debug("conn record header: %s", header)
+        logger.debug("conn header: %s", conn)
         callerid: Optional[str] = None
         latching: Optional[str] = None
         if 'callerid' in conn:
