@@ -98,7 +98,7 @@ def test_bag_replay():
     fn_bag = os.path.join(DIR_TEST, 'hello_world/bug.bag')
     with build_hello_world() as (sut, ros):
         with ros.playback(fn_bag) as player:
-            player.wait()_
+            player.wait()
             popen = player._process
             out = '\n'.join(popen.stream)
             assert 'error' not in out
