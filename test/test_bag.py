@@ -106,8 +106,11 @@ def test_bag_replay():
 
 
 def test_write_and_replay():
+    log_to_stdout = logging.StreamHandler()
+    log_to_stdout.setLevel(logging.DEBUG)
+    logging.getLogger('roswire.bag.writer').addHandler(log_to_stdout)
     with build_hello_world() as (sut, ros):
-        fn_bag_orig = os.path.join(DIR_TEST, 'hello_world/bug.bag')
+        fn_bag_orig = os.path.join(DIR_TEST, 'hello_world/non-bug.bag')
         db_type = sut.description.types
         reader = BagReader(fn_bag_orig, db_type)
         messages = list(reader)
@@ -127,4 +130,14 @@ def test_write_and_replay():
 
 
 if __name__ == '__main__':
-    test_write_and_replay()
+    # test_write_and_replay()
+    with build_hello_world() as (sut, ros):
+        fn_bag_orig = os.path.join(DIR_TEST, 'hello_world/non-bug.bag')
+        db_type = sut.description.types
+        reader = BagReader(fn_bag_orig, db_type)
+        messages = list(reader)
+
+        fn_bag = 'temp.bag'
+        writer = BagWriter(fn_bag)
+        writer.write(messages)
+        writer.close()
