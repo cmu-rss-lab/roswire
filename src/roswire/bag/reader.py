@@ -11,7 +11,7 @@ import logging
 import heapq
 
 from .core import *
-from ..definitions.base import Time
+from ..definitions.base import Time, Duration
 from ..definitions.msg import Message
 from ..definitions.type_db import TypeDatabase
 from ..definitions.decode import (decode_uint8, read_uint8,
@@ -79,6 +79,11 @@ class BagReader:
     @property
     def index(self) -> Index:
         return self.__index
+
+    @property
+    def duration(self) -> Duration:
+        """The duration of the recording in this bag file."""
+        raise NotImplementedError
 
     @property
     def topics(self) -> Set[str]:
