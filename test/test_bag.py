@@ -13,6 +13,8 @@ from test_basic import build_ardu
 
 DIR_TEST = os.path.dirname(__file__)
 
+ms_to_ns = 10 ** 6
+
 
 def load_mavros_type_db() -> TypeDatabase:
     fn_db_format = os.path.join(DIR_TEST,
@@ -50,6 +52,16 @@ def test_from_file():
     fn_bag = os.path.join(DIR_TEST, 'example.bag')
     bag = BagReader(fn_bag, db_type)
     check_example_bag(db_type, bag)
+
+
+def test_bag_reader_time():
+    ms_to_ns = lambda x: x * 10 ** 6
+    db_type = load_mavros_type_db()
+    fn_bag = os.path.join(DIR_TEST, 'hello_world/non-bug.bag')
+    bag = BagReader(fn_bag, db_type)
+    assert bag.duration == Duration(49, ms_to_ns(400))
+    assert bag.time_start == Time(1556312447, ms_to_ns(650))
+    assert bag.time_start == Time(1556312497, ms_to_ns(100))
 
 
 def test_write():

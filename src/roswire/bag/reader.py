@@ -83,7 +83,7 @@ class BagReader:
     @property
     def duration(self) -> Duration:
         """The duration of the recording in this bag file."""
-        raise NotImplementedError
+        return Duration.between(self.time_start, self.time_end)
 
     @property
     def time_start(self) -> Time:
