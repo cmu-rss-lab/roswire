@@ -29,3 +29,14 @@ def test_time_compare():
     t = Time
     assert t(100, 250) < t(100, 300)
     assert t(100, 250) <= t(100, 300)
+    assert not (t(100, 300) < t(100, 250))
+    assert t(100, 300) > t(100, 250)
+    assert t(100, 300) >= t(100, 250)
+
+
+    assert t(100, 250) <= t(100, 300)
+    assert t(500, 0) > t(0, 500)
+
+    assert min(t(0, 50), t(100, 200), t(300, 500)) == t(0, 50)
+    assert max(t(0, 50), t(100, 200), t(300, 500)) == t(300, 500)
+    assert min(t(500, 0), t(100, 200), t(300, 500)) == t(100, 200)
