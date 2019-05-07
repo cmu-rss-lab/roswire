@@ -96,7 +96,7 @@ class BagReader:
     def time_end(self) -> Time:
         """The time at which the recording ended."""
         times = [c.time_end for c in self.chunks]
-        return reduce(min, times[1:], times[0])
+        return reduce(max, times[1:], times[0])
 
     @property
     def topics(self) -> Set[str]:
