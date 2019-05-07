@@ -86,6 +86,16 @@ class BagReader:
         raise NotImplementedError
 
     @property
+    def time_start(self) -> Time:
+        """The time at which the recording began."""
+        raise NotImplementedError
+
+    @property
+    def time_end(self) -> Time:
+        """The time at which the recording ended."""
+        raise NotImplementedError
+
+    @property
     def topics(self) -> Set[str]:
         """The names of all topics represented in this bag."""
         return set(c.topic for c in self.connections)
