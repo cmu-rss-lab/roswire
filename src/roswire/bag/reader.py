@@ -89,13 +89,14 @@ class BagReader:
     @property
     def time_start(self) -> Time:
         """The time at which the recording began."""
-        return reduce(lambda t, c: min(t, c.time_start),
-                      self.chunks[1:], self.chunks[0].time_start)
+        times = [c.time_start for c in self.chunks]
+        return reduce(min, times[1:], times[0])
 
     @property
     def time_end(self) -> Time:
         """The time at which the recording ended."""
-        raise NotImplementedError
+        times = [c.time_end for c in self.chunks]
+        return reduce(min, times[1:], times[0])
 
     @property
     def topics(self) -> Set[str]:
