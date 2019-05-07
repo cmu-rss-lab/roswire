@@ -8,6 +8,7 @@ import pytest
 from roswire.bag import BagReader, BagWriter
 from roswire.description import SystemDescription
 from roswire.definitions import TypeDatabase, FormatDatabase, PackageDatabase
+from roswire.definitions import Time, Duration
 
 from test_basic import build_ardu
 
@@ -55,13 +56,12 @@ def test_from_file():
 
 
 def test_bag_reader_time():
-    ms_to_ns = lambda x: x * 10 ** 6
     db_type = load_mavros_type_db()
     fn_bag = os.path.join(DIR_TEST, 'hello_world/non-bug.bag')
     bag = BagReader(fn_bag, db_type)
-    assert bag.duration == Duration(49, ms_to_ns(400))
-    assert bag.time_start == Time(1556312447, ms_to_ns(650))
-    assert bag.time_start == Time(1556312497, ms_to_ns(100))
+    assert bag.duration == Duration(49, 449297900)
+    assert bag.time_start == Time(1556312447, 647802600)
+    assert bag.time_end == Time(1556312497, 97100500)
 
 
 def test_write():
