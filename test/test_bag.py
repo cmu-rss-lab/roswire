@@ -64,6 +64,27 @@ def test_bag_reader_time():
     assert bag.time_end == Time(1556312497, 97100500)
 
 
+def test_bag_writer_time():
+    db_type = load_mavros_type_db()
+    fn_orig = os.path.join(DIR_TEST, 'hello_world/non-bug.bag')
+    reader = BagReader(fn_orig, db_type)
+    messages = list(reader)
+
+    # copy the contents of the bag
+    fn_copy = tempfile.mkstemp(suffix='.bag')[1]
+    try:
+        writer = BagWriter(fn_copy)
+        writer.write(messages)
+        writer.close()
+
+        reader_copy = BagReader(fn_copy, db_type)
+        assert reader_copy.duration == reader.duration
+        assert reader_copy.time_start == reader.time_start
+        assert reader_copy.time_end == reader.time_end
+    finally:
+        os.remove(fn_bag)
+
+
 def test_write():
     db_type = load_mavros_type_db()
 
