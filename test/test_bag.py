@@ -125,5 +125,6 @@ def test_write_and_replay():
             player.wait()
             popen = player._process
             out = '\n'.join(popen.stream)
+            print(out)
             assert 'error' not in out
             assert 'Done' in out
