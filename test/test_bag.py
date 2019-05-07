@@ -9,10 +9,13 @@ from roswire import ROSWire
 from roswire.bag import BagReader, BagWriter
 from roswire.description import SystemDescription
 from roswire.definitions import TypeDatabase, FormatDatabase, PackageDatabase
+from roswire.definitions import Time, Duration
 
 from test_basic import build_ardu, build_hello_world
 
 DIR_TEST = os.path.dirname(__file__)
+
+ms_to_ns = 10 ** 6
 
 
 def load_mavros_type_db() -> TypeDatabase:
@@ -51,6 +54,36 @@ def test_from_file():
     fn_bag = os.path.join(DIR_TEST, 'example.bag')
     bag = BagReader(fn_bag, db_type)
     check_example_bag(db_type, bag)
+
+
+def test_bag_reader_time():
+    db_type = load_mavros_type_db()
+    fn_bag = os.path.join(DIR_TEST, 'hello_world/non-bug.bag')
+    bag = BagReader(fn_bag, db_type)
+    assert bag.duration == Duration(49, 449297900)
+    assert bag.time_start == Time(1556312447, 647802600)
+    assert bag.time_end == Time(1556312497, 97100500)
+
+
+def test_bag_writer_time():
+    db_type = load_mavros_type_db()
+    fn_orig = os.path.join(DIR_TEST, 'hello_world/non-bug.bag')
+    reader = BagReader(fn_orig, db_type)
+    messages = list(reader)
+
+    # copy the contents of the bag
+    fn_copy = tempfile.mkstemp(suffix='.bag')[1]
+    try:
+        writer = BagWriter(fn_copy)
+        writer.write(messages)
+        writer.close()
+
+        reader_copy = BagReader(fn_copy, db_type)
+        assert reader_copy.duration == reader.duration
+        assert reader_copy.time_start == reader.time_start
+        assert reader_copy.time_end == reader.time_end
+    finally:
+        os.remove(fn_copy)
 
 
 def test_write():

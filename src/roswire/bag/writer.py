@@ -153,10 +153,9 @@ class BagWriter:
         index = self._write_chunk_data(messages)
 
         # determine time of earliest and latest message in the bag
-        time_start = time_end = Time(0, 0)
-        for time in (e.time for ci in index.values() for e in ci):
-            time_start = min(time, time_start)
-            time_end = max(time, time_end)
+        times = [e.time for ci in index.values() for e in ci]
+        time_start = min(times)
+        time_end = max(times)
 
         # compute chunk size
         pos_end = self.__fp.tell()

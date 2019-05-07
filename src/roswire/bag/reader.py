@@ -4,6 +4,7 @@ __all__ = ('BagReader',)
 from typing import (Dict, Sequence, Union, Optional, Tuple, List, Type,
                     Callable, Collection, Set, Iterator)
 from io import BytesIO
+from functools import reduce
 import os
 import bz2
 import datetime
@@ -11,7 +12,7 @@ import logging
 import heapq
 
 from .core import *
-from ..definitions.base import Time
+from ..definitions.base import Time, Duration
 from ..definitions.msg import Message
 from ..definitions.type_db import TypeDatabase
 from ..definitions.decode import (decode_uint8, read_uint8,
@@ -79,6 +80,23 @@ class BagReader:
     @property
     def index(self) -> Index:
         return self.__index
+
+    @property
+    def duration(self) -> Duration:
+        """The duration of the recording in this bag file."""
+        return Duration.between(self.time_start, self.time_end)
+
+    @property
+    def time_start(self) -> Time:
+        """The time at which the recording began."""
+        times = [c.time_start for c in self.chunks]
+        return reduce(min, times[1:], times[0])
+
+    @property
+    def time_end(self) -> Time:
+        """The time at which the recording ended."""
+        times = [c.time_end for c in self.chunks]
+        return reduce(max, times[1:], times[0])
 
     @property
     def topics(self) -> Set[str]:
