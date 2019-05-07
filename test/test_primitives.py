@@ -23,3 +23,9 @@ def test_duration_between():
     t_start = Time(150, 50)
     t_stop = Time(200, 300)
     assert Duration.between(t_start, t_stop) == Duration(50, 250)
+
+
+def test_time_compare():
+    t = Time
+    assert t(100, 250) < t(100, 300)
+    assert t(100, 250) <= t(100, 300)
