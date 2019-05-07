@@ -143,7 +143,6 @@ class MsgFormat:
         """
         typ: str
         name_const: str
-        val: Any
         fields: List[Field] = []
         constants: List[Constant] = []
 
@@ -157,12 +156,12 @@ class MsgFormat:
                 continue
             elif m_string_constant:
                 name_const, val = m_string_constant.group(1, 2)
-                constant: Constant = Constant('string', name_const, val)
+                constant = Constant('string', name_const, val)
                 constants.append(constant)
             elif m_other_constant:
                 typ, name_const, val_str = m_other_constant.group(1, 2, 3)
-                val: ConstantValue = val_str  # FIXME convert value
-                constant: Constant = Constant(typ, name_const, val)
+                val = val_str  # FIXME convert value
+                constant = Constant(typ, name_const, val)
                 constants.append(constant)
             elif m_field:
                 typ, name_field = m_field.group(1, 2)
