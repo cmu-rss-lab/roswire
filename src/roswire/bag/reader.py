@@ -4,6 +4,7 @@ __all__ = ('BagReader',)
 from typing import (Dict, Sequence, Union, Optional, Tuple, List, Type,
                     Callable, Collection, Set, Iterator)
 from io import BytesIO
+from functools import reduce
 import os
 import bz2
 import datetime
@@ -88,7 +89,8 @@ class BagReader:
     @property
     def time_start(self) -> Time:
         """The time at which the recording began."""
-        raise NotImplementedError
+        return reduce(lambda t, c: min(t, c.time_start),
+                      self.chunks[1:], self.chunks[0].time_start)
 
     @property
     def time_end(self) -> Time:
