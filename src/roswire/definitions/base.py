@@ -35,7 +35,7 @@ class Duration:
         d_nsecs = sec_to_nsec - start.nsecs + stop.nsecs
         d_secs = stop.secs - start.secs + 1
         if d_nsecs > sec_to_nsec:
-            d_nsecs -= sec_to_nsect
+            d_nsecs -= sec_to_nsec
             d_secs += 1
         return Duration(d_secs, d_nsecs)
 
