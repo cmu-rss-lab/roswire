@@ -141,6 +141,9 @@ class MsgFormat:
         Raises:
             ParsingError: if the description cannot be parsed.
         """
+        typ: str
+        name_const: str
+        val: Any
         fields: List[Field] = []
         constants: List[Constant] = []
 
