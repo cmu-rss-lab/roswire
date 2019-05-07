@@ -31,13 +31,12 @@ class Duration:
         if start.secs == stop.secs:
             return Duration(0, stop.nsecs - start.nsecs)
 
-        sec_to_nsec = 1000000000  # 1 sec = 10^9 nsecs
-        d_nsecs = sec_to_nsec - start.nsecs + stop.nsecs
-        d_secs = stop.secs - start.secs + 1
-        if d_nsecs > sec_to_nsec:
-            d_nsecs -= sec_to_nsec
-            d_secs += 1
-        return Duration(d_secs, d_nsecs)
+        d_secs = stop.secs - start.secs
+        if stop.nsecs >= start.nsecs:
+            return Duration(d_secs, stop.nsecs - start.nsecs)
+        else:
+            sec_to_nsec = 1000000000  # 1 sec = 10^9 nsecs
+            return Duration(d_secs - 1, stop.nsecs + sec_to_nsec - start.nsecs)
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> 'Duration':
