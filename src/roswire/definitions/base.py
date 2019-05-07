@@ -25,8 +25,9 @@ class Duration:
     nsecs: int = attr.ib()
 
     @staticmethod
-    def between(x: Time, y: Time) -> 'Duration':
+    def between(start: Time, stop: Time) -> 'Duration':
         """Computes the length of time between two timestamps."""
+        assert stop.secs > start.secs or stop.nsecs >= start.nsecs
         raise NotImplementedError
 
     @staticmethod
