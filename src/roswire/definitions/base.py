@@ -28,7 +28,16 @@ class Duration:
     def between(start: Time, stop: Time) -> 'Duration':
         """Computes the length of time between two timestamps."""
         assert stop.secs > start.secs or stop.nsecs >= start.nsecs
-        raise NotImplementedError
+        if start.secs == stop.secs:
+            return Duration(0, stop.nsecs - start.nsecs)
+
+        sec_to_nsec = 1000000000  # 1 sec = 10^9 nsecs
+        d_nsecs = sec_to_nsec - start.nsecs + stop.nsecs
+        d_secs = stop.secs - start.secs + 1
+        if d_nsecs > sec_to_nsec:
+            d_nsecs -= sec_to_nsect
+            d_secs += 1
+        return Duration(d_secs, d_nsecs)
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> 'Duration':
