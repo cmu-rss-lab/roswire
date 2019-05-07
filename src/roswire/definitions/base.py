@@ -25,6 +25,20 @@ class Duration:
     nsecs: int = attr.ib()
 
     @staticmethod
+    def between(start: Time, stop: Time) -> 'Duration':
+        """Computes the length of time between two timestamps."""
+        assert stop.secs > start.secs or stop.nsecs >= start.nsecs
+        if start.secs == stop.secs:
+            return Duration(0, stop.nsecs - start.nsecs)
+
+        d_secs = stop.secs - start.secs
+        if stop.nsecs >= start.nsecs:
+            return Duration(d_secs, stop.nsecs - start.nsecs)
+        else:
+            sec_to_nsec = 1000000000  # 1 sec = 10^9 nsecs
+            return Duration(d_secs - 1, stop.nsecs + sec_to_nsec - start.nsecs)
+
+    @staticmethod
     def from_dict(d: Dict[str, Any]) -> 'Duration':
         return Duration(d['secs'], d['nsecs'])
 
