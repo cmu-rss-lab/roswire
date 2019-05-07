@@ -120,24 +120,10 @@ def test_write_and_replay():
         writer.write(messages)
         writer.close()
 
+        ros.launch('/ros_ws/src/ros_tutorials/roscpp_tutorials/launch/listener.launch')
         with ros.playback(fn_bag) as player:
             player.wait()
             popen = player._process
             out = '\n'.join(popen.stream)
-            print(out)
             assert 'error' not in out
             assert 'Done' in out
-
-
-if __name__ == '__main__':
-    # test_write_and_replay()
-    with build_hello_world() as (sut, ros):
-        fn_bag_orig = os.path.join(DIR_TEST, 'hello_world/non-bug.bag')
-        db_type = sut.description.types
-        reader = BagReader(fn_bag_orig, db_type)
-        messages = list(reader)
-
-        fn_bag = 'temp.bag'
-        writer = BagWriter(fn_bag)
-        writer.write(messages)
-        writer.close()
