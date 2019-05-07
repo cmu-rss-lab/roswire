@@ -82,7 +82,7 @@ def test_bag_writer_time():
         assert reader_copy.time_start == reader.time_start
         assert reader_copy.time_end == reader.time_end
     finally:
-        os.remove(fn_bag)
+        os.remove(fn_copy)
 
 
 def test_write():
