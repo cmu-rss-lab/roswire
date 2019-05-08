@@ -1,4 +1,5 @@
 from typing import Iterator, Tuple
+import os
 import contextlib
 import logging
 import time
@@ -9,6 +10,29 @@ import roswire
 import roswire.exceptions
 from roswire import ROSWire, ROSProxy, System, SystemDescription
 from roswire.proxy import ShellProxy, FileProxy, ContainerProxy
+from roswire.description import SystemDescription
+from roswire.definitions import TypeDatabase, FormatDatabase, PackageDatabase
+
+DIR_TEST = os.path.dirname(__file__)
+
+
+def load_hello_world_type_db() -> TypeDatabase:
+    fn_db_format = os.path.join(DIR_TEST,
+                                'format-databases/helloworld.formats.yml')
+    db_format = FormatDatabase.load(fn_db_format)
+    return TypeDatabase.build(db_format)
+
+
+def load_hello_world_description() -> SystemDescription:
+    fn_db_format = os.path.join(DIR_TEST,
+                                'format-databases/helloworld.formats.yml')
+    db_format = FormatDatabase.load(fn_db_format)
+    db_type = TypeDatabase.build(db_format)
+    desc = SystemDescription(sha256='foo',
+                             types=db_type,
+                             formats=db_format,
+                             packages=PackageDatabase([]))
+    return desc
 
 
 @contextlib.contextmanager
@@ -26,6 +50,17 @@ def build_test_environment() -> Iterator[Tuple[System, ROSProxy]]:
 def build_ardu() -> Iterator[Tuple[System, ROSProxy]]:
     rsw = ROSWire()
     with rsw.launch('brass') as sut:
+        with sut.roscore() as ros:
+            time.sleep(5)
+            yield (sut, ros)
+
+
+@contextlib.contextmanager
+def build_hello_world() -> Iterator[Tuple[System, ROSProxy]]:
+    rsw = ROSWire()
+    image = 'roswire/helloworld:buggy'
+    desc = load_hello_world_description()
+    with rsw.launch(image, desc) as sut:
         with sut.roscore() as ros:
             time.sleep(5)
             yield (sut, ros)

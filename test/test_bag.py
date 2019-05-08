@@ -5,12 +5,13 @@ import tempfile
 import yaml
 import pytest
 
+from roswire import ROSWire
 from roswire.bag import BagReader, BagWriter
 from roswire.description import SystemDescription
 from roswire.definitions import TypeDatabase, FormatDatabase, PackageDatabase
 from roswire.definitions import Time, Duration
 
-from test_basic import build_ardu
+from test_basic import build_ardu, build_hello_world
 
 DIR_TEST = os.path.dirname(__file__)
 
@@ -124,3 +125,39 @@ def test_simple_write():
         msgs = list(reader.read_messages('/hello'))
     finally:
         os.remove(fn_bag)
+
+
+def test_bag_replay():
+    fn_bag = os.path.join(DIR_TEST, 'hello_world/bug.bag')
+    with build_hello_world() as (sut, ros):
+        with ros.playback(fn_bag) as player:
+            player.wait()
+            popen = player._process
+            out = '\n'.join(popen.stream)
+            assert 'error' not in out
+            assert 'Done' in out
+
+
+def test_write_and_replay():
+    log_to_stdout = logging.StreamHandler()
+    log_to_stdout.setLevel(logging.DEBUG)
+    logging.getLogger('roswire.bag.writer').addHandler(log_to_stdout)
+    with build_hello_world() as (sut, ros):
+        fn_bag_orig = os.path.join(DIR_TEST, 'minimal.bag')
+        db_type = sut.description.types
+        reader = BagReader(fn_bag_orig, db_type)
+        messages = list(reader)
+
+        fn_bag = 'temp.bag'
+        writer = BagWriter(fn_bag)
+        writer.write(messages)
+        writer.close()
+
+        ros.launch('/ros_ws/src/ros_tutorials/roscpp_tutorials/launch/listener.launch')
+        with ros.playback(fn_bag) as player:
+            player.wait()
+            popen = player._process
+            out = '\n'.join(popen.stream)
+            print(out)
+            assert 'error' not in out
+            assert 'Done' in out
