@@ -26,7 +26,8 @@ R_NAME = r"[a-zA-Z0-9_/]+"
 R_VAL = r".+"
 R_COMMENT = r"(#.*)?"
 R_FIELD = re.compile(f"^\s*({R_TYPE})\s+({R_NAME})\s*{R_COMMENT}$")
-R_CONSTANT = re.compile(f"^\s*(\w+)\s+(\w+)\s*=\s*(.+)$")
+R_STRING_CONSTANT = re.compile(f"^\s*string\s+(\w+)\s*=\s*(.+)\s*$")
+R_OTHER_CONSTANT = re.compile(f"^\s*(\w+)\s+(\w+)\s*=\s*([^\s]+).*$")
 R_BLANK = re.compile(f"^\s*{R_COMMENT}$")
 
 ConstantValue = Union[str, int, float]
@@ -140,23 +141,27 @@ class MsgFormat:
         Raises:
             ParsingError: if the description cannot be parsed.
         """
+        typ: str
+        name_const: str
         fields: List[Field] = []
         constants: List[Constant] = []
 
         for line in text.split('\n'):
             m_blank = R_BLANK.match(line)
-            m_constant = R_CONSTANT.match(line)
+            m_string_constant = R_STRING_CONSTANT.match(line)
+            m_other_constant = R_OTHER_CONSTANT.match(line)
             m_field = R_FIELD.match(line)
 
             if m_blank:
                 continue
-            elif m_constant:
-                typ, name_const, val_str = m_constant.group(1, 2, 3)
-
-                # FIXME convert value
-                val: ConstantValue = val_str
-
-                constant: Constant = Constant(typ, name_const, val)
+            elif m_string_constant:
+                name_const, val = m_string_constant.group(1, 2)
+                constant = Constant('string', name_const, val)
+                constants.append(constant)
+            elif m_other_constant:
+                typ, name_const, val_str = m_other_constant.group(1, 2, 3)
+                val = val_str  # FIXME convert value
+                constant = Constant(typ, name_const, val)
                 constants.append(constant)
             elif m_field:
                 typ, name_field = m_field.group(1, 2)

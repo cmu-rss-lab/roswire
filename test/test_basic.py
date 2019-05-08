@@ -84,6 +84,15 @@ def build_file_proxy() -> Iterator[FileProxy]:
         yield sut.files
 
 
+@contextlib.contextmanager
+def build_file_and_shell_proxy() -> Iterator[Tuple[FileProxy, ShellProxy]]:
+    rsw = ROSWire()
+    image = 'brass'
+    desc = SystemDescription(image, [], [], [])
+    with rsw.launch(image, desc) as sut:
+        yield sut.files, sut.shell
+
+
 def test_parameters():
     with build_test_environment() as (sut, ros):
         assert ros.topic_to_type == {'/rosout': 'rosgraph_msgs/Log',
