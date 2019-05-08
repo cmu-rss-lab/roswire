@@ -124,7 +124,7 @@ string frame_id
 
 def test_md5sum():
     db_type = load_mavros_type_db()
-    
+
     def check(name: str, md5sum_expected: str) -> None:
         assert db_type[name].md5sum() == md5sum_expected
 
@@ -140,3 +140,4 @@ def test_md5sum():
     check('visualization_msgs/InteractiveMarkerPose', 'a6e6833209a196a38d798dadb02c81f8')
     check('mavros_msgs/State', '9e3d873fae342c8f48a8bd64c53d991e')
     check('mavros_msgs/Mavlink', '6dd71a38b8541fdc2de89a548c7dbc2f')
+    check('rosgraph_msgs/Log', 'acffd30cd6b6de30f120938c17c593fb')
