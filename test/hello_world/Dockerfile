@@ -6,6 +6,7 @@ RUN apt-get update \
       vim \
       wget \
       curl \
+      clang \
       python-catkin-tools \
       python-rosinstall-generator \
       python-pip \
