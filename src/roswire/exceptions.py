@@ -3,6 +3,17 @@ class ROSWireException(Exception):
     """Base class used by all ROSWire exceptions."""
 
 
+class CatkinException(ROSWireException):
+    """Base class used by all Catkin-related exceptions."""
+
+
+class CatkinBuildFailed(CatkinException):
+    """The attempt to build via catkin failed."""
+    def __init__(self, retcode: int, reason: str) -> None:
+        msg = f"catkin build failed [retcode: {retcode}]: {reason}"
+        super().__init__(msg)
+
+
 class PlayerNotStarted(ROSWireException):
     """Playback has not begun."""
 
