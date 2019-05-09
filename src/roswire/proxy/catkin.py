@@ -5,7 +5,7 @@ from typing import Optional, List
 import shlex
 import logging
 
-from shell import ShellProxy
+from .shell import ShellProxy
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
