@@ -1,4 +1,4 @@
-FROM ros:indigo as base
+FROM ros:kinetic as base
 ENV ROS_WSPACE /ros_ws
 WORKDIR "${ROS_WSPACE}"
 RUN apt-get update \
@@ -6,7 +6,7 @@ RUN apt-get update \
       vim \
       wget \
       curl \
-      clang \
+      clang-4.0 \
       python-catkin-tools \
       python-rosinstall-generator \
       python-pip \
@@ -19,7 +19,7 @@ RUN . /opt/ros/${ROS_DISTRO}/setup.sh \
     && wstool set ros_tutorials --git git://github.com/ros/ros_tutorials.git -y \
     && wstool update \
     && cd ${ROS_WSPACE} \
-    && /bin/bash -c "source /opt/ros/indigo/setup.bash && catkin build"
+    && /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && catkin build"
 
 # create entrypoint
 WORKDIR "${ROS_WSPACE}"
