@@ -81,7 +81,7 @@ class CatkinToolsProxy(CatkinProxy):
         retcode, output, duration_secs = \
             shell.execute(command_str, context=context)
         duration_mins = duration_secs / 60
-        logger.debug("cleaning completed after %.2f minutes [retcode: %d]:\n%s",
+        logger.debug("clean completed after %.2f minutes [retcode: %d]:\n%s",
                      duration_mins, retcode, output)
 
         if retcode != 0:
