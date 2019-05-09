@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __all__ = ('System',)
 
 from typing import Iterator
@@ -7,7 +8,8 @@ import logging
 
 from .description import SystemDescription
 from .definitions import TypeDatabase, FormatDatabase, PackageDatabase
-from .proxy import ShellProxy, ROSProxy, FileProxy, ContainerProxy
+from .proxy import (ShellProxy, ROSProxy, FileProxy, ContainerProxy,
+                    CatkinProxy)
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -20,6 +22,7 @@ class System:
                  ) -> None:
         self.__container = container
         self.__description = description
+        self.__catkin: CatkinProxy = CatkinProxy(container.shell)
 
     @property
     def description(self) -> SystemDescription:
@@ -40,6 +43,10 @@ class System:
     @property
     def shell(self) -> ShellProxy:
         return self.__container.shell
+
+    @property
+    def catkin(self) -> CatkinProxy:
+        return self.__catkin
 
     @property
     def files(self) -> FileProxy:
