@@ -10,6 +10,7 @@ __all__ = (
     'BagPlayerProxy',
     'FileProxy',
     'ContainerProxy',
+    'CatkinProxy',
     'ContainerProxyManager'
 )
 
@@ -22,6 +23,7 @@ import time
 
 from .shell import ShellProxy
 from .file import FileProxy
+from .catkin import CatkinProxy
 from .container import ContainerProxy, ContainerProxyManager
 from .parameters import ParameterServerProxy
 from .bag import BagRecorderProxy, BagPlayerProxy
