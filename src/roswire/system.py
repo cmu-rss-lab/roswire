@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __all__ = ('System',)
 
 from typing import Iterator
@@ -7,7 +8,8 @@ import logging
 
 from .description import SystemDescription
 from .definitions import TypeDatabase, FormatDatabase, PackageDatabase
-from .proxy import ShellProxy, ROSProxy, FileProxy, ContainerProxy
+from .proxy import (ShellProxy, ROSProxy, FileProxy, ContainerProxy,
+                    CatkinProxy, CatkinToolsProxy, CatkinMakeProxy)
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -40,6 +42,19 @@ class System:
     @property
     def shell(self) -> ShellProxy:
         return self.__container.shell
+
+    def catkin(self, directory: str) -> CatkinProxy:
+        """Returns an interface to a given catkin workspace."""
+        # TODO decide whether to use catkin_tools or catkin_make
+        return self.catkin_tools(directory)
+
+    def catkin_tools(self, directory: str) -> CatkinToolsProxy:
+        """Returns an interface to a given catkin tools workspace."""
+        return CatkinToolsProxy(self.shell, directory)
+
+    def catkin_make(self, directory: str) -> CatkinMakeProxy:
+        """Returns an interface to a given catkin_make workspace."""
+        return CatkinMakeProxy(self.shell, directory)
 
     @property
     def files(self) -> FileProxy:
