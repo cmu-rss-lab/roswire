@@ -43,7 +43,6 @@ class System:
     def shell(self) -> ShellProxy:
         return self.__container.shell
 
-    @property
     def catkin(self, directory: str) -> CatkinProxy:
         """Returns an interface to a given catkin workspace."""
         return CatkinProxy(self.shell, directory)
