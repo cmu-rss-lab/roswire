@@ -3,8 +3,12 @@ __all__ = ('CatkinProxy',)
 
 from typing import Optional, List
 import shlex
+import logging
 
 from shell import ShellProxy
+
+logger: logging.Logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 class CatkinProxy:
@@ -17,7 +21,9 @@ class CatkinProxy:
               pre_clean: bool = False,
               jobs: Optional[int] = None,
               cmake_args: Optional[List[str]] = None,
-              make_args: Optional[List[str]] = None
+              make_args: Optional[List[str]] = None,
+              context: Optional[str] = None,
+              time_limit: Optional[int] = None
               ) -> None:
         shell = self._shell
         command = ['catkin', 'build', '--no-status', '--no-notify']
@@ -31,5 +37,13 @@ class CatkinProxy:
             command += [shlex.quote(a) for a in cmake_args]
         if make_args:
             command += [shlex.quote(a) for a in make_args]
+
+        command_str = ' '.join(command)
+        logger.debug("building via: %s", command_str)
+        retcode, output, duration_secs = \
+            shell.execute(command_str, context=context, time_limit=time_limit)
+        duration_mins = duration_secs / 60
+        logger.debug("build completed after %.2f minutes [retcode: %d]:\n%s",
+                     duration_mins, retcode, output)
 
         # TODO check exit code -- 127 indicates catkin_tools not installed
