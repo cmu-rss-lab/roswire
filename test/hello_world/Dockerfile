@@ -2,16 +2,26 @@ FROM ros:kinetic as base
 ENV ROS_WSPACE /ros_ws
 WORKDIR "${ROS_WSPACE}"
 RUN apt-get update \
- && apt-get install -y build-essential qtbase5-dev \
+ && apt-get install -y \
+      build-essential \
+      software-properties-common \
+      qtbase5-dev \
       vim \
       wget \
       curl \
-      clang-4.0 \
       python-catkin-tools \
       python-rosinstall-generator \
       python-pip \
+ && wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - \
+ && apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-6.0 main" \
+ && apt-get update \
+ && apt-get install -y clang-6.0 \
  && apt-get clean \
- && rm -rf /var/lib/apt/lists
+ && rm -rf /var/lib/apt/lists \
+ && update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-6.0 100 \
+ && update-alternatives --install /usr/bin/clang clang /usr/bin/clang-6.0 100 \
+ && update-alternatives --config clang \
+ && update-alternatives --config clang++
 RUN . /opt/ros/${ROS_DISTRO}/setup.sh \
     && cd ${ROS_WSPACE} \
     && wstool init src \
