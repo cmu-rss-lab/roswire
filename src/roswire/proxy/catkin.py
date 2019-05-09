@@ -13,8 +13,15 @@ logger.setLevel(logging.DEBUG)
 
 
 class CatkinProxy:
-    def __init__(self, shell: ShellProxy) -> None:
+    """Provides an interface to a catkin workspace."""
+    def __init__(self, shell: ShellProxy, directory: str) -> None:
+        self._directory = directory
         self._shell = shell
+
+    @property
+    def directory(self) -> str:
+        """The directory of this catkin workspace."""
+        return self._directory
 
     def build(self,
               packages: Optional[List[str]] = None,
@@ -45,6 +52,8 @@ class CatkinProxy:
             command += [shlex.quote(a) for a in cmake_args]
         if make_args:
             command += [shlex.quote(a) for a in make_args]
+        if not context:
+            context = self.directory
 
         command_str = ' '.join(command)
         logger.debug("building via: %s", command_str)

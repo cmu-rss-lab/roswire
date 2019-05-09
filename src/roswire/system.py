@@ -22,7 +22,6 @@ class System:
                  ) -> None:
         self.__container = container
         self.__description = description
-        self.__catkin: CatkinProxy = CatkinProxy(container.shell)
 
     @property
     def description(self) -> SystemDescription:
@@ -45,8 +44,9 @@ class System:
         return self.__container.shell
 
     @property
-    def catkin(self) -> CatkinProxy:
-        return self.__catkin
+    def catkin(self, directory: str) -> CatkinProxy:
+        """Returns an interface to a given catkin workspace."""
+        return CatkinProxy(self.shell, directory)
 
     @property
     def files(self) -> FileProxy:
