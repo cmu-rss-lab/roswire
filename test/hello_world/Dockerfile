@@ -18,7 +18,7 @@ RUN . /opt/ros/${ROS_DISTRO}/setup.sh \
     && wstool set ros_tutorials --git git://github.com/ros/ros_tutorials.git -y \
     && wstool update \
     && cd ${ROS_WSPACE} \
-    && /bin/bash -c "source /opt/ros/indigo/setup.bash && catkin_make"
+    && /bin/bash -c "source /opt/ros/indigo/setup.bash && catkin build"
 
 # create entrypoint
 WORKDIR "${ROS_WSPACE}"
@@ -44,4 +44,4 @@ COPY non-bug.bag ${ROS_WSPACE}
 RUN cd ${ROS_WSPACE}/src/ros_tutorials \
  && git apply ${ROS_WSPACE}/bug.diff \
  && cd ${ROS_WSPACE} \
- && /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && catkin_make"
+ && /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && catkin build"
