@@ -6,6 +6,7 @@ import shlex
 import logging
 
 from .shell import ShellProxy
+from ..exceptions import CatkinBuildFailed
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -25,6 +26,13 @@ class CatkinProxy:
               context: Optional[str] = None,
               time_limit: Optional[int] = None
               ) -> None:
+        """Attempts to build a catkin workspace.
+
+        Raises
+        ------
+        CatkinBuildFailed:
+            if the attempt to build resulted in a non-zero return code.
+        """
         shell = self._shell
         command = ['catkin', 'build', '--no-status', '--no-notify']
         if packages:
@@ -47,3 +55,6 @@ class CatkinProxy:
                      duration_mins, retcode, output)
 
         # TODO check exit code -- 127 indicates catkin_tools not installed
+
+        if retcode != 0:
+            raise CatkinBuildFailed(retcode, output)
