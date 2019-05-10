@@ -20,6 +20,7 @@ from typing import (Tuple, Dict, Optional, Iterator, Any, List, Union,
                     Collection)
 import os
 import xmlrpc.client
+import shlex
 import logging
 import time
 
@@ -111,7 +112,7 @@ class ROSProxy:
                prefix: Optional[str] = None
                ) -> None:
         """Provides an interface to roslaunch.
-        
+
         Parameters
         ----------
         filename: str
