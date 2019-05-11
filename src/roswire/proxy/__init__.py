@@ -20,6 +20,7 @@ from typing import (Tuple, Dict, Optional, Iterator, Any, List, Union,
                     Collection)
 import os
 import xmlrpc.client
+import shlex
 import logging
 import time
 
@@ -104,14 +105,35 @@ class ROSProxy:
         return {name: typ for (name, typ) in result}
 
     def launch(self,
-               *args: str,
-               **kwargs: Union[int, str]
+               filename: str,
+               package: Optional[str] = None,
+               *,
+               args: Optional[Dict[str, Union[int, str]]] = None,
+               prefix: Optional[str] = None
                ) -> None:
-        """Provides an interface to roslaunch."""
-        assert len(args) in [1, 2]
-        launch_args = [f'{arg}:={val}' for arg, val in kwargs.items()]
-        cmd = ' '.join(['roslaunch'] + list(args) + launch_args)
-        self.__shell.non_blocking_execute(cmd)
+        """Provides an interface to roslaunch.
+
+        Parameters
+        ----------
+        filename: str
+            The name of the launch file (or an absolute path).
+        package: str, optional
+            The name of the package to which the launch file belongs.
+        args: Dict[str, Union[int, str]], optional
+            Keyword arguments that should be supplied to roslaunch.
+        prefix: str, optional
+            An optional prefix to add before the roslaunch command.
+        """
+        if not args:
+            args = {}
+        launch_args: List[str] = [f'{arg}:={val}' for arg, val in args.items()]
+        cmd = ['roslaunch']
+        if package:
+            cmd += [shlex.quote(package)]
+        cmd += [shlex.quote(filename)]
+        cmd += launch_args
+        cmd_str = ' '.join(cmd)
+        self.__shell.non_blocking_execute(cmd_str)
 
     def record(self,
                fn: str,
