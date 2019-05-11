@@ -24,6 +24,10 @@ class System:
         self.__description = description
 
     @property
+    def container(self) -> ContainerProxy:
+        return self.__container
+
+    @property
     def description(self) -> SystemDescription:
         return self.__description
 

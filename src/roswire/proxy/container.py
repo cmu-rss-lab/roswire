@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __all__ = ('ContainerProxy', 'ContainerProxyManager')
 
 from typing import Iterator, Optional, Union
@@ -74,6 +75,25 @@ class ContainerProxy:
             return str(IPv4Address(address))
         except ipaddress.AddressValueError:
             return str(IPv6Address(address))
+
+    def persist(self,
+                repo: Optional[str] = None,
+                tag: Optional[str] = None
+                ) -> DockerImage:
+        """Persists this container to an image.
+
+        Parameters
+        ----------
+        repo: str, optional
+            The name of the repository to which the image should belong.
+        tag: str, optional
+            The tag that should be used for the image.
+
+        Returns
+        -------
+        A description of the persisted image.
+        """
+        return self.__container_docker.commit(repo, tag)
 
 
 class ContainerProxyManager:
@@ -162,15 +182,11 @@ class ContainerProxyManager:
                 yield c
 
     def image(self, tag: str) -> DockerImage:
-        """
-        Retrieves the Docker image with a given tag.
-        """
+        """Retrieves the Docker image with a given tag."""
         return self.__client_docker.images.get(tag)
 
     def image_sha256(self, tag_or_image: Union[str, DockerImage]) -> str:
-        """
-        Retrieves the SHA256 for a given Docker image.
-        """
+        """Retrieves the SHA256 for a given Docker image."""
         image: DockerImage
         if isinstance(tag_or_image, str):
             image = self.image(tag_or_image)
