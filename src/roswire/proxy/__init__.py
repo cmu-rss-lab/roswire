@@ -124,6 +124,8 @@ class ROSProxy:
         prefix: str, optional
             An optional prefix to add before the roslaunch command.
         """
+        if not args:
+            args = {}
         launch_args: List[str] = [f'{arg}:={val}' for arg, val in args.items()]
         cmd = ['roslaunch']
         if package:
