@@ -76,6 +76,20 @@ class ContainerProxy:
         except ipaddress.AddressValueError:
             return str(IPv6Address(address))
 
+    def persist(self, name: Optional[str] = None) -> str:
+        """Persists this container to an image.
+
+        Parameters
+        ----------
+        name: str, optional
+            The name of the image.
+
+        Returns
+        -------
+        The name of the persisted image.
+        """
+        raise NotImplementedError
+
 
 class ContainerProxyManager:
     def __init__(self,
