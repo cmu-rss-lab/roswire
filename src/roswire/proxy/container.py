@@ -76,19 +76,24 @@ class ContainerProxy:
         except ipaddress.AddressValueError:
             return str(IPv6Address(address))
 
-    def persist(self, name: Optional[str] = None) -> str:
+    def persist(self,
+                repo: Optional[str] = None,
+                tag: Optional[str] = None
+                ) -> DockerImage:
         """Persists this container to an image.
 
         Parameters
         ----------
-        name: str, optional
-            The name of the image.
+        repo: str, optional
+            The name of the repository to which the image should belong.
+        tag: str, optional
+            The tag that should be used for the image.
 
         Returns
         -------
-        The name of the persisted image.
+        A description of the persisted image.
         """
-        raise NotImplementedError
+        return self.__container_docker.commit(repo, tag)
 
 
 class ContainerProxyManager:
