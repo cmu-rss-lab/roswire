@@ -106,9 +106,9 @@ class CatkinToolsProxy(CatkinProxy):
         if pre_clean:
             command += ['--pre-clean']
         if cmake_args:
-            command += [shlex.quote(a) for a in cmake_args]
+            command += cmake_args
         if make_args:
-            command += [shlex.quote(a) for a in make_args]
+            command += make_args
         if not context:
             context = self.directory
 
