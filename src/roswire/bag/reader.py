@@ -63,7 +63,9 @@ class BagReader:
         logger.debug("topics: %s", self.topics)
         for conn_id, indices in self.__index.items():
             logger.debug("conn %d [%s]: %d messages",
-                         conn_id, self.__connections[conn_id].topic, len(indices))
+                         conn_id,
+                         self.__connections[conn_id].topic,
+                         len(indices))
 
     @property
     def connections(self) -> Tuple[ConnectionInfo, ...]:
