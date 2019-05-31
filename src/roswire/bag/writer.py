@@ -76,16 +76,20 @@ class BagWriter:
         logger.debug("writing bag header record")
         self.__fp.seek(self.__pos_header)
         self._write_header(OpCode.HEADER, {
-            'index_pos': encode_uint64(self.__pos_index),
+            'chunk_count': encode_uint32(len(self.__chunks)),
             'conn_count': encode_uint32(len(self.__connections)),
-            'chunk_count': encode_uint32(len(self.__chunks))})
+            'index_pos': encode_uint64(self.__pos_index)
+        })
 
         # ensure the bag header record is 4096 characters long by padding it
         # with ASCII space characters (0x20) where necessary.
+        #
+        # the ROS bag format doesn't consider size fields when computing the
+        # length of the header and the record
         pos_current = self.__fp.tell()
         size = 4096
-        size_header = pos_current - self.__pos_header
-        size_padding = size - size_header - 4
+        size_header = pos_current - self.__pos_header - 4
+        size_padding = size - size_header
 
         write_uint32(size_padding, self.__fp)
         padding = b'\x20' * size_padding
