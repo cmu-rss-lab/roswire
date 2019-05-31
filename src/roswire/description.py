@@ -48,7 +48,7 @@ class SystemDescription:
     def from_file(fn: str) -> 'SystemDescription':
         """Loads a description from a given file."""
         with open(fn, 'r') as f:
-            d = yaml.load(f)
+            d = yaml.safe_load(f)
         return SystemDescription.from_dict(d)
 
     @staticmethod
