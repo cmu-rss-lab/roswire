@@ -87,4 +87,4 @@ class FormatDatabase:
     def load(cls, fn: str) -> 'FormatDatabase':
         """Loads a format database from a given file on disk."""
         with open(fn, 'r') as f:
-            return cls.from_dict(yaml.load(f))
+            return cls.from_dict(yaml.safe_load(f))
