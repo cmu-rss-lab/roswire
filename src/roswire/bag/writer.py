@@ -97,9 +97,9 @@ class BagWriter:
         logger.debug("wrote bag header record")
 
     def _write_message(self,
-                       offset: int,
+                       pos_chunk_start: int,
                        index: Index,
-                       message: BagMessage,
+                       message: BagMessage
                        ) -> None:
         typ = message.message.__class__
         connection = self._get_connection(message.topic, typ)
@@ -116,6 +116,7 @@ class BagWriter:
         self.__fp.write(bin_data)
 
         # update index
+        offset = pos_header - pos_chunk_start
         index_entry = IndexEntry(time=message.time,
                                  pos=pos_header,
                                  offset=offset)
@@ -127,14 +128,8 @@ class BagWriter:
         logger.debug("writing messages to chunk")
         index: Index = {}
         pos_start = self.__fp.tell()
-        pos_end = pos_start
-        offset = 0
         for m in messages:
-            self._write_message(offset, index, m)
-            pos_end = self.__fp.tell()
-            size_record = pos_end - pos_start
-            offset += size_record
-            pos_start = pos_end
+            self._write_message(pos_start, index, m)
         logger.debug("wrote messages to chunk")
         return index
 
@@ -221,15 +216,15 @@ class BagWriter:
 
         # write the connection header
         header_conn: Dict[str, bytes] = {}
+        if conn.callerid is not None:
+            header_conn['callerid'] = conn.callerid.encode('utf-8')
+        if conn.latching is not None:
+            header_conn['latching'] = conn.latching.encode('utf-8')
         header_conn['topic'] = conn.topic_original.encode('utf-8')
         header_conn['type'] = conn.typ.encode('utf-8')
         header_conn['md5sum'] = conn.md5sum.encode('utf-8')
         header_conn['message_definition'] = \
             conn.message_definition.encode('utf-8')
-        if conn.callerid is not None:
-            header_conn['callerid'] = conn.callerid.encode('utf-8')
-        if conn.latching is not None:
-            header_conn['latching'] = conn.latching.encode('utf-8')
         self._write_header(None, header_conn)
 
     def _get_connection(self,
