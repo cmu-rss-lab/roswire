@@ -132,6 +132,8 @@ class ROSProxy:
             cmd += [shlex.quote(package)]
         cmd += [shlex.quote(filename)]
         cmd += launch_args
+        if prefix:
+            cmd = [prefix] + cmd
         cmd_str = ' '.join(cmd)
         self.__shell.non_blocking_execute(cmd_str)
 
