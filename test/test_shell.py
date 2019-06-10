@@ -5,6 +5,7 @@ import os
 import pytest
 
 from roswire.proxy import ShellProxy
+from roswire.exceptions import EnvNotFoundError
 
 from test_basic import build_shell_proxy
 
@@ -30,3 +31,5 @@ def test_local_to_host_pid():
 def test_environ():
     with build_shell_proxy() as shell:
         assert shell.environ('ROS_PACKAGE_PATH')
+        with pytest.raises(EnvNotFoundError):
+            shell.environ('FOOBARFOOBARFOO')
