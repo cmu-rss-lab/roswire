@@ -3,6 +3,13 @@ class ROSWireException(Exception):
     """Base class used by all ROSWire exceptions."""
 
 
+class EnvNotFoundError(ROSWireException):
+    """A given environment variable could not be found."""
+    def __init__(self, var: str) -> None:
+        m = f"could not find enviroment variable: {var}"
+        super().__init__(m)
+
+
 class CatkinException(ROSWireException):
     """Base class used by all Catkin-related exceptions."""
 
