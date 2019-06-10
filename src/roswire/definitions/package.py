@@ -88,9 +88,7 @@ class PackageDatabase(Mapping[str, Package]):
         Parses the contents of the ROS_PACKAGE_PATH environment variable for a
         given shell.
         """
-        code, path_str, duration = shell.execute('echo "${ROS_PACKAGE_PATH}"')
-        if code != 0:
-            raise Exception("unexpected error when fetching ROS_PACKAGE_PATH")
+        path_str = shell.environ('ROS_PACKAGE_PATH')
         package_paths: List[str] = path_str.strip().split(':')
         paths: List[str] = []
         for path in package_paths:

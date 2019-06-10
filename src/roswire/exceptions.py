@@ -7,6 +7,17 @@ class FailedToParseLaunchFile(ROSWireException):
     """An attempt to parse a launch file failed."""
 
 
+class EnvNotFoundError(ROSWireException):
+    """A given environment variable could not be found."""
+    def __init__(self, var: str) -> None:
+        m = f"could not find enviroment variable: {var}"
+        super().__init__(m)
+
+
+class SubstitutionError(ROSWireException):
+    """An error occurred during substitution argument handling."""
+
+
 class CatkinException(ROSWireException):
     """Base class used by all Catkin-related exceptions."""
 
