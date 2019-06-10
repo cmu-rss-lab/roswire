@@ -33,6 +33,9 @@ def resolve_arg(shell: ShellProxy,
     EnvNotFoundError
         if a given environment variable is not found.
     """
+    if not context:
+        context = {}
+
     logger.debug("resolving substitution argument: %s", s)
     s = s[2:-1]
     logger.debug("stripped delimiters: %s", s)
