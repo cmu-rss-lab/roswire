@@ -10,6 +10,10 @@ class EnvNotFoundError(ROSWireException):
         super().__init__(m)
 
 
+class SubstitutionError(ROSWireException):
+    """An error occurred during substitution argument handling."""
+
+
 class CatkinException(ROSWireException):
     """Base class used by all Catkin-related exceptions."""
 
