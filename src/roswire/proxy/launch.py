@@ -24,6 +24,7 @@ class LaunchFileReader:
         Reference
         ---------
             http://wiki.ros.org/roslaunch/XML/node
+            http://docs.ros.org/kinetic/api/roslaunch/html/roslaunch.xmlloader.XmlLoader-class.html
         """
         root = ET.fromstring(self.__files.read(fn))
         if root.tag != 'launch':
