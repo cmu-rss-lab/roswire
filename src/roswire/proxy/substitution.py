@@ -5,7 +5,7 @@ by XML launch and xacro files.
 """
 __all__ = ('resolve',)
 
-from typing import Optional, Dict
+from typing import Optional, Dict, Any
 import os
 import re
 import shlex
@@ -25,7 +25,7 @@ R_ARG = re.compile(r'\$\(.+?\)')
 def resolve_arg(shell: ShellProxy,
                 files: FileProxy,
                 s: str,
-                context: Optional[Dict[str, str]] = None
+                context: Optional[Dict[str, Any]] = None
                 ) -> str:
     """
     Raises
