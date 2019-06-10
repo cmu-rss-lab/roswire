@@ -8,6 +8,7 @@ __all__ = ('resolve',)
 from typing import Optional, Dict
 import os
 import re
+import shlex
 import functools
 import logging
 
@@ -59,8 +60,14 @@ def resolve_arg(shell: ShellProxy,
             m = f'arg not supplied to launch context [{arg_name}]'
             raise SubstitutionError(m)
         return context['arg'][arg_name]
+    if kind == 'find':
+        package = params[0]
+        cmd = f'rospack find {shlex.quote(package)}'
+        retcode, location, duration = shell.execute(cmd)
+        if retcode != 0:
+            raise SubstitutionError(f'failed to locate package: {package}')
+        return location.strip()
 
-    # TODO $(find pkg)
     # TODO $(anon name)
     return s
 
