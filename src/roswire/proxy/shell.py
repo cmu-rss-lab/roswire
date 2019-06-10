@@ -16,6 +16,7 @@ from docker import APIClient as DockerAPIClient
 from docker.models.containers import Container as DockerContainer
 
 from ..util import Stopwatch
+from .. import exceptions
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -168,6 +169,20 @@ class ShellProxy:
         id_thread = threading.get_ident()
         h = abs(hash((id_thread, timer(), command)))
         return str(h)
+
+    def environ(self, var: str) -> str:
+        """Reads the value of a given environment variable inside this shell.
+
+        Raises
+        ------
+        EnvNotFoundError
+            if no environment variable exists with the given name.
+        """
+        cmd = f'echo "${{{var}}}"'
+        retcode, val, duration = self.execute(cmd)
+        if retcode != 0:
+            raise exceptions.EnvNotFoundError(var)
+        return val
 
     def instrument(self,
                    command: str,
