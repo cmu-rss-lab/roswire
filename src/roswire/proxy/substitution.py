@@ -53,8 +53,13 @@ def resolve_arg(shell: ShellProxy,
             raise SubstitutionError(m)
         dirname = os.path.normpath(dirname)
         return dirname
+    if kind == 'arg':
+        arg_name = params[0]
+        if 'arg' not in context or arg_name not in context['arg']:
+            m = f'arg not supplied to launch context [{arg_name}]'
+            raise SubstitutionError(m)
+        return context['arg'][arg_name]
 
-    # TODO $(arg foo)
     # TODO $(find pkg)
     # TODO $(anon name)
     return s
