@@ -25,3 +25,8 @@ def test_local_to_host_pid():
         p = shell.popen('sleep 60')
         pid_host = shell.local_to_host_pid(p.pid)
         assert pid_host is not None
+
+
+def test_environ():
+    with build_shell_proxy() as shell:
+        assert shell.environ('ROS_PACKAGE_PATH')
