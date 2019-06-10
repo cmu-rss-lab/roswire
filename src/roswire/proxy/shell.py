@@ -178,7 +178,7 @@ class ShellProxy:
         EnvNotFoundError
             if no environment variable exists with the given name.
         """
-        cmd = f'echo "${{{var}}}"'
+        cmd = f'test -v {var} && echo "${{{var}}}"'
         retcode, val, duration = self.execute(cmd)
         if retcode != 0:
             raise exceptions.EnvNotFoundError(var)
