@@ -6,13 +6,14 @@ by XML launch and xacro files.
 __all__ = ('resolve',)
 
 from typing import Optional, Dict
+import os
 import re
 import functools
 import logging
 
 from .shell import ShellProxy
 from .file import FileProxy
-from ..exceptions import EnvNotFoundError
+from ..exceptions import EnvNotFoundError, SubstitutionError
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -44,11 +45,18 @@ def resolve_arg(shell: ShellProxy,
             return shell.environ(params[0])
         except EnvNotFoundError:
             return ' '.join(params[1:])
+    if kind == 'dirname':
+        try:
+            dirname = os.path.dirname(context['filename'])
+        except KeyError:
+            m = 'filename is not provided by the launch context'
+            raise SubstitutionError(m)
+        dirname = os.path.normpath(dirname)
+        return dirname
 
     # TODO $(arg foo)
     # TODO $(find pkg)
     # TODO $(anon name)
-    # TODO $(dirname)
     return s
 
 
