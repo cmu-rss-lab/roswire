@@ -10,8 +10,8 @@ import xml.etree.ElementTree as ET
 
 import attr
 
-from .file import FileProxy
-from ..exceptions import FailedToParseLaunchFile
+from ..file import FileProxy
+from ...exceptions import FailedToParseLaunchFile
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
