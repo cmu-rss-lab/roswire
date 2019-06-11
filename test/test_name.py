@@ -37,3 +37,13 @@ def test_name_is_global():
     assert not f('foo/')
     assert not f('~foo')
     assert not f('~bar')
+
+
+def test_namespace():
+    f = roswire.name.namespace
+    assert f('/') == '/'
+    assert f('') == '/'
+    assert f('/bar') == '/'
+    assert f('/bar/foo') == '/bar'
+    with pytest.raises(ValueError):
+        f('~foo')
