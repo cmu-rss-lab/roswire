@@ -1,16 +1,10 @@
 # -*- coding: utf-8 -*-
 __all__ = (
-    'canonical_name',
     'global_name',
     'namespace',
     'namespace_join',
     'name_is_private',
     'name_is_global')
-
-
-def canonical_name(name: str) -> str:
-    """Returns the canonical form of a given name."""
-    return name if name_is_private(name) else global_name(name)
 
 
 def global_name(name: str) -> str:
