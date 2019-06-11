@@ -32,7 +32,8 @@ def name_is_global(name: str) -> bool:
 def namespace(name: str) -> str:
     """Returns the corresponding namespace for a given name."""
     if name_is_private(name):
-        return name
+        m = f'cannot determine namespace of private name: {name}'
+        raise ValueError(m)
     name = global_name(name)[:-1]
     ns, sep, name = name.rpartition('/')
     return ns if ns else '/'

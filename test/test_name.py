@@ -47,3 +47,14 @@ def test_namespace():
     assert f('/bar/foo') == '/bar'
     with pytest.raises(ValueError):
         f('~foo')
+
+
+def test_namespace_join():
+    f = roswire.name.namespace_join
+    assert f('', 'foo') == 'foo'
+    assert f('', 'foo/bar') == 'foo/bar'
+    assert f('/', 'foo') == '/foo'
+    assert f('/foo', 'bar') == '/foo/bar'
+    assert f('/foo/bar', 'beep') == '/foo/bar/beep'
+    assert f('/foo/bar', '~beep') == '~beep'
+    assert f('/foo/bar', '/bork') == '/bork'
