@@ -35,3 +35,14 @@ def namespace(name: str) -> str:
     name = global_name(name)[:-1]
     ns, sep, name = name.rpartition('/')
     return ns if ns else '/'
+
+
+def namespace_join(ns: str, name: str) -> str:
+    """Concatenates a given name to a namespace."""
+    if name_is_private(name) or name_is_global(name):
+        return name
+    if not ns:
+        return name
+    if ns == '~':
+        return '~' + name
+    return global_name(ns) + name
