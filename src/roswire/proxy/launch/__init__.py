@@ -44,6 +44,7 @@ class LaunchContext:
     namespace: str = attr.ib(default='/')
     arg_names: Tuple[str, ...] = attr.ib(default=tuple())
     env_args: Tuple[Tuple[str, str], ...] = attr.ib(default=tuple())
+    pass_all_args: bool = attr.ib(default=False)
 
     def with_argv(self, argv: Sequence[str]) -> 'LaunchContext':
         # ignore parameter assignment mappings
@@ -61,6 +62,48 @@ class LaunchContext:
     def with_env_arg(self, var: str, val: Any) -> 'LaunchContext':
         env_args = self.env_args + ((var, val),)
         return attr.evolve(self, env_args=env_args)
+
+    def with_arg(self,
+                 name: str,
+                 default: Optional[Any] = None,
+                 value: Optional[Any] = None,
+                 doc: Optional = None
+                 ) -> 'LaunchContext':
+        # ignore duplication if pass_all_args is set
+        if name in self.arg_names:
+            if not self.pass_all_args:
+                m = f"arg [{name}] has already been declared"
+                raise FailedToParseLaunchFile(m)
+        else:
+            arg_names = self.arg_names + (name,)
+
+        # FIXME decide which resolve dictionary should be used
+        # if self.include_resolve_dict is None:
+        #     resolve_dict = self.resolve_dict
+        # else:
+        #     resolve_dict = self.include_resolve_dict
+
+        # update stored arg values
+        resolve_dict = self.resolve_dict.copy()
+        resolve_dict['arg'] = resolve_dict.get('arg', {}).copy()
+        arg_dict = resolve_dict['arg']
+
+        if value is not None:
+            if name in arg_dict and not self.pass_all_args:
+                m = f"arg [{name}] value has already been defined."
+                raise FailedToParseLaunchFile(m)
+            arg_dict[name] = value
+        elif default is not None:
+            arg_dict[name] = arg_dict.get(name, default)
+
+        # update arg documentation
+        # NOTE do we care about this?
+        # resolve_dict['arg_doc'] = resolve_dict.get('arg_doc', {}).copy()
+        # doc_dict = resolve_dict['arg_doc']
+
+        return attr.evolve(self,
+                           arg_names=arg_names,
+                           resolve_dict=resolve_dict)
 
 
 def tag(name: str, legal_attributes: Collection[str] = tuple()):
@@ -130,7 +173,10 @@ class LaunchFileReader:
                       ) -> LaunchContext:
         name = tag.attrib['name']
         logger.debug("found attribute: %s", name)
-        return ctx
+        return ctx.with_arg(name=name,
+                            value=tag.attrib.get('value'),
+                            default=tag.attrib.get('default'),
+                            doc=tag.attrib.get('doc'))
 
     @tag('env', ['name', 'value'])
     def _load_env_tag(self,
@@ -167,7 +213,7 @@ class LaunchFileReader:
                             filename=fn,
                             resolve_dict={},
                             include_resolve_dict={},
-                            arg_names=[])
+                            arg_names=tuple())
         if argv:
             ctx = ctx.with_argv(argv)
 
