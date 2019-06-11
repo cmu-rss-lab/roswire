@@ -44,11 +44,14 @@ class LaunchContext:
     namespace: str = attr.ib(default='/')
 
     def with_argv(self, argv: Sequence[str]) -> 'LaunchContext':
-        # http://docs.ros.org/lunar/api/rosgraph/html/rosgraph.names-pysrc.html
-        # TODO load_mappings
+        # ignore parameter assignment mappings
+        logger.debug("loading argv: %s", argv)
+        mappings: Dict[str, str] = {}
         for arg in (a for a in argv if ':=' in a):
             var, sep, val = [a.strip() for a in arg.partition(':=')]
-            pass
+            if not var.startswith('__'):
+                mappings[var] = val
+        logger.debug("loaded argv: %s", mappings)
         resolve_dict = self.resolve_dict.copy()
         resolve_dict['arg'] = mappings
         return attr.evolve(self, resolve_dict=resolve_dict)
@@ -130,15 +133,13 @@ class LaunchFileReader:
             http://wiki.ros.org/roslaunch/XML/node
             http://docs.ros.org/kinetic/api/roslaunch/html/roslaunch.xmlloader.XmlLoader-class.html
         """
-        # TODO load system arguments into context
         ctx = LaunchContext(namespace='/',
                             filename=fn,
                             resolve_dict={},
                             include_resolve_dict={},
                             arg_names=[])
-
-        if not argv:
-            argv = []
+        if argv:
+            ctx = ctx.with_argv(argv)
 
         launch = self._parse_file(fn)
         self._load_tags(ctx, list(launch))
