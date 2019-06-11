@@ -46,6 +46,16 @@ class LaunchContext:
     env_args: Tuple[Tuple[str, str], ...] = attr.ib(default=tuple())
     pass_all_args: bool = attr.ib(default=False)
 
+    def child(self, ns: Optional[str] = None) -> 'LaunchContext':
+        """Creates a child context that inherits from this context."""
+        if ns is None:
+            child_ns = self.namespace
+        elif ns.startswith('/') or ns == '~':
+            child_ns = ns
+        else:
+            child_ns = ns_join(self.namespace, ns)
+        return attr.evolve(self, namespace=child_ns, parent=self)
+
     def with_argv(self, argv: Sequence[str]) -> 'LaunchContext':
         # ignore parameter assignment mappings
         logger.debug("loading argv: %s", argv)
