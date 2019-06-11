@@ -29,6 +29,12 @@ class LaunchConfig:
 
 
 @attr.s(frozen=True, slots=True)
+class Parameter:
+    name: str = attr.ib()
+    value: str = attr.ib()  # TODO convert to appropriate type
+
+
+@attr.s(frozen=True, slots=True)
 class NodeConfig:
     namespace: str = attr.ib()
     name: str = attr.ib()
@@ -46,6 +52,17 @@ class LaunchContext:
     arg_names: Tuple[str, ...] = attr.ib(default=tuple())
     env_args: Tuple[Tuple[str, str], ...] = attr.ib(default=tuple())
     pass_all_args: bool = attr.ib(default=False)
+
+    def include_child(self,
+                      ns: Optional[str],
+                      filename: str
+                      ) -> 'LaunchContext':
+        ctx = self.child(ns)
+        ctx = attr.evolve(ctx,
+                          filename=filename,
+                          arg_names=tuple(),
+                          include_resolve_dict={})
+        return ctx
 
     def child(self, ns: Optional[str] = None) -> 'LaunchContext':
         """Creates a child context that inherits from this context."""
@@ -199,13 +216,56 @@ class LaunchFileReader:
                           ctx: LaunchContext,
                           tag: ET.Element
                           ) -> LaunchContext:
-        include_filename = resolve_args(self.__shell,
-                                        self.__files,
-                                        tag.attrib['file'])
+        include_filename = self._resolve_args(tag.attrib['file'])
         logger.debug("include file: %s", include_filename)
 
-        # TODO should all arguments be passed?
+        # construct child context
+        ctx_child = self._handle_ns_and_clear_params(ctx,
+                                                     tag,
+                                                     include_filename=include_filename)
+        if 'pass_all_args' in tag.attrib:
+            if 'arg' in ctx.resolve_dict:
+                for var, val in ctx.resolve_dict['arg'].items():
+                    ctx_child.with_arg(var, value=val)
+            ctx_child = attrs.evolve(ctx_child, pass_all_args=True)
+            logger.debug("passed all args: %s", ctx_child)
+
+        logger.debug("tag: %s", tag.attrib)
+
+        # handle child tags
+        # TODO param tags require special care
+        logger.debug("processing child tags")
+        child_tags = [t for t in tag if t.tag in ('env', 'arg')]
+        ctx_child = self._load_tags(ctx_child, child_tags)
+        logger.debug("processed child tags")
+
+        # TODO process_include_args(ctx_child)
+
         return ctx
+
+    def _handle_ns_and_clear_params(self,
+                                    ctx: LaunchContext,
+                                    tag: ET.Element,
+                                    include_filename: Optional[str] = None
+                                    ) -> LaunchContext:
+        ns: Optional[str] = None
+        if 'namespace' in tag.attrib:
+            ns = tag.attrib['namespace']
+            ns = self._resolve_args(ns)
+            if not ns:
+                m = f"<{tag.tag}> has empty attribute [namespace]"
+                raise FailedToParseLaunchFile(m)
+
+        if include_filename:
+            ctx_child = ctx.include_child(ns, include_filename)
+        else:
+            ctx_child = ctx.child(ns)
+
+        return ctx_child
+
+    def _resolve_args(self, s: str) -> str:
+        """Resolves all substitution args in a given string."""
+        return resolve_args(self.__shell, self.__files, s)
 
     def read(self, fn: str, argv: Optional[Sequence[str]] = None) -> None:
         """Parses the contents of a given launch file.
