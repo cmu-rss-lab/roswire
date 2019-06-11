@@ -70,10 +70,13 @@ def tag(name: str, legal_attributes: Collection[str] = tuple()):
                     ctx: LaunchContext,
                     elem: ET.Element
                     ) -> LaunchContext:
+            logger.debug("parsing <%s> tag", name)
             for attribute in elem.attrib:
                 if attribute not in legal_attributes:
                     raise FailedToParseLaunchFile(m)
-            return loader(self, ctx, elem)
+            ctx = loader(self, ctx, elem)
+            logger.debug("new context: %s", ctx)
+            return ctx
         _TAG_TO_LOADER[name] = wrapped
         return wrapped
     return wrap
