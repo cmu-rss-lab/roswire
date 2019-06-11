@@ -117,13 +117,18 @@ class LaunchFileReader:
         name = tag.attrib['name']
         logger.debug("found attribute: %s", name)
 
-    @tag('include', ['file'])
+    @tag('include', ['file', 'pass_all_args', 'ns', 'clear_params'])
     def _load_include_tag(self,
                           ctx: LaunchContext,
                           tag: ET.Element
                           ) -> None:
-        include_filename = resolve_args(self.__shell, self.__files, tag.attrib['file'])
+        include_filename = resolve_args(self.__shell,
+                                        self.__files,
+                                        tag.attrib['file'])
         logger.debug("include file: %s", include_filename)
+
+        # TODO should all arguments be passed?
+
 
     def read(self, fn: str, argv: Optional[Sequence[str]] = None) -> None:
         """Parses the contents of a given launch file.
