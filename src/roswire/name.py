@@ -26,7 +26,7 @@ def name_is_private(name: str) -> bool:
 
 def name_is_global(name: str) -> bool:
     """Determines whether a given name is global."""
-    return not name or name[0] == '/'
+    return name.startswith('/')
 
 
 def namespace(name: str) -> str:
