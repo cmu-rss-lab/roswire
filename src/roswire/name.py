@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
 __all__ = (
+    'canonical_name',
     'global_name',
     'namespace',
     'name_is_private',
     'name_is_global')
+
+
+def canonical_name(name: str) -> str:
+    """Returns the canonical form of a given name."""
+    return name if name_is_private(name) else global_name(name)
 
 
 def global_name(name: str) -> str:
@@ -39,9 +45,7 @@ def namespace(name: str) -> str:
 
 def namespace_join(ns: str, name: str) -> str:
     """Concatenates a given name to a namespace."""
-    if name_is_private(name) or name_is_global(name):
-        return name
-    if not ns:
+    if not ns or name_is_private(name) or name_is_global(name):
         return name
     if ns == '~':
         return '~' + name
