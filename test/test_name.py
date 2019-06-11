@@ -17,9 +17,23 @@ def test_global_name():
 
 def test_name_is_private():
     f = roswire.name.name_is_private
+    assert not f('')
+    assert not f('/')
     assert not f('/foo')
     assert not f('/foo/bar')
     assert not f('foo')
     assert not f('foo/')
     assert f('~foo')
     assert f('~bar')
+
+
+def test_name_is_global():
+    f = roswire.name.name_is_global
+    assert f('')
+    assert f('/')
+    assert f('/foo')
+    assert f('/foo/bar')
+    assert f('foo')
+    assert f('foo/')
+    assert not f('~foo')
+    assert not f('~bar')
