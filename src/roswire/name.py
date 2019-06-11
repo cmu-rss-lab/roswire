@@ -3,6 +3,7 @@ __all__ = (
     'canonical_name',
     'global_name',
     'namespace',
+    'namespace_join',
     'name_is_private',
     'name_is_global')
 
