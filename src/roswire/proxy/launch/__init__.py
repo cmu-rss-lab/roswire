@@ -171,9 +171,7 @@ class LaunchFileReader:
                       ctx: LaunchContext,
                       tag: ET.Element
                       ) -> LaunchContext:
-        name = tag.attrib['name']
-        logger.debug("found attribute: %s", name)
-        return ctx.with_arg(name=name,
+        return ctx.with_arg(name=tag.attrib['name'],
                             value=tag.attrib.get('value'),
                             default=tag.attrib.get('default'),
                             doc=tag.attrib.get('doc'))
@@ -183,10 +181,7 @@ class LaunchFileReader:
                       ctx: LaunchContext,
                       tag: ET.Element
                       ) -> LaunchContext:
-        name = tag.attrib['name']
-        value = tag.attrib['value']
-        logger.debug("found env tag [%s]: %s", name, value)
-        return ctx.with_env_arg(name, value)
+        return ctx.with_env_arg(tag.attrib['name'], tag.attrib['value'])
 
     @tag('include', ['file', 'pass_all_args', 'ns', 'clear_params'])
     def _load_include_tag(self,
