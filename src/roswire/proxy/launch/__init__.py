@@ -14,6 +14,7 @@ import attr
 from ..substitution import resolve as resolve_args
 from ..shell import ShellProxy
 from ..file import FileProxy
+from ...name import namespace_join
 from ...exceptions import FailedToParseLaunchFile
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -53,7 +54,7 @@ class LaunchContext:
         elif ns.startswith('/') or ns == '~':
             child_ns = ns
         else:
-            child_ns = ns_join(self.namespace, ns)
+            child_ns = namespace_join(self.namespace, ns)
         return attr.evolve(self, namespace=child_ns, parent=self)
 
     def with_argv(self, argv: Sequence[str]) -> 'LaunchContext':
