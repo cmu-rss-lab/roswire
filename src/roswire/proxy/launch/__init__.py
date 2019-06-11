@@ -4,7 +4,7 @@ This file implements a proxy for parsing the contents of launch files.
 """
 __all__ = ('LaunchFileReader',)
 
-from typing import List, Optional, Sequence, Collection, Dict, Any
+from typing import List, Optional, Sequence, Collection, Dict, Any, Mapping
 import logging
 import xml.etree.ElementTree as ET
 
@@ -37,11 +37,21 @@ class NodeConfig:
 @attr.s(frozen=True, slots=True)
 class LaunchContext:
     filename: str = attr.ib()
-    resolve_dict: Dict[str, Any] = attr.ib()
-    include_resolve_dict: Dict[str, Any] = attr.ib()
+    resolve_dict: Mapping[str, Any] = attr.ib()
+    include_resolve_dict: Mapping[str, Any] = attr.ib()
     arg_names: List[str] = attr.ib()
     parent: 'LaunchContext' = attr.ib(default=None)
     namespace: str = attr.ib(default='/')
+
+    def with_argv(self, argv: Sequence[str]) -> 'LaunchContext':
+        # http://docs.ros.org/lunar/api/rosgraph/html/rosgraph.names-pysrc.html
+        # TODO load_mappings
+        for arg in (a for a in argv if ':=' in a):
+            var, sep, val = [a.strip() for a in arg.partition(':=')]
+            pass
+        resolve_dict = self.resolve_dict.copy()
+        resolve_dict['arg'] = mappings
+        return attr.evolve(self, resolve_dict=resolve_dict)
 
 
 def tag(name: str, legal_attributes: Collection[str] = tuple()):
