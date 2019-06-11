@@ -4,7 +4,8 @@ This file implements a proxy for parsing the contents of launch files.
 """
 __all__ = ('LaunchFileReader',)
 
-from typing import List, Optional, Sequence, Collection, Dict, Any, Mapping
+from typing import (List, Optional, Sequence, Collection, Dict, Any, Mapping,
+                    Tuple)
 import logging
 import xml.etree.ElementTree as ET
 
@@ -39,9 +40,10 @@ class LaunchContext:
     filename: str = attr.ib()
     resolve_dict: Mapping[str, Any] = attr.ib()
     include_resolve_dict: Mapping[str, Any] = attr.ib()
-    arg_names: List[str] = attr.ib()
     parent: 'LaunchContext' = attr.ib(default=None)
     namespace: str = attr.ib(default='/')
+    arg_names: Tuple[str, ...] = attr.ib(default=tuple())
+    env_args: Tuple[Tuple[str, str], ...] = attr.ib(default=tuple())
 
     def with_argv(self, argv: Sequence[str]) -> 'LaunchContext':
         # ignore parameter assignment mappings
@@ -56,11 +58,18 @@ class LaunchContext:
         resolve_dict['arg'] = mappings
         return attr.evolve(self, resolve_dict=resolve_dict)
 
+    def with_env_arg(self, var: str, val: Any) -> 'LaunchContext':
+        env_args = self.env_args + ((var, val),)
+        return attr.evolve(self, env_args=env_args)
+
 
 def tag(name: str, legal_attributes: Collection[str] = tuple()):
     legal_attributes = frozenset(legal_attributes)
     def wrap(loader):
-        def wrapped(self, ctx: LaunchContext, elem: ET.Element):
+        def wrapped(self,
+                    ctx: LaunchContext,
+                    elem: ET.Element
+                    ) -> LaunchContext:
             for attribute in elem.attrib:
                 if attribute not in legal_attributes:
                     raise FailedToParseLaunchFile(m)
@@ -86,16 +95,17 @@ class LaunchFileReader:
     def _load_tags(self,
                    ctx: LaunchContext,
                    tags: Sequence[ET.Element]
-                   ) -> None:
+                   ) -> LaunchContext:
         for tag in (t for t in tags if t.tag in _TAG_TO_LOADER):
             loader = _TAG_TO_LOADER[tag.tag]
-            loader(self, ctx, tag)
+            ctx = loader(self, ctx, tag)
+        return ctx
 
     @tag('arg', ['name', 'type', 'pkg'])
     def _load_node_tag(self,
                        ctx: LaunchContext,
                        tag: ET.Element
-                       ) -> None:
+                       ) -> LaunchContext:
         name = tag.attrib['name']
         pkg = tag.attrib['type']
         node_type = tag.attrib['type']
@@ -108,27 +118,37 @@ class LaunchFileReader:
                           pkg=pkg,
                           node_type=node_type)
         logger.debug("found node: %s", node)
+        return ctx
 
     @tag('arg', ['name', 'default', 'value', 'doc'])
     def _load_arg_tag(self,
                       ctx: LaunchContext,
                       tag: ET.Element
-                      ) -> None:
+                      ) -> LaunchContext:
         name = tag.attrib['name']
         logger.debug("found attribute: %s", name)
+        return ctx
+
+    @tag('env', ['name', 'value'])
+    def _load_env_tag(self,
+                      ctx: LaunchContext,
+                      tag: ET.Element
+                      ) -> LaunchContext:
+        logger.debug("found env tag [%s]: %s", name, value)
+        return ctx.with_env_arg(tag.attrib['name'], tag.attrib['value'])
 
     @tag('include', ['file', 'pass_all_args', 'ns', 'clear_params'])
     def _load_include_tag(self,
                           ctx: LaunchContext,
                           tag: ET.Element
-                          ) -> None:
+                          ) -> LaunchContext:
         include_filename = resolve_args(self.__shell,
                                         self.__files,
                                         tag.attrib['file'])
         logger.debug("include file: %s", include_filename)
 
         # TODO should all arguments be passed?
-
+        return ctx
 
     def read(self, fn: str, argv: Optional[Sequence[str]] = None) -> None:
         """Parses the contents of a given launch file.
