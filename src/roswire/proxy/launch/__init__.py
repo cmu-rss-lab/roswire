@@ -93,6 +93,19 @@ class LaunchFileReader:
             ctx, cfg = loader(self, ctx, cfg, tag)
         return ctx, cfg
 
+    @tag('remap', ['from', 'to'])
+    def _load_remap_tag(self,
+                        ctx: LaunchContext,
+                        cfg: ROSConfig,
+                        tag: ET.Element
+                        ) -> Tuple[LaunchContext, ROSConfig]:
+        frm = self._read_required(tag, 'from', ctx)
+        to = self._read_required(tag, 'to', ctx)
+        logger.debug("remapping: %s -> %s", frm, to)
+
+        # TODO add remap to context
+        return ctx, cfg
+
     @tag('node', ['name', 'type', 'pkg', 'required', 'clear_params',
                   'respawn', 'namespace', 'output'])
     def _load_node_tag(self,
@@ -109,7 +122,9 @@ class LaunchFileReader:
         respawn_delay = \
             self._read_optional_float(tag, 'respawn', ctx, 0.0)
 
-        # TODO respawn_delay
+        # TODO create param context
+        ctx_child = \
+            self._handle_ns_and_clear_params(ctx, tag, node_name=name)
 
         allowed = {'remap', 'rosparam', 'env', 'param'}
         # self._load_tags([t for t in tags if t.tag in allowed])
@@ -192,7 +207,8 @@ class LaunchFileReader:
     def _handle_ns_and_clear_params(self,
                                     ctx: LaunchContext,
                                     tag: ET.Element,
-                                    include_filename: Optional[str] = None
+                                    include_filename: Optional[str] = None,
+                                    node_name: Optional[str] = None
                                     ) -> LaunchContext:
         ns = self._read_optional(tag, 'namespace', ctx)
         if ns == '':
@@ -205,6 +221,8 @@ class LaunchFileReader:
             ctx_child = ctx.child(ns)
 
         # TODO clear params
+        if self._read_optional_bool(tag, 'clear_params', ctx, False):
+            pass
 
         return ctx_child
 

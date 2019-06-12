@@ -10,6 +10,8 @@ import logging
 
 import attr
 
+from ...name import canonical_name
+
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -24,6 +26,7 @@ class LaunchContext:
     env_args: Tuple[Tuple[str, str], ...] = attr.ib(default=tuple())
     pass_all_args: bool = attr.ib(default=False)
     include_resolve_dict: Optional[Mapping[str, Any]] = attr.ib(default=None)
+    remappings: Tuple[Tuple[str, str], ...] = attr.ib(default=tuple())
 
     def include_child(self,
                       ns: Optional[str],
@@ -48,6 +51,12 @@ class LaunchContext:
                            namespace=child_ns,
                            parent=self,
                            pass_all_args=False)
+
+    def with_remapping(self, frm: str, to: str) -> 'LaunchContext':
+        # TODO canonicalise name
+        frm = canonical_name(frm)
+        to = canonical_name(to)
+        return self
 
     def with_pass_all_args(self) -> 'LaunchContext':
         ctx = self
