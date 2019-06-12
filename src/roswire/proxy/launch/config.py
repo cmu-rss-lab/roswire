@@ -33,6 +33,7 @@ class NodeConfig:
     output: Optional[str] = attr.ib(default=None)
     required: bool = attr.ib(default=False)
     respawn: bool = attr.ib(default=False)
+    respawn_delay: float = attr.ib(default=0.0)
 
     @property
     def full_name(self) -> str:

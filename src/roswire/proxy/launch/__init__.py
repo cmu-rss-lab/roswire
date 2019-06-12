@@ -106,6 +106,8 @@ class LaunchFileReader:
         output = self._read_optional(tag, 'output', ctx)
         required = self._read_optional_bool(tag, 'required', ctx, False)
         respawn = self._read_optional_bool(tag, 'respawn', ctx, False)
+        respawn_delay = \
+            self._read_optional_float(tag, 'respawn', ctx, 0.0)
 
         # TODO respawn_delay
 
@@ -120,6 +122,7 @@ class LaunchFileReader:
                           package=package,
                           required=required,
                           respawn=respawn,
+                          respawn_delay=respawn_delay,
                           output=output,
                           remappings=remappings,
                           filename=ctx.filename,
@@ -191,13 +194,10 @@ class LaunchFileReader:
                                     tag: ET.Element,
                                     include_filename: Optional[str] = None
                                     ) -> LaunchContext:
-        ns: Optional[str] = None
-        if 'namespace' in tag.attrib:
-            ns = tag.attrib['namespace']
-            ns = self._resolve_args(ns, ctx)
-            if not ns:
-                m = f"<{tag.tag}> has empty attribute [namespace]"
-                raise FailedToParseLaunchFile(m)
+        ns = self._read_optional(tag, 'namespace', ctx)
+        if ns == '':
+            m = f"<{tag.tag}> has empty attribute [namespace]"
+            raise FailedToParseLaunchFile(m)
 
         if include_filename:
             ctx_child = ctx.include_child(ns, include_filename)
@@ -218,6 +218,17 @@ class LaunchFileReader:
         if s is None:
             return default
         return _parse_bool(attrib, s)
+
+    def _read_optional_float(self,
+                             elem: ET.Element,
+                             attrib: str,
+                             ctx: LaunchContext,
+                             default: Optional[float] = None
+                             ) -> Optional[float]:
+        s = self._read_optional(elem, attrib, ctx)
+        if s is None:
+            return default
+        return _parse_float(attrib, s)
 
     def _read_optional(self,
                        elem: ET.Element,
