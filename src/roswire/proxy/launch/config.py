@@ -37,3 +37,7 @@ class ROSConfig:
     def with_roslaunch_file(self, filename: str) -> 'ROSConfig':
         roslaunch_files = self.roslaunch_files + (filename,)
         return attr.evolve(self, roslaunch_files=roslaunch_files)
+
+    def with_node(self, name: str) -> 'ROSConfig':
+        nodes = self.nodes + (name,)
+        return attr.evolve(self, nodes=nodes)
