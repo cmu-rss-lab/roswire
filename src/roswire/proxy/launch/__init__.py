@@ -73,7 +73,32 @@ class LaunchContext:
             child_ns = ns
         else:
             child_ns = namespace_join(self.namespace, ns)
-        return attr.evolve(self, namespace=child_ns, parent=self)
+        return attr.evolve(self,
+                           namespace=child_ns,
+                           parent=self,
+                           pass_all_args=False)
+
+    def with_pass_all_args(self) -> 'LaunchContext':
+        ctx = self
+        if 'arg' in self.parent.resolve_dict:
+            for var, val in self.parent.resolve_dict['arg'].items():
+                ctx = ctx.with_arg(var, value=val)
+        return attrs.evolve(ctx, pass_all_args=True)
+
+    def process_include_args(self) -> 'LaunchContext':
+        if self.include_resolve_dict is None:
+            return self
+
+        arg_dict = self.include_resolve_dict.get('arg', {})
+        for arg in self.arg_names:
+            if not arg in arg_dict:
+                m = f'include arg [{arg}] is missing value.'
+                raise FailedToParseLaunchFile(m)
+
+        return attr.evolve(self,
+                           arg_names=tuple(),
+                           resolve_dict=deepcopy(self.include_resolve_dict),
+                           include_resolve_dict=None)
 
     def with_argv(self, argv: Sequence[str]) -> 'LaunchContext':
         # ignore parameter assignment mappings
@@ -223,30 +248,21 @@ class LaunchFileReader:
                                                      tag,
                                                      include_filename=include_filename)
 
-        # TODO with_pass_all_args
+        # TODO handle with_pass_all_args
         # if instructed to pass along args, then those args must be added to
         # the child context
+
         if 'pass_all_args' in tag.attrib:
+            # TODO resolve and convert to boolean
             pass_all_args_s = tag.attrib['pass_all_args'].value
             pass_all_args = self._resolve_args(pass_all_args_s)
-        else:
-            pass_all_args = False
-
-        if pass_all_args:
-            if 'arg' in ctx.resolve_dict:
-                for var, val in ctx.resolve_dict['arg'].items():
-                    ctx_child.with_arg(var, value=val)
-            ctx_child = attrs.evolve(ctx_child, pass_all_args=True)
-            logger.debug("passed all args: %s", ctx_child)
+            if pass_all_args:
+                ctx_child = ctx_child.with_pass_all_args()
 
         # handle child tags
-        logger.debug("created child context: %s", ctx_child)
-        logger.debug("processing child tags")
         child_tags = [t for t in tag if t.tag in ('env', 'arg')]
         ctx_child = self._load_tags(ctx_child, child_tags)
-        logger.debug("processed child tags")
-
-        # TODO process_include_args(ctx_child)
+        ctx_child = ctx_child.process_include_args()
 
         return ctx
 
