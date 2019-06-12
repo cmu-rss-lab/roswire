@@ -6,6 +6,7 @@ __all__ = ('LaunchFileReader',)
 
 from typing import (List, Optional, Sequence, Collection, Dict, Any, Mapping,
                     Tuple)
+from copy import deepcopy
 import logging
 import xml.etree.ElementTree as ET
 
@@ -97,23 +98,23 @@ class LaunchContext:
                  value: Optional[Any] = None,
                  doc: Optional = None
                  ) -> 'LaunchContext':
-        # ignore duplication if pass_all_args is set
+        logger.debug("adding arg [%s] to context", name)
+        arg_names = self.arg_names
         if name in self.arg_names:
             if not self.pass_all_args:
                 m = f"arg [{name}] has already been declared"
                 raise FailedToParseLaunchFile(m)
         else:
-            arg_names = self.arg_names + (name,)
+            arg_names = arg_names + (name,)
 
-        # FIXME decide which resolve dictionary should be used
-        # if self.include_resolve_dict is None:
-        #     resolve_dict = self.resolve_dict
-        # else:
-        #     resolve_dict = self.include_resolve_dict
+        # decide which resolve dictionary should be used
+        use_include_resolve_dict = self.include_resolve_dict is not None
+        if use_include_resolve_dict:
+            resolve_dict = self.include_resolve_dict
+        else:
+            resolve_dict = self.resolve_dict
 
-        # update stored arg values
-        resolve_dict = self.resolve_dict.copy()
-        resolve_dict['arg'] = resolve_dict.get('arg', {}).copy()
+        resolve_dict = deepcopy(resolve_dict)
         arg_dict = resolve_dict['arg']
 
         if value is not None:
@@ -124,14 +125,12 @@ class LaunchContext:
         elif default is not None:
             arg_dict[name] = arg_dict.get(name, default)
 
-        # update arg documentation
-        # NOTE do we care about this?
-        # resolve_dict['arg_doc'] = resolve_dict.get('arg_doc', {}).copy()
-        # doc_dict = resolve_dict['arg_doc']
-
-        return attr.evolve(self,
-                           arg_names=arg_names,
-                           resolve_dict=resolve_dict)
+        # construct new context
+        ctx = attr.evolve(self, arg_names=arg_names)
+        if use_include_resolve_dict:
+            return attr.evolve(ctx, include_resolve_dict=resolve_dict)
+        else:
+            return attr.evolve(ctx, resolve_dict=resolve_dict)
 
 
 def tag(name: str, legal_attributes: Collection[str] = tuple()):
@@ -223,17 +222,25 @@ class LaunchFileReader:
         ctx_child = self._handle_ns_and_clear_params(ctx,
                                                      tag,
                                                      include_filename=include_filename)
+
+        # TODO with_pass_all_args
+        # if instructed to pass along args, then those args must be added to
+        # the child context
         if 'pass_all_args' in tag.attrib:
+            pass_all_args_s = tag.attrib['pass_all_args'].value
+            pass_all_args = self._resolve_args(pass_all_args_s)
+        else:
+            pass_all_args = False
+
+        if pass_all_args:
             if 'arg' in ctx.resolve_dict:
                 for var, val in ctx.resolve_dict['arg'].items():
                     ctx_child.with_arg(var, value=val)
             ctx_child = attrs.evolve(ctx_child, pass_all_args=True)
             logger.debug("passed all args: %s", ctx_child)
 
-        logger.debug("tag: %s", tag.attrib)
-
         # handle child tags
-        # TODO param tags require special care
+        logger.debug("created child context: %s", ctx_child)
         logger.debug("processing child tags")
         child_tags = [t for t in tag if t.tag in ('env', 'arg')]
         ctx_child = self._load_tags(ctx_child, child_tags)
@@ -260,6 +267,8 @@ class LaunchFileReader:
             ctx_child = ctx.include_child(ns, include_filename)
         else:
             ctx_child = ctx.child(ns)
+
+        # TODO clear params
 
         return ctx_child
 
