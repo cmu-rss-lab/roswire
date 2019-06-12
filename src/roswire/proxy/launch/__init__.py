@@ -139,8 +139,8 @@ class LaunchContext:
         else:
             resolve_dict = self.resolve_dict
 
-        resolve_dict = deepcopy(resolve_dict)
-        arg_dict = resolve_dict['arg']
+        resolve_dict = resolve_dict.copy()
+        arg_dict = resolve_dict['arg'] = resolve_dict.get('arg', {}).copy()
 
         if value is not None:
             if name in arg_dict and not self.pass_all_args:
