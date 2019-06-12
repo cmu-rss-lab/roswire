@@ -93,6 +93,7 @@ class LaunchFileReader:
         name = tag.attrib['name']
         pkg = tag.attrib['type']
         node_type = tag.attrib['type']
+        required = _parse_bool('required', tag.attrib.get('required'), False)
 
         allowed = {'remap', 'rosparam', 'env', 'param'}
         # self._load_tags([t for t in tags if t.tag in allowed])
@@ -100,6 +101,7 @@ class LaunchFileReader:
         node = NodeConfig(name=name,
                           namespace=ctx.namespace,
                           pkg=pkg,
+                          required=required,
                           typ=node_type)
         logger.debug("found node: %s", node)
 

@@ -21,6 +21,7 @@ class NodeConfig:
     name: str = attr.ib()
     typ: str = attr.ib()
     pkg: str = attr.ib()
+    required: bool = attr.ib(default=False)
 
 
 @attr.s(frozen=True, slots=True)
