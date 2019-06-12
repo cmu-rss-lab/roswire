@@ -266,6 +266,7 @@ class LaunchFileReader:
                           ) -> Tuple[LaunchContext, ROSConfig]:
         include_filename = self._resolve_args(tag.attrib['file'])
         logger.debug("include file: %s", include_filename)
+        cfg = cfg.with_roslaunch_file(include_filename)
 
         # construct child context
         ctx_child = self._handle_ns_and_clear_params(ctx,
@@ -342,4 +343,5 @@ class LaunchFileReader:
             ctx = ctx.with_argv(argv)
 
         launch = self._parse_file(fn)
-        return self._load_launch(ctx, cfg, launch)
+        ctx, cfg = self._load_launch(ctx, cfg, launch)
+        logger.debug("launch configuration: %s", cfg)
