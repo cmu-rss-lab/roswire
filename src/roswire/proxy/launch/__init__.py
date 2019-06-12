@@ -149,7 +149,9 @@ class LaunchFileReader:
                       cfg: ROSConfig,
                       tag: ET.Element
                       ) -> Tuple[LaunchContext, ROSConfig]:
-        ctx = ctx.with_env_arg(tag.attrib['name'], tag.attrib['value'])
+        name = self._read_required(tag, 'name', ctx)
+        value = self._read_required(tag, 'value', ctx)
+        ctx = ctx.with_env_arg(name, value)
         return ctx, cfg
 
     @tag('include', ['file', 'pass_all_args', 'ns', 'clear_params'])
