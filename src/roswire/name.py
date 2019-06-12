@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 __all__ = (
+    'canonical_name',
     'global_name',
     'namespace',
     'namespace_join',
@@ -8,7 +9,7 @@ __all__ = (
 
 
 def global_name(name: str) -> str:
-    """Converts a name to its canonical global form."""
+    """Converts a name to its global form."""
     if name_is_private(name):
         m = f'cannot convert private name [{name}] into global name'
         raise ValueError(m)
@@ -17,6 +18,15 @@ def global_name(name: str) -> str:
     if name[-1] != '/':
         name = name + '/'
     return name
+
+
+def canonical_name(name: str) -> str:
+    """Returns the canonical form of a given name."""
+    if not name:
+        return ''
+    if name[0] == '/':
+        return '/' + '/'.join(n for n in name[1:].split('/') if n)
+    return '/'.join(n for n in name.split('/') if n)
 
 
 def name_is_private(name: str) -> bool:
