@@ -33,7 +33,7 @@ class LaunchContext:
         ctx = attr.evolve(ctx,
                           filename=filename,
                           arg_names=tuple(),
-                          include_resolve_dict=None)
+                          include_resolve_dict={})
         return ctx
 
     def child(self, ns: Optional[str] = None) -> 'LaunchContext':

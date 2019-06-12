@@ -205,9 +205,8 @@ class LaunchFileReader:
 
     def _resolve_args(self, s: str, ctx: LaunchContext) -> str:
         """Resolves all substitution args in a given string."""
-        arg_dict = ctx.resolve_dict['arg']
-        logger.debug("resolve [%s] with context: %s", s, arg_dict)
-        return resolve_args(self.__shell, self.__files, s, arg_dict)
+        logger.debug("resolve [%s] with context: %s", s, ctx.resolve_dict)
+        return resolve_args(self.__shell, self.__files, s, ctx.resolve_dict)
 
     def read(self, fn: str, argv: Optional[Sequence[str]] = None) -> None:
         """Parses the contents of a given launch file.
