@@ -160,7 +160,7 @@ class LaunchFileReader:
                           cfg: ROSConfig,
                           tag: ET.Element
                           ) -> Tuple[LaunchContext, ROSConfig]:
-        include_filename = self._resolve_args(tag.attrib['file'], ctx)
+        include_filename = self._read_required(tag, 'file', ctx)
         logger.debug("include file: %s", include_filename)
         cfg = cfg.with_roslaunch_file(include_filename)
 
@@ -171,11 +171,8 @@ class LaunchFileReader:
 
         # if instructed to pass along args, then those args must be added to
         # the child context
-        if 'pass_all_args' in tag.attrib:
-            s_pass_all_args = tag.attrib['pass_all_args'].value
-            s_pass_all_args = self._resolve_args(s_pass_all_args, ctx)
-            if _parse_bool('pass_all_args', s_pass_all_args, False):
-                ctx_child = ctx_child.with_pass_all_args()
+        if self._read_optional_bool(tag, 'pass_all_args', ctx, False):
+            ctx_child = ctx_child.with_pass_all_args()
 
         # handle child tags
         child_tags = [t for t in tag if t.tag in ('env', 'arg')]
