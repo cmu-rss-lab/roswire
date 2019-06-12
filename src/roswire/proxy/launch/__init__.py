@@ -226,6 +226,14 @@ class LaunchFileReader:
         """Reads the string value of an optional attribute of a DOM element."""
         if attrib not in elem.attrib:
             return None
+        return self._read_required(elem, attrib, ctx)
+
+    def _read_required(self,
+                       elem: ET.Element,
+                       attrib: str,
+                       ctx: LaunchContext
+                       ) -> str:
+        """Reads the string value of a required attribute of a DOM element."""
         return self._resolve_args(elem.attrib[attrib])
 
     def _resolve_args(self, s: str, ctx: LaunchContext) -> str:
