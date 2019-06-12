@@ -26,11 +26,8 @@ logger.setLevel(logging.DEBUG)
 _TAG_TO_LOADER = {}
 
 
-def _parse_bool(attr: str, val: Optional[str], default: bool) -> bool:
+def _parse_bool(attr: str, val: str) -> bool:
     """Parses a boolean value from an XML attribute."""
-    if val is None:
-        return default
-
     val = val.lower()
     if val == 'true':
         return True
@@ -41,10 +38,8 @@ def _parse_bool(attr: str, val: Optional[str], default: bool) -> bool:
     raise FailedToParseLaunchFile(m)
 
 
-def _parse_float(attr: str, val: Optional[str], default: float) -> float:
+def _parse_float(attr: str, val: str) -> float:
     """Parses a float value from an XML attribute."""
-    if val is None:
-        return default
     if not val:
         m = f'empty string used by float attribute [{attr}]'
         raise FailedToParseLaunchFile(m)
@@ -105,14 +100,12 @@ class LaunchFileReader:
                        cfg: ROSConfig,
                        tag: ET.Element
                        ) -> Tuple[LaunchContext, ROSConfig]:
-        name = tag.attrib['name']
-        package = tag.attrib['pkg']
-        node_type = tag.attrib['type']
-        output = tag.attrib.get('output')
-        if output:
-            output = self._resolve_args(output, ctx)
-        required = _parse_bool('required', tag.attrib.get('required'), False)
-        respawn = _parse_bool('respawn', tag.attrib.get('respawn'), False)
+        name = self._read_required(tag, 'name', ctx)
+        package = self._read_required(tag, 'pkg', ctx)
+        node_type = self._read_required(tag, 'type', ctx)
+        output = self._read_optional(tag, 'output', ctx)
+        required = self._read_optional_bool(tag, 'required', ctx, False)
+        respawn = self._read_optional_bool(tag, 'respawn', ctx, False)
 
         # TODO respawn_delay
 
@@ -218,12 +211,23 @@ class LaunchFileReader:
 
         return ctx_child
 
+    def _read_optional_bool(self,
+                            elem: ET.Element,
+                            attrib: str,
+                            ctx: LaunchContext,
+                            default: Optional[bool] = None
+                            ) -> Optional[bool]:
+        s = self._read_optional(elem, attrib, ctx)
+        if s is None:
+            return default
+        return _parse_bool(attrib, s)
+
     def _read_optional(self,
                        elem: ET.Element,
                        attrib: str,
                        ctx: LaunchContext
                        ) -> Optional[str]:
-        """Reads the string value of an optional attribute of a DOM element."""
+        """Reads the string value of an optional attribute of an element."""
         if attrib not in elem.attrib:
             return None
         return self._read_required(elem, attrib, ctx)
@@ -233,8 +237,8 @@ class LaunchFileReader:
                        attrib: str,
                        ctx: LaunchContext
                        ) -> str:
-        """Reads the string value of a required attribute of a DOM element."""
-        return self._resolve_args(elem.attrib[attrib])
+        """Reads the string value of a required attribute of an element."""
+        return self._resolve_args(elem.attrib[attrib], ctx)
 
     def _resolve_args(self, s: str, ctx: LaunchContext) -> str:
         """Resolves all substitution args in a given string."""
