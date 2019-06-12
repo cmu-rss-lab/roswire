@@ -12,6 +12,7 @@ import xml.etree.ElementTree as ET
 
 import attr
 
+from .config import ROSConfig, NodeConfig
 from ..substitution import resolve as resolve_args
 from ..shell import ShellProxy
 from ..file import FileProxy
@@ -22,41 +23,6 @@ logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 _TAG_TO_LOADER = {}
-
-
-@attr.s(slots=True)
-class LaunchConfig:
-    nodes = attr.ib(type=List[str])
-
-
-@attr.s(frozen=True, slots=True)
-class Parameter:
-    name: str = attr.ib()
-    value: str = attr.ib()  # TODO convert to appropriate type
-
-
-@attr.s(frozen=True, slots=True)
-class NodeConfig:
-    namespace: str = attr.ib()
-    name: str = attr.ib()
-    typ: str = attr.ib()
-    pkg: str = attr.ib()
-
-
-@attr.s(frozen=True, slots=True)
-class ROSConfig:
-    nodes: Tuple[str, ...] = attr.ib(default=tuple())
-    executables: Tuple[str, ...] = attr.ib(default=tuple())
-    roslaunch_files: Tuple[str, ...] = attr.ib(default=tuple())
-
-    def with_executable(self, executable: str) -> 'ROSConfig':
-        """Specify an executable that should be run at launch."""
-        executables = self.executables + (executable,)
-        return attr.evolve(self, executables=executables)
-
-    def with_roslaunch_file(self, filename: str) -> 'ROSConfig':
-        roslaunch_files = self.roslaunch_files + (filename,)
-        return attr.evolve(self, roslaunch_files=roslaunch_files)
 
 
 @attr.s(frozen=True, slots=True)
