@@ -226,7 +226,7 @@ class LaunchFileReader:
         """Reads the string value of an optional attribute of a DOM element."""
         if attrib not in elem.attrib:
             return None
-        return self._resolve_args(elem.attrib[val])
+        return self._resolve_args(elem.attrib[attrib])
 
     def _resolve_args(self, s: str, ctx: LaunchContext) -> str:
         """Resolves all substitution args in a given string."""
