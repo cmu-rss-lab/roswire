@@ -103,9 +103,7 @@ class LaunchFileReader:
                           pkg=pkg,
                           required=required,
                           typ=node_type)
-        logger.debug("found node: %s", node)
-
-        cfg = cfg.with_node(name)
+        cfg = cfg.with_node(node)
         return ctx, cfg
 
     @tag('arg', ['name', 'default', 'value', 'doc'])
