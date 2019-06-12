@@ -103,7 +103,7 @@ class LaunchContext:
 
     def process_include_args(self) -> 'LaunchContext':
         if self.include_resolve_dict is None:
-            return self
+            return attr.evolve(self, arg_names=tuple())
 
         arg_dict = self.include_resolve_dict.get('arg', {})
         for arg in self.arg_names:
@@ -187,7 +187,6 @@ def tag(name: str, legal_attributes: Collection[str] = tuple()):
                 if attribute not in legal_attributes:
                     raise FailedToParseLaunchFile(m)
             ctx, cfg = loader(self, ctx, cfg, elem)
-            logger.debug("new context: %s", ctx)
             return ctx, cfg
         _TAG_TO_LOADER[name] = wrapped
         return wrapped
@@ -290,6 +289,10 @@ class LaunchFileReader:
         ctx_child = ctx_child.process_include_args()
         logger.debug("prepared include context: %s", ctx_child)
 
+        logger.debug("loading include file")
+        launch = self._parse_file(include_filename)
+        ctx_child, cfg = self._load_tags(ctx_child, cfg, list(launch))
+
         return ctx, cfg
 
     def _handle_ns_and_clear_params(self,
@@ -318,13 +321,6 @@ class LaunchFileReader:
         """Resolves all substitution args in a given string."""
         return resolve_args(self.__shell, self.__files, s)
 
-    def _load_launch(self,
-                     ctx: LaunchContext,
-                     cfg: ROSConfig,
-                     launch: ET.Element
-                     ) -> Tuple[LaunchContext, ROSConfig]:
-        return self._load_tags(ctx, cfg, list(launch))
-
     def read(self, fn: str, argv: Optional[Sequence[str]] = None) -> None:
         """Parses the contents of a given launch file.
 
@@ -343,5 +339,5 @@ class LaunchFileReader:
             ctx = ctx.with_argv(argv)
 
         launch = self._parse_file(fn)
-        ctx, cfg = self._load_launch(ctx, cfg, launch)
+        ctx, cfg = self._load_tags(ctx, cfg, list(launch))
         logger.debug("launch configuration: %s", cfg)
