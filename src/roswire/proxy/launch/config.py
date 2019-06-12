@@ -4,7 +4,7 @@ This file provides data structures that represent ROS launch configurations.
 """
 __all__ = ('ROSConfig', 'NodeConfig')
 
-from typing import Tuple, FrozenSet
+from typing import Tuple, FrozenSet, Optional
 import logging
 
 import attr
@@ -29,7 +29,9 @@ class NodeConfig:
     typ: str = attr.ib()
     package: str = attr.ib()
     remappings: Tuple[str, ...] = attr.ib(converter=tuple, default=tuple())
+    filename: Optional[str] = attr.ib(default=None)
     required: bool = attr.ib(default=False)
+    respawn: bool = attr.ib(default=False)
 
     @property
     def full_name(self) -> str:

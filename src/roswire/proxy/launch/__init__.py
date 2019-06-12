@@ -84,7 +84,7 @@ class LaunchFileReader:
         return ctx, cfg
 
     @tag('node', ['name', 'type', 'pkg', 'required', 'clear_params',
-                  'namespace', 'output'])
+                  'respawn', 'namespace', 'output'])
     def _load_node_tag(self,
                        ctx: LaunchContext,
                        cfg: ROSConfig,
@@ -94,6 +94,7 @@ class LaunchFileReader:
         package = tag.attrib['pkg']
         node_type = tag.attrib['type']
         required = _parse_bool('required', tag.attrib.get('required'), False)
+        respawn = _parse_bool('respawn', tag.attrib.get('respawn'), False)
 
         allowed = {'remap', 'rosparam', 'env', 'param'}
         # self._load_tags([t for t in tags if t.tag in allowed])
@@ -105,7 +106,9 @@ class LaunchFileReader:
                           namespace=ctx.namespace,
                           package=package,
                           required=required,
+                          respawn=respawn,
                           remappings=remappings,
+                          filename=ctx.filename,
                           typ=node_type)
         cfg = cfg.with_node(node)
         return ctx, cfg
