@@ -25,6 +25,20 @@ logger.setLevel(logging.DEBUG)
 _TAG_TO_LOADER = {}
 
 
+def _parse_bool(attr: str, val: Optional[str], default: bool) -> bool:
+    if val is None:
+        return default
+
+    val = val.lower()
+    if val == 'true':
+        return True
+    if val == 'false':
+        return False
+
+    m = f'illegal boolean attribute [{attr}]: {val}'
+    raise FailedToParseLaunchFile(m)
+
+
 @attr.s(frozen=True, slots=True)
 class LaunchContext:
     filename: str = attr.ib()
@@ -151,7 +165,8 @@ def tag(name: str, legal_attributes: Collection[str] = tuple()):
             logger.debug("parsing <%s> tag", name)
             for attribute in elem.attrib:
                 if attribute not in legal_attributes:
-                    raise FailedToParseLaunchFile(m)
+                    m = '<{}> tag contains illegal attribute: {}'
+                    raise FailedToParseLaunchFile(m.format(name, attribute))
             ctx, cfg = loader(self, ctx, cfg, elem)
             return ctx, cfg
         _TAG_TO_LOADER[name] = wrapped
@@ -182,7 +197,8 @@ class LaunchFileReader:
             ctx, cfg = loader(self, ctx, cfg, tag)
         return ctx, cfg
 
-    @tag('arg', ['name', 'type', 'pkg'])
+    @tag('node', ['name', 'type', 'pkg', 'required', 'clear_params',
+                  'namespace', 'output'])
     def _load_node_tag(self,
                        ctx: LaunchContext,
                        cfg: ROSConfig,
@@ -193,13 +209,15 @@ class LaunchFileReader:
         node_type = tag.attrib['type']
 
         allowed = {'remap', 'rosparam', 'env', 'param'}
-        self._load_tags([t for t in tags if t.tag in allowed])
+        # self._load_tags([t for t in tags if t.tag in allowed])
 
         node = NodeConfig(name=name,
                           namespace=ctx.namespace,
                           pkg=pkg,
-                          node_type=node_type)
+                          typ=node_type)
         logger.debug("found node: %s", node)
+
+        cfg = cfg.with_node(name)
         return ctx, cfg
 
     @tag('arg', ['name', 'default', 'value', 'doc'])
