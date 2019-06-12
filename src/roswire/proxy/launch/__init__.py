@@ -142,15 +142,12 @@ class LaunchFileReader:
                                                      tag,
                                                      include_filename=include_filename)
 
-        # TODO handle with_pass_all_args
         # if instructed to pass along args, then those args must be added to
         # the child context
-
         if 'pass_all_args' in tag.attrib:
-            # TODO resolve and convert to boolean
-            pass_all_args_s = tag.attrib['pass_all_args'].value
-            pass_all_args = self._resolve_args(pass_all_args_s)
-            if pass_all_args:
+            s_pass_all_args = tag.attrib['pass_all_args'].value
+            s_pass_all_args = self._resolve_args(s_pass_all_args)
+            if _parse_bool('pass_all_args', s_pass_all_args, False):
                 ctx_child = ctx_child.with_pass_all_args()
 
         # handle child tags
