@@ -306,6 +306,13 @@ class LaunchFileReader:
         """Resolves all substitution args in a given string."""
         return resolve_args(self.__shell, self.__files, s)
 
+    def _load_launch(self,
+                     ctx: LaunchContext,
+                     cfg: ROSConfig,
+                     launch: ET.Element
+                     ) -> Tuple[LaunchContext, ROSConfig]:
+        return self._load_tags(ctx, cfg, list(launch))
+
     def read(self, fn: str, argv: Optional[Sequence[str]] = None) -> None:
         """Parses the contents of a given launch file.
 
@@ -324,4 +331,4 @@ class LaunchFileReader:
             ctx = ctx.with_argv(argv)
 
         launch = self._parse_file(fn)
-        ctx, cfg = self._load_tags(ctx, cfg, list(launch))
+        return self._load_launch(ctx, cfg, launch)
