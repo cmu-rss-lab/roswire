@@ -46,6 +46,12 @@ class NodeConfig:
 @attr.s(frozen=True, slots=True)
 class ROSConfig:
     nodes: Tuple[str, ...] = attr.ib(default=tuple())
+    executables: Tuple[str, ...] = attr.ib(default=tuple())
+
+    def with_executable(self, executable: str) -> 'ROSConfig':
+        """Specify an executable that should be run at launch."""
+        executables = self.executables + (executable,)
+        return attr.evolve(self, executables=executables)
 
 
 @attr.s(frozen=True, slots=True)
