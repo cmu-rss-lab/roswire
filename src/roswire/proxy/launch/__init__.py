@@ -133,16 +133,14 @@ class LaunchFileReader:
                       cfg: ROSConfig,
                       tag: ET.Element
                       ) -> Tuple[LaunchContext, ROSConfig]:
-        value: Optional[str] = tag.attrib.get('value')
-        default: Optional[str] = tag.attrib.get('default')
-        if value:
-            value = self._resolve_args(value, ctx)
-        if default:
-            default = self._resolve_args(default, ctx)
-        ctx = ctx.with_arg(name=tag.attrib['name'],
+        name = self._read_required(tag, 'name', ctx)
+        value = self._read_optional(tag, 'value', ctx)
+        default = self._read_optional(tag, 'default', ctx)
+        doc = self._read_optional(tag, 'doc', ctx)
+        ctx = ctx.with_arg(name=name,
                            value=value,
                            default=default,
-                           doc=tag.attrib.get('doc'))
+                           doc=doc)
         return ctx, cfg
 
     @tag('env', ['name', 'value'])
