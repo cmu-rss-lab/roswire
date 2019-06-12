@@ -27,6 +27,7 @@ _TAG_TO_LOADER = {}
 
 
 def _parse_bool(attr: str, val: Optional[str], default: bool) -> bool:
+    """Parses a boolean value from an XML attribute."""
     if val is None:
         return default
 
@@ -38,6 +39,20 @@ def _parse_bool(attr: str, val: Optional[str], default: bool) -> bool:
 
     m = f'illegal boolean attribute [{attr}]: {val}'
     raise FailedToParseLaunchFile(m)
+
+
+def _parse_float(attr: str, val: Optional[str], default: float) -> float:
+    """Parses a float value from an XML attribute."""
+    if val is None:
+        return default
+    if not val:
+        m = f'empty string used by float attribute [{attr}]'
+        raise FailedToParseLaunchFile(m)
+    try:
+        return float(val)
+    except ValueError:
+        m = f'failed to parse attribute [{attr}] to float: {val}'
+        raise FailedToParseLaunchFile(m)
 
 
 def tag(name: str, legal_attributes: Collection[str] = tuple()):
