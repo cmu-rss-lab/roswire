@@ -27,7 +27,8 @@ class NodeConfig:
     namespace: str = attr.ib()
     name: str = attr.ib()
     typ: str = attr.ib()
-    pkg: str = attr.ib()
+    package: str = attr.ib()
+    remappings: Tuple[str, ...] = attr.ib(converter=tuple, default=tuple())
     required: bool = attr.ib(default=False)
 
     @property

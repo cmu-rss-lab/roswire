@@ -91,17 +91,21 @@ class LaunchFileReader:
                        tag: ET.Element
                        ) -> Tuple[LaunchContext, ROSConfig]:
         name = tag.attrib['name']
-        pkg = tag.attrib['type']
+        package = tag.attrib['pkg']
         node_type = tag.attrib['type']
         required = _parse_bool('required', tag.attrib.get('required'), False)
 
         allowed = {'remap', 'rosparam', 'env', 'param'}
         # self._load_tags([t for t in tags if t.tag in allowed])
 
+        # TODO determine remappings
+        remappings = tuple()
+
         node = NodeConfig(name=name,
                           namespace=ctx.namespace,
-                          pkg=pkg,
+                          package=package,
                           required=required,
+                          remappings=remappings,
                           typ=node_type)
         cfg = cfg.with_node(node)
         return ctx, cfg
