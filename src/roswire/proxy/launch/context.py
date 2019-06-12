@@ -17,13 +17,13 @@ logger.setLevel(logging.DEBUG)
 @attr.s(frozen=True, slots=True)
 class LaunchContext:
     filename: str = attr.ib()
-    resolve_dict: Mapping[str, Any] = attr.ib()
-    include_resolve_dict: Mapping[str, Any] = attr.ib()
+    resolve_dict: Mapping[str, Any] = attr.ib(factory=dict)
     parent: 'LaunchContext' = attr.ib(default=None)
     namespace: str = attr.ib(default='/')
     arg_names: Tuple[str, ...] = attr.ib(default=tuple())
     env_args: Tuple[Tuple[str, str], ...] = attr.ib(default=tuple())
     pass_all_args: bool = attr.ib(default=False)
+    include_resolve_dict: Optional[Mapping[str, Any]] = attr.ib(default=None)
 
     def include_child(self,
                       ns: Optional[str],
@@ -33,7 +33,7 @@ class LaunchContext:
         ctx = attr.evolve(ctx,
                           filename=filename,
                           arg_names=tuple(),
-                          include_resolve_dict={})
+                          include_resolve_dict=None)
         return ctx
 
     def child(self, ns: Optional[str] = None) -> 'LaunchContext':

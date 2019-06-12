@@ -93,8 +93,13 @@ class LaunchFileReader:
         name = tag.attrib['name']
         package = tag.attrib['pkg']
         node_type = tag.attrib['type']
+        output = tag.attrib.get('output')
+        if output:
+            output = self._resolve_args(output, ctx)
         required = _parse_bool('required', tag.attrib.get('required'), False)
         respawn = _parse_bool('respawn', tag.attrib.get('respawn'), False)
+
+        # TODO respawn_delay
 
         allowed = {'remap', 'rosparam', 'env', 'param'}
         # self._load_tags([t for t in tags if t.tag in allowed])
@@ -107,6 +112,7 @@ class LaunchFileReader:
                           package=package,
                           required=required,
                           respawn=respawn,
+                          output=output,
                           remappings=remappings,
                           filename=ctx.filename,
                           typ=node_type)
@@ -119,9 +125,15 @@ class LaunchFileReader:
                       cfg: ROSConfig,
                       tag: ET.Element
                       ) -> Tuple[LaunchContext, ROSConfig]:
+        value: Optional[str] = tag.attrib.get('value')
+        default: Optional[str] = tag.attrib.get('default')
+        if value:
+            value = self._resolve_args(value, ctx)
+        if default:
+            default = self._resolve_args(default, ctx)
         ctx = ctx.with_arg(name=tag.attrib['name'],
-                           value=tag.attrib.get('value'),
-                           default=tag.attrib.get('default'),
+                           value=value,
+                           default=default,
                            doc=tag.attrib.get('doc'))
         return ctx, cfg
 
@@ -140,7 +152,7 @@ class LaunchFileReader:
                           cfg: ROSConfig,
                           tag: ET.Element
                           ) -> Tuple[LaunchContext, ROSConfig]:
-        include_filename = self._resolve_args(tag.attrib['file'])
+        include_filename = self._resolve_args(tag.attrib['file'], ctx)
         logger.debug("include file: %s", include_filename)
         cfg = cfg.with_roslaunch_file(include_filename)
 
@@ -153,7 +165,7 @@ class LaunchFileReader:
         # the child context
         if 'pass_all_args' in tag.attrib:
             s_pass_all_args = tag.attrib['pass_all_args'].value
-            s_pass_all_args = self._resolve_args(s_pass_all_args)
+            s_pass_all_args = self._resolve_args(s_pass_all_args, ctx)
             if _parse_bool('pass_all_args', s_pass_all_args, False):
                 ctx_child = ctx_child.with_pass_all_args()
 
@@ -177,7 +189,7 @@ class LaunchFileReader:
         ns: Optional[str] = None
         if 'namespace' in tag.attrib:
             ns = tag.attrib['namespace']
-            ns = self._resolve_args(ns)
+            ns = self._resolve_args(ns, ctx)
             if not ns:
                 m = f"<{tag.tag}> has empty attribute [namespace]"
                 raise FailedToParseLaunchFile(m)
@@ -191,9 +203,11 @@ class LaunchFileReader:
 
         return ctx_child
 
-    def _resolve_args(self, s: str) -> str:
+    def _resolve_args(self, s: str, ctx: LaunchContext) -> str:
         """Resolves all substitution args in a given string."""
-        return resolve_args(self.__shell, self.__files, s)
+        arg_dict = ctx.resolve_dict['arg']
+        logger.debug("resolve [%s] with context: %s", s, arg_dict)
+        return resolve_args(self.__shell, self.__files, s, arg_dict)
 
     def read(self, fn: str, argv: Optional[Sequence[str]] = None) -> None:
         """Parses the contents of a given launch file.
@@ -204,11 +218,7 @@ class LaunchFileReader:
             http://docs.ros.org/kinetic/api/roslaunch/html/roslaunch.xmlloader.XmlLoader-class.html
         """
         cfg = ROSConfig()
-        ctx = LaunchContext(namespace='/',
-                            filename=fn,
-                            resolve_dict={},
-                            include_resolve_dict={},
-                            arg_names=tuple())
+        ctx = LaunchContext(namespace='/', filename=fn)
         if argv:
             ctx = ctx.with_argv(argv)
 

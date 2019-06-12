@@ -30,6 +30,7 @@ class NodeConfig:
     package: str = attr.ib()
     remappings: Tuple[str, ...] = attr.ib(converter=tuple, default=tuple())
     filename: Optional[str] = attr.ib(default=None)
+    output: Optional[str] = attr.ib(default=None)
     required: bool = attr.ib(default=False)
     respawn: bool = attr.ib(default=False)
 
