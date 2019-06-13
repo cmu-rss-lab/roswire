@@ -54,6 +54,7 @@ class LaunchContext:
                            pass_all_args=False)
 
     def with_remapping(self, frm: str, to: str) -> 'LaunchContext':
+        """Adds a name remapping."""
         frm = canonical_name(frm)
         to = canonical_name(to)
         if not frm or not to:
@@ -68,7 +69,11 @@ class LaunchContext:
             m = f"<remap>: invalid ROS name [to]: {to}"
             raise FailedToParseLaunchFile(m)
 
-        return self
+        # overwrite any existing remapping from the given source before adding
+        # the given remapping
+        remappings = tuple(r for r in self.remappings if r[0] != frm)
+        remappings = remappings + ((frm, to), )
+        return attr.evolve(self, remappings=remappings)
 
     def with_pass_all_args(self) -> 'LaunchContext':
         ctx = self
