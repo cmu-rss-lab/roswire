@@ -21,6 +21,7 @@ logger.setLevel(logging.DEBUG)
 class LaunchContext:
     filename: str = attr.ib()
     resolve_dict: Dict[str, Any] = attr.ib(factory=dict)
+    parent: Optional['LaunchContext'] = attr.ib(default=None)
     namespace: str = attr.ib(default='/')
     arg_names: Tuple[str, ...] = attr.ib(default=tuple())
     env_args: Tuple[Tuple[str, str], ...] = attr.ib(default=tuple())
@@ -61,6 +62,7 @@ class LaunchContext:
         else:
             child_ns = namespace_join(self.namespace, ns)
         return attr.evolve(self,
+                           parent=self,
                            namespace=child_ns,
                            pass_all_args=False)
 
