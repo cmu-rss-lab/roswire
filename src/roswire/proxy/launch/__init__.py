@@ -5,7 +5,7 @@ This file implements a proxy for parsing the contents of launch files.
 __all__ = ('LaunchFileReader',)
 
 from typing import (List, Optional, Sequence, Collection, Dict, Any, Mapping,
-                    Tuple, overload)
+                    Tuple, Union, overload)
 from copy import deepcopy
 import logging
 import xml.etree.ElementTree as ET
@@ -48,6 +48,33 @@ def _parse_float(attr: str, val: str) -> float:
     except ValueError:
         m = f'failed to parse attribute [{attr}] to float: {val}'
         raise FailedToParseLaunchFile(m)
+
+
+def convert_str_to_type(s: str, typ: str) -> Union[bool, int, str, float]:
+    if typ == 'auto':
+        if s.lower() in ('true', 'false'):
+            return convert_str_to_type(s, 'bool')
+        if s.isnumeric() and '.' in s:
+            return convert_str_to_type(s, 'float')
+        if s.isnumeric():
+            return convert_str_to_type(s, 'int')
+        return convert_str_to_type(s, 'str')
+
+    if typ in ('str', 'string'):
+        return s
+    if typ in ('float', 'double'):
+        return float(s)
+    if typ == 'int':
+        return int(s)
+    if typ in ('bool', 'boolean'):
+        s = s.lower()
+        if s in ('true', '1'):
+            return True
+        if s in ('false', '0'):
+            return False
+        raise ValueError(f"illegal 'bool' value: {s}")
+
+    raise ValueError(f'unknown parameter type: {typ}')
 
 
 def tag(name: str, legal_attributes: Collection[str] = tuple()):
@@ -95,42 +122,6 @@ class LaunchFileReader:
             ctx, cfg = loader(self, ctx, cfg, tag)
         return ctx, cfg
 
-    def _read_param_value(self,
-                          name: str,
-                          typ: str,
-                          val: str,
-                          ctx: LaunchContext
-                          ) -> Any:
-        """Reads a parameter value from a resolved value string."""
-        raise NotImplementedError
-
-    def _read_param_command(self,
-                            name: str,
-                            typ: str,
-                            command: str,
-                            ctx: LaunchContext
-                            ) -> Any:
-        """Reads a parameter value from a resolved command string."""
-        raise NotImplementedError
-
-    def _read_param_textfile(self,
-                             name: str,
-                             typ: str,
-                             filename: str,
-                             ctx: LaunchContext
-                             ) -> Any:
-        """Reads a parameter value from a given text file."""
-        raise NotImplementedError
-
-    def _read_param_binfile(self,
-                            name: str,
-                            typ: str,
-                            filename: str,
-                            ctx: LaunchContext
-                            ) -> Any:
-        """Reads a parameter value from a given binary file."""
-        raise NotImplementedError
-
     @tag('param', ['name', 'value', 'type', 'textfile', 'binfile', 'command'])
     def _load_param_tag(self,
                         ctx: LaunchContext,
@@ -155,13 +146,15 @@ class LaunchFileReader:
 
         value: Any
         if val is not None:
-            value = self._read_param_value(name, typ, val, ctx)
+            value = convert_str_to_type(val, typ)
         if textfile is not None:
-            value = self._read_param_textfile(name, typ, textfile, ctx)
+            value = self.__files.read(textfile)
         if binfile is not None:
-            value = self._read_param_binfile(name, typ, binfile, ctx)
+            value = self.__files.read(binfile, binary=True)
         if command is not None:
-            value = self._read_param_command(name, typ, command, ctx)
+            retcode, value, duration = self.__shell.execute(command)
+
+        logger.debug("obtained value for parameter [%s]: %s", name, value)
 
         # TODO handle private/local parameters
         # TODO handle global parameters
