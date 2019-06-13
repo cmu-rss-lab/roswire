@@ -101,9 +101,7 @@ class LaunchFileReader:
                         ) -> Tuple[LaunchContext, ROSConfig]:
         frm = self._read_required(tag, 'from', ctx)
         to = self._read_required(tag, 'to', ctx)
-        logger.debug("remapping: %s -> %s", frm, to)
-
-        # TODO add remap to context
+        ctx = ctx.with_remapping(frm, to)
         return ctx, cfg
 
     @tag('node', ['name', 'type', 'pkg', 'required', 'clear_params',
