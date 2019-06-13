@@ -11,6 +11,7 @@ import logging
 import attr
 
 from ...name import canonical_name
+from ...exceptions import FailedToParseLaunchFile
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -53,9 +54,20 @@ class LaunchContext:
                            pass_all_args=False)
 
     def with_remapping(self, frm: str, to: str) -> 'LaunchContext':
-        # TODO canonicalise name
         frm = canonical_name(frm)
         to = canonical_name(to)
+        if not frm or not to:
+            m = "'from' and 'to' attributes must be specified for <remap>"
+            raise FailedToParseLaunchFile(m)
+        # TODO check name legality
+        if False:
+            m = f"<remap>: invalid ROS name [from]: {frm}"
+            raise FailedToParseLaunchFile(m)
+        # TODO check name legality
+        if False:
+            m = f"<remap>: invalid ROS name [to]: {to}"
+            raise FailedToParseLaunchFile(m)
+
         return self
 
     def with_pass_all_args(self) -> 'LaunchContext':
