@@ -9,6 +9,7 @@ import logging
 
 import attr
 
+from ...util import build_tuple
 from ...exceptions import FailedToParseLaunchFile
 from ...name import namespace_join, canonical_name
 
@@ -28,7 +29,7 @@ class NodeConfig:
     name: str = attr.ib()
     typ: str = attr.ib()
     package: str = attr.ib()
-    remappings: Tuple[str, ...] = attr.ib(converter=tuple, default=tuple())
+    remappings: Tuple[Tuple[str, str], ...] = attr.ib(default=tuple())
     filename: Optional[str] = attr.ib(default=None)
     output: Optional[str] = attr.ib(default=None)
     required: bool = attr.ib(default=False)
