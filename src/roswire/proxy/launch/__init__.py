@@ -93,6 +93,15 @@ class LaunchFileReader:
             ctx, cfg = loader(self, ctx, cfg, tag)
         return ctx, cfg
 
+    def _read_param_value(self,
+                          name: str,
+                          typ: str,
+                          val: str,
+                          ctx: LaunchContext
+                          ) -> Any:
+        """Reads a parameter value from a resolved string."""
+        raise NotImplementedError
+
     @tag('param', ['name', 'value', 'type', 'textfile', 'binfile', 'command'])
     def _load_param_tag(self,
                         ctx: LaunchContext,
