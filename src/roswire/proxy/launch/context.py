@@ -88,7 +88,7 @@ class LaunchContext:
 
     def with_pass_all_args(self) -> 'LaunchContext':
         ctx = self
-        if 'arg' in self.parent.resolve_dict:
+        if self.parent and 'arg' in self.parent.resolve_dict:
             for var, val in self.parent.resolve_dict['arg'].items():
                 ctx = ctx.with_arg(var, value=val)
         return attr.evolve(ctx, pass_all_args=True)

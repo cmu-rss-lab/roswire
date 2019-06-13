@@ -305,7 +305,7 @@ class LaunchFileReader:
         if ns == '':
             m = f"<{tag.tag}> has empty attribute [namespace]"
             raise FailedToParseLaunchFile(m)
-        return
+        return ns
 
     @overload
     def _read_optional_bool(self,
