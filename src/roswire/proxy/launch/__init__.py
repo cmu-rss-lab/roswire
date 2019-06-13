@@ -50,10 +50,7 @@ def _parse_float(attr: str, val: str) -> float:
         raise FailedToParseLaunchFile(m)
 
 
-def convert_str_to_type(self,
-                        s: str,
-                        typ: str
-                        ) -> Union[bool, int, str, float]:
+def convert_str_to_type(s: str, typ: str) -> Union[bool, int, str, float]:
     if typ == 'auto':
         if s.lower() in ('true', 'false'):
             return convert_str_to_type(s, 'bool')
