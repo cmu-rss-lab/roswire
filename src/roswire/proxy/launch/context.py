@@ -46,6 +46,15 @@ class LaunchContext:
                           include_resolve_dict={})
         return ctx
 
+    def node_child(self, ns: Optional[str], name: str) -> 'LaunchContext':
+        ctx = self.child(ns).child(name)
+        ctx = attr.evolve(ctx,
+                          node_name=name,
+                          filename=filename,
+                          arg_names=tuple(),
+                          include_resolve_dict={})
+        return ctx
+
     def child(self, ns: Optional[str] = None) -> 'LaunchContext':
         """Creates a child context that inherits from this context."""
         if ns is None:
