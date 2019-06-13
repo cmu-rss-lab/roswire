@@ -5,7 +5,7 @@ This file implements a proxy for parsing the contents of launch files.
 __all__ = ('LaunchFileReader',)
 
 from typing import (List, Optional, Sequence, Collection, Dict, Any, Mapping,
-                    Tuple)
+                    Tuple, overload)
 from copy import deepcopy
 import logging
 import xml.etree.ElementTree as ET
@@ -89,7 +89,7 @@ class LaunchFileReader:
                    ctx: LaunchContext,
                    cfg: ROSConfig,
                    tags: Sequence[ET.Element]
-                   ) -> LaunchContext:
+                   ) -> Tuple[LaunchContext, ROSConfig]:
         for tag in (t for t in tags if t.tag in _TAG_TO_LOADER):
             loader = _TAG_TO_LOADER[tag.tag]
             ctx, cfg = loader(self, ctx, cfg, tag)
@@ -157,11 +157,11 @@ class LaunchFileReader:
         if val is not None:
             value = self._read_param_value(name, typ, val, ctx)
         if textfile is not None:
-            value = self._read_param_textfile(name, typ, val, ctx)
+            value = self._read_param_textfile(name, typ, textfile, ctx)
         if binfile is not None:
-            value = self._read_param_binfile(name, typ, val, ctx)
+            value = self._read_param_binfile(name, typ, binfile, ctx)
         if command is not None:
-            value = self._read_param_command(name, typ, val, ctx)
+            value = self._read_param_command(name, typ, command, ctx)
 
         # TODO handle private/local parameters
         # TODO handle global parameters
@@ -317,12 +317,23 @@ class LaunchFileReader:
 
         return ctx_child, cfg
 
+    @overload
     def _read_optional_bool(self,
                             elem: ET.Element,
                             attrib: str,
                             ctx: LaunchContext,
-                            default: Optional[bool] = None
-                            ) -> Optional[bool]:
+                            default: None
+                            ) -> Optional[bool]: ...
+
+    @overload
+    def _read_optional_bool(self,
+                            elem: ET.Element,
+                            attrib: str,
+                            ctx: LaunchContext,
+                            default: bool
+                            ) -> bool: ...
+
+    def _read_optional_bool(self, elem, attrib, ctx, default=None):
         s = self._read_optional(elem, attrib, ctx)
         if s is None:
             return default
