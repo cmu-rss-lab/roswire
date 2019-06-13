@@ -182,7 +182,10 @@ class LaunchFileReader:
         if binfile is not None:
             value = self.__files.read(binfile, binary=True)
         if command is not None:
-            value = self._read_param_command(name, typ, command, ctx)
+            m = "ROSWire does not currently support 'command' attributes"
+            raise NotImplementedError(m)
+
+        logger.debug("obtained value for parameter [%s]: %s", name, value)
 
         # TODO handle private/local parameters
         # TODO handle global parameters
