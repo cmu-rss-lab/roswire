@@ -4,7 +4,7 @@ This file provides data structures that represent ROS launch configurations.
 """
 __all__ = ('ROSConfig', 'NodeConfig')
 
-from typing import Tuple, FrozenSet, Optional, Dict
+from typing import Tuple, FrozenSet, Optional, Dict, Any
 import logging
 
 import attr
