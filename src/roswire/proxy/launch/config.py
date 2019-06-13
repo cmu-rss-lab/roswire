@@ -11,7 +11,7 @@ import attr
 
 from ...util import build_tuple
 from ...exceptions import FailedToParseLaunchFile
-from ...name import namespace_join, canonical_name
+from ...name import namespace_join, canonical_name, name_is_global
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -67,6 +67,10 @@ class ROSConfig:
 
     def with_param(self, name: str, value: Any) -> 'ROSConfig':
         """Adds a parameter to this configuration."""
+        if not name_is_global(name):
+            m = f"expected parameter name to be global: {name}"
+            raise FailedToParseLaunchFile(m)
+
         logger.debug("adding parameter [%s] with value [%s]", name, value)
         logger.warning("with_param not implemented")
         return self
