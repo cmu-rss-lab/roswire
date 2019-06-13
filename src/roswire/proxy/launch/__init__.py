@@ -17,7 +17,8 @@ from .context import LaunchContext
 from ..substitution import resolve as resolve_args
 from ..shell import ShellProxy
 from ..file import FileProxy
-from ...name import namespace_join, global_name, namespace
+from ...name import (namespace_join, global_name, namespace, name_is_global,
+                     name_is_private)
 from ...exceptions import FailedToParseLaunchFile
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -156,8 +157,16 @@ class LaunchFileReader:
 
         logger.debug("obtained value for parameter [%s]: %s", name, value)
 
-        # TODO handle node-local parameters
-        # TODO handle global parameters
+        # compute the fully qualified name
+        if name_is_global(name):
+            fullname = name
+        elif name_is_private(name):
+            fullname = namespace_join(ctx.namespace, name[1:])
+        else:
+            fullname = namespace_join(ctx.namespace, name)
+
+        # register the parameter
+        cfg = cfg.with_param(fullname, value)
 
         return ctx, cfg
 
