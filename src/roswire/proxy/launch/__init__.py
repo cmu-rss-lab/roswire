@@ -339,12 +339,23 @@ class LaunchFileReader:
             return default
         return _parse_bool(attrib, s)
 
+    @overload
     def _read_optional_float(self,
                              elem: ET.Element,
                              attrib: str,
                              ctx: LaunchContext,
-                             default: Optional[float] = None
-                             ) -> Optional[float]:
+                             default: None
+                             ) -> Optional[float]: ...
+
+    @overload
+    def _read_optional_float(self,
+                             elem: ET.Element,
+                             attrib: str,
+                             ctx: LaunchContext,
+                             default: float
+                             ) -> float: ...
+
+    def _read_optional_float(self, elem, attrib, ctx, default=None):
         s = self._read_optional(elem, attrib, ctx)
         if s is None:
             return default
