@@ -115,6 +115,19 @@ class LaunchFileReader:
             m = '<param> must have exactly one value/textfile/binfile/command'
             raise FailedToParseLaunchFile(m)
 
+        value: Any
+        if val is not None:
+            value = self._read_param_value(name, typ, val, ctx)
+        if textfile is not None:
+            value = self._read_param_textfile(name, typ, val, ctx)
+        if binfile is not None:
+            value = self._read_param_binfile(name, typ, val, ctx)
+        if command is not None:
+            value = self._read_param_command(name, typ, val, ctx)
+
+        # TODO handle private/local parameters
+        # TODO handle global parameters
+
         return ctx, cfg
 
     @tag('remap', ['from', 'to'])
@@ -311,8 +324,13 @@ class LaunchFileReader:
         logger.debug("resolve [%s] with context: %s", s, ctx.resolve_dict)
         return resolve_args(self.__shell, self.__files, s, ctx.resolve_dict)
 
-    def read(self, fn: str, argv: Optional[Sequence[str]] = None) -> None:
+    def read(self, fn: str, argv: Optional[Sequence[str]] = None) -> ROSConfig:
         """Parses the contents of a given launch file.
+
+        Returns
+        -------
+        ROSConfig
+            A description of the launch configuration.
 
         Reference
         ---------
@@ -327,3 +345,4 @@ class LaunchFileReader:
         launch = self._parse_file(fn)
         ctx, cfg = self._load_tags(ctx, cfg, list(launch))
         logger.debug("launch configuration: %s", cfg)
+        return cfg
