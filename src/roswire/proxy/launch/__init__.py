@@ -178,7 +178,7 @@ class LaunchFileReader:
         if val is not None:
             value = convert_str_to_type(val, typ)
         if textfile is not None:
-            value = self._read_param_textfile(name, typ, textfile, ctx)
+            value = self.__files.read(textfile)
         if binfile is not None:
             value = self._read_param_binfile(name, typ, binfile, ctx)
         if command is not None:
