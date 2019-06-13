@@ -5,7 +5,7 @@ This file implements a proxy for parsing the contents of launch files.
 __all__ = ('LaunchFileReader',)
 
 from typing import (List, Optional, Sequence, Collection, Dict, Any, Mapping,
-                    Tuple, overload)
+                    Tuple, Union, overload)
 from copy import deepcopy
 import logging
 import xml.etree.ElementTree as ET
@@ -48,6 +48,36 @@ def _parse_float(attr: str, val: str) -> float:
     except ValueError:
         m = f'failed to parse attribute [{attr}] to float: {val}'
         raise FailedToParseLaunchFile(m)
+
+
+def convert_str_to_type(self,
+                        s: str,
+                        typ: str
+                        ) -> Union[bool, int, str, float]:
+    if typ == 'auto':
+        if s.lower() in ('true', 'false'):
+            return convert_str_to_type(s, 'bool')
+        if s.isnumeric() and '.' in s:
+            return convert_str_to_type(s, 'float')
+        if s.isnumeric():
+            return convert_str_to_type(s, 'int')
+        return convert_str_to_type(s, 'str')
+
+    if typ in ('str', 'string'):
+        return s
+    if typ in ('float', 'double'):
+        return float(s)
+    if typ == 'int':
+        return int(s)
+    if typ in ('bool', 'boolean'):
+        s = s.lower()
+        if s in ('true', '1'):
+            return True
+        if s in ('false', '0'):
+            return False
+        raise ValueError(f"illegal 'bool' value: {s}")
+
+    raise ValueError(f'unknown parameter type: {typ}')
 
 
 def tag(name: str, legal_attributes: Collection[str] = tuple()):
