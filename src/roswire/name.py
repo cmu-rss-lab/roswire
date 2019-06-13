@@ -5,7 +5,12 @@ __all__ = (
     'namespace',
     'namespace_join',
     'name_is_private',
-    'name_is_global')
+    'name_is_global',
+    'name_is_legal')
+
+import re
+
+RE_NAME = re.compile(r'^[\~\/A-Za-z][\w\/]*$')
 
 
 def global_name(name: str) -> str:
@@ -27,6 +32,15 @@ def canonical_name(name: str) -> str:
     if name[0] == '/':
         return '/' + '/'.join(n for n in name[1:].split('/') if n)
     return '/'.join(n for n in name.split('/') if n)
+
+
+def name_is_legal(name: str) -> bool:
+    """Determines whether a given name is a legal ROS name."""
+    if name is None:
+        return False
+    if name == '':
+        return True
+    return RE_NAME.match(name) and not '//' in name
 
 
 def name_is_private(name: str) -> bool:
