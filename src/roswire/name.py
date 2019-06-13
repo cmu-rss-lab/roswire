@@ -38,7 +38,7 @@ def name_is_legal(name: str) -> bool:
     """Determines whether a given name is a legal ROS name."""
     if name is None:
         return False
-    if name == '':
+    if name in ('', '/'):
         return True
     return RE_NAME.match(name) and not '//' in name
 
