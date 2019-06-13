@@ -49,8 +49,6 @@ class LaunchContext:
         ctx = self.child(ns).child(name)
         ctx = attr.evolve(ctx,
                           node_name=name,
-                          filename=filename,
-                          arg_names=tuple(),
                           include_resolve_dict={})
         return ctx
 
