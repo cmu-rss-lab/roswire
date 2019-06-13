@@ -180,7 +180,7 @@ class LaunchFileReader:
         if textfile is not None:
             value = self.__files.read(textfile)
         if binfile is not None:
-            value = self._read_param_binfile(name, typ, binfile, ctx)
+            value = self.__files.read(binfile, binary=True)
         if command is not None:
             value = self._read_param_command(name, typ, command, ctx)
 
