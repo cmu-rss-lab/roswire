@@ -21,13 +21,19 @@ logger.setLevel(logging.DEBUG)
 class LaunchContext:
     filename: str = attr.ib()
     resolve_dict: Dict[str, Any] = attr.ib(factory=dict)
-    parent: 'LaunchContext' = attr.ib(default=None)
+    parent: Optional['LaunchContext'] = attr.ib(default=None)
     namespace: str = attr.ib(default='/')
     arg_names: Tuple[str, ...] = attr.ib(default=tuple())
     env_args: Tuple[Tuple[str, str], ...] = attr.ib(default=tuple())
     pass_all_args: bool = attr.ib(default=False)
     include_resolve_dict: Optional[Dict[str, Any]] = attr.ib(default=None)
     remappings: Tuple[Tuple[str, str], ...] = attr.ib(default=tuple())
+    node_name: Optional[str] = attr.ib(default=None)
+
+    @property
+    def is_node_context(self) -> bool:
+        """Determines whether or not this context is node-local."""
+        return self.node_name is not None
 
     def include_child(self,
                       ns: Optional[str],
@@ -40,6 +46,13 @@ class LaunchContext:
                           include_resolve_dict={})
         return ctx
 
+    def node_child(self, ns: Optional[str], name: str) -> 'LaunchContext':
+        ctx = self.child(ns).child(name)
+        ctx = attr.evolve(ctx,
+                          node_name=name,
+                          include_resolve_dict={})
+        return ctx
+
     def child(self, ns: Optional[str] = None) -> 'LaunchContext':
         """Creates a child context that inherits from this context."""
         if ns is None:
@@ -49,8 +62,8 @@ class LaunchContext:
         else:
             child_ns = namespace_join(self.namespace, ns)
         return attr.evolve(self,
-                           namespace=child_ns,
                            parent=self,
+                           namespace=child_ns,
                            pass_all_args=False)
 
     def with_remapping(self, frm: str, to: str) -> 'LaunchContext':
@@ -75,7 +88,7 @@ class LaunchContext:
 
     def with_pass_all_args(self) -> 'LaunchContext':
         ctx = self
-        if 'arg' in self.parent.resolve_dict:
+        if self.parent and 'arg' in self.parent.resolve_dict:
             for var, val in self.parent.resolve_dict['arg'].items():
                 ctx = ctx.with_arg(var, value=val)
         return attr.evolve(ctx, pass_all_args=True)

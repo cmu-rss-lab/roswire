@@ -12,12 +12,13 @@ import xml.etree.ElementTree as ET
 
 import attr
 
-from .config import ROSConfig, NodeConfig
+from .config import ROSConfig, NodeConfig, Parameter
 from .context import LaunchContext
 from ..substitution import resolve as resolve_args
 from ..shell import ShellProxy
 from ..file import FileProxy
-from ...name import namespace_join, global_name
+from ...name import (namespace_join, global_name, namespace, name_is_global,
+                     name_is_private)
 from ...exceptions import FailedToParseLaunchFile
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -156,8 +157,16 @@ class LaunchFileReader:
 
         logger.debug("obtained value for parameter [%s]: %s", name, value)
 
-        # TODO handle private/local parameters
-        # TODO handle global parameters
+        # compute the fully qualified name
+        if name_is_global(name):
+            fullname = name
+        elif name_is_private(name):
+            fullname = namespace_join(ctx.namespace, name[1:])
+        else:
+            fullname = namespace_join(ctx.namespace, name)
+
+        # register the parameter
+        cfg = cfg.with_param(fullname, value)
 
         return ctx, cfg
 
@@ -191,9 +200,14 @@ class LaunchFileReader:
         respawn_delay = \
             self._read_optional_float(tag, 'respawn', ctx, 0.0)
 
-        # create node context
-        ctx_child, cfg = \
-            self._handle_ns_and_clear_params(ctx, cfg, tag, node_name=name)
+        # create context
+        ns = self._read_namespace(ctx, tag)
+        ctx_child = ctx.node_child(ns, name)
+
+        # handle 'clear_params'
+        if self._read_optional_bool(tag, 'clear_params', ctx, False):
+            clear_ns = global_name(ctx_child.namespace)
+            cfg = cfg.with_clear_param(clear_ns)
 
         # handle nested tags
         allowed = {'env', 'remap', 'param', 'rosparam'}
@@ -201,7 +215,7 @@ class LaunchFileReader:
         ctx_child, cfg = self._load_tags(ctx_child, cfg, nested_tags)
 
         node = NodeConfig(name=name,
-                          namespace=ctx.namespace,
+                          namespace=namespace(ctx_child.namespace),
                           package=package,
                           cwd=cwd,
                           args=args,
@@ -254,12 +268,16 @@ class LaunchFileReader:
         logger.debug("include file: %s", include_filename)
         cfg = cfg.with_roslaunch_file(include_filename)
 
-        # construct child context
-        ctx_child, cfg = \
-            self._handle_ns_and_clear_params(ctx,
-                                             cfg,
-                                             tag,
-                                             include_filename=include_filename)
+        # create context
+        ns = self._read_namespace(ctx, tag)
+        ctx_child = ctx.include_child(ns, include_filename)
+
+        # handle 'clear_params'
+        if self._read_optional_bool(tag, 'clear_params', ctx, False):
+            if not ns:
+                m = "'ns' must be specified to use 'clear_params'"
+                raise FailedToParseLaunchFile(m)
+            cfg = cfg.with_clear_param(ctx_child.namespace)
 
         # if instructed to pass along args, then those args must be added to
         # the child context
@@ -278,37 +296,16 @@ class LaunchFileReader:
 
         return ctx, cfg
 
-    def _handle_ns_and_clear_params(self,
-                                    ctx: LaunchContext,
-                                    cfg: ROSConfig,
-                                    tag: ET.Element,
-                                    include_filename: Optional[str] = None,
-                                    node_name: Optional[str] = None
-                                    ) -> Tuple[LaunchContext, ROSConfig]:
+    def _read_namespace(self,
+                        ctx: LaunchContext,
+                        tag: ET.Element
+                        ) -> Optional[str]:
+        """Fetches the value of the optional 'namespace' attribute."""
         ns = self._read_optional(tag, 'namespace', ctx)
         if ns == '':
             m = f"<{tag.tag}> has empty attribute [namespace]"
             raise FailedToParseLaunchFile(m)
-
-        if include_filename:
-            ctx_child = ctx.include_child(ns, include_filename)
-        else:
-            ctx_child = ctx.child(ns)
-
-        # handle 'clear_params'
-        clear_ns = ctx_child.namespace
-        if self._read_optional_bool(tag, 'clear_params', ctx, False):
-            if tag.tag == 'node':
-                if not node_name:
-                    m = "<node> must have a 'name' attribute to use 'clear_params'"  # noqa
-                    raise FailedToParseLaunchFile(m)
-                clear_ns = global_name(namespace_join(clear_ns, node_name))
-            elif not ns:
-                m = "'ns' must be specified to use 'clear_params'"
-                raise FailedToParseLaunchFile(m)
-            cfg = cfg.with_clear_param(clear_ns)
-
-        return ctx_child, cfg
+        return ns
 
     @overload
     def _read_optional_bool(self,

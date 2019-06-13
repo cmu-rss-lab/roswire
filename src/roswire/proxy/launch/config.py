@@ -4,7 +4,7 @@ This file provides data structures that represent ROS launch configurations.
 """
 __all__ = ('ROSConfig', 'NodeConfig')
 
-from typing import Tuple, FrozenSet, Optional
+from typing import Tuple, FrozenSet, Optional, Dict, Any
 import logging
 
 import attr
@@ -51,6 +51,7 @@ class ROSConfig:
                                            converter=frozenset)
     executables: Tuple[str, ...] = attr.ib(default=tuple())
     roslaunch_files: Tuple[str, ...] = attr.ib(default=tuple())
+    params: Dict[str, Any] = attr.ib(factory=dict)
     clear_params: Tuple[str, ...] = attr.ib(default=tuple())
 
     def with_clear_param(self, ns: str) -> 'ROSConfig':
@@ -63,6 +64,12 @@ class ROSConfig:
             return self
         clear_params = self.clear_params + (ns,)
         return attr.evolve(self, clear_params=clear_params)
+
+    def with_param(self, name: str, value: Any) -> 'ROSConfig':
+        """Adds a parameter to this configuration."""
+        logger.debug("adding parameter [%s] with value [%s]", name, value)
+        logger.warning("with_param not implemented")
+        return self
 
     def with_executable(self, executable: str) -> 'ROSConfig':
         """Specify an executable that should be run at launch."""
