@@ -95,14 +95,13 @@ class LaunchFileReader:
             ctx, cfg = loader(self, ctx, cfg, tag)
         return ctx, cfg
 
-    def _read_param_value(self,
-                          name: str,
-                          typ: str,
-                          val: str,
-                          ctx: LaunchContext
-                          ) -> Any:
+    def _read_param_value(self, name: str, typ: str, val: str) -> Any:
         """Reads a parameter value from a resolved value string."""
-        raise NotImplementedError
+        try:
+            return convert_str_to_type(val, typ)
+        except ValueError:
+            m = f"failed to convert '{name}' value [{val}] to {typ}"
+            raise FailedToParseLaunchFile(m)
 
     def _read_param_command(self,
                             name: str,
@@ -155,7 +154,7 @@ class LaunchFileReader:
 
         value: Any
         if val is not None:
-            value = self._read_param_value(name, typ, val, ctx)
+            value = self._read_param_value(name, typ, val)
         if textfile is not None:
             value = self._read_param_textfile(name, typ, textfile, ctx)
         if binfile is not None:
