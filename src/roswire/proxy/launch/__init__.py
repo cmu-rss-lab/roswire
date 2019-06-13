@@ -117,6 +117,7 @@ class LaunchFileReader:
         package = self._read_required(tag, 'pkg', ctx)
         node_type = self._read_required(tag, 'type', ctx)
         output = self._read_optional(tag, 'output', ctx)
+        launch_prefix = self._read_optional(tag, 'launch_prefix', ctx)
         required = self._read_optional_bool(tag, 'required', ctx, False)
         respawn = self._read_optional_bool(tag, 'respawn', ctx, False)
         respawn_delay = \
@@ -138,6 +139,7 @@ class LaunchFileReader:
                           output=output,
                           remappings=ctx.remappings,
                           filename=ctx.filename,
+                          env_args=ctx.env_args,
                           typ=node_type)
         cfg = cfg.with_node(node)
         return ctx, cfg

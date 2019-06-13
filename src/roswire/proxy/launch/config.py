@@ -34,6 +34,7 @@ class NodeConfig:
     required: bool = attr.ib(default=False)
     respawn: bool = attr.ib(default=False)
     respawn_delay: float = attr.ib(default=0.0)
+    env_args: Tuple[Tuple[str, str], ...] = attr.ib(default=tuple())
 
     @property
     def full_name(self) -> str:
