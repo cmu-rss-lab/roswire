@@ -61,8 +61,9 @@ def test_name_is_legal():
     assert f('/foo/bar/')
     assert f('~')
     assert f('~foo')
-    # assert not f('/~foo')  # the ROS implementation actually allows this?
+    assert not f('/~foo')
     assert not f('foo bar')
+
 
 def test_namespace():
     f = roswire.name.namespace
