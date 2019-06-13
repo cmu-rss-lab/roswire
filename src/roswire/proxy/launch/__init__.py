@@ -12,7 +12,7 @@ import xml.etree.ElementTree as ET
 
 import attr
 
-from .config import ROSConfig, NodeConfig
+from .config import ROSConfig, NodeConfig, Param
 from .context import LaunchContext
 from ..substitution import resolve as resolve_args
 from ..shell import ShellProxy
@@ -156,7 +156,7 @@ class LaunchFileReader:
 
         logger.debug("obtained value for parameter [%s]: %s", name, value)
 
-        # TODO handle private/local parameters
+        # TODO handle node-local parameters
         # TODO handle global parameters
 
         return ctx, cfg
@@ -201,7 +201,7 @@ class LaunchFileReader:
         ctx_child, cfg = self._load_tags(ctx_child, cfg, nested_tags)
 
         node = NodeConfig(name=name,
-                          namespace=ctx.namespace,
+                          namespace=ctx_child.namespace,
                           package=package,
                           cwd=cwd,
                           args=args,
