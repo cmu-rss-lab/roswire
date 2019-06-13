@@ -1,7 +1,16 @@
-__all__ = ('Stopwatch',)
+# -*- coding: utf-8 -*-
+__all__ = ('build_tuple', 'Stopwatch',)
 
+from typing import TypeVar, Sequence, Tuple
 from timeit import default_timer as timer
 import warnings
+
+T = TypeVar('T')
+
+
+def build_tuple(elements: Sequence[T]) -> Tuple[T, ...]:
+    """Tranforms a sequence of items to a tuple."""
+    return tuple(elements)
 
 
 class Stopwatch:
