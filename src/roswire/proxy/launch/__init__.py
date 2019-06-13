@@ -93,6 +93,14 @@ class LaunchFileReader:
             ctx, cfg = loader(self, ctx, cfg, tag)
         return ctx, cfg
 
+    @tag('param', ['name', 'value', 'type', 'textfile', 'binfile', 'command'])
+    def _load_param_tag(self,
+                        ctx: LaunchContext,
+                        cfg: ROSConfig,
+                        tag: ET.Element
+                        ) -> Tuple[LaunchContext, ROSConfig]:
+        return ctx, cfg
+
     @tag('remap', ['from', 'to'])
     def _load_remap_tag(self,
                         ctx: LaunchContext,
@@ -127,8 +135,10 @@ class LaunchFileReader:
         ctx_child, cfg = \
             self._handle_ns_and_clear_params(ctx, cfg, tag, node_name=name)
 
-        allowed = {'remap', 'rosparam', 'env', 'param'}
-        # self._load_tags([t for t in tags if t.tag in allowed])
+        # handle nested tags
+        allowed = {'env', 'remap'}  # TODO add param, rosparam
+        nested_tags = [t for t in tag if t.tag in allowed]
+        ctx_child, cfg = self._load_tags(ctx_child, cfg, nested_tags)
 
         node = NodeConfig(name=name,
                           namespace=ctx.namespace,
@@ -139,10 +149,10 @@ class LaunchFileReader:
                           respawn=respawn,
                           respawn_delay=respawn_delay,
                           output=output,
-                          remappings=ctx.remappings,
+                          remappings=ctx_child.remappings,
                           launch_prefix=launch_prefix,
                           filename=ctx.filename,
-                          env_args=ctx.env_args,
+                          env_args=ctx_child.env_args,
                           typ=node_type)
         cfg = cfg.with_node(node)
         return ctx, cfg
@@ -236,7 +246,7 @@ class LaunchFileReader:
             elif not ns:
                 m = "'ns' must be specified to use 'clear_params'"
                 raise FailedToParseLaunchFile(m)
-            cfg = cfg.with_clear_params(clear_ns)
+            cfg = cfg.with_clear_param(clear_ns)
 
         return ctx_child, cfg
 
