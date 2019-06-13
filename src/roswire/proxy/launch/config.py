@@ -67,7 +67,7 @@ class ROSConfig:
 
     def with_param(self, name: str, value: Any) -> 'ROSConfig':
         """Adds a parameter to this configuration."""
-        logger.debug("adding parameter [%s] with value [%s]", value)
+        logger.debug("adding parameter [%s] with value [%s]", name, value)
         logger.warning("with_param not implemented")
 
     def with_executable(self, executable: str) -> 'ROSConfig':
