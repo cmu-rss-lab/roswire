@@ -47,6 +47,10 @@ class ROSConfig:
     executables: Tuple[str, ...] = attr.ib(default=tuple())
     roslaunch_files: Tuple[str, ...] = attr.ib(default=tuple())
 
+    def with_cleared_params(self, ns: str) -> 'ROSConfig':
+        logger.warning("unimplemented functionality [with_cleared_params]")
+        return self
+
     def with_executable(self, executable: str) -> 'ROSConfig':
         """Specify an executable that should be run at launch."""
         executables = self.executables + (executable,)

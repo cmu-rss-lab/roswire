@@ -17,7 +17,7 @@ from .context import LaunchContext
 from ..substitution import resolve as resolve_args
 from ..shell import ShellProxy
 from ..file import FileProxy
-from ...name import namespace_join
+from ...name import namespace_join, global_name
 from ...exceptions import FailedToParseLaunchFile
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -122,15 +122,12 @@ class LaunchFileReader:
         respawn_delay = \
             self._read_optional_float(tag, 'respawn', ctx, 0.0)
 
-        # TODO create param context
-        ctx_child = \
-            self._handle_ns_and_clear_params(ctx, tag, node_name=name)
+        # create node context
+        ctx_child, cfg = \
+            self._handle_ns_and_clear_params(ctx, cfg, tag, node_name=name)
 
         allowed = {'remap', 'rosparam', 'env', 'param'}
         # self._load_tags([t for t in tags if t.tag in allowed])
-
-        # TODO determine remappings
-        remappings = tuple()
 
         node = NodeConfig(name=name,
                           namespace=ctx.namespace,
@@ -139,7 +136,7 @@ class LaunchFileReader:
                           respawn=respawn,
                           respawn_delay=respawn_delay,
                           output=output,
-                          remappings=remappings,
+                          remappings=ctx.remappings,
                           filename=ctx.filename,
                           typ=node_type)
         cfg = cfg.with_node(node)
@@ -183,9 +180,11 @@ class LaunchFileReader:
         cfg = cfg.with_roslaunch_file(include_filename)
 
         # construct child context
-        ctx_child = self._handle_ns_and_clear_params(ctx,
-                                                     tag,
-                                                     include_filename=include_filename)
+        ctx_child, cfg = \
+            self._handle_ns_and_clear_params(ctx,
+                                             cfg,
+                                             tag,
+                                             include_filename=include_filename)
 
         # if instructed to pass along args, then those args must be added to
         # the child context
@@ -206,10 +205,11 @@ class LaunchFileReader:
 
     def _handle_ns_and_clear_params(self,
                                     ctx: LaunchContext,
+                                    cfg: ROSConfig,
                                     tag: ET.Element,
                                     include_filename: Optional[str] = None,
                                     node_name: Optional[str] = None
-                                    ) -> LaunchContext:
+                                    ) -> Tuple[LaunchContext, ROSConfig]:
         ns = self._read_optional(tag, 'namespace', ctx)
         if ns == '':
             m = f"<{tag.tag}> has empty attribute [namespace]"
@@ -220,11 +220,20 @@ class LaunchFileReader:
         else:
             ctx_child = ctx.child(ns)
 
-        # TODO clear params
+        # handle 'clear_params'
+        clear_ns = ctx_child.namespace
         if self._read_optional_bool(tag, 'clear_params', ctx, False):
-            pass
+            if tag.tag == 'node':
+                if not node_name:
+                    m = "<node> must have a 'name' attribute to use 'clear_params'"  # noqa
+                    raise FailedToParseLaunchFile(m)
+                clear_ns = global_name(namespace_join(clear_ns, node_name))
+            elif not ns:
+                m = "'ns' must be specified to use 'clear_params'"
+                raise FailedToParseLaunchFile(m)
+            cfg = cfg.with_cleared_params(clear_ns)
 
-        return ctx_child
+        return ctx_child, cfg
 
     def _read_optional_bool(self,
                             elem: ET.Element,
