@@ -10,7 +10,7 @@ import logging
 import attr
 
 from ...exceptions import FailedToParseLaunchFile
-from ...name import namespace_join
+from ...name import namespace_join, canonical_name
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -50,10 +50,18 @@ class ROSConfig:
                                            converter=frozenset)
     executables: Tuple[str, ...] = attr.ib(default=tuple())
     roslaunch_files: Tuple[str, ...] = attr.ib(default=tuple())
+    clear_params: Tuple[str, ...] = attr.ib(default=tuple())
 
-    def with_cleared_params(self, ns: str) -> 'ROSConfig':
-        logger.warning("unimplemented functionality [with_cleared_params]")
-        return self
+    def with_clear_param(self, ns: str) -> 'ROSConfig':
+        """
+        Specifies a parameter that should be cleared before new parameters
+        are set.
+        """
+        ns = canonical_name(ns)
+        if ns in self.clear_params:
+            return self
+        clear_params = self.clear_params + (ns,)
+        return attr.evolve(self, clear_params=clear_params)
 
     def with_executable(self, executable: str) -> 'ROSConfig':
         """Specify an executable that should be run at launch."""
