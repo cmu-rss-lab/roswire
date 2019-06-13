@@ -86,7 +86,7 @@ class LaunchContext:
 
         arg_dict = self.include_resolve_dict.get('arg', {})
         for arg in self.arg_names:
-            if not arg in arg_dict:
+            if arg not in arg_dict:
                 m = f'include arg [{arg}] is missing value.'
                 raise FailedToParseLaunchFile(m)
 

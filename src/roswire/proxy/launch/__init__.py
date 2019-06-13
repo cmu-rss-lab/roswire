@@ -52,6 +52,7 @@ def _parse_float(attr: str, val: str) -> float:
 
 def tag(name: str, legal_attributes: Collection[str] = tuple()):
     legal_attributes = frozenset(legal_attributes)
+
     def wrap(loader):
         def wrapped(self,
                     ctx: LaunchContext,
@@ -67,6 +68,7 @@ def tag(name: str, legal_attributes: Collection[str] = tuple()):
             return ctx, cfg
         _TAG_TO_LOADER[name] = wrapped
         return wrapped
+
     return wrap
 
 
@@ -121,11 +123,11 @@ class LaunchFileReader:
         raise NotImplementedError
 
     def _read_param_binfile(self,
-                             name: str,
-                             typ: str,
-                             filename: str,
-                             ctx: LaunchContext
-                             ) -> Any:
+                            name: str,
+                            typ: str,
+                            filename: str,
+                            ctx: LaunchContext
+                            ) -> Any:
         """Reads a parameter value from a given binary file."""
         raise NotImplementedError
 
