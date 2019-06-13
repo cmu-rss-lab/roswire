@@ -99,6 +99,22 @@ class LaunchFileReader:
                         cfg: ROSConfig,
                         tag: ET.Element
                         ) -> Tuple[LaunchContext, ROSConfig]:
+        name = self._read_required(tag, 'name', ctx)
+        typ = self._read_optional(tag, 'type', ctx) or 'auto'
+        logger.debug("adding parameter [%s] with type [%s]", name, typ)
+
+        # obtain value from either 'value', 'textfile', 'binfile', or
+        # 'command' exclusively.
+        val = self._read_optional(tag, 'value', ctx)
+        textfile = self._read_optional(tag, 'textfile', ctx)
+        binfile = self._read_optional(tag, 'binfile', ctx)
+        command = self._read_optional(tag, 'command', ctx)
+        value_candidates = [val, textfile, binfile, command]
+
+        if len([c for c in value_candidates if c is not None]) != 1:
+            m = '<param> must have exactly one value/textfile/binfile/command'
+            raise FailedToParseLaunchFile(m)
+
         return ctx, cfg
 
     @tag('remap', ['from', 'to'])
@@ -136,7 +152,7 @@ class LaunchFileReader:
             self._handle_ns_and_clear_params(ctx, cfg, tag, node_name=name)
 
         # handle nested tags
-        allowed = {'env', 'remap'}  # TODO add param, rosparam
+        allowed = {'env', 'remap', 'param', 'rosparam'}
         nested_tags = [t for t in tag if t.tag in allowed]
         ctx_child, cfg = self._load_tags(ctx_child, cfg, nested_tags)
 
