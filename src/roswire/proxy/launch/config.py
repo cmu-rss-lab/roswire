@@ -11,7 +11,8 @@ import attr
 
 from ...util import build_tuple
 from ...exceptions import FailedToParseLaunchFile
-from ...name import namespace_join, canonical_name, name_is_global
+from ...name import (namespace_join, canonical_name, name_is_global,
+                     namespaces_of)
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -53,6 +54,7 @@ class ROSConfig:
     roslaunch_files: Tuple[str, ...] = attr.ib(default=tuple())
     params: Dict[str, Any] = attr.ib(factory=dict)
     clear_params: Tuple[str, ...] = attr.ib(default=tuple())
+    errors: Tuple[str, ...] = attr.ib(default=tuple())
 
     def with_clear_param(self, ns: str) -> 'ROSConfig':
         """
@@ -67,13 +69,19 @@ class ROSConfig:
 
     def with_param(self, name: str, value: Any) -> 'ROSConfig':
         """Adds a parameter to this configuration."""
+        params = self.params.copy()
+        errors = self.errors
+
         if not name_is_global(name):
             m = f"expected parameter name to be global: {name}"
             raise FailedToParseLaunchFile(m)
 
-        logger.debug("adding parameter [%s] with value [%s]", name, value)
-        logger.warning("with_param not implemented")
-        return self
+        for parent_name in (n for n in namespaces_of(name) if n in params):
+            err = f"parameter [{name}] conflicts with parent [{parent_name}]"
+            errors = errors + (err,)
+
+        params[name] = value
+        return attr.evolve(self, params=params, errors=errors)
 
     def with_executable(self, executable: str) -> 'ROSConfig':
         """Specify an executable that should be run at launch."""
