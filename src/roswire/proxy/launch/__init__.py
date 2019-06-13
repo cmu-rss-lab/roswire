@@ -238,7 +238,7 @@ class LaunchFileReader:
             elif not ns:
                 m = "'ns' must be specified to use 'clear_params'"
                 raise FailedToParseLaunchFile(m)
-            cfg = cfg.with_cleared_params(clear_ns)
+            cfg = cfg.with_clear_params(clear_ns)
 
         return ctx_child, cfg
 
