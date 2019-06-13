@@ -10,7 +10,7 @@ import logging
 
 import attr
 
-from ...name import canonical_name
+from ...name import canonical_name, name_is_legal
 from ...exceptions import FailedToParseLaunchFile
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -60,12 +60,10 @@ class LaunchContext:
         if not frm or not to:
             m = "'from' and 'to' attributes must be specified for <remap>"
             raise FailedToParseLaunchFile(m)
-        # TODO check name legality
-        if False:
+        if not name_is_legal(frm):
             m = f"<remap>: invalid ROS name [from]: {frm}"
             raise FailedToParseLaunchFile(m)
-        # TODO check name legality
-        if False:
+        if not name_is_legal(to):
             m = f"<remap>: invalid ROS name [to]: {to}"
             raise FailedToParseLaunchFile(m)
 
