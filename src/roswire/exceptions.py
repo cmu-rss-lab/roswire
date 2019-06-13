@@ -3,6 +3,10 @@ class ROSWireException(Exception):
     """Base class used by all ROSWire exceptions."""
 
 
+class FailedToParseLaunchFile(ROSWireException):
+    """An attempt to parse a launch file failed."""
+
+
 class EnvNotFoundError(ROSWireException):
     """A given environment variable could not be found."""
     def __init__(self, var: str) -> None:
