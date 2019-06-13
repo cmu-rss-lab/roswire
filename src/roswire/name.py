@@ -3,6 +3,7 @@ __all__ = (
     'canonical_name',
     'global_name',
     'namespace',
+    'namespaces_of',
     'namespace_join',
     'name_is_private',
     'name_is_global',
@@ -32,6 +33,14 @@ def canonical_name(name: str) -> str:
     if name[0] == '/':
         return '/' + '/'.join(n for n in name[1:].split('/') if n)
     return '/'.join(n for n in name.split('/') if n)
+
+
+def namespaces_of(name: str) -> List[str]:
+    """Returns a list of each of the namespaces for a given name."""
+    if not name:
+        return ['/']
+    parts = [n for n in name.split('/') if n]
+    return ['/'] + ['/' + '/'.join(parts[:i]) for i in range(1, len(parts))]
 
 
 def name_is_legal(name: str) -> bool:
