@@ -69,6 +69,7 @@ class ROSConfig:
         """Adds a parameter to this configuration."""
         logger.debug("adding parameter [%s] with value [%s]", name, value)
         logger.warning("with_param not implemented")
+        return self
 
     def with_executable(self, executable: str) -> 'ROSConfig':
         """Specify an executable that should be run at launch."""
