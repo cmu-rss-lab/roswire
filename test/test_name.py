@@ -52,6 +52,19 @@ def test_name_is_global():
     assert not f('~bar')
 
 
+def test_name_is_legal():
+    f = roswire.name.name_is_legal
+    assert f('')
+    assert f('/')
+    assert f('/foo')
+    assert f('/foo/bar')
+    assert f('/foo/bar/')
+    assert f('~')
+    assert f('~foo')
+    assert not f('/~foo')
+    assert not f('foo bar')
+
+
 def test_namespace():
     f = roswire.name.namespace
     assert f('/') == '/'
