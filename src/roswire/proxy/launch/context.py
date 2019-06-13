@@ -4,13 +4,13 @@ This file provides data structures that represent ROS launch configurations.
 """
 __all__ = ('LaunchContext',)
 
-from typing import Tuple, Mapping, Any, Optional, Sequence
+from typing import Tuple, Mapping, Any, Optional, Sequence, Dict
 from copy import deepcopy
 import logging
 
 import attr
 
-from ...name import canonical_name, name_is_legal
+from ...name import canonical_name, name_is_legal, namespace_join
 from ...exceptions import FailedToParseLaunchFile
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -20,13 +20,13 @@ logger.setLevel(logging.DEBUG)
 @attr.s(frozen=True, slots=True)
 class LaunchContext:
     filename: str = attr.ib()
-    resolve_dict: Mapping[str, Any] = attr.ib(factory=dict)
+    resolve_dict: Dict[str, Any] = attr.ib(factory=dict)
     parent: 'LaunchContext' = attr.ib(default=None)
     namespace: str = attr.ib(default='/')
     arg_names: Tuple[str, ...] = attr.ib(default=tuple())
     env_args: Tuple[Tuple[str, str], ...] = attr.ib(default=tuple())
     pass_all_args: bool = attr.ib(default=False)
-    include_resolve_dict: Optional[Mapping[str, Any]] = attr.ib(default=None)
+    include_resolve_dict: Optional[Dict[str, Any]] = attr.ib(default=None)
     remappings: Tuple[Tuple[str, str], ...] = attr.ib(default=tuple())
 
     def include_child(self,
@@ -78,7 +78,7 @@ class LaunchContext:
         if 'arg' in self.parent.resolve_dict:
             for var, val in self.parent.resolve_dict['arg'].items():
                 ctx = ctx.with_arg(var, value=val)
-        return attrs.evolve(ctx, pass_all_args=True)
+        return attr.evolve(ctx, pass_all_args=True)
 
     def process_include_args(self) -> 'LaunchContext':
         if self.include_resolve_dict is None:
@@ -116,7 +116,7 @@ class LaunchContext:
                  name: str,
                  default: Optional[Any] = None,
                  value: Optional[Any] = None,
-                 doc: Optional = None
+                 doc: Optional[str] = None
                  ) -> 'LaunchContext':
         logger.debug("adding arg [%s] to context", name)
         arg_names = self.arg_names
@@ -130,11 +130,11 @@ class LaunchContext:
         # decide which resolve dictionary should be used
         use_include_resolve_dict = self.include_resolve_dict is not None
         if use_include_resolve_dict:
-            resolve_dict = self.include_resolve_dict
+            assert self.include_resolve_dict is not None  # stupid mypy
+            resolve_dict = self.include_resolve_dict.copy()
         else:
-            resolve_dict = self.resolve_dict
+            resolve_dict = self.resolve_dict.copy()
 
-        resolve_dict = resolve_dict.copy()
         arg_dict = resolve_dict['arg'] = resolve_dict.get('arg', {}).copy()
 
         if value is not None:
