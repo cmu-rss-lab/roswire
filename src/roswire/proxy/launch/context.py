@@ -28,6 +28,12 @@ class LaunchContext:
     pass_all_args: bool = attr.ib(default=False)
     include_resolve_dict: Optional[Dict[str, Any]] = attr.ib(default=None)
     remappings: Tuple[Tuple[str, str], ...] = attr.ib(default=tuple())
+    node_name: Optional[str] = attr.ib(default=None)
+
+    @property
+    def is_node_context(self) -> bool:
+        """Determines whether or not this context is node-local."""
+        return self.node_name is not None
 
     def include_child(self,
                       ns: Optional[str],
