@@ -17,7 +17,7 @@ from .context import LaunchContext
 from ..substitution import resolve as resolve_args
 from ..shell import ShellProxy
 from ..file import FileProxy
-from ...name import namespace_join, global_name
+from ...name import namespace_join, global_name, namespace
 from ...exceptions import FailedToParseLaunchFile
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -193,14 +193,11 @@ class LaunchFileReader:
 
         # create context
         ns = self._read_namespace(ctx, tag)
-        ctx_child = ctx.child(ns)
+        ctx_child = ctx.node_child(ns, name)
 
         # handle 'clear_params'
         if self._read_optional_bool(tag, 'clear_params', ctx, False):
-            if not name:
-                m = "<node> must have a 'name' attribute to use 'clear_params'"
-                raise FailedToParseLaunchFile(m)
-            clear_ns = global_name(namespace_join(ctx_child.namespace, name))
+            clear_ns = global_name(ctx_child.namespace)
             cfg = cfg.with_clear_param(clear_ns)
 
         # handle nested tags
@@ -209,7 +206,7 @@ class LaunchFileReader:
         ctx_child, cfg = self._load_tags(ctx_child, cfg, nested_tags)
 
         node = NodeConfig(name=name,
-                          namespace=ctx_child.namespace,
+                          namespace=namespace(ctx_child.namespace),
                           package=package,
                           cwd=cwd,
                           args=args,
