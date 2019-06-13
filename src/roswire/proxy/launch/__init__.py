@@ -122,33 +122,6 @@ class LaunchFileReader:
             ctx, cfg = loader(self, ctx, cfg, tag)
         return ctx, cfg
 
-    def _read_param_command(self,
-                            name: str,
-                            typ: str,
-                            command: str,
-                            ctx: LaunchContext
-                            ) -> Any:
-        """Reads a parameter value from a resolved command string."""
-        raise NotImplementedError
-
-    def _read_param_textfile(self,
-                             name: str,
-                             typ: str,
-                             filename: str,
-                             ctx: LaunchContext
-                             ) -> Any:
-        """Reads a parameter value from a given text file."""
-        raise NotImplementedError
-
-    def _read_param_binfile(self,
-                            name: str,
-                            typ: str,
-                            filename: str,
-                            ctx: LaunchContext
-                            ) -> Any:
-        """Reads a parameter value from a given binary file."""
-        raise NotImplementedError
-
     @tag('param', ['name', 'value', 'type', 'textfile', 'binfile', 'command'])
     def _load_param_tag(self,
                         ctx: LaunchContext,
