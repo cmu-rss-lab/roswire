@@ -216,7 +216,8 @@ class LaunchFileReader:
             yml_text = self.__files.read(filename)
             if subst_value:
                 yml_text = self._resolve_args(yml_text, ctx)
-            data = yaml.safe_load(yml_text) or {}
+            logger.debug("parsing rosparam YAML:\n%s", yml_text)
+            data = yaml.full_load(yml_text) or {}
             if type(data) != dict and not param:
                 m = "<rosparam> requires 'param' for non-dictionary values"
                 raise FailedToParseLaunchFile(m)
