@@ -13,6 +13,7 @@ import xml.etree.ElementTree as ET
 import attr
 import yaml
 
+from .rosparam import load_from_yaml_string as load_rosparam_from_string
 from .config import ROSConfig, NodeConfig, Parameter
 from .context import LaunchContext
 from ..substitution import resolve as resolve_args
@@ -217,7 +218,8 @@ class LaunchFileReader:
             if subst_value:
                 yml_text = self._resolve_args(yml_text, ctx)
             logger.debug("parsing rosparam YAML:\n%s", yml_text)
-            data = yaml.full_load(yml_text) or {}
+            data = load_rosparam_from_string(yml_text)
+            logger.debug("rosparam values: %s", data)
             if type(data) != dict and not param:
                 m = "<rosparam> requires 'param' for non-dictionary values"
                 raise FailedToParseLaunchFile(m)

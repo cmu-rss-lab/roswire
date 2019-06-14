@@ -2,20 +2,25 @@
 """
 This file provides utilities for interacting with rosparam.
 """
+__all__ = ('load_from_yaml_string',)
+
+from typing import Dict, Any
 import math
+import re
 
 import yaml
 
-# allow both PyYAML and LibYAML
-try:
-    from yaml import CLoader as YAMLLoader
-    from yaml import CYAMLObject as YAMLObject
-except ImportError:
-    from yaml import YAMLLoader, YAMLObject
+
+class YAMLLoader(yaml.SafeLoader):
+    """A custom YAML loader for rosparam files."""
 
 
-@yaml.add_constructor('!radians')
-def load_radians(loader: YAMLLoader, node: YAMLObject) -> float:
+def load_from_yaml_string(s: str) -> Dict[str, Any]:
+    """Parses the contents of a rosparam file to a dictionary."""
+    return yaml.load(s, Loader=YAMLLoader) or {}
+
+
+def __load_radians(loader: YAMLLoader, node: yaml.YAMLObject) -> float:
     """Safely converts rad(num) to a float value.
     
     Note
@@ -30,8 +35,7 @@ def load_radians(loader: YAMLLoader, node: YAMLObject) -> float:
     return float(expr_s)
 
 
-@yaml.add_constructor('!degrees')
-def load_degrees(loader: YAMLLoader, node: YAMLObject) -> float:
+def __load_degrees(loader: YAMLLoader, node: yaml.YAMLObject) -> float:
     """Safely converts deg(num) to a float value."""
     expr_s = loader.construct_scalar(node).strip()
     if expr_s.startswith('def('):
@@ -39,5 +43,9 @@ def load_degrees(loader: YAMLLoader, node: YAMLObject) -> float:
     return float(expr_s) * math.pi / 180.0
 
 
-yaml.add_implicit_resolve('!degrees', r'^deg\([^\)]*\)$', first='deg(')
-yaml.add_implicit_resolve('!radians', r'^rad\([^\)]*\)$', first='rad(')
+YAMLLoader.add_constructor('!degrees', __load_degrees)
+YAMLLoader.add_implicit_resolver(
+    '!degrees', re.compile('^deg\([^\)]*\)$'), first='deg(')
+YAMLLoader.add_constructor('!radians', __load_radians)
+YAMLLoader.add_implicit_resolver(
+    '!radians', re.compile('^rad\([^\)]*\)$'), first='rad(')
