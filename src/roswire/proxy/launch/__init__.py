@@ -11,6 +11,7 @@ import logging
 import xml.etree.ElementTree as ET
 
 import attr
+import yaml
 
 from .config import ROSConfig, NodeConfig, Parameter
 from .context import LaunchContext
@@ -183,33 +184,46 @@ class LaunchFileReader:
                            tag: ET.Element
                            ) -> Tuple[LaunchContext, ROSConfig]:
         filename = self._read_optional(tag, 'file', ctx)
+        subst_value = self._read_optional_bool(tag, 'subst_value', ctx, False)
         ns = self._read_optional(tag, 'ns', ctx) or ''
         param = self._read_optional(tag, 'param', ctx) or ''
         param = namespace_join(ns, param)
-        param = namespace_join(ctx.namespace, param)
+        full_param = namespace_join(ctx.namespace, param)
         value = _get_text(tag)
-
-        if self._read_optional_bool(tag, 'subst_value', ctx, False):
-            subst_func = lambda s: self._resolve_args(s, ctx)
 
         cmd = self._read_optional(tag, 'command', ctx) or 'load'
         if cmd not in ('load', 'delete', 'dump'):
-            m = f"<launch> unsupported 'command': {cmd}"
+            m = f"<rosparam> unsupported 'command': {cmd}"
             raise FailedToParseLaunchFile(m)
 
         if cmd == 'load' and not self.__files.isfile(filename):
-            m = f"<launch> file does not exist: {filename}"
+            m = f"<rosparam> file does not exist: {filename}"
             raise FailedToParseLaunchFile(m)
 
         if cmd == 'delete' and filename is not None:
-            m = "<launch> command:delete does not support filename"
+            m = "<rosparam> command:delete does not support filename"
             raise FailedToParseLaunchFile(m)
 
-        # TODO handle load command
+        # handle load command
         if cmd == 'load':
+            yml_text = self.__files.read(filename)
+            if subst_value:
+                yml_text = self._resolve_args(yml_text, ctx)
+            data = yaml.safe_load(yml_text) or {}
+            if type(data) != dict and not param:
+                m = "<rosparam> requires 'param' for non-dictionary values"
+                raise FailedToParseLaunchFile(m)
+            cfg = cfg.with_param(full_param, data)
 
-        # TODO handle dump command
-        # TODO handle delete command
+        # handle dump command
+        if cmd == 'dump':
+            m = "'dump' command is currently not supported in <rosparam>"
+            raise NotImplementedError(m)
+
+        # handle delete command
+        if cmd == 'delete':
+            m = "'delete' command is currently not supported in <rosparam>"
+            raise NotImplementedError(m)
 
         return ctx, cfg
 
