@@ -220,7 +220,7 @@ class LaunchFileReader:
             logger.debug("parsing rosparam YAML:\n%s", yml_text)
             data = load_rosparam_from_string(yml_text)
             logger.debug("rosparam values: %s", data)
-            if type(data) != dict and not param:
+            if not isinstance(data, dict) and not param:
                 m = "<rosparam> requires 'param' for non-dictionary values"
                 raise FailedToParseLaunchFile(m)
             cfg = cfg.with_param(full_param, data)
