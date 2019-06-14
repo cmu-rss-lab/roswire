@@ -200,9 +200,11 @@ class LaunchFileReader:
             m = f"<rosparam> load command requires filename"
             raise FailedToParseLaunchFile(m)
 
-        if cmd == 'load' and not self.__files.isfile(filename):
-            m = f"<rosparam> file does not exist: {filename}"
-            raise FailedToParseLaunchFile(m)
+        if cmd == 'load':
+            assert filename is not None  # mypy can't work this out
+            if not self.__files.isfile(filename):
+                m = f"<rosparam> file does not exist: {filename}"
+                raise FailedToParseLaunchFile(m)
 
         if cmd == 'delete' and filename is not None:
             m = "<rosparam> command:delete does not support filename"
@@ -210,7 +212,7 @@ class LaunchFileReader:
 
         # handle load command
         if cmd == 'load':
-            assert filename  # stupid mypy can't figure this out
+            assert filename is not None  # mypy can't work this out
             yml_text = self.__files.read(filename)
             if subst_value:
                 yml_text = self._resolve_args(yml_text, ctx)
