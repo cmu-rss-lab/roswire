@@ -197,7 +197,7 @@ class LaunchFileReader:
             raise FailedToParseLaunchFile(m)
 
         if cmd == 'load' and not filename:
-            m = f"<rosparam> load command requires filename"
+            m = "<rosparam> load command requires 'filename' attribute"
             raise FailedToParseLaunchFile(m)
 
         if cmd == 'load':
