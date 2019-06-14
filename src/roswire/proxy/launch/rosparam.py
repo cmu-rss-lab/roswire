@@ -22,7 +22,7 @@ def load_from_yaml_string(s: str) -> Dict[str, Any]:
 
 def __load_radians(loader: YAMLLoader, node: yaml.YAMLObject) -> float:
     """Safely converts rad(num) to a float value.
-    
+
     Note
     ----
     This does not support evaluation of expressions.
