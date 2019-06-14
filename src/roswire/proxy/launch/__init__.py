@@ -27,6 +27,12 @@ logger.setLevel(logging.DEBUG)
 _TAG_TO_LOADER = {}
 
 
+def _read_contents(tag: ET.Element) -> str:
+    """Reads the text contents of an XML element."""
+    # FIXME add support for CDATA -- possibly via lxml or xml.dom?
+    return ''.join(t.text for t in tag if t.text)
+
+
 def _parse_bool(attr: str, val: str) -> bool:
     """Parses a boolean value from an XML attribute."""
     val = val.lower()
@@ -167,6 +173,43 @@ class LaunchFileReader:
 
         # register the parameter
         cfg = cfg.with_param(fullname, value)
+
+        return ctx, cfg
+
+    @tag('rosparam', ['command', 'ns', 'file', 'param', 'subst_value'])
+    def _load_rosparam_tag(self,
+                           ctx: LaunchContext,
+                           cfg: ROSConfig,
+                           tag: ET.Element
+                           ) -> Tuple[LaunchContext, ROSConfig]:
+        filename = self._read_optional(tag, 'file', ctx)
+        ns = self._read_optional(tag, 'ns', ctx) or ''
+        param = self._read_optional(tag, 'param', ctx) or ''
+        param = namespace_join(ns, param)
+        param = namespace_join(ctx.namespace, param)
+        value = _get_text(tag)
+
+        if self._read_optional_bool(tag, 'subst_value', ctx, False):
+            subst_func = lambda s: self._resolve_args(s, ctx)
+
+        cmd = self._read_optional(tag, 'command', ctx) or 'load'
+        if cmd not in ('load', 'delete', 'dump'):
+            m = f"<launch> unsupported 'command': {cmd}"
+            raise FailedToParseLaunchFile(m)
+
+        if cmd == 'load' and not self.__files.isfile(filename):
+            m = f"<launch> file does not exist: {filename}"
+            raise FailedToParseLaunchFile(m)
+
+        if cmd == 'delete' and filename is not None:
+            m = "<launch> command:delete does not support filename"
+            raise FailedToParseLaunchFile(m)
+
+        # TODO handle load command
+        if cmd == 'load':
+
+        # TODO handle dump command
+        # TODO handle delete command
 
         return ctx, cfg
 
