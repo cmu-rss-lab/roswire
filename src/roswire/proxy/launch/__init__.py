@@ -189,11 +189,15 @@ class LaunchFileReader:
         param = self._read_optional(tag, 'param', ctx) or ''
         param = namespace_join(ns, param)
         full_param = namespace_join(ctx.namespace, param)
-        value = _get_text(tag)
+        value = _read_contents(tag)
 
-        cmd = self._read_optional(tag, 'command', ctx) or 'load'
+        cmd: str = self._read_optional(tag, 'command', ctx) or 'load'
         if cmd not in ('load', 'delete', 'dump'):
             m = f"<rosparam> unsupported 'command': {cmd}"
+            raise FailedToParseLaunchFile(m)
+
+        if cmd == 'load' and not filename:
+            m = f"<rosparam> load command requires filename"
             raise FailedToParseLaunchFile(m)
 
         if cmd == 'load' and not self.__files.isfile(filename):
@@ -206,6 +210,7 @@ class LaunchFileReader:
 
         # handle load command
         if cmd == 'load':
+            assert filename  # stupid mypy can't figure this out
             yml_text = self.__files.read(filename)
             if subst_value:
                 yml_text = self._resolve_args(yml_text, ctx)
