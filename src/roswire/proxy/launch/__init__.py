@@ -11,7 +11,9 @@ import logging
 import xml.etree.ElementTree as ET
 
 import attr
+import yaml
 
+from .rosparam import load_from_yaml_string as load_rosparam_from_string
 from .config import ROSConfig, NodeConfig, Parameter
 from .context import LaunchContext
 from ..substitution import resolve as resolve_args
@@ -25,6 +27,12 @@ logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 _TAG_TO_LOADER = {}
+
+
+def _read_contents(tag: ET.Element) -> str:
+    """Reads the text contents of an XML element."""
+    # FIXME add support for CDATA -- possibly via lxml or xml.dom?
+    return ''.join(t.text for t in tag if t.text)
 
 
 def _parse_bool(attr: str, val: str) -> bool:
@@ -167,6 +175,65 @@ class LaunchFileReader:
 
         # register the parameter
         cfg = cfg.with_param(fullname, value)
+
+        return ctx, cfg
+
+    @tag('rosparam', ['command', 'ns', 'file', 'param', 'subst_value'])
+    def _load_rosparam_tag(self,
+                           ctx: LaunchContext,
+                           cfg: ROSConfig,
+                           tag: ET.Element
+                           ) -> Tuple[LaunchContext, ROSConfig]:
+        filename = self._read_optional(tag, 'file', ctx)
+        subst_value = self._read_optional_bool(tag, 'subst_value', ctx, False)
+        ns = self._read_optional(tag, 'ns', ctx) or ''
+        param = self._read_optional(tag, 'param', ctx) or ''
+        param = namespace_join(ns, param)
+        full_param = namespace_join(ctx.namespace, param)
+        value = _read_contents(tag)
+
+        cmd: str = self._read_optional(tag, 'command', ctx) or 'load'
+        if cmd not in ('load', 'delete', 'dump'):
+            m = f"<rosparam> unsupported 'command': {cmd}"
+            raise FailedToParseLaunchFile(m)
+
+        if cmd == 'load' and not filename:
+            m = "<rosparam> load command requires 'filename' attribute"
+            raise FailedToParseLaunchFile(m)
+
+        if cmd == 'load':
+            assert filename is not None  # mypy can't work this out
+            if not self.__files.isfile(filename):
+                m = f"<rosparam> file does not exist: {filename}"
+                raise FailedToParseLaunchFile(m)
+
+        if cmd == 'delete' and filename is not None:
+            m = "<rosparam> command:delete does not support filename"
+            raise FailedToParseLaunchFile(m)
+
+        # handle load command
+        if cmd == 'load':
+            assert filename is not None  # mypy can't work this out
+            yml_text = self.__files.read(filename)
+            if subst_value:
+                yml_text = self._resolve_args(yml_text, ctx)
+            logger.debug("parsing rosparam YAML:\n%s", yml_text)
+            data = load_rosparam_from_string(yml_text)
+            logger.debug("rosparam values: %s", data)
+            if not isinstance(data, dict) and not param:
+                m = "<rosparam> requires 'param' for non-dictionary values"
+                raise FailedToParseLaunchFile(m)
+            cfg = cfg.with_param(full_param, data)
+
+        # handle dump command
+        if cmd == 'dump':
+            m = "'dump' command is currently not supported in <rosparam>"
+            raise NotImplementedError(m)
+
+        # handle delete command
+        if cmd == 'delete':
+            m = "'delete' command is currently not supported in <rosparam>"
+            raise NotImplementedError(m)
 
         return ctx, cfg
 
