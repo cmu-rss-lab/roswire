@@ -9,12 +9,13 @@ import yaml
 # allow both PyYAML and LibYAML
 try:
     from yaml import CLoader as YAMLLoader
+    from yaml import CYAMLObject as YAMLObject
 except ImportError:
-    from yaml import YAMLLoader
+    from yaml import YAMLLoader, YAMLObject
 
 
 @yaml.add_constructor('!radians')
-def load_radians(loader, node) -> float:
+def load_radians(loader: YAMLLoader, node: YAMLObject) -> float:
     """Safely converts rad(num) to a float value.
     
     Note
@@ -30,13 +31,8 @@ def load_radians(loader, node) -> float:
 
 
 @yaml.add_constructor('!degrees')
-def load_degrees(loader, node) -> float:
-    """Safely converts deg(num) to a float value.
-    
-    Note
-    ----
-    This does not support evaluation of expressions.
-    """
+def load_degrees(loader: YAMLLoader, node: YAMLObject) -> float:
+    """Safely converts deg(num) to a float value."""
     expr_s = loader.construct_scalar(node).strip()
     if expr_s.startswith('def('):
         expr_s = expr_s[4:-1]
