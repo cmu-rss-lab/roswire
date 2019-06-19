@@ -1,4 +1,5 @@
-__all__ = ['SrvFormat']
+# -*- coding: utf-8 -*-
+__all__ = ('SrvFormat',)
 
 from typing import Optional, List, Dict, Any
 import os
@@ -20,8 +21,7 @@ class SrvFormat:
 
     @staticmethod
     def from_file(package: str, fn: str, files: FileProxy) -> 'SrvFormat':
-        """
-        Constructs a service format from a .srv file for a given package.
+        """Constructs a service format from a .srv file for a given package.
 
         Parameters:
             package: the name of the package that provides the file.
@@ -38,8 +38,7 @@ class SrvFormat:
 
     @staticmethod
     def from_string(package: str, name: str, s: str) -> 'SrvFormat':
-        """
-        Constructs a service format from its description.
+        """Constructs a service format from its description.
 
         Raises:
             ParsingError: if the description cannot be parsed.
@@ -50,11 +49,9 @@ class SrvFormat:
         name_res = f"{name}Response"
 
         sections: List[str] = [ss.strip() for ss in s.split('---')]
-        try:
-            s_req, s_res = sections
-        except ValueError:
-            m = "bad service description: missing separator (---)"
-            raise exceptions.ParsingError(m)
+        assert len(sections) < 3
+        s_req = sections[0]
+        s_res = sections[1] if len(sections) > 1 else ''
 
         if s_req:
             req = MsgFormat.from_string(package, name_req, s_req)

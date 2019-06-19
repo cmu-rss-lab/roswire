@@ -87,8 +87,14 @@ uint32 an_integer
 
     assert len(res.fields) == 3
     assert Field('another_pkg/YetAnotherMessage', 'val') in res.fields
-    assert Field('CustomMessageDefinedInThisPackage', 'value') in res.fields
+    assert Field('PkgName/CustomMessageDefinedInThisPackage', 'value') in res.fields
     assert Field('uint32', 'an_integer') in res.fields
+
+    # bug #269
+    s = "map_msgs/ProjectedMapInfo[] projected_maps_info"
+    fmt = SrvFormat.from_string("map_msgs", "ProjectedMapsInfo", s)
+    assert fmt.request is not None
+    assert fmt.response is None
 
 
 def test_action_from_string():
