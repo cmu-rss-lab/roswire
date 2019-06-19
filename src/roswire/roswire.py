@@ -92,8 +92,7 @@ class ROSWire:
                image: str,
                description: Optional[SystemDescription] = None
                ) -> Iterator[System]:
-        """
-        Launches a ROS application using a provided Docker image.
+        """Launches a ROS application using a provided Docker image.
 
         Parameters
         ----------
@@ -105,7 +104,7 @@ class ROSWire:
                 from the cache or else build one.
         """
         if not description:
-            description = self.descriptions.build(image)
+            description = self.descriptions.load_or_build(image)
         with self.containers.launch(image) as container:
             container = container
             yield System(container, description)
