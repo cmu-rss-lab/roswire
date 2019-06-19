@@ -49,11 +49,9 @@ class SrvFormat:
         name_res = f"{name}Response"
 
         sections: List[str] = [ss.strip() for ss in s.split('---')]
-        try:
-            s_req, s_res = sections
-        except ValueError:
-            m = "bad service description: missing separator (---)"
-            raise exceptions.ParsingError(m)
+        assert len(sections) < 3
+        s_req = sections[0]
+        s_res = sections[1] if len(sections) > 1 else ''
 
         if s_req:
             req = MsgFormat.from_string(package, name_req, s_req)
