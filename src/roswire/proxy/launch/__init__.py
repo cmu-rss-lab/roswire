@@ -265,7 +265,7 @@ class LaunchFileReader:
         required = self._read_optional_bool(tag, 'required', ctx, False)
         respawn = self._read_optional_bool(tag, 'respawn', ctx, False)
         respawn_delay = \
-            self._read_optional_float(tag, 'respawn', ctx, 0.0)
+            self._read_optional_float(tag, 'respawn_delay', ctx, 0.0)
 
         # create context
         ns = self._read_namespace(ctx, tag)
