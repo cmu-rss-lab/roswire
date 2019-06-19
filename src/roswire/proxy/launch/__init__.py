@@ -249,7 +249,7 @@ class LaunchFileReader:
         return ctx, cfg
 
     @tag('node', ['name', 'type', 'pkg', 'required', 'clear_params',
-                  'respawn', 'namespace', 'output'])
+                  'respawn', 'namespace', 'output', 'args'])
     def _load_node_tag(self,
                        ctx: LaunchContext,
                        cfg: ROSConfig,
