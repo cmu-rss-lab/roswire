@@ -1,4 +1,5 @@
-__all__ = ['SrvFormat']
+# -*- coding: utf-8 -*-
+__all__ = ('SrvFormat',)
 
 from typing import Optional, List, Dict, Any
 import os
@@ -20,8 +21,7 @@ class SrvFormat:
 
     @staticmethod
     def from_file(package: str, fn: str, files: FileProxy) -> 'SrvFormat':
-        """
-        Constructs a service format from a .srv file for a given package.
+        """Constructs a service format from a .srv file for a given package.
 
         Parameters:
             package: the name of the package that provides the file.
@@ -38,8 +38,7 @@ class SrvFormat:
 
     @staticmethod
     def from_string(package: str, name: str, s: str) -> 'SrvFormat':
-        """
-        Constructs a service format from its description.
+        """Constructs a service format from its description.
 
         Raises:
             ParsingError: if the description cannot be parsed.
