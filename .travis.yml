@@ -14,6 +14,8 @@ script:
 - mypy src --ignore-missing-imports
 notifications:
   email: false
+before_deploy:
+- "(python setup.py docs && touch docs/_build/html/.nojekyll)"
 deploy:
 - provider: pypi
   user: ChrisTimperley
@@ -21,4 +23,11 @@ deploy:
     secure: HXpws1isawBMm5PhtQ+ty1lRj9o3bFhsA6VsA3vKoRfq08+/92prsdyRWRu7koCLCnul0mC8N2V1OmGdy6crP84iz7nzY3XyaEdmSzdVFG29oTpOYgNcWW6JbD2llfYT5niMmZKShRsRB1f0oqMnGG/L/q9uRJ9I7VRkhQjAOPV3jiv/83NoS9BkXNNU3F5cvtMlV/+TB+7WuDSd7n0WGbIeFMUY0PqsgHNUTr6x0O10QaiwlNzvwChG1uoKNzBUQNTWOhlW0/HUbFNlCzzpNvEgbcWKbFxk1DEIAwfb+Op/rrZj9RZL+/5xnLBk+xwXeCMJbAWK/bUdZOSk8egjVH89LtM6bfL/y+sWxOe+JpzELMK8zKNCV4pV5xJy/tBwt4VIU2CzCPNZepTCLduvtmoCy6p9bdpwsdZNd9/BOWNRvSttZsCcg9a4reMXoW1X8hI2uikbfWx80p3SfZCUOW3IDDSbxsbdXq4SLI+w0oPv1TxSbw6iPWyeiWysXied6ant5bEGJxvF1JcewXHaOL4aT61BV9wiQi/fNOegOs7KFysBVM8GPRzm8kEwPRbzuRmdrVWjc72BidBNMdFxGk97A1Y41Esa/RCW7Cp6238JxZLKxWmls3D37OFiQIB3XUkRo/GdxD77tomd5P9x0DPv8bJbb6luRBpJpwLldGQ=
   on:
     tags: true
+    python: '3.6'
+- provider: pages
+  skip_cleanup: true
+  local_dir: docs/_build/html
+  github_token: "$GITHUB_TOKEN"
+  on:
+    branch: master
     python: '3.6'
