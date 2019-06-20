@@ -28,5 +28,5 @@ deploy:
   github_token:
     secure: AGy5Uvwxi6gfWHDyBF1DJDWoi21697CkosP2+YETftQvCiUYdF8n8ha+KUi8npz93aoM3/XHrS4/k0Fhj73B0yblRYuSKY4raixCdxoojE255LkphHBgMyYuqwIGq0Drvkq3n1ckmNbXVkxPjlK6p+BBiL76A5QhJUW2tgty3yYduGQeJQGZSlOYVEKlb8vFQhfFv6P5hsF26zVcu0VbQgEPsopembXGdVwRC9YlpkKspD12XN7z4ddFYFprFflbDQm68bheRvrMbtJVVG0N6tgOgI8THMWhwIX+9G6/oeJwMcwDD9zi+fzHv5ofQg4AMeTg4HEQ7MVUYuwps33G/C0Ye4k6MhGuLfY9VE80H3KQ3Q74vF7hfnMqLk9H6x1WNBFXY2vczse8Eic1dO6faLVJA+6NAreNLnMz//56vWxf1/JB5IsYESUyUTC+xc53PzPTKPWGwX38s+wKCghmRHe5MKqWtLyflY1qxdIW3OhE9N+LReNtE+G1Osl3MW76fXehpWDzEZMSTwBUW1gJD8g8eU4thkyhYPYBUdqyrIHBg/s+xJP9+3G3ZDrdJX8FZzBDxCX+AcO6JFjjdI82a/k62ONedVieYTzpR+MLiix1AQC2Att5t6k+ZqwBP/j7wiPyd2SIZvJifJlei234w+5J1vAQ07r8AYJfFaPWvPw=
   on:
-    branch: master
+    branch: add-docs-to-travis
     python: '3.6'
