@@ -14,6 +14,8 @@ script:
 - mypy src --ignore-missing-imports
 notifications:
   email: false
+before_deploy:
+- "(python setup.py docs && touch docs/_build/html/.nojekyll)"
 deploy:
 - provider: pypi
   user: ChrisTimperley
