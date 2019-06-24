@@ -24,7 +24,7 @@ Features
 
 * **Package Discovery:** finds all ROS packages within a Docker image.
 * **Definition Discovery:** finds and parses all message, service and
-   action formats into readable data structures.
+  action formats into readable data structures.
 * **Message Serialisation:** converts ROS messages from YAML or binary
   to readable data structures and vice versa.
 * **Bag Manipulation:** efficiently parses
