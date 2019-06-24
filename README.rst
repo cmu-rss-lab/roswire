@@ -30,7 +30,7 @@ Features
 * **Bag Manipulation:** efficiently parses
   `rosbag <http://wiki.ros.org/rosbag>`_ files, which can then be inspected,
   manipulated, and saved to disk.
-* **Bag Playback:** safely replaying bag files inside containers.
+* **Bag Playback:** safely replay bag files inside containers.
 
 
 Installation
