@@ -11,7 +11,7 @@ with open(path, 'r') as f:
 setup(
     name='roswire',
     version=__version__,
-    python_requires='>=3.5',
+    python_requires='>=3.6',
     description='An API for testing and mutating ROS systems.',
     author='Chris Timperley',
     author_email='christimperley@googlemail.com',
