@@ -5,6 +5,10 @@ roswire
 
 .. image:: https://travis-ci.org/ChrisTimperley/roswire.svg?branch=master
     :target: https://travis-ci.org/ChrisTimperley/roswire
+.. image:: https://badge.fury.io/py/roswire.svg
+    :target: https://badge.fury.io/py/roswire
+.. image:: https://img.shields.io/pypi/pyversions/roswire.svg
+    :target: https://pypi.org/project/roswire
 
 
 ROSWire is a Python library for static and dynamic analysis of
@@ -35,6 +39,8 @@ Features
 
 Installation
 ------------
+
+roswire requires Python 3.6+
 
 To avoid interfering with the rest of your system (i.e., to avoid Python's
 equivalent of DLL hell), we strongly recommend that
