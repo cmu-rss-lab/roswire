@@ -448,9 +448,9 @@ class LaunchFileReader:
             m = 'tag may not provide both "if" and "unless" attributes'
             raise FailedToParseLaunchFile(m)
         if if_val is not None:
-            return _convert_bool('if', if_val)
+            return _parse_bool('if', if_val)
         if unless_val is not None:
-            return _convert_bool('unless', unless_val)
+            return _parse_bool('unless', unless_val)
         return True
 
     def _resolve_args(self, s: str, ctx: LaunchContext) -> str:
