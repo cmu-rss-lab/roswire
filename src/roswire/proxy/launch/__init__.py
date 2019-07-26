@@ -87,23 +87,9 @@ def convert_str_to_type(s: str, typ: str) -> Union[bool, int, str, float]:
 
 
 def tag(name: str, legal_attributes: Collection[str] = tuple()):
-    legal_attributes = frozenset(legal_attributes)
-    allow_ifunless = any(lambda a: a in legal_attributes, ('if', 'unless'))
+    legal_attributes = frozenset(legal_attributes + ['if', 'unless'])
 
     def wrap(loader):
-        loader_orig = loader
-        def ifunless(self,
-                     ctx: LaunchContext,
-                     cfg: ROSConfig,
-                     elem: ET.Element
-                     ) -> Tuple[LaunchContext, ROSConfig]:
-            if self._ifunless_check(elem, ctx):
-                return loader_orig(self, ctx, cfg, elem)
-            return ctx, cfg
-
-        if allow_ifunless:
-            loader = ifunless
-
         def wrapped(self,
                     ctx: LaunchContext,
                     cfg: ROSConfig,
@@ -114,8 +100,11 @@ def tag(name: str, legal_attributes: Collection[str] = tuple()):
                 if attribute not in legal_attributes:
                     m = '<{}> tag contains illegal attribute: {}'
                     raise FailedToParseLaunchFile(m.format(name, attribute))
-            ctx, cfg = loader(self, ctx, cfg, elem)
-            return ctx, cfg
+
+            # should we process this element?
+            if not self._ifunless_check(elem, ctx):
+                return ctx, cfg
+            return loader(self, ctx, cfg, elem)
 
         _TAG_TO_LOADER[name] = wrapped
         return wrapped
