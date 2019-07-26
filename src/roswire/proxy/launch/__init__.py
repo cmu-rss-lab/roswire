@@ -88,8 +88,22 @@ def convert_str_to_type(s: str, typ: str) -> Union[bool, int, str, float]:
 
 def tag(name: str, legal_attributes: Collection[str] = tuple()):
     legal_attributes = frozenset(legal_attributes)
+    allow_ifunless = any(lambda a: a in legal_attributes, ('if', 'unless'))
 
     def wrap(loader):
+        loader_orig = loader
+        def ifunless(self,
+                     ctx: LaunchContext,
+                     cfg: ROSConfig,
+                     elem: ET.Element
+                     ) -> Tuple[LaunchContext, ROSConfig]:
+            if self._ifunless_check(elem, ctx):
+                return loader_orig(self, ctx, cfg, elem)
+            return ctx, cfg
+
+        if allow_ifunless:
+            loader = ifunless
+
         def wrapped(self,
                     ctx: LaunchContext,
                     cfg: ROSConfig,
@@ -102,6 +116,7 @@ def tag(name: str, legal_attributes: Collection[str] = tuple()):
                     raise FailedToParseLaunchFile(m.format(name, attribute))
             ctx, cfg = loader(self, ctx, cfg, elem)
             return ctx, cfg
+
         _TAG_TO_LOADER[name] = wrapped
         return wrapped
 
@@ -435,6 +450,19 @@ class LaunchFileReader:
                        ) -> str:
         """Reads the string value of a required attribute of an element."""
         return self._resolve_args(elem.attrib[attrib], ctx)
+
+    def _ifunless_check(self, elem: ET.Element, ctx: LaunchContext) -> bool:
+        """Determines whether an element should be parsed."""
+        if_val = self._read_optional(elem, 'if', ctx)
+        unless_val = self._read_optional(elem, 'unless', ctx)
+        if if_val is not None and unless_val is not None:
+            m = 'tag may not provide both "if" and "unless" attributes'
+            raise FailedToParseLaunchFile(m)
+        if if_val is not None:
+            return _convert_bool('if', if_val)
+        if unless_val is not None:
+            return _convert_bool('unless', unless_val)
+        return True
 
     def _resolve_args(self, s: str, ctx: LaunchContext) -> str:
         """Resolves all substitution args in a given string."""
