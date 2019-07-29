@@ -450,7 +450,7 @@ class LaunchFileReader:
         if if_val is not None:
             return _parse_bool('if', if_val)
         if unless_val is not None:
-            return _parse_bool('unless', unless_val)
+            return not _parse_bool('unless', unless_val)
         return True
 
     def _resolve_args(self, s: str, ctx: LaunchContext) -> str:
