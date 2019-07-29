@@ -87,7 +87,7 @@ def convert_str_to_type(s: str, typ: str) -> Union[bool, int, str, float]:
 
 
 def tag(name: str, legal_attributes: Collection[str] = tuple()):
-    legal_attributes = frozenset(legal_attributes + ['if', 'unless'])
+    legal_attributes = frozenset(list(legal_attributes) + ['if', 'unless'])
 
     def wrap(loader):
         def wrapped(self,
