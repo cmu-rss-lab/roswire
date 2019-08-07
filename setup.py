@@ -8,9 +8,4 @@ with open(path, 'r') as f:
     exec(f.read())
 
 
-setup(
-    version=__version__,
-    setup_requires=['pytest-runner'],
-    tests_require=['pytest'],
-    test_suites='tests'
-)
+setup(version=__version__)
