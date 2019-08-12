@@ -27,8 +27,7 @@ Features
 --------
 
 * **Does not require ROS to be installed on your machine.**
-* **Supports most ROS distributions out of the box
-    (e.g., Indigo, Kinetic, Melodic).**
+* **Supports most ROS distributions out of the box (e.g., Groovy, Indigo, Kinetic, Melodic).**
 * **Package Discovery:** finds all ROS packages within a Docker image.
 * **Definition Discovery:** finds and parses all message, service and
   action formats into readable data structures.
