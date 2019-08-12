@@ -10,6 +10,8 @@ roswire
 .. image:: https://img.shields.io/pypi/pyversions/roswire.svg
     :target: https://pypi.org/project/roswire
 
+Read the [documentation](https://christimperley.github.io/roswire)
+------------------------------------------------------------------
 
 ROSWire is a Python library for static and dynamic analysis of
 containerised `Robot Operating System (ROS) <https://ros.org>`_
