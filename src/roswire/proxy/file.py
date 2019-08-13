@@ -307,18 +307,25 @@ class FileProxy:
         """
         Recursively creates a directory at a given path, creating any missing
         intermediate directories along the way.
+        Inspired by :meth:`os.makedirs`.
 
-        Parameters:
-            d: the path to the directory.
-            exist_ok: specifies whether or not an exception should be raised
-                if the given directory already exists.
+        Parameters
+        ----------
+        d: str
+            the path to the directory.
+        exist_ok: bool
+            specifies whether or not an exception should be raised if the
+            given directory already exists.
 
-        Raises:
-            FileExistsError: if either (a) `exist_ok=False` and a directory
-                already exists at the given path, or (b) a file already exists
-                at the given path.
-            NotADirectoryError: if the parent directory isn't a directory.
-            ROSWireException: if an unexpected error occurred.
+        Raises
+        ------
+        FileExistsError
+            if either (a) `exist_ok=False` and a directory already exists at
+            the given path, or (b) a file already exists at the given path.
+        NotADirectoryError
+            if the parent directory isn't a directory.
+        ROSWireException
+            if an unexpected error occurred.
         """
         d_parent = os.path.dirname(d)
         if self.isdir(d) and not exist_ok:
