@@ -16,6 +16,24 @@ logger.setLevel(logging.DEBUG)
 
 
 class System:
+    """Provides access to a ROS application hosted by a Docker container.
+    
+    Attributes
+    ----------
+    uuid: UUID
+        A unique identifier for the underlying container.
+    description: SystemDescription
+        A static description of the associated ROS application.
+    shell: ShellProxy
+        Provides access to a bash shell for this container.
+    files: FileProxy
+        Provides access to the filesystem for this container.
+    ws_host: str
+        The absolute path to the shared directory for this container's
+        workspace on the host machine.
+    container: ContainerProxy
+        Provides access to the underlying Docker container.
+    """
     def __init__(self,
                  container: ContainerProxy,
                  description: SystemDescription
