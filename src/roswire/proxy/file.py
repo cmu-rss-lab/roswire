@@ -25,7 +25,7 @@ logger.setLevel(logging.DEBUG)
 class FileProxy:
     """Provides access to the filesystem for a given Docker container.
     Inspired by the interfaces of the :mod:`os`, :mod:`os.path`,
-    and :mod:`shutil` modules in the Python standard library.
+    :mod:`tempfile`, and :mod:`shutil` modules in the Python standard library.
     """
     def __init__(self,
                  container_docker: DockerContainer,
@@ -39,17 +39,21 @@ class FileProxy:
         """
         Copies a given file or directory tree from the host to the container.
 
-        Parameters:
-            fn_host: the file or directory tree that should be copied from
-                the host.
-            fn_container: the destination path on the container.
+        Parameters
+        ----------
+        fn_host: str
+            the file or directory tree that should be copied from the host.
+        fn_container: str
+            the destination path on the container.
 
-        Raises:
-            FileNotFoundError: if no file or directory exists at the given path
-                on the host.
-            FileNotFoundError: if the parent directory of the container
-                filepath does not exist.
-            OSError: if the copy operation failed.
+        Raises
+        ------
+        FileNotFoundError
+            if no file or directory exists at the given path on the host.
+        FileNotFoundError
+            if the parent directory of the container filepath does not exist.
+        OSError
+            if the copy operation failed.
         """
         id_container: str = self.__docker_id
         if not os.path.exists(path_host):
@@ -75,16 +79,22 @@ class FileProxy:
         """
         Copies a given file or directory tree from the container to the host.
 
-        Parameters:
-            fn_container: the file that should be copied from the container.
-            fn_host: the destination filepath on the host.
+        Parameters
+        ----------
+        fn_container: str
+            the file that should be copied from the container.
+        fn_host: str
+            the destination filepath on the host.
 
-        Raises:
-            FileNotFoundError: if no file or directory exists at the given path
-                inside the container.
-            FileNotFoundError: if the parent directory of the host filepath
-                does not exist.
-            OSError: if the copy operation failed.
+        Raises
+        ------
+        FileNotFoundError
+            if no file or directory exists at the given path inside the
+            container.
+        FileNotFoundError
+            if the parent directory of the host filepath does not exist.
+        OSError
+            if the copy operation failed.
         """
         id_container: str = self.__docker_id
         if not self.exists(path_container):
@@ -136,13 +146,22 @@ class FileProxy:
         ...
 
     def read(self, fn: str, binary: bool = False) -> Union[str, bytes]:
-        """
-        Reads the contents of a given file.
+        """Reads the contents of a given file.
 
-        Parameters:
-            fn: path to the file.
-            binary: if true, read the binary contents of the file;
-                otherwise, treat the file as a text file.
+        Parameters
+        ----------
+        fn: str
+            absolute path to the file.
+        binary: bool
+            if :code:`True`, read the binary contents of the file; otherwise,
+            treat the file as a text file.
+
+        Raises
+        ------
+        FileNotFoundError
+            if no file exists at the given path.
+        IsADirectoryError
+            if :code:`fn` is a directory.
         """
         mode = 'rb' if binary else 'r'
         if not self.exists(fn):
@@ -159,32 +178,32 @@ class FileProxy:
             os.remove(fn_host_temp)
 
     def exists(self, path: str) -> bool:
-        """
-        Determines whether a file or directory exists at the given path.
+        """Determines whether a file or directory exists at the given path.
+        Inspired by :meth:`os.path.exists`.
         """
         cmd = f'test -e {shlex.quote(path)}'
         code, output, duration = self.__shell.execute(cmd)
         return code == 0
 
     def isfile(self, path: str) -> bool:
-        """
-        Determines whether a regular file exists at a given path.
+        """Determines whether a regular file exists at a given path.
+        Inspired by :meth:`os.path.isfile`.
         """
         cmd = f'test -f {shlex.quote(path)}'
         code, output, duration = self.__shell.execute(cmd)
         return code == 0
 
     def isdir(self, path: str) -> bool:
-        """
-        Determines whether a directory exists at a given path.
+        """Determines whether a directory exists at a given path.
+        Inspired by :meth:`os.path.dir`.
         """
         cmd = f'test -d {shlex.quote(path)}'
         code, output, duration = self.__shell.execute(cmd)
         return code == 0
 
     def islink(self, path: str) -> bool:
-        """
-        Determines whether a symbolic link exists at a given path.
+        """Determines whether a symbolic link exists at a given path.
+        Inspired by :meth:`os.path.islink`.
         """
         cmd = f'test -h {shlex.quote(path)}'
         code, output, duration = self.__shell.execute(cmd)
