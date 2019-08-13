@@ -42,19 +42,19 @@ class System:
 
     @property
     def uuid(self) -> UUID:
-        return self.__container.uuid
+        return self.container.uuid
 
     @property
     def ws_host(self) -> str:
-        return self.__container.ws_host
+        return self.container.ws_host
 
     @property
     def ip_address(self) -> str:
-        return self.__container.ip_address
+        return self.container.ip_address
 
     @property
     def shell(self) -> ShellProxy:
-        return self.__container.shell
+        return self.container.shell
 
     def catkin(self, directory: str) -> CatkinProxy:
         """Returns an interface to a given catkin workspace.
@@ -104,7 +104,7 @@ class System:
 
     @property
     def files(self) -> FileProxy:
-        return self.__container.files
+        return self.container.files
 
     @contextlib.contextmanager
     def roscore(self, port: int = 11311) -> Iterator[ROSProxy]:
