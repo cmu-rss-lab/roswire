@@ -31,8 +31,10 @@ Shell
 
 .. py:module:: roswire.proxy.shell
 .. autoclass:: ShellProxy()
+  :members:
 
 .. autoclass:: Popen()
+  :members:
 
 
 Descriptions
