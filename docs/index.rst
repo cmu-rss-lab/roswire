@@ -96,19 +96,3 @@ service and action types:
    #   a new one accordingly.
    #
    description = roswire.descriptions.load_or_build(image)
-
-
-API Reference
--------------
-
-
-.. py:module:: roswire
-.. autoclass:: ROSWire
-  :members:
-
-.. py:module:: roswire.description
-.. autoclass:: SystemDescriptionManager()
-  :members:
-
-.. autoclass:: SystemDescription()
-  :members:
