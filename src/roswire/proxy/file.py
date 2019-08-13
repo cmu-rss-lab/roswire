@@ -438,6 +438,7 @@ class FileProxy:
                dirname: Optional[str] = None
                ) -> str:
         """Creates a temporary file.
+        Inspired by :class:`tempfile.mktemp`.
 
         Parameters
         ----------
