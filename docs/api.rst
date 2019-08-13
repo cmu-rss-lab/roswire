@@ -22,7 +22,7 @@ through a number of loosely-coupled proxies that are represented as
 attributes. For example, :attr:`System.shell` exposes a proxy for interacting
 with a :code:`bash` shell inside the application container.
 
-.. autoclass:: System
+.. autoclass:: System()
   :members:
 
 
