@@ -9,6 +9,8 @@ roswire
     :target: https://badge.fury.io/py/roswire
 .. image:: https://img.shields.io/pypi/pyversions/roswire.svg
     :target: https://pypi.org/project/roswire
+.. image:: https://gitq.com/badge.svg
+    :target: https://gitq.com/ChrisTimperley/roswire
 
 Read the `documentation <https://christimperley.github.io/roswire>`_
 --------------------------------------------------------------------
