@@ -46,13 +46,13 @@ class ContainerProxy:
     ip_address: str
         The IP address for this container on the host network.
     """
-    uuid = attr.ib(type=UUID)
-    pid = attr.ib(type=int)
-    shell = attr.ib(type=ShellProxy)
-    files = attr.ib(type=FileProxy)
-    ws_host = attr.ib(type=str)
-    _api_docker = attr.ib(type=DockerAPIClient)
-    _container_docker = attr.ib(type=DockerContainer)
+    uuid: UUID = attr.ib()
+    pid: int = attr.ib()
+    shell: ShellProxy = attr.ib()
+    files: FileProxy = attr.ib()
+    ws_host: str = attr.ib()
+    _api_docker: DockerAPIClient = attr.ib()
+    _container_docker: DockerContainer = attr.ib()
 
     @staticmethod
     def _from_docker(api_docker: DockerAPIClient,
