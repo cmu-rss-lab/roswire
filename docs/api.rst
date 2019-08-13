@@ -36,6 +36,9 @@ instances that are generated using :meth:`ROSWire.launch`.
 .. autoclass:: ContainerProxyManager()
   :members:
 
+.. autoclass:: ContainerProxy()
+  :members:
+
 
 Exceptions
 ----------
