@@ -68,9 +68,17 @@ ROSWire can also be installed from source:
    (roswire) $ pip install .
 
 
+Contents
+--------
+
+.. toctree::
+   :maxdepth: 2
+
+   api
+
+
 Getting Started
 ---------------
-
 
 To obtain a description of all of the packages contained within a ROS
 application, along with a description of their associated message,
