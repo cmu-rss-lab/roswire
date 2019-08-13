@@ -57,16 +57,49 @@ class System:
         return self.__container.shell
 
     def catkin(self, directory: str) -> CatkinProxy:
-        """Returns an interface to a given catkin workspace."""
+        """Returns an interface to a given catkin workspace.
+        
+        Parameters
+        ----------
+        directory: str
+            The absolute path to the catkin workspace inside the container.
+
+        Returns
+        -------
+        CatkinProxy
+            An interface to the given workspace.
+        """
         # TODO decide whether to use catkin_tools or catkin_make
         return self.catkin_tools(directory)
 
     def catkin_tools(self, directory: str) -> CatkinToolsProxy:
-        """Returns an interface to a given catkin tools workspace."""
+        """Returns an interface to a given catkin tools workspace.
+        
+        Parameters
+        ----------
+        directory: str
+            The absolute path to the catkin workspace inside the container.
+
+        Returns
+        -------
+        CatkinToolsProxy
+            An interface to the given workspace.
+        """
         return CatkinToolsProxy(self.shell, directory)
 
     def catkin_make(self, directory: str) -> CatkinMakeProxy:
-        """Returns an interface to a given catkin_make workspace."""
+        """Returns an interface to a given catkin_make workspace.
+        
+        Parameters
+        ----------
+        directory: str
+            The absolute path to the catkin workspace inside the container.
+
+        Returns
+        -------
+        CatkinMakeProxy
+            An interface to the given workspace.
+        """
         return CatkinMakeProxy(self.shell, directory)
 
     @property
