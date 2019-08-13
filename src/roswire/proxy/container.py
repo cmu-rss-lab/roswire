@@ -186,7 +186,7 @@ class ContainerProxyManager:
         return self.__client_docker.images.get(tag)
 
     def image_sha256(self, tag_or_image: Union[str, DockerImage]) -> str:
-        """Retrieves the SHA256 for a given Docker image."""
+        """Computes the SHA256 for a given Docker image."""
         image: DockerImage
         if isinstance(tag_or_image, str):
             image = self.image(tag_or_image)
