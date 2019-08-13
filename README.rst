@@ -12,8 +12,8 @@ roswire
 .. image:: https://gitq.com/badge.svg
     :target: https://gitq.com/ChrisTimperley/roswire
 
-Read the `documentation <https://christimperley.github.io/roswire>`_
---------------------------------------------------------------------
+Read the `documentation <https://christimperley.github.io/roswire>`_ or check out the `forum <https://gitq.com/ChrisTimperley/roswire>`_
+----------------------------------------------------------------------------------------------------------------------------------------
 
 ROSWire is a Python library for static and dynamic analysis of
 containerised `Robot Operating System (ROS) <https://ros.org>`_
