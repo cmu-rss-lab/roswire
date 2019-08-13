@@ -13,6 +13,14 @@ the roswire library.
 System
 ------
 
+The :class:`System` class is used to provide access to a ROS application that
+has been launched by :meth:`ROSWire.launch`. This class is the main entry
+point for users wishing to interact with an ROS application.
+The :class:`System` class facilitates interaction with the ROS application
+through a number of loosely-coupled proxies that are represented as
+attributes. For example, :attr:`System.shell` exposes a proxy for interacting
+with a :code:`bash` shell inside the application container.
+
 .. autoclass:: System
   :members:
 
