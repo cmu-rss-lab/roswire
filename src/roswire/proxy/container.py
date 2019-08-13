@@ -26,6 +26,24 @@ logger.setLevel(logging.DEBUG)
 
 
 class ContainerProxy:
+    """Provides an interface to a Docker container running on this host.
+
+    Attributes
+    ----------
+    uuid: UUID
+        A unique identifier for this container.
+    shell: ShellProxy
+        Provides access to a bash shell for this container.
+    files: FileProxy
+        Provides access to the filesystem for this container.
+    pid: int
+        The PID of this container process on the host machine.
+    ws_host: str
+        The absolute path to the shared directory for this container's
+        workspace on the host machine.
+    ip_address: str
+        The IP address for this container on the host network.
+    """
     def __init__(self,
                  api_docker: DockerAPIClient,
                  container_docker: DockerContainer,
@@ -50,7 +68,6 @@ class ContainerProxy:
 
     @property
     def pid(self) -> int:
-        """The PID of this container process on the host machine."""
         return self.__pid
 
     @property
@@ -91,7 +108,8 @@ class ContainerProxy:
 
         Returns
         -------
-        A description of the persisted image.
+        DockerImage
+            A description of the persisted image.
         """
         return self.__container_docker.commit(repo, tag)
 
