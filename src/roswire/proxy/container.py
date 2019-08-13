@@ -65,7 +65,13 @@ class ContainerProxy:
         pid = int(info['State']['Pid'])
         shell = ShellProxy(api_docker, container_docker, pid)
         files = FileProxy(container_docker, shell)
-        return ContainerProxy(uuid, shell, files, pid, ws_host)
+        return ContainerProxy(uuid=uuid,
+                              shell=shell,
+                              files=files,
+                              pid=pid,
+                              ws_host=ws_host,
+                              _api_docker=api_docker
+                              _container_docker=container_docker)
 
     @property
     def ip_address(self) -> str:
