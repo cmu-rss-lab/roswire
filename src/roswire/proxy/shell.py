@@ -162,7 +162,18 @@ class ShellProxy:
         return self.__api_docker.exec_inspect(exec_id)['Pid']
 
     def local_to_host_pid(self, pid_local: int) -> Optional[int]:
-        """Finds the host PID for a process inside this shell."""
+        """Finds the host PID for a process inside this shell.
+
+        Parameters
+        ----------
+        pid_local: int
+            The PID of the process inside the container.
+
+        Returns
+        -------
+        int
+            The PID of the same process on the host machine.
+        """
         ctr_pids = [self.__container_pid]
         info = self.__api_docker.inspect_container(self.__container_docker.id)
         ctr_pids += [self.exec_id_to_host_pid(i) for i in info['ExecIDs']]
@@ -253,6 +264,31 @@ class ShellProxy:
         non-blocking process, or to send a signal (e.g., SIGTERM) to a process
         at run-time.
 
+        Parameters
+        ----------
+        command: str
+            The command that should be executed.
+        stdout: bool
+            If :code:`True`, includes stdout as part of output.
+        stderr: bool
+            If :code:`True`, includes stderr as part of output.
+        user: str, optional
+            The name or UID of the user, inside the container, that should
+            execute the command. If left unspecified, the default user for
+            the container will be used.
+        context: str, optional
+            The absolute path to the working directory that should be used
+            when executing the command. If unspecified, the default working
+            directory for the container will be used.
+        time_limit: int, optional
+            The maximum number of seconds that the command is allowed to run
+            before being terminated via SIGTERM. If unspecified, no time limit
+            will be imposed on command execution.
+        kill_after: int
+            The maximum number of seconds to wait before sending SIGKILL to
+            the process after attempting termination via SIGTERM. Only applies
+            when :code:`time_limit` is specified.
+
         Returns
         -------
         Popen
@@ -289,30 +325,9 @@ class ShellProxy:
                 ) -> Tuple[int, str, float]:
         """Executes a given command and blocks until its completion.
 
-        Parameters
-        ----------
-        command: str
-            The command that should be executed.
-        stdout: bool
-            If :code:`True`, includes stdout as part of output.
-        stderr: bool
-            If :code:`True`, includes stderr as part of output.
-        user: str, optional
-            The name or UID of the user, inside the container, that should
-            execute the command. If left unspecified, the default user for
-            the container will be used.
-        context: str, optional
-            The absolute path to the working directory that should be used
-            when executing the command. If unspecified, the default working
-            directory for the container will be used.
-        time_limit: int, optional
-            The maximum number of seconds that the command is allowed to run
-            before being terminated via SIGTERM. If unspecified, no time limit
-            will be imposed on command execution.
-        kill_after: int
-            The maximum number of seconds to wait before sending SIGKILL to
-            the process after attempting termination via SIGTERM. Only applies
-            when :code:`time_limit` is specified.
+        Note
+        ----
+        Accepts the same arguments as :meth:`popen`.
 
         Returns
         -------
