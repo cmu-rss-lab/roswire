@@ -70,8 +70,8 @@ class ContainerProxy:
                               files=files,
                               pid=pid,
                               ws_host=ws_host,
-                              _api_docker=api_docker,
-                              _container_docker=container_docker)
+                              api_docker=api_docker,
+                              container_docker=container_docker)
 
     @property
     def ip_address(self) -> str:
