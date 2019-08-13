@@ -299,7 +299,7 @@ class ShellProxy:
         api_docker = self.__api_docker
         command_orig = command
         command = self._instrument(command, time_limit, kill_after,
-                                  identifier=uid_popen)
+                                   identifier=uid_popen)
         exec_resp = api_docker.exec_create(id_container, command,
                                            tty=True,
                                            stdout=stdout,
