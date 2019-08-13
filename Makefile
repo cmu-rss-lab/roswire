@@ -7,7 +7,6 @@ init:
 
 # builds the documentation
 docs:
-	pipenv install --dev
 	pipenv run python setup.py docs
 
 # runs the unit test suite
