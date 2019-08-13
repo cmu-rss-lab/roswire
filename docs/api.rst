@@ -16,3 +16,11 @@ the roswire library.
 
 .. autoclass:: SystemDescription()
   :members:
+
+
+Exceptions
+----------
+
+.. py:module:: roswire.exceptions
+
+.. autoclass:: ROSWireException

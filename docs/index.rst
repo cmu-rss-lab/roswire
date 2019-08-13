@@ -74,33 +74,5 @@ Contents
 .. toctree::
    :maxdepth: 2
 
+   index
    api
-
-
-Getting Started
----------------
-
-To obtain a description of all of the packages contained within a ROS
-application, along with a description of their associated message,
-service and action types:
-
-
-.. code:: python
-
-   image = 'myrosapp'  # name of the Docker image for the ROS app
-
-   # create a new roswire session
-   roswire = ROSWire()
-
-   # we can obtain a static description of the application
-   #
-   # * loads an existing description if one has already been generated and
-   #   saved to disk for the given ROS application
-   # * otherwise it builds a description for the application and caches that
-   #   description to disk (unless told not).
-   # * descriptions in the cache are indexed by the SHA256 ID of the Docker
-   #   image. If the image changes or a different tag is used for the same
-   #   image, ROSWire is smart enough to load an existing description or build
-   #   a new one accordingly.
-   #
-   description = roswire.descriptions.load_or_build(image)
