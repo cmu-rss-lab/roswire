@@ -3,6 +3,15 @@
 roswire
 =======
 
+.. image:: https://travis-ci.org/ChrisTimperley/roswire.svg?branch=master
+    :target: https://travis-ci.org/ChrisTimperley/roswire
+.. image:: https://badge.fury.io/py/roswire.svg
+    :target: https://badge.fury.io/py/roswire
+.. image:: https://img.shields.io/pypi/pyversions/roswire.svg
+    :target: https://pypi.org/project/roswire
+.. image:: https://gitq.com/badge.svg
+    :target: https://gitq.com/ChrisTimperley/roswire
+
 
 ROSWire is a Python library for performing static and dynamic analysis of
 containerised `Robot Operating System (ROS) <https://ros.org>`_
