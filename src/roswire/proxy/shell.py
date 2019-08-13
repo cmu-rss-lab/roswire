@@ -163,6 +163,15 @@ class ShellProxy:
         return None
 
     def send_signal(self, pid: int, sig: int) -> None:
+        """Sends a given signal to a specified process.
+
+        Parameters
+        ----------
+        pid: int
+            The PID of the process.
+        sig: int
+            The signal number.
+        """
         self.execute(f'kill -{sig} {pid}', user='root')
 
     def __generate_popen_uid(self, command: str) -> str:
