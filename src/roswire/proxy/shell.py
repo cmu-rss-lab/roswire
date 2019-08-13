@@ -247,6 +247,17 @@ class ShellProxy:
               time_limit: Optional[int] = None,
               kill_after: int = 1
               ) -> Popen:
+        """Creates a process without blocking, and returns an interface to it.
+        Inspired by :meth:`subprocess.Popen` in the Python standard library.
+        This method can be used, for example, to stream the output of a
+        non-blocking process, or to send a signal (e.g., SIGTERM) to a process
+        at run-time.
+
+        Returns
+        -------
+        Popen
+            An interface for interacting with and inspecting the process.
+        """
         uid_popen = self.__generate_popen_uid(command)
         id_container = self.__container_docker.id
         api_docker = self.__api_docker
