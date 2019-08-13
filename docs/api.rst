@@ -11,8 +11,8 @@ the roswire library.
   :members:
 
 
-Managers
---------
+Descriptions
+------------
 
 .. py:module:: roswire.description
 .. autoclass:: SystemDescriptionManager()
