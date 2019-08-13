@@ -23,6 +23,10 @@ logger.setLevel(logging.DEBUG)
 
 
 class FileProxy:
+    """Provides access to the filesystem for a given Docker container.
+    Inspired by the interfaces of the :mod:`os`, :mod:`os.path`,
+    :mod:`tempfile`, and :mod:`shutil` modules in the Python standard library.
+    """
     def __init__(self,
                  container_docker: DockerContainer,
                  shell: ShellProxy
@@ -35,17 +39,21 @@ class FileProxy:
         """
         Copies a given file or directory tree from the host to the container.
 
-        Parameters:
-            fn_host: the file or directory tree that should be copied from
-                the host.
-            fn_container: the destination path on the container.
+        Parameters
+        ----------
+        fn_host: str
+            the file or directory tree that should be copied from the host.
+        fn_container: str
+            the destination path on the container.
 
-        Raises:
-            FileNotFoundError: if no file or directory exists at the given path
-                on the host.
-            FileNotFoundError: if the parent directory of the container
-                filepath does not exist.
-            OSError: if the copy operation failed.
+        Raises
+        ------
+        FileNotFoundError
+            if no file or directory exists at the given path on the host.
+        FileNotFoundError
+            if the parent directory of the container filepath does not exist.
+        OSError
+            if the copy operation failed.
         """
         id_container: str = self.__docker_id
         if not os.path.exists(path_host):
@@ -71,16 +79,22 @@ class FileProxy:
         """
         Copies a given file or directory tree from the container to the host.
 
-        Parameters:
-            fn_container: the file that should be copied from the container.
-            fn_host: the destination filepath on the host.
+        Parameters
+        ----------
+        fn_container: str
+            the file that should be copied from the container.
+        fn_host: str
+            the destination filepath on the host.
 
-        Raises:
-            FileNotFoundError: if no file or directory exists at the given path
-                inside the container.
-            FileNotFoundError: if the parent directory of the host filepath
-                does not exist.
-            OSError: if the copy operation failed.
+        Raises
+        ------
+        FileNotFoundError
+            if no file or directory exists at the given path inside the
+            container.
+        FileNotFoundError
+            if the parent directory of the host filepath does not exist.
+        OSError
+            if the copy operation failed.
         """
         id_container: str = self.__docker_id
         if not self.exists(path_container):
@@ -132,13 +146,22 @@ class FileProxy:
         ...
 
     def read(self, fn: str, binary: bool = False) -> Union[str, bytes]:
-        """
-        Reads the contents of a given file.
+        """Reads the contents of a given file.
 
-        Parameters:
-            fn: path to the file.
-            binary: if true, read the binary contents of the file;
-                otherwise, treat the file as a text file.
+        Parameters
+        ----------
+        fn: str
+            absolute path to the file.
+        binary: bool
+            if :code:`True`, read the binary contents of the file; otherwise,
+            treat the file as a text file.
+
+        Raises
+        ------
+        FileNotFoundError
+            if no file exists at the given path.
+        IsADirectoryError
+            if :code:`fn` is a directory.
         """
         mode = 'rb' if binary else 'r'
         if not self.exists(fn):
@@ -155,51 +178,58 @@ class FileProxy:
             os.remove(fn_host_temp)
 
     def exists(self, path: str) -> bool:
-        """
-        Determines whether a file or directory exists at the given path.
+        """Determines whether a file or directory exists at the given path.
+        Inspired by :meth:`os.path.exists`.
         """
         cmd = f'test -e {shlex.quote(path)}'
         code, output, duration = self.__shell.execute(cmd)
         return code == 0
 
     def isfile(self, path: str) -> bool:
-        """
-        Determines whether a regular file exists at a given path.
+        """Determines whether a regular file exists at a given path.
+        Inspired by :meth:`os.path.isfile`.
         """
         cmd = f'test -f {shlex.quote(path)}'
         code, output, duration = self.__shell.execute(cmd)
         return code == 0
 
     def isdir(self, path: str) -> bool:
-        """
-        Determines whether a directory exists at a given path.
+        """Determines whether a directory exists at a given path.
+        Inspired by :meth:`os.path.dir`.
         """
         cmd = f'test -d {shlex.quote(path)}'
         code, output, duration = self.__shell.execute(cmd)
         return code == 0
 
     def islink(self, path: str) -> bool:
-        """
-        Determines whether a symbolic link exists at a given path.
+        """Determines whether a symbolic link exists at a given path.
+        Inspired by :meth:`os.path.islink`.
         """
         cmd = f'test -h {shlex.quote(path)}'
         code, output, duration = self.__shell.execute(cmd)
         return code == 0
 
-    def find(self,
-             path: str,
-             filename: str
-             ) -> List[str]:
+    def find(self, path: str, filename: str) -> List[str]:
         """
-        Returns a list of files that match the provided filename
-        in a given directory recursively.
+        Returns a list of files that match the provided filename in a given
+        directory recursively.
 
-        Parameters:
-            path: absolute path to the directory.
-            filename: the name of the file to match.
+        Parameters
+        ----------
+        path: str
+            absolute path to the directory.
+        filename: str
+            the name of the file to match.
 
-        Raises:
-            OSError: if find operation is not successful.
+        Returns
+        -------
+        List[str]
+            A list of matching files, given by their absolute paths.
+
+        Raises
+        ------
+        OSError
+            if find operation is not successful.
         """
         cmd = f'find {shlex.quote(path)} -name {shlex.quote(filename)}'
         code, output, duration = self.__shell.execute(cmd)
@@ -213,17 +243,23 @@ class FileProxy:
                 *,
                 absolute: bool = False
                 ) -> List[str]:
-        """
-        Returns a list of the files belonging to a given directory.
+        """Returns a list of the files belonging to a given directory.
+        Inspired by :meth:`os.listdir`.
 
-        Parameters:
-            d: absolute path to the directory.
-            absolute: if True, returns a list of absolute paths; if False,
-                returns a list of relative paths.
+        Parameters
+        ----------
+        d: str
+            absolute path to the directory.
+        absolute: bool
+            if :code:`True`, returns a list of absolute paths;
+            if :code:`False`, returns a list of relative paths.
 
-        Raises:
-            OSError: if the given path isn't a directory.
-            OSError: if the given path is not a file or directory.
+        Raises
+        ------
+        OSError
+            if the given path isn't a directory.
+        OSError
+            if the given path is not a file or directory.
         """
         cmd = f'ls -A -1 {shlex.quote(d)}'
         code, output, duration = self.__shell.execute(cmd)
@@ -237,15 +273,19 @@ class FileProxy:
         return paths
 
     def mkdir(self, d: str) -> None:
-        """
-        Creates a directory at a given path.
+        """Creates a directory at a given path.
+        Inspired by :meth:`os.mkdir`.
 
-        Raises:
-            NotADirectoryError: if the parent directory isn't a directory.
-            FileNotFoundError: if the parent directory doesn't exist.
-            FileExistsError: if a file or directory already exist at the given
-                path.
-            ROSWireException: if an unexpected error occurred.
+        Raises
+        ------
+        NotADirectoryError
+            if the parent directory isn't a directory.
+        FileNotFoundError
+            if the parent directory doesn't exist.
+        FileExistsError
+            if a file or directory already exist at the given path.
+        ROSWireException
+            if an unexpected error occurred.
         """
         cmd = f"mkdir {shlex.quote(d)}"
         code, output, duration = self.__shell.execute(cmd)
@@ -267,18 +307,25 @@ class FileProxy:
         """
         Recursively creates a directory at a given path, creating any missing
         intermediate directories along the way.
+        Inspired by :meth:`os.makedirs`.
 
-        Parameters:
-            d: the path to the directory.
-            exist_ok: specifies whether or not an exception should be raised
-                if the given directory already exists.
+        Parameters
+        ----------
+        d: str
+            the path to the directory.
+        exist_ok: bool
+            specifies whether or not an exception should be raised if the
+            given directory already exists.
 
-        Raises:
-            FileExistsError: if either (a) `exist_ok=False` and a directory
-                already exists at the given path, or (b) a file already exists
-                at the given path.
-            NotADirectoryError: if the parent directory isn't a directory.
-            ROSWireException: if an unexpected error occurred.
+        Raises
+        ------
+        FileExistsError
+            if either (a) `exist_ok=False` and a directory already exists at
+            the given path, or (b) a file already exists at the given path.
+        NotADirectoryError
+            if the parent directory isn't a directory.
+        ROSWireException
+            if an unexpected error occurred.
         """
         d_parent = os.path.dirname(d)
         if self.isdir(d) and not exist_ok:
@@ -297,16 +344,21 @@ class FileProxy:
             raise ROSWireException("unexpected makedirs failure")
 
     def remove(self, fn: str) -> None:
-        """
-        Removes a given file.
+        """Removes a given file.
+        Inspired by :meth:`os.remove`.
 
-        Note:
-            Does not handle permissions errors.
+        Warning
+        -------
+        Does not handle permissions errors.
 
-        Raises:
-            FileNotFoundError: if the given file does not exist.
-            IsADirectoryError: if the given path is a directory.
-            ROSWireException: an unexpected failure occurred.
+        Raises
+        ------
+        FileNotFoundError
+            if the given file does not exist.
+        IsADirectoryError
+            if the given path is a directory.
+        ROSWireException
+            an unexpected failure occurred.
         """
         cmd = f'rm {shlex.quote(fn)}'
         code, output, duration = self.__shell.execute(cmd)
@@ -321,17 +373,23 @@ class FileProxy:
         raise ROSWireException("unexpected remove failure")
 
     def rmdir(self, d: str) -> None:
-        """
-        Removes a given directory.
+        """Removes a given directory.
+        Inspired by :meth:`os.rmdir`.
 
-        Note:
-            Does not handle permissions errors.
+        Warning
+        -------
+        Does not handle permissions errors.
 
-        Raises:
-            FileNotFoundError: if the given directory does not exist.
-            NotADirectoryError: if the given path is not a directory.
-            OSError: if the given directory is not empty.
-            ROSWireException: an unexpected failure occurred.
+        Raises
+        ------
+        FileNotFoundError
+            if the given directory does not exist.
+        NotADirectoryError
+            if the given path is not a directory.
+        OSError
+            if the given directory is not empty.
+        ROSWireException
+            an unexpected failure occurred.
         """
         if self.isfile(d):
             raise NotADirectoryError(f"cannot remove file: {d}")
@@ -348,16 +406,21 @@ class FileProxy:
         raise ROSWireException("unexpected rmdir failure")
 
     def rmtree(self, d: str) -> None:
-        """
-        Removes a given directory tree.
+        """Removes a given directory tree.
+        Inspired by :meth:`shutil.rmtree`.
 
-        Note:
-            Does not handle permissions errors.
+        Warning
+        -------
+        Does not handle permissions errors.
 
-        Raises:
-            FileNotFoundError: if the given directory does not exist.
-            NotADirectoryError: if the given path is not a directory.
-            OSError: if the directory tree removal failed.
+        Raises
+        ------
+        FileNotFoundError
+            if the given directory does not exist.
+        NotADirectoryError
+            if the given path is not a directory.
+        OSError
+            if the directory tree removal failed.
         """
         if self.isfile(d):
             raise NotADirectoryError(f"cannot remove file: {d}")
@@ -375,6 +438,7 @@ class FileProxy:
                dirname: Optional[str] = None
                ) -> str:
         """Creates a temporary file.
+        Inspired by :class:`tempfile.mktemp`.
 
         Parameters
         ----------
@@ -423,12 +487,12 @@ class FileProxy:
                  dirname: Optional[str] = None
                  ) -> Iterator[str]:
         """Creates a temporary file within a context.
-
         Upon exiting the context, the temporary file will be destroyed.
+        Inspired by :class:`tempfile.TemporaryFile`.
 
-        See Also
-        --------
-        mktemp: Uses the same arguments to create a temporary file.
+        Note
+        ----
+        Accepts the same arguments as :meth:`mktemp`.
 
         Yields
         ------

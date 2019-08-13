@@ -37,6 +37,14 @@ Shell
   :members:
 
 
+Filesystem
+----------
+
+.. py:module:: roswire.proxy.file
+.. autoclass:: FileProxy()
+   :members:
+
+
 Descriptions
 ------------
 
