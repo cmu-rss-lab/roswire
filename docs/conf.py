@@ -15,7 +15,8 @@
 import os
 import sys
 
-import solar_theme
+# import solar_theme
+# import guzzle_sphinx_theme
 
 import roswire
 
@@ -30,6 +31,10 @@ author = 'Christopher Steven Timperley'
 version = roswire.__version__
 # The full version, including alpha/beta/rc tags
 release = roswire.__version__
+
+DESCRIPTION = """
+A Python library for inspecting and interacting with ROS applications.
+""".strip()
 
 
 # -- General configuration ---------------------------------------------------
@@ -86,16 +91,19 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'solar_theme'
-html_theme_path = [solar_theme.theme_path]
+html_theme = 'classic'
+#html_theme_path = [solar_theme.theme_path]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
 html_theme_options = {
+    'description': DESCRIPTION,
+    'fixed_sidebar': True,
     'github_user': 'ChrisTimperley',
-    'github_repo': 'roswire'
+    'github_repo': 'roswire',
+    'github_type': 'star'
 }
 
 html_show_sourcelink = False
@@ -114,7 +122,21 @@ html_static_path = ['_static']
 # default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
 # 'searchbox.html']``.
 #
-# html_sidebars = {}
+#html_sidebars = {
+#    '**': [
+#        'globaltoc.html',
+#        # 'about.html',
+#        # 'navigation.html',
+#        'searchbox.html'
+#    ]
+#}
+# html_sidebars = {
+#     '**': [
+#         'about.html',
+#         'navigation.html',
+#         'searchbox.html'
+#     ]
+# }
 
 
 # -- Options for HTMLHelp output ---------------------------------------------
@@ -198,8 +220,8 @@ epub_exclude_files = ['search.html']
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3', None),
-    'docker': ('https://https://docker-py.readthedocs.io/en/stable/', None)
+#    'python': ('https://docs.python.org/3', None),
+#    'docker': ('https://https://docker-py.readthedocs.io/en/stable/', None)
 }
 
 # -- Options for todo extension ----------------------------------------------
