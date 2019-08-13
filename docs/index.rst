@@ -112,12 +112,3 @@ API Reference
 
 .. autoclass:: SystemDescription()
   :members:
-
-
-
-Contents
---------
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
