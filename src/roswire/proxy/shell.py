@@ -250,6 +250,39 @@ class ShellProxy:
                 time_limit: Optional[int] = None,
                 kill_after: int = 1
                 ) -> Tuple[int, str, float]:
+        """Executes a given command and blocks until its completion.
+
+        Parameters
+        ----------
+        command: str
+            The command that should be executed.
+        stdout: bool
+            If :code:`True`, includes stdout as part of output.
+        stderr: bool
+            If :code:`True`, includes stderr as part of output.
+        user: str, optional
+            The name or UID of the user, inside the container, that should
+            execute the command. If left unspecified, the default user for
+            the container will be used.
+        context: str, optional
+            The absolute path to the working directory that should be used
+            when executing the command. If unspecified, the default working
+            directory for the container will be used.
+        time_limit: int, optional
+            The maximum number of seconds that the command is allowed to run
+            before being terminated via SIGTERM. If unspecified, no time limit
+            will be imposed on command execution.
+        kill_after: int
+            The maximum number of seconds to wait before sending SIGKILL to
+            the process after attempting termination via SIGTERM. Only applies
+            when :code:`time_limit` is specified.
+
+        Returns
+        -------
+        Tuple[int, str, float]
+            The return code, output, and wall-clock running time of the
+            execution.
+        """
         logger.debug("executing command: %s", command)
         dockerc = self.__container_docker
         command = self.instrument(command, time_limit, kill_after)
