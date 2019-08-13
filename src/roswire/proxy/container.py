@@ -15,6 +15,7 @@ from docker import DockerClient
 from docker import APIClient as DockerAPIClient
 from docker.models.images import Image as DockerImage
 from docker.models.containers import Container as DockerContainer
+import attr
 
 from .file import FileProxy
 from .shell import ShellProxy
@@ -25,50 +26,57 @@ logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
+@attr.s(frozen=True)
 class ContainerProxy:
-    def __init__(self,
-                 api_docker: DockerAPIClient,
-                 container_docker: DockerContainer,
-                 uuid: UUID,
-                 ws_host: str
-                 ) -> None:
-        self.__uuid = uuid
-        self.__api_docker = api_docker
-        self.__container_docker = container_docker
-        self.__ws_host = ws_host
+    """Provides an interface to a Docker container running on this host.
 
+    Attributes
+    ----------
+    uuid: UUID
+        A unique identifier for this container.
+    shell: ShellProxy
+        Provides access to a bash shell for this container.
+    files: FileProxy
+        Provides access to the filesystem for this container.
+    pid: int
+        The PID of this container process on the host machine.
+    ws_host: str
+        The absolute path to the shared directory for this container's
+        workspace on the host machine.
+    ip_address: str
+        The IP address for this container on the host network.
+    """
+    uuid: UUID = attr.ib()
+    pid: int = attr.ib()
+    shell: ShellProxy = attr.ib()
+    files: FileProxy = attr.ib()
+    ws_host: str = attr.ib()
+    _api_docker: DockerAPIClient = attr.ib()
+    _container_docker: DockerContainer = attr.ib()
+
+    @staticmethod
+    def _from_docker(api_docker: DockerAPIClient,
+                     container_docker: DockerContainer,
+                     uuid: UUID,
+                     ws_host: str
+                     ) -> 'ContainerProxy':
+        """Constructs a proxy from a given Docker container."""
         info = api_docker.inspect_container(container_docker.id)
-        self.__pid = int(info['State']['Pid'])
-        self.__shell = ShellProxy(self.__api_docker,
-                                  self.__container_docker,
-                                  self.__pid)
-        self.__files = FileProxy(self.__container_docker, self.__shell)
-
-    @property
-    def uuid(self) -> UUID:
-        return self.__uuid
-
-    @property
-    def pid(self) -> int:
-        """The PID of this container process on the host machine."""
-        return self.__pid
-
-    @property
-    def shell(self) -> ShellProxy:
-        return self.__shell
-
-    @property
-    def files(self) -> FileProxy:
-        return self.__files
-
-    @property
-    def ws_host(self) -> str:
-        return self.__ws_host
+        pid = int(info['State']['Pid'])
+        shell = ShellProxy(api_docker, container_docker, pid)
+        files = FileProxy(container_docker, shell)
+        return ContainerProxy(uuid=uuid,
+                              shell=shell,
+                              files=files,
+                              pid=pid,
+                              ws_host=ws_host,
+                              api_docker=api_docker,
+                              container_docker=container_docker)
 
     @property
     def ip_address(self) -> str:
-        container = self.__container_docker
-        api = self.__api_docker
+        container = self._container_docker
+        api = self._api_docker
         docker_info = api.inspect_container(container.id)
         address = docker_info['NetworkSettings']['IPAddress']
         try:
@@ -91,12 +99,17 @@ class ContainerProxy:
 
         Returns
         -------
-        A description of the persisted image.
+        DockerImage
+            A description of the persisted image.
         """
-        return self.__container_docker.commit(repo, tag)
+        return self._container_docker.commit(repo, tag)
 
 
 class ContainerProxyManager:
+    """
+    Provides an interface for accessing and inspecting Docker images, and
+    launching Docker containers.
+    """
     def __init__(self,
                  client_docker: DockerClient,
                  api_docker: DockerAPIClient,
@@ -173,20 +186,38 @@ class ContainerProxyManager:
     def launch(self,
                image_or_name: Union[str, DockerImage]
                ) -> Iterator['ContainerProxy']:
+        """
+        Launches a context-managed Docker container for a given image. Upon
+        exiting the context, whether gracefully or abruptly (i.e., via an
+        unhandled exception), the container will be automatically destroyed.
+
+        Parameters
+        ----------
+        image_or_name: Union[str, DockerImage]
+            The image that should be used to create the container, or the name
+            of that image.
+
+        Yields
+        ------
+        ContainerProxy
+            The constructed container.
+        """
         api_docker = self.__api_docker
         uuid = uuid4()
         logger.debug("UUID for container: %s", uuid)
         with self._build_shared_directory(uuid) as dir_shared:
             with self._container(image_or_name, dir_shared, uuid) as dockerc:
-                c = ContainerProxy(api_docker, dockerc, uuid, dir_shared)
-                yield c
+                yield ContainerProxy._from_docker(api_docker,
+                                                  dockerc,
+                                                  uuid,
+                                                  dir_shared)
 
     def image(self, tag: str) -> DockerImage:
         """Retrieves the Docker image with a given tag."""
         return self.__client_docker.images.get(tag)
 
     def image_sha256(self, tag_or_image: Union[str, DockerImage]) -> str:
-        """Retrieves the SHA256 for a given Docker image."""
+        """Computes the SHA256 for a given Docker image."""
         image: DockerImage
         if isinstance(tag_or_image, str):
             image = self.image(tag_or_image)
