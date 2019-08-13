@@ -20,7 +20,7 @@ logger.setLevel(logging.DEBUG)
 @attr.s(frozen=True)
 class System:
     """Provides access to a ROS application hosted by a Docker container.
-    
+
     Attributes
     ----------
     uuid: UUID
@@ -58,7 +58,7 @@ class System:
 
     def catkin(self, directory: str) -> CatkinProxy:
         """Returns an interface to a given catkin workspace.
-        
+
         Parameters
         ----------
         directory: str
@@ -74,7 +74,7 @@ class System:
 
     def catkin_tools(self, directory: str) -> CatkinToolsProxy:
         """Returns an interface to a given catkin tools workspace.
-        
+
         Parameters
         ----------
         directory: str
@@ -89,7 +89,7 @@ class System:
 
     def catkin_make(self, directory: str) -> CatkinMakeProxy:
         """Returns an interface to a given catkin_make workspace.
-        
+
         Parameters
         ----------
         directory: str
