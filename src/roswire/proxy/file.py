@@ -347,8 +347,8 @@ class FileProxy:
         """Removes a given file.
         Inspired by :meth:`os.remove`.
 
-        Note
-        ----
+        Warning
+        -------
         Does not handle permissions errors.
 
         Raises
@@ -373,17 +373,23 @@ class FileProxy:
         raise ROSWireException("unexpected remove failure")
 
     def rmdir(self, d: str) -> None:
-        """
-        Removes a given directory.
+        """Removes a given directory.
+        Inspired by :meth:`os.rmdir`.
 
-        Note:
-            Does not handle permissions errors.
+        Warning
+        -------
+        Does not handle permissions errors.
 
-        Raises:
-            FileNotFoundError: if the given directory does not exist.
-            NotADirectoryError: if the given path is not a directory.
-            OSError: if the given directory is not empty.
-            ROSWireException: an unexpected failure occurred.
+        Raises
+        ------
+        FileNotFoundError
+            if the given directory does not exist.
+        NotADirectoryError
+            if the given path is not a directory.
+        OSError
+            if the given directory is not empty.
+        ROSWireException
+            an unexpected failure occurred.
         """
         if self.isfile(d):
             raise NotADirectoryError(f"cannot remove file: {d}")
