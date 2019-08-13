@@ -486,12 +486,12 @@ class FileProxy:
                  dirname: Optional[str] = None
                  ) -> Iterator[str]:
         """Creates a temporary file within a context.
-
         Upon exiting the context, the temporary file will be destroyed.
+        Inspired by :class:`tempfile.TemporaryFile`.
 
-        See Also
-        --------
-        mktemp: Uses the same arguments to create a temporary file.
+        Note
+        ----
+        Accepts the same arguments as :meth:`mktemp`.
 
         Yields
         ------
