@@ -344,16 +344,21 @@ class FileProxy:
             raise ROSWireException("unexpected makedirs failure")
 
     def remove(self, fn: str) -> None:
-        """
-        Removes a given file.
+        """Removes a given file.
+        Inspired by :meth:`os.remove`.
 
-        Note:
-            Does not handle permissions errors.
+        Note
+        ----
+        Does not handle permissions errors.
 
-        Raises:
-            FileNotFoundError: if the given file does not exist.
-            IsADirectoryError: if the given path is a directory.
-            ROSWireException: an unexpected failure occurred.
+        Raises
+        ------
+        FileNotFoundError
+            if the given file does not exist.
+        IsADirectoryError
+            if the given path is a directory.
+        ROSWireException
+            an unexpected failure occurred.
         """
         cmd = f'rm {shlex.quote(fn)}'
         code, output, duration = self.__shell.execute(cmd)
