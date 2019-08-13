@@ -10,12 +10,22 @@ the roswire library.
 .. autoclass:: ROSWire
   :members:
 
+
+Managers
+--------
+
 .. py:module:: roswire.description
 .. autoclass:: SystemDescriptionManager()
   :members:
 
 .. autoclass:: SystemDescription()
   :members:
+
+.. py:module:: roswire.proxy.container
+.. autoclass:: ContainerProxyManager()
+  :members:
+
+
 
 
 Exceptions

@@ -97,6 +97,10 @@ class ContainerProxy:
 
 
 class ContainerProxyManager:
+    """
+    Provides an interface for accessing and inspecting Docker images, and
+    launching Docker containers.
+    """
     def __init__(self,
                  client_docker: DockerClient,
                  api_docker: DockerAPIClient,
@@ -173,6 +177,22 @@ class ContainerProxyManager:
     def launch(self,
                image_or_name: Union[str, DockerImage]
                ) -> Iterator['ContainerProxy']:
+        """
+        Launches a context-managed Docker container for a given image. Upon
+        exiting the context, whether gracefully or abruptly (i.e., via an
+        unhandled exception), the container will be automatically destroyed.
+
+        Parameters
+        ----------
+        image_or_name: Union[str, DockerImage]
+            The image that should be used to create the container, or the name
+            of that image.
+
+        Yields
+        ------
+        ContainerProxy
+            The constructed container.
+        """
         api_docker = self.__api_docker
         uuid = uuid4()
         logger.debug("UUID for container: %s", uuid)
