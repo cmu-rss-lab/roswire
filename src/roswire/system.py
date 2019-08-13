@@ -108,6 +108,21 @@ class System:
 
     @contextlib.contextmanager
     def roscore(self, port: int = 11311) -> Iterator[ROSProxy]:
+        """
+        Launches a context-managed ROS Master (i.e., roscore) inside the
+        container. Upon exiting the context, the ROS master (and its
+        associated resources) will be destroyed.
+
+        Parameters
+        ----------
+        port: int, optional
+            The port inside the container on which roscore should run.
+
+        Yields
+        ------
+        ROSProxy
+            An interface to the launched ROS Master.
+        """
         assert port > 1023
         cmd = "roscore -p {}".format(port)
         self.shell.non_blocking_execute(cmd)
