@@ -75,8 +75,8 @@ class ContainerProxy:
 
     @property
     def ip_address(self) -> str:
-        container = self.__container_docker
-        api = self.__api_docker
+        container = self._container_docker
+        api = self._api_docker
         docker_info = api.inspect_container(container.id)
         address = docker_info['NetworkSettings']['IPAddress']
         try:
@@ -102,7 +102,7 @@ class ContainerProxy:
         DockerImage
             A description of the persisted image.
         """
-        return self.__container_docker.commit(repo, tag)
+        return self._container_docker.commit(repo, tag)
 
 
 class ContainerProxyManager:
