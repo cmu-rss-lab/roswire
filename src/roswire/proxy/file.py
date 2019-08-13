@@ -243,17 +243,23 @@ class FileProxy:
                 *,
                 absolute: bool = False
                 ) -> List[str]:
-        """
-        Returns a list of the files belonging to a given directory.
+        """Returns a list of the files belonging to a given directory.
+        Inspired by :meth:`os.listdir`.
 
-        Parameters:
-            d: absolute path to the directory.
-            absolute: if True, returns a list of absolute paths; if False,
-                returns a list of relative paths.
+        Parameters
+        ----------
+        d: str
+            absolute path to the directory.
+        absolute: bool
+            if :code:`True`, returns a list of absolute paths;
+            if :code:`False`, returns a list of relative paths.
 
-        Raises:
-            OSError: if the given path isn't a directory.
-            OSError: if the given path is not a file or directory.
+        Raises
+        ------
+        OSError
+            if the given path isn't a directory.
+        OSError
+            if the given path is not a file or directory.
         """
         cmd = f'ls -A -1 {shlex.quote(d)}'
         code, output, duration = self.__shell.execute(cmd)
