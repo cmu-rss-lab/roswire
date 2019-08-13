@@ -21,11 +21,20 @@ Managers
 .. autoclass:: SystemDescription()
   :members:
 
+
+Containers
+----------
+
+.. py:module:: roswire
+
+Internally, roswire uses the following classes to facilitate its interactions
+with Docker. The majority of users should not need to interact with these
+classes directly; instead, they should use interact with :class:`System`
+instances that are generated using :meth:`ROSWire.launch`.
+
 .. py:module:: roswire.proxy.container
 .. autoclass:: ContainerProxyManager()
   :members:
-
-
 
 
 Exceptions
