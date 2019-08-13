@@ -23,6 +23,10 @@ logger.setLevel(logging.DEBUG)
 
 
 class FileProxy:
+    """Provides access to the filesystem for a given Docker container.
+    Inspired by the interfaces of the :mod:`os`, :mod:`os.path`,
+    and :mod:`shutil` modules in the Python standard library.
+    """
     def __init__(self,
                  container_docker: DockerContainer,
                  shell: ShellProxy
