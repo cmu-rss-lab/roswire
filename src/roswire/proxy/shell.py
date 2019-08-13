@@ -193,12 +193,12 @@ class ShellProxy:
             raise exceptions.EnvNotFoundError(var)
         return val
 
-    def instrument(self,
-                   command: str,
-                   time_limit: Optional[int] = None,
-                   kill_after: int = 1,
-                   identifier: Optional[str] = None
-                   ) -> str:
+    def _instrument(self,
+                    command: str,
+                    time_limit: Optional[int] = None,
+                    kill_after: int = 1,
+                    identifier: Optional[str] = None
+                    ) -> str:
         logger.debug("instrumenting command: %s", command)
         q = shlex.quote
         command = f'source /.environment && {command}'
@@ -225,7 +225,7 @@ class ShellProxy:
         id_container = self.__container_docker.id
         api_docker = self.__api_docker
         command_orig = command
-        command = self.instrument(command, time_limit, kill_after,
+        command = self._instrument(command, time_limit, kill_after,
                                   identifier=uid_popen)
         exec_resp = api_docker.exec_create(id_container, command,
                                            tty=True,
@@ -285,7 +285,7 @@ class ShellProxy:
         """
         logger.debug("executing command: %s", command)
         dockerc = self.__container_docker
-        command = self.instrument(command, time_limit, kill_after)
+        command = self._instrument(command, time_limit, kill_after)
 
         timer = Stopwatch()
         timer.start()
