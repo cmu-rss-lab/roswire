@@ -6,6 +6,8 @@ from uuid import UUID
 import contextlib
 import logging
 
+import attr
+
 from .description import SystemDescription
 from .definitions import TypeDatabase, FormatDatabase, PackageDatabase
 from .proxy import (ShellProxy, ROSProxy, FileProxy, ContainerProxy,
@@ -15,6 +17,7 @@ logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
+@attr.s(frozen=True)
 class System:
     """Provides access to a ROS application hosted by a Docker container.
     
@@ -34,20 +37,8 @@ class System:
     container: ContainerProxy
         Provides access to the underlying Docker container.
     """
-    def __init__(self,
-                 container: ContainerProxy,
-                 description: SystemDescription
-                 ) -> None:
-        self.__container = container
-        self.__description = description
-
-    @property
-    def container(self) -> ContainerProxy:
-        return self.__container
-
-    @property
-    def description(self) -> SystemDescription:
-        return self.__description
+    container: ContainerProxy = attr.ib()
+    description: SystemDescription = attr.ib()
 
     @property
     def uuid(self) -> UUID:
