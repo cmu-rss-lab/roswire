@@ -273,15 +273,19 @@ class FileProxy:
         return paths
 
     def mkdir(self, d: str) -> None:
-        """
-        Creates a directory at a given path.
+        """Creates a directory at a given path.
+        Inspired by :meth:`os.mkdir`.
 
-        Raises:
-            NotADirectoryError: if the parent directory isn't a directory.
-            FileNotFoundError: if the parent directory doesn't exist.
-            FileExistsError: if a file or directory already exist at the given
-                path.
-            ROSWireException: if an unexpected error occurred.
+        Raises
+        ------
+        NotADirectoryError
+            if the parent directory isn't a directory.
+        FileNotFoundError
+            if the parent directory doesn't exist.
+        FileExistsError
+            if a file or directory already exist at the given path.
+        ROSWireException
+            if an unexpected error occurred.
         """
         cmd = f"mkdir {shlex.quote(d)}"
         code, output, duration = self.__shell.execute(cmd)
