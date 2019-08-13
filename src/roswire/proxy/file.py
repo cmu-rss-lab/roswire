@@ -406,16 +406,21 @@ class FileProxy:
         raise ROSWireException("unexpected rmdir failure")
 
     def rmtree(self, d: str) -> None:
-        """
-        Removes a given directory tree.
+        """Removes a given directory tree.
+        Inspired by :meth:`shutil.rmtree`.
 
-        Note:
-            Does not handle permissions errors.
+        Warning
+        -------
+        Does not handle permissions errors.
 
-        Raises:
-            FileNotFoundError: if the given directory does not exist.
-            NotADirectoryError: if the given path is not a directory.
-            OSError: if the directory tree removal failed.
+        Raises
+        ------
+        FileNotFoundError
+            if the given directory does not exist.
+        NotADirectoryError
+            if the given path is not a directory.
+        OSError
+            if the directory tree removal failed.
         """
         if self.isfile(d):
             raise NotADirectoryError(f"cannot remove file: {d}")
