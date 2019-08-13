@@ -81,6 +81,13 @@ class Popen:
         return self.__returncode
 
     def send_signal(self, sig: int) -> None:
+        """Sends a given signal to this process.
+
+        Parameters
+        ----------
+        sig: int
+            The signal number.
+        """
         pid = self.pid
         if pid:
             self.__shell.send_signal(pid, sig)
