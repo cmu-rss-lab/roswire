@@ -123,7 +123,7 @@ html_static_path = ['_static']
 # 'searchbox.html']``.
 #
 html_sidebars = {
-    '**': ['globaltoc.html', 'searchbox.html']
+    '**': ['github.html', 'globaltoc.html', 'searchbox.html']
 }
 
 
