@@ -10,6 +10,7 @@ the roswire library.
 .. autoclass:: ROSWire
   :members:
 
+
 System
 ------
 
@@ -23,6 +24,15 @@ with a :code:`bash` shell inside the application container.
 
 .. autoclass:: System
   :members:
+
+
+Shell
+-----
+
+.. py:module:: roswire.proxy.shell
+.. autoclass:: ShellProxy()
+
+.. autoclass:: Popen()
 
 
 Descriptions
