@@ -23,9 +23,7 @@ class Package:
 
     @staticmethod
     def build(path: str, files: FileProxy) -> 'Package':
-        """
-        Constructs a description of a package located at a given path.
-        """
+        """Constructs a description of a package at a given path."""
         name: str = os.path.basename(path)
         messages: List[MsgFormat] = []
         services: List[SrvFormat] = []
@@ -82,10 +80,23 @@ class Package:
 
 
 class PackageDatabase(Mapping[str, Package]):
-    """Maintains a database of packages, indexed by their names."""
+    """
+    An immutable database of packages, represented as :class:`Package`
+    instances, indexed by their names, given as :class:`str`.
+
+    Note
+    ----
+        Implements most :class:`dict` operations via
+        :class:`abc.collections.Mapping`,
+        including :code:`db['name']`, :code:`len(db)`), :code:`db.keys()`,
+        :code:`db.values()`, and :code:`iter(db)`.
+        As instances of this class are immutable, no destructive
+        :class:`dict` operations are provided (e.g., :code:`del db['foo'])`
+        and `db['foo'] = bar`).
+    """
     @staticmethod
     def paths(shell: ShellProxy, files: FileProxy) -> List[str]:
-        """Parses the ROS_PACKAGE_PATH env var for a given shell."""
+        """Parses :code:`ROS_PACKAGE_PATH` for a given shell."""
         path_str = shell.environ('ROS_PACKAGE_PATH')
         package_paths: List[str] = path_str.strip().split(':')
         paths: List[str] = []
@@ -137,17 +148,16 @@ class PackageDatabase(Mapping[str, Package]):
         self.__contents = {p.name: p for p in packages}
 
     def __len__(self) -> int:
-        """
-        Returns a count of the number of packages within this database.
-        """
+        """Returns the number of packages within this database."""
         return len(self.__contents)
 
     def __getitem__(self, name: str) -> Package:
-        """
-        Fetches the description for a given package.
+        """Fetches the description for a given package.
 
-        Raises:
-            KeyError: if no package exists with the given name.
+        Raises
+        ------
+        KeyError
+            if no package exists with the given name.
         """
         return self.__contents[name]
 
