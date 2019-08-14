@@ -25,19 +25,20 @@ logger.setLevel(logging.DEBUG)
 @attr.s(slots=True)
 class SystemDescription:
     """
-    A description of the packages, types, and specifications within
-    a containerised ROS application.
+    An immutable description of all of the packages, types, and
+    specifications (i.e., :code:`.msg`, :code:`.srv`, and :code:`.action`
+    files) within a containerised ROS application.
 
     Attributes
     ----------
-        sha256: str
-            The ID of the Docker image for the application.
-        types: TypeDatabase
-            A database of types for the application.
-        formats: FormatDatabase
-            A database of message, service and action specifications.
-        packages:
-            A database of the packages contained within the application.
+    sha256: str
+        The ID of the Docker image for the application.
+    types: TypeDatabase
+        A database of types for the application.
+    formats: FormatDatabase
+        A database of message, service and action specifications.
+    packages: PackageDatabase
+        A database of the packages contained within the application.
     """
     sha256: str = attr.ib()
     types: TypeDatabase = attr.ib()
@@ -46,14 +47,12 @@ class SystemDescription:
 
     @staticmethod
     def from_file(fn: str) -> 'SystemDescription':
-        """Loads a description from a given file."""
         with open(fn, 'r') as f:
             d = yaml.safe_load(f)
         return SystemDescription.from_dict(d)
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> 'SystemDescription':
-        """Constructs a description from a JSON dictionary."""
         sha256: str = d['sha256']
         packages = PackageDatabase.from_dict(d['packages'])
         formats = FormatDatabase.build(packages)
@@ -64,7 +63,6 @@ class SystemDescription:
                                  types=types)
 
     def to_dict(self) -> Dict[str, Any]:
-        """Produces a JSON dictionary for this description."""
         return {'sha256': self.sha256,
                 'packages': self.packages.to_dict()}
 
@@ -110,7 +108,7 @@ class SystemDescriptionManager:
 
         Raises
         ------
-        FileNotFoundError:
+        FileNotFoundError
             if no description for the given image is stored on disk.
         """
         sha256 = self.__containers.image_sha256(image_or_tag)
@@ -123,9 +121,7 @@ class SystemDescriptionManager:
             raise
 
     def saved(self, image_or_tag: Union[str, DockerImage]) -> bool:
-        """
-        Determines whether a description for a given image has been saved.
-        """
+        """Determines whether a description for an image has been saved."""
         sha256 = self.__containers.image_sha256(image_or_tag)
         fn = os.path.join(self.__dir_cache, sha256)
         return os.path.exists(fn)
@@ -145,6 +141,12 @@ class SystemDescriptionManager:
         Builds a description of the ROS application contained within a given
         image and optionally saves that description to disk.
 
+        Parameters
+        ----------
+        image_or_tag: Union[str, DockerImage]
+            The name or object for the Docker image.
+        save: bool
+            If :code:`True`, the description will be saved to disk.
 
         Returns
         -------
