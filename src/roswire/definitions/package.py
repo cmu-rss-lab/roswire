@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __all__ = ('Package', 'PackageDatabase')
 
 from typing import (Tuple, List, Dict, Union, Any, Iterator, Collection,
