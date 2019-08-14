@@ -123,7 +123,8 @@ class ROSProxy:
         Parameters
         ----------
         filename: str
-            The name of the launch file (or an absolute path).
+            The name of the launch file, or an absolute path to the launch
+            file inside the container.
         package: str, optional
             The name of the package to which the launch file belongs.
         args: Dict[str, Union[int, str]], optional
@@ -148,7 +149,26 @@ class ROSProxy:
                fn: str,
                exclude_topics: Optional[Collection[str]] = None
                ) -> BagRecorderProxy:
-        """Provides an interface to rosbag for recording ROS topics."""
+        """Provides an interface to rosbag for recording ROS topics to disk.
+
+        Note
+        ----
+            This method records bag files to the host machine, and not to the
+            container where the ROS instance is running.
+        
+        Parameters
+        ----------
+        fn: str
+            The name of the file, on the host machine, to which the bag should
+            be recorded
+        exclude_topics: Collection[str], optional
+            An optional collection of topics that should not be recorded.
+
+        Returns
+        -------
+        BagRecorderProxy
+            An interface for dynamically interacting with the bag recorder.
+        """
         return BagRecorderProxy(fn,
                                 self.__ws_host,
                                 self.__shell,
@@ -160,7 +180,7 @@ class ROSProxy:
                  *,
                  file_on_host: bool = True
                  ) -> BagPlayerProxy:
-        """Provides an interface to rosbag for replaying bag files."""
+        """Provides an interface to rosbag for replaying bag files from disk."""
         fn_ctr: str
         delete_file_after_use: bool = False
         if file_on_host:
