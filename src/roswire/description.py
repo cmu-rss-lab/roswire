@@ -108,7 +108,7 @@ class SystemDescriptionManager:
 
         Raises
         ------
-        FileNotFoundError:
+        FileNotFoundError
             if no description for the given image is stored on disk.
         """
         sha256 = self.__containers.image_sha256(image_or_tag)
@@ -121,9 +121,7 @@ class SystemDescriptionManager:
             raise
 
     def saved(self, image_or_tag: Union[str, DockerImage]) -> bool:
-        """
-        Determines whether a description for a given image has been saved.
-        """
+        """Determines whether a description for an image has been saved."""
         sha256 = self.__containers.image_sha256(image_or_tag)
         fn = os.path.join(self.__dir_cache, sha256)
         return os.path.exists(fn)
@@ -143,6 +141,12 @@ class SystemDescriptionManager:
         Builds a description of the ROS application contained within a given
         image and optionally saves that description to disk.
 
+        Parameters
+        ----------
+        image_or_tag: Union[str, DockerImage]
+            The name or object for the Docker image.
+        save: bool
+            If :code:`True`, the description will be saved to disk.
 
         Returns
         -------
