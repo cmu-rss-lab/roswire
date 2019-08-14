@@ -46,14 +46,12 @@ class SystemDescription:
 
     @staticmethod
     def from_file(fn: str) -> 'SystemDescription':
-        """Loads a description from a given file."""
         with open(fn, 'r') as f:
             d = yaml.safe_load(f)
         return SystemDescription.from_dict(d)
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> 'SystemDescription':
-        """Constructs a description from a JSON dictionary."""
         sha256: str = d['sha256']
         packages = PackageDatabase.from_dict(d['packages'])
         formats = FormatDatabase.build(packages)
@@ -64,7 +62,6 @@ class SystemDescription:
                                  types=types)
 
     def to_dict(self) -> Dict[str, Any]:
-        """Produces a JSON dictionary for this description."""
         return {'sha256': self.sha256,
                 'packages': self.packages.to_dict()}
 
