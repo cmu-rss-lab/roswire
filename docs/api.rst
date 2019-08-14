@@ -55,6 +55,13 @@ Descriptions
 .. autoclass:: SystemDescription()
   :members:
 
+.. py:module:: roswire.definitions
+.. autoclass:: PackageDatabase()
+
+.. autoclass:: TypeDatabase()
+
+.. autoclass:: FormatDatabase()
+
 
 Containers
 ----------
