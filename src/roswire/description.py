@@ -36,7 +36,7 @@ class SystemDescription:
             A database of types for the application.
         formats: FormatDatabase
             A database of message, service and action specifications.
-        packages:
+        packages: PackageDatabase
             A database of the packages contained within the application.
     """
     sha256: str = attr.ib()
