@@ -40,7 +40,21 @@ logger.setLevel(logging.DEBUG)
 
 
 class ROSProxy:
-    """Provides access to a remote ROS master via XML-RPC."""
+    """Provides access to a remote ROS master via XML-RPC.
+    
+    Attributes
+    ----------
+    uri: str
+        The URI of the ROS Master.
+    nodes: NodeManagerProxy
+        Provides access to the nodes running on this ROS Master.
+    services: ServiceManagerProxy
+        Provides access to the services advertised on this ROS Master.
+    parameters: ParameterServerProxy
+        Provides access to the parameter server for this ROS Master.
+    connection: xmlrpc.client.ServerProxy
+        The XML-RPC connection to the ROS master.
+    """
     def __init__(self,
                  description: SystemDescription,
                  shell: ShellProxy,
@@ -72,28 +86,19 @@ class ROSProxy:
                                 self.__shell)
 
     @property
-    def uri(self) -> str:
-        """The URI of the ROS Master."""
-        return self.__uri
-
-    @property
     def nodes(self) -> NodeManagerProxy:
-        """Provides access to the nodes running on this ROS master."""
         return self.__nodes
 
     @property
     def services(self) -> ServiceManagerProxy:
-        """Provides access to the services advertised on this ROS master."""
         return self.__services
 
     @property
     def parameters(self) -> ParameterServerProxy:
-        """Provides access to the parameter server for this ROS Master."""
         return self.__parameters
 
     @property
     def connection(self) -> xmlrpc.client.ServerProxy:
-        """The XML-RPC connection to the ROS master."""
         return self.__connection
 
     @property
