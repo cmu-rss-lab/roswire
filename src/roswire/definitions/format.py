@@ -13,8 +13,25 @@ from .package import Package, PackageDatabase
 
 
 class FormatDatabase:
+    """
+    An immutable database of ROS definitions that maintains the parsed
+    contents of :code:`.msg`, :code:`.srv`, and :code:`.action` files
+    for messages, services, and action definitions.
+    Note that implicit message definitions, i.e., those associated with a
+    service or action definition, are also represented by the database.
+
+    Attributes
+    ----------
+    messages: Mapping[str, MsgFormat]
+        An immutable mapping from message name to its definition.
+    services: Mapping[str, SrvFormat]
+        An immutable mapping from service name to definition.
+    actions: Mapping[str, ActionFormat]
+        An immutable mapping from action name to definition.
+    """
     @staticmethod
     def build(db: PackageDatabase) -> 'FormatDatabase':
+        """Constructs a format database from a given package database."""
         messages: Set[MsgFormat] = set()
         services: Set[SrvFormat] = set()
         actions: Set[ActionFormat] = set()
