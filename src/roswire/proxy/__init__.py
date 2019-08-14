@@ -180,7 +180,22 @@ class ROSProxy:
                  *,
                  file_on_host: bool = True
                  ) -> BagPlayerProxy:
-        """Provides an interface to rosbag for replaying bag files from disk."""
+        """Provides an interface to rosbag for replaying bag files from disk.
+        
+        Parameters
+        ----------
+        fn: str
+            The bag file that should be replayed.
+        file_on_host: bool
+            If :code:`True`, as by default, :code:`fn` will be considered to
+            be a file on the host machine. If :code:`False`, :code:`fn` will
+            be considered to be a file inside the container.
+
+        Returns
+        -------
+        BagPlayerProxy
+            An interface for dynamically controlling the bag player.
+        """
         fn_ctr: str
         delete_file_after_use: bool = False
         if file_on_host:
