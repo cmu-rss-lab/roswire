@@ -25,8 +25,9 @@ logger.setLevel(logging.DEBUG)
 @attr.s(slots=True)
 class SystemDescription:
     """
-    A description of the packages, types, and specifications within
-    a containerised ROS application.
+    An immutable description of all of the packages, types, and
+    specifications (i.e., :code:`.msg`, :code:`.srv`, and :code:`.action`
+    files) within a containerised ROS application.
 
     Attributes
     ----------
