@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __all__ = ('TypeDatabase',)
 
 from typing import (Collection, Type, Mapping, Iterator, Dict, ClassVar, Any,
@@ -25,6 +26,15 @@ from .encode import (write_time,
 
 
 class TypeDatabase(Mapping[str, Type[Message]]):
+    """
+    An immutable database of ROS types, represented as :class:`Message`
+    subclasses, indexed by the fully qualified names of those types.
+
+    Note
+    ----
+    Implements the set of non-destructive :class:`dict` operations as
+    :class:`PackageDatabase`.
+    """
     @classmethod
     def build(cls, db_format: FormatDatabase) -> 'TypeDatabase':
         formats = list(db_format.messages.values())
