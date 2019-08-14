@@ -82,12 +82,10 @@ class Package:
 
 
 class PackageDatabase(Mapping[str, Package]):
+    """Maintains a database of packages, indexed by their names."""
     @staticmethod
     def paths(shell: ShellProxy, files: FileProxy) -> List[str]:
-        """
-        Parses the contents of the ROS_PACKAGE_PATH environment variable for a
-        given shell.
-        """
+        """Parses the ROS_PACKAGE_PATH env var for a given shell."""
         path_str = shell.environ('ROS_PACKAGE_PATH')
         package_paths: List[str] = path_str.strip().split(':')
         paths: List[str] = []
@@ -110,9 +108,20 @@ class PackageDatabase(Mapping[str, Package]):
         Constructs a package database from a list of the paths of the packages
         belonging to the database.
 
-        Parameters:
-            files: access to the filesystem.
-            paths: a list of the absolute paths of the packages.
+        Parameters
+        ----------
+        files: FileProxy
+            access to the filesystem.
+        paths: List[str]
+            a list of the absolute paths of the packages.
+        ignore_bad_paths: bool
+            If :code:`True`, non-existent paths will be ignored.
+            If :code:`False`, a :exc:`FileNotFoundError` will be raised.
+
+        Raises
+        ------
+        FileNotFoundError
+            if no package is found at a given path.
         """
         packages: List[Package] = []
         for p in paths:
