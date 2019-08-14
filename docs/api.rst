@@ -26,6 +26,14 @@ with a :code:`bash` shell inside the application container.
   :members:
 
 
+ROS
+---
+
+.. py:module:: roswire.proxy
+.. autoclass:: ROSProxy()
+  :members:
+
+
 Shell
 -----
 
