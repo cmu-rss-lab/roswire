@@ -30,14 +30,14 @@ class SystemDescription:
 
     Attributes
     ----------
-        sha256: str
-            The ID of the Docker image for the application.
-        types: TypeDatabase
-            A database of types for the application.
-        formats: FormatDatabase
-            A database of message, service and action specifications.
-        packages: PackageDatabase
-            A database of the packages contained within the application.
+    sha256: str
+        The ID of the Docker image for the application.
+    types: TypeDatabase
+        A database of types for the application.
+    formats: FormatDatabase
+        A database of message, service and action specifications.
+    packages: PackageDatabase
+        A database of the packages contained within the application.
     """
     sha256: str = attr.ib()
     types: TypeDatabase = attr.ib()
