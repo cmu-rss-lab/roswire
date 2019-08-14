@@ -46,14 +46,16 @@ class ROSProxy:
     ----------
     uri: str
         The URI of the ROS Master.
+    connection: xmlrpc.client.ServerProxy
+        The XML-RPC connection to the ROS master.
     nodes: NodeManagerProxy
         Provides access to the nodes running on this ROS Master.
     services: ServiceManagerProxy
         Provides access to the services advertised on this ROS Master.
     parameters: ParameterServerProxy
         Provides access to the parameter server for this ROS Master.
-    connection: xmlrpc.client.ServerProxy
-        The XML-RPC connection to the ROS master.
+    topic_to_type: Dict[str, str]
+        A mapping from topic names to the names of their message types.
     """
     def __init__(self,
                  description: SystemDescription,
