@@ -5,6 +5,7 @@ __all__ = (
     'ParameterServerProxy',
     'NodeManagerProxy',
     'NodeProxy',
+    'ServiceProxy',
     'ROSProxy',
     'BagRecorderProxy',
     'BagPlayerProxy',
@@ -31,7 +32,7 @@ from .container import ContainerProxy, ContainerProxyManager
 from .parameters import ParameterServerProxy
 from .bag import BagRecorderProxy, BagPlayerProxy
 from .node import NodeProxy, NodeManagerProxy
-from .service import ServiceManagerProxy
+from .service import ServiceProxy, ServiceManagerProxy
 from ..description import SystemDescription
 from ..exceptions import ROSWireException
 
@@ -40,7 +41,23 @@ logger.setLevel(logging.DEBUG)
 
 
 class ROSProxy:
-    """Provides access to a remote ROS master via XML-RPC."""
+    """Provides access to a remote ROS master via XML-RPC.
+
+    Attributes
+    ----------
+    uri: str
+        The URI of the ROS Master.
+    connection: xmlrpc.client.ServerProxy
+        The XML-RPC connection to the ROS master.
+    nodes: NodeManagerProxy
+        Provides access to the nodes running on this ROS Master.
+    services: ServiceManagerProxy
+        Provides access to the services advertised on this ROS Master.
+    parameters: ParameterServerProxy
+        Provides access to the parameter server for this ROS Master.
+    topic_to_type: Dict[str, str]
+        A mapping from topic names to the names of their message types.
+    """
     def __init__(self,
                  description: SystemDescription,
                  shell: ShellProxy,
@@ -72,28 +89,19 @@ class ROSProxy:
                                 self.__shell)
 
     @property
-    def uri(self) -> str:
-        """The URI of the ROS Master."""
-        return self.__uri
-
-    @property
     def nodes(self) -> NodeManagerProxy:
-        """Provides access to the nodes running on this ROS master."""
         return self.__nodes
 
     @property
     def services(self) -> ServiceManagerProxy:
-        """Provides access to the services advertised on this ROS master."""
         return self.__services
 
     @property
     def parameters(self) -> ParameterServerProxy:
-        """Provides access to the parameter server for this ROS Master."""
         return self.__parameters
 
     @property
     def connection(self) -> xmlrpc.client.ServerProxy:
-        """The XML-RPC connection to the ROS master."""
         return self.__connection
 
     @property
@@ -116,7 +124,8 @@ class ROSProxy:
         Parameters
         ----------
         filename: str
-            The name of the launch file (or an absolute path).
+            The name of the launch file, or an absolute path to the launch
+            file inside the container.
         package: str, optional
             The name of the package to which the launch file belongs.
         args: Dict[str, Union[int, str]], optional
@@ -141,7 +150,26 @@ class ROSProxy:
                fn: str,
                exclude_topics: Optional[Collection[str]] = None
                ) -> BagRecorderProxy:
-        """Provides an interface to rosbag for recording ROS topics."""
+        """Provides an interface to rosbag for recording ROS topics to disk.
+
+        Note
+        ----
+            This method records bag files to the host machine, and not to the
+            container where the ROS instance is running.
+
+        Parameters
+        ----------
+        fn: str
+            The name of the file, on the host machine, to which the bag should
+            be recorded
+        exclude_topics: Collection[str], optional
+            An optional collection of topics that should not be recorded.
+
+        Returns
+        -------
+        BagRecorderProxy
+            An interface for dynamically interacting with the bag recorder.
+        """
         return BagRecorderProxy(fn,
                                 self.__ws_host,
                                 self.__shell,
@@ -153,7 +181,22 @@ class ROSProxy:
                  *,
                  file_on_host: bool = True
                  ) -> BagPlayerProxy:
-        """Provides an interface to rosbag for replaying bag files."""
+        """Provides an interface to rosbag for replaying bag files from disk.
+
+        Parameters
+        ----------
+        fn: str
+            The bag file that should be replayed.
+        file_on_host: bool
+            If :code:`True`, as by default, :code:`fn` will be considered to
+            be a file on the host machine. If :code:`False`, :code:`fn` will
+            be considered to be a file inside the container.
+
+        Returns
+        -------
+        BagPlayerProxy
+            An interface for dynamically controlling the bag player.
+        """
         fn_ctr: str
         delete_file_after_use: bool = False
         if file_on_host:

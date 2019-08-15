@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __all__ = ('ServiceProxy', 'ServiceProxyManager')
 
 from typing import Iterator, Any, List, Set, Mapping, Optional
@@ -21,6 +22,17 @@ logger.setLevel(logging.DEBUG)
 
 @attr.s(slots=True)
 class ServiceProxy:
+    """Provides access to a ROS service.
+
+    Attributes
+    ----------
+    name: str
+        The fully qualified name of this service.
+    url: str
+        The URL of this service.
+    format: SrvFormat
+        The :code:`.srv` definition for this service.
+    """
     name: str = attr.ib()
     url: str = attr.ib()
     format: SrvFormat = attr.ib()
@@ -28,6 +40,18 @@ class ServiceProxy:
     _shell: ShellProxy = attr.ib()
 
     def call(self, message: Optional[Message] = None) -> Optional[Message]:
+        """Calls this service.
+
+        Parameters
+        ----------
+        message: Message, optional
+            The message, if any, that should be sent to the service.
+
+        Returns
+        -------
+        Optional[Message]
+            The reply produced by the service, if any.
+        """
         if not message:
             yml = '{}'
         else:
@@ -50,9 +74,7 @@ class ServiceProxy:
 
 
 class ServiceManagerProxy(Mapping[str, ServiceProxy]):
-    """
-    Provides access to the registered services on a ROS graph.
-    """
+    """Provides access to the registered services on a ROS graph."""
     def __init__(self,
                  description: SystemDescription,
                  host_ip_master: str,
@@ -75,23 +97,30 @@ class ServiceManagerProxy(Mapping[str, ServiceProxy]):
         return services
 
     def __len__(self) -> int:
-        """
-        The number of advertised services on this ROS graph.
-        """
+        """The number of advertised services on this ROS graph."""
         return len(self.__get_service_names())
 
     def __iter__(self) -> Iterator[str]:
-        """
-        Returns an iterator over the names of all registered services.
-        """
+        """Returns an iterator over the names of all registered services."""
         yield from self.__get_service_names()
 
     def __getitem__(self, name: str) -> ServiceProxy:
-        """
-        Fetches a proxy for a service with a given name.
+        """Fetches a proxy for a service with a given name.
 
-        Raises:
-            ServiceNotFound: if no service is found with the given name.
+        Parameters
+        ----------
+        name: str
+            The name of the service.
+
+        Returns
+        -------
+        ServiceProxy
+            A proxy to the given service.
+
+        Raises
+        ------
+        ServiceNotFound
+            If no service is found with the given name.
         """
         code, msg, url_container = self.__api.lookupService('/.roswire', name)
 

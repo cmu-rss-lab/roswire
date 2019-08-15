@@ -8,7 +8,7 @@ the roswire library.
 
 .. py:module:: roswire
 .. autoclass:: ROSWire
-  :members:
+   :members:
 
 
 System
@@ -24,6 +24,40 @@ with a :code:`bash` shell inside the application container.
 
 .. autoclass:: System()
   :members:
+
+
+ROS
+---
+
+.. py:module:: roswire.proxy
+.. autoclass:: ROSProxy()
+  :members:
+
+.. autoclass:: NodeManagerProxy()
+  :show-inheritance:
+  :members:
+  :inherited-members:
+
+  .. automethod:: __getitem__
+  .. automethod:: __delitem__
+  .. automethod:: __iter__
+  .. automethod:: __len__
+
+.. autoclass:: NodeProxy()
+   :members:
+
+.. autoclass:: ServiceManagerProxy()
+  :show-inheritance:
+  :members:
+  :inherited-members:
+
+  .. automethod:: __getitem__
+  .. automethod:: __delitem__
+  .. automethod:: __iter__
+  .. automethod:: __len__
+
+.. autoclass:: ServiceProxy()
+   :members:
 
 
 Shell
@@ -42,7 +76,7 @@ Filesystem
 
 .. py:module:: roswire.proxy.file
 .. autoclass:: FileProxy()
-   :members:
+  :members:
 
 
 Descriptions
