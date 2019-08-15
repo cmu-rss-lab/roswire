@@ -46,6 +46,19 @@ ROS
 .. autoclass:: NodeProxy()
    :members:
 
+.. autoclass:: ServiceManagerProxy()
+  :show-inheritance:
+  :members:
+  :inherited-members:
+
+  .. automethod:: __getitem__
+  .. automethod:: __delitem__
+  .. automethod:: __iter__
+  .. automethod:: __len__
+
+.. autoclass:: ServiceProxy()
+   :members:
+
 
 Shell
 -----
