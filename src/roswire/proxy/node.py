@@ -15,19 +15,26 @@ logger.setLevel(logging.DEBUG)
 
 
 class NodeProxy:
+    """Provides access to a ROS node.
+
+    Attributes
+    ----------
+    api: xmlrpc.client.ServerProxy
+        An XML-RPC API client for this node.
+    name: str
+        The fully qualified name of this node.
+    url: str
+        URL used to access this node from the host network.
+    pid: int
+        The container PID of the main process for this node.
+    pid_host: int
+        The host PID of the main process for this node.
+    """
     def __init__(self,
                  name: str,
                  url_host_network: str,
                  shell: ShellProxy
                  ) -> None:
-        """
-        Constructs a proxy for a given name.
-
-        Parameters:
-            name: the name of the node.
-            url_host_network: the URL of the node on the host network.
-            shell: a shell proxy.
-        """
         self.__name = name
         self.__url = url_host_network
         self.__shell = shell
@@ -35,22 +42,18 @@ class NodeProxy:
 
     @property
     def api(self) -> xmlrpc.client.ServerProxy:
-        """Provides access to the XML-RPC API for this node."""
         return xmlrpc.client.ServerProxy(self.url)
 
     @property
     def name(self) -> str:
-        """The fully qualified name of this node."""
         return self.__name
 
     @property
     def url(self) -> str:
-        """URL used to access this node from the host network."""
         return self.__url
 
     @property
     def pid(self) -> int:
-        """The container PID of the main process for this node."""
         code, status, pid = self.api.getPid('/.roswire')
         if code != 1:
             m = f"failed to obtain PID [{self.name}]: {status} (code: {code})"
@@ -61,13 +64,13 @@ class NodeProxy:
 
     @property
     def pid_host(self) -> int:
-        """The host PID of the main process for this node."""
         if self.__pid_host is None:
             self.__pid_host = self.__shell.local_to_host_pid(self.pid)
             assert self.__pid_host is not None
         return self.__pid_host
 
     def is_alive(self) -> bool:
+        """Determines whether this node is alive."""
         # TODO check start time to ensure this is the same process!
         try:
             return psutil.pid_exists(self.pid_host)
@@ -75,6 +78,7 @@ class NodeProxy:
             return False
 
     def shutdown(self) -> None:
+        """Instructs this node to shutdown."""
         self.__shell.execute(f'rosnode kill {self.name}')
 
 
