@@ -83,6 +83,7 @@ class NodeProxy:
 
 
 class NodeManagerProxy(Mapping[str, NodeProxy]):
+    """Provides access to all nodes associated with a given ROSMaster."""
     def __init__(self,
                  host_ip_master: str,
                  api: xmlrpc.client.ServerProxy,
@@ -108,15 +109,11 @@ class NodeManagerProxy(Mapping[str, NodeProxy]):
         return names
 
     def __len__(self) -> int:
-        """
-        Returns a count of the number of active nodes.
-        """
+        """Returns a count of the number of active nodes."""
         return len(self.__get_node_names())
 
     def __iter__(self) -> Iterator[str]:
-        """
-        Returns an iterator over the names of all active nodes.
-        """
+        """Returns an iterator over the names of all active nodes."""
         yield from self.__get_node_names()
 
     def __getitem__(self, name: str) -> NodeProxy:
@@ -150,11 +147,17 @@ class NodeManagerProxy(Mapping[str, NodeProxy]):
         return NodeProxy(name, uri_host, self.__shell)
 
     def __delitem__(self, name: str) -> None:
-        """
-        Shutdown and deregister a given node.
+        """Shutdown and deregister a given node.
 
-        Raises:
-            NodeNotFoundError: no node found with given name.
+        Parameters
+        ----------
+        name: str
+            The name of the node.
+
+        Raises
+        ------
+        NodeNotFoundError
+            no node found with given name.
         """
         try:
             node = self[name]
