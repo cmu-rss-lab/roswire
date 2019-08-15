@@ -112,6 +112,11 @@ class ServiceManagerProxy(Mapping[str, ServiceProxy]):
         name: str
             The name of the service.
 
+        Returns
+        -------
+        ServiceProxy
+            A proxy to the given service.
+
         Raises
         ------
         ServiceNotFound
