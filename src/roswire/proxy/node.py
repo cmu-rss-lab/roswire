@@ -120,11 +120,22 @@ class NodeManagerProxy(Mapping[str, NodeProxy]):
         yield from self.__get_node_names()
 
     def __getitem__(self, name: str) -> NodeProxy:
-        """
-        Attempts to fetch a given node.
+        """Attempts to fetch a given node.
 
-        Raises:
-            NodeNotFoundError: if there is no node with the given name.
+        Parameters
+        ----------
+        name: str
+            The name of the node.
+
+        Returns
+        -------
+        NodeProxy
+            An interface to the given node.
+
+        Raises
+        ------
+        NodeNotFoundError
+            If there is no node with the given name.
         """
         code, status, uri_container = self.api.lookupNode('/.roswire', name)
         if code == -1:
