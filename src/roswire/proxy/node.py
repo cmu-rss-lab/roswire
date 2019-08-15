@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __all__ = ('NodeManagerProxy', 'NodeProxy')
 
 from typing import Iterator, Set, Mapping, Optional
@@ -83,7 +84,7 @@ class NodeProxy:
 
 
 class NodeManagerProxy(Mapping[str, NodeProxy]):
-    """Provides access to all nodes associated with a given ROSMaster."""
+    """Provides access to all nodes on a ROS graph."""
     def __init__(self,
                  host_ip_master: str,
                  api: xmlrpc.client.ServerProxy,
