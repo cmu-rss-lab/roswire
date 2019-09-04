@@ -135,6 +135,22 @@ class LaunchFileReader:
             ctx, cfg = loader(self, ctx, cfg, tag)
         return ctx, cfg
 
+    @tag('group', ['ns'])
+    def _load_group_tag(self,
+                        ctx: LaunchContext,
+                        cfg: ROSConfig,
+                        tag: ET.Element
+                        ) -> Tuple[LaunchContext, ROSConfig]:
+        # create context for group
+        ns = self._read_namespace(ctx, tag)
+        ctx_child = ctx.child(ns)
+
+        # handle nested tags
+        nested_tags = [t for t in tag]
+        ctx_child, cfg = self._load_tags(ctx_child, cfg, nested_tags)
+
+        return ctx, cfg
+
     @tag('param', ['name', 'value', 'type', 'textfile', 'binfile', 'command'])
     def _load_param_tag(self,
                         ctx: LaunchContext,
@@ -201,12 +217,7 @@ class LaunchFileReader:
             m = f"<rosparam> unsupported 'command': {cmd}"
             raise FailedToParseLaunchFile(m)
 
-        if cmd == 'load' and not filename:
-            m = "<rosparam> load command requires 'filename' attribute"
-            raise FailedToParseLaunchFile(m)
-
-        if cmd == 'load':
-            assert filename is not None  # mypy can't work this out
+        if cmd == 'load' and filename is not None:
             if not self.__files.isfile(filename):
                 m = f"<rosparam> file does not exist: {filename}"
                 raise FailedToParseLaunchFile(m)
@@ -217,8 +228,11 @@ class LaunchFileReader:
 
         # handle load command
         if cmd == 'load':
-            assert filename is not None  # mypy can't work this out
-            yml_text = self.__files.read(filename)
+            if filename is None:
+                yml_text = value
+            else:
+                yml_text = self.__files.read(filename)
+
             if subst_value:
                 yml_text = self._resolve_args(yml_text, ctx)
             logger.debug("parsing rosparam YAML:\n%s", yml_text)
