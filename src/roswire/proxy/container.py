@@ -177,6 +177,10 @@ class ContainerProxyManager:
 
             logger.debug("finished building container: %s", uuid)
             yield dockerc
+        # TODO debugging code
+        except Exception:
+            logger.exception("error occurred during container creation: %s", uuid)
+            raise
         finally:
             logger.debug("destroying docker container: %s", uuid)
             dockerc.remove(force=True)
