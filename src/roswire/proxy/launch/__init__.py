@@ -135,6 +135,22 @@ class LaunchFileReader:
             ctx, cfg = loader(self, ctx, cfg, tag)
         return ctx, cfg
 
+    @tag('group', ['ns'])
+    def _load_group_tag(self,
+                        ctx: LaunchContext,
+                        cfg: ROSConfig,
+                        tag: ET.Element
+                        ) -> Tuple[LaunchContext, ROSConfig]:
+        # create context for group
+        ns = self._read_namespace(ctx, tag)
+        ctx_child = ctx.child(ns)
+
+        # handle nested tags
+        nested_tags = [t for t in tag]
+        ctx_child, cfg = self._load_tags(ctx_child, cfg, nested_tags)
+
+        return ctx, cfg
+
     @tag('param', ['name', 'value', 'type', 'textfile', 'binfile', 'command'])
     def _load_param_tag(self,
                         ctx: LaunchContext,
