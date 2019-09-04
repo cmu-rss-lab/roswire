@@ -167,12 +167,14 @@ class ContainerProxyManager:
             logger.debug("started docker container")
 
             # wait until .environment file is ready
+            logger.debug("waiting for .environment file")
             env_is_ready = False
             for line in self.__api_docker.logs(dockerc.id, stream=True):
                 line = line.strip().decode('utf-8')
                 if line == 'ENVFILE CREATED':
                     env_is_ready = True
                     break
+            logger.debug("checking env is ready")
             assert env_is_ready
 
             logger.debug("finished building container: %s", uuid)
