@@ -145,7 +145,9 @@ class ContainerProxyManager:
     def _container(self,
                    image_or_name: Union[str, DockerImage],
                    dir_host_shared: str,
-                   uuid: UUID
+                   uuid: UUID,
+                   *,
+                   ports: Optional[Dict[int, int]] = None
                    ) -> Iterator[DockerContainer]:
         cmd_env_file = ("export | tee /.environment > /dev/null && "
                         "chmod 444 /.environment && "
@@ -158,6 +160,7 @@ class ContainerProxyManager:
             user='root',
             name=uuid,
             volumes={dir_host_shared: {'bind': '/.roswire', 'mode': 'rw'}},
+            ports=ports,
             stdin_open=True,
             tty=False,
             detach=True)
@@ -212,7 +215,7 @@ class ContainerProxyManager:
         uuid = uuid4()
         logger.debug("UUID for container: %s", uuid)
         with self._build_shared_directory(uuid) as dir_shared:
-            with self._container(image_or_name, dir_shared, uuid) as dockerc:
+            with self._container(image_or_name, dir_shared, uuid, ports=ports) as dockerc:  # noqa: pycodestyle
                 yield ContainerProxy._from_docker(api_docker,
                                                   dockerc,
                                                   uuid,
