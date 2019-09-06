@@ -5,6 +5,7 @@ __all__ = (
     'ParameterServerProxy',
     'NodeManagerProxy',
     'NodeProxy',
+    'ServiceProxy',
     'ROSProxy',
     'BagRecorderProxy',
     'BagPlayerProxy',
@@ -31,7 +32,7 @@ from .container import ContainerProxy, ContainerProxyManager
 from .parameters import ParameterServerProxy
 from .bag import BagRecorderProxy, BagPlayerProxy
 from .node import NodeProxy, NodeManagerProxy
-from .service import ServiceManagerProxy
+from .service import ServiceProxy, ServiceManagerProxy
 from ..description import SystemDescription
 from ..exceptions import ROSWireException
 
@@ -41,7 +42,7 @@ logger.setLevel(logging.DEBUG)
 
 class ROSProxy:
     """Provides access to a remote ROS master via XML-RPC.
-    
+
     Attributes
     ----------
     uri: str
@@ -155,7 +156,7 @@ class ROSProxy:
         ----
             This method records bag files to the host machine, and not to the
             container where the ROS instance is running.
-        
+
         Parameters
         ----------
         fn: str
@@ -181,7 +182,7 @@ class ROSProxy:
                  file_on_host: bool = True
                  ) -> BagPlayerProxy:
         """Provides an interface to rosbag for replaying bag files from disk.
-        
+
         Parameters
         ----------
         fn: str
