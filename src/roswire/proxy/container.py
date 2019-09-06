@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__ = ('ContainerProxy', 'ContainerProxyManager')
 
-from typing import Iterator, Optional, Union
+from typing import Iterator, Optional, Union, Dict
 from uuid import UUID, uuid4
 from ipaddress import IPv4Address, IPv6Address
 import ipaddress
@@ -145,7 +145,9 @@ class ContainerProxyManager:
     def _container(self,
                    image_or_name: Union[str, DockerImage],
                    dir_host_shared: str,
-                   uuid: UUID
+                   uuid: UUID,
+                   *,
+                   ports: Optional[Dict[int, int]] = None
                    ) -> Iterator[DockerContainer]:
         cmd_env_file = ("export | tee /.environment > /dev/null && "
                         "chmod 444 /.environment && "
@@ -158,6 +160,7 @@ class ContainerProxyManager:
             user='root',
             name=uuid,
             volumes={dir_host_shared: {'bind': '/.roswire', 'mode': 'rw'}},
+            ports=ports,
             stdin_open=True,
             tty=False,
             detach=True)
@@ -184,7 +187,9 @@ class ContainerProxyManager:
 
     @contextlib.contextmanager
     def launch(self,
-               image_or_name: Union[str, DockerImage]
+               image_or_name: Union[str, DockerImage],
+               *,
+               ports: Optional[Dict[int, int]] = None
                ) -> Iterator['ContainerProxy']:
         """
         Launches a context-managed Docker container for a given image. Upon
@@ -196,6 +201,10 @@ class ContainerProxyManager:
         image_or_name: Union[str, DockerImage]
             The image that should be used to create the container, or the name
             of that image.
+        ports: Dict[int, int], optional
+            An optional dictionary specifying port mappings between the host
+            and container, where keys represent container ports and values
+            represent host ports.
 
         Yields
         ------
@@ -206,7 +215,7 @@ class ContainerProxyManager:
         uuid = uuid4()
         logger.debug("UUID for container: %s", uuid)
         with self._build_shared_directory(uuid) as dir_shared:
-            with self._container(image_or_name, dir_shared, uuid) as dockerc:
+            with self._container(image_or_name, dir_shared, uuid, ports=ports) as dockerc:  # noqa: pycodestyle
                 yield ContainerProxy._from_docker(api_docker,
                                                   dockerc,
                                                   uuid,
