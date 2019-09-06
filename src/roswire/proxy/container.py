@@ -184,7 +184,9 @@ class ContainerProxyManager:
 
     @contextlib.contextmanager
     def launch(self,
-               image_or_name: Union[str, DockerImage]
+               image_or_name: Union[str, DockerImage],
+               *,
+               ports: Optional[Dict[int, int]] = None
                ) -> Iterator['ContainerProxy']:
         """
         Launches a context-managed Docker container for a given image. Upon
@@ -196,6 +198,10 @@ class ContainerProxyManager:
         image_or_name: Union[str, DockerImage]
             The image that should be used to create the container, or the name
             of that image.
+        ports: Dict[int, int], optional
+            An optional dictionary specifying port mappings between the host
+            and container, where keys represent container ports and values
+            represent host ports.
 
         Yields
         ------

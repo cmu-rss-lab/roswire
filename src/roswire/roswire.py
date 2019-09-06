@@ -111,6 +111,6 @@ class ROSWire:
         """
         if not description:
             description = self.descriptions.load_or_build(image)
-        with self.containers.launch(image) as container:
+        with self.containers.launch(image, ports=ports) as container:
             container = container
             yield System(container, description)
