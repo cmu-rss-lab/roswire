@@ -96,12 +96,12 @@ class ROSWire:
 
         Parameters
         ----------
-            image: str
-                the name of the Docker image.
-            description: Optional[SystemDescription]
-                an optional static description of the ROS application.
-                If no description is provided, ROSWire will attempt to load one
-                from the cache or else build one.
+        image: str
+            the name of the Docker image.
+        description: Optional[SystemDescription]
+            an optional static description of the ROS application.
+            If no description is provided, ROSWire will attempt to load one
+            from the cache or else build one.
         """
         if not description:
             description = self.descriptions.load_or_build(image)
