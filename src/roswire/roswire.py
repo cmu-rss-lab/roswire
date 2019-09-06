@@ -90,7 +90,9 @@ class ROSWire:
     @contextlib.contextmanager
     def launch(self,
                image: str,
-               description: Optional[SystemDescription] = None
+               description: Optional[SystemDescription] = None,
+               *,
+               ports: Optional[Dict[int, int]] = None
                ) -> Iterator[System]:
         """Launches a ROS application using a provided Docker image.
 
@@ -102,6 +104,10 @@ class ROSWire:
             an optional static description of the ROS application.
             If no description is provided, ROSWire will attempt to load one
             from the cache or else build one.
+        ports: Dict[int, int], optional
+            an optional dictionary specifying port mappings between the host
+            and container, where keys represent container ports and values
+            represent host ports.
         """
         if not description:
             description = self.descriptions.load_or_build(image)
