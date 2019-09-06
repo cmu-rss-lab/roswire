@@ -1,0 +1,6 @@
+.. -*-restructuredtext-*-
+
+Recipes
+=======
+
+To appear.
