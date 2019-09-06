@@ -75,4 +75,5 @@ Contents
    :maxdepth: 2
 
    index
+   recipes
    api
