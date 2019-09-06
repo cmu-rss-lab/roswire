@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__ = ('ContainerProxy', 'ContainerProxyManager')
 
-from typing import Iterator, Optional, Union
+from typing import Iterator, Optional, Union, Dict
 from uuid import UUID, uuid4
 from ipaddress import IPv4Address, IPv6Address
 import ipaddress
