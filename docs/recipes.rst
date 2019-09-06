@@ -3,7 +3,7 @@
 Recipes
 =======
 
-To appear.
+This section of the documentation provides several recipes for using ROSWire.
 
 .. note::
 
