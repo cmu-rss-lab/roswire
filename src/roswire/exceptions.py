@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+import attr as _attr
+
+
 class ROSWireException(Exception):
     """Base class used by all ROSWire exceptions."""
 
@@ -96,7 +99,7 @@ class ParameterNotFoundError(KeyError, ROSWireException):
         super().__init__(f"parameter not found: {name}")
 
 
-@attr.s(frozen=True, auto_exc=True, auto_attribs=True)
+@_attr.s(frozen=True, auto_exc=True, auto_attribs=True)
 class PatchFailedError(ROSWireException):
     """An error occurred during the application of a patch."""
     retcode: int
