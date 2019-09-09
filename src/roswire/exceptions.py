@@ -94,3 +94,10 @@ class ParameterNotFoundError(KeyError, ROSWireException):
     """No parameter was found with the given name."""
     def __init__(self, name: str) -> None:
         super().__init__(f"parameter not found: {name}")
+
+
+@attr.s(frozen=True, auto_exc=True, auto_attribs=True)
+class PatchFailedError(ROSWireException):
+    """An error occurred during the application of a patch."""
+    retcode: int
+    output: str
