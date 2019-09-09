@@ -16,7 +16,7 @@ import subprocess
 from docker.models.containers import Container as DockerContainer
 
 from .shell import ShellProxy
-from ..exceptions import ROSWireException
+from ..exceptions import ROSWireException, PatchFailedError
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
