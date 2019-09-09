@@ -75,3 +75,42 @@ Running the code snippet above produces the following output:
   Messages: TF2Error, TFMessage
   Services: FrameGraph
   Actions: LookupTransform
+
+
+Apply a source code patch and rebuild the application
+-----------------------------------------------------
+
+
+.. code:: python
+
+   import roswire
+
+   rsw = roswire.ROSWire()
+
+   with open('example.diff') as f:
+      diff = f.read()
+
+   with rsw.launch('roswire/example:mavros') as system:
+      # apply the patch
+      context = '/ros_ws/src/mavros/mavros/src/mavros_node.cpp'
+      system.files.patch(context, diff)
+
+      # rebuild via catkin tools
+      dir_workspace = '/ros_ws'
+      system.catkin(dir_workspace).build()
+
+
+Below are the contents of :code:`example.diff`.
+
+.. code:: diff
+
+   --- mavros_node.cpp	2019-09-09 23:22:23.000000000 +0000
+   +++ mavros_node.cpp	2019-09-09 23:42:52.419422343 +0000
+   @@ -20,6 +20,6 @@
+           mavros::MavRos mavros;
+           mavros.spin();
+
+   -	return 0;
+   +	return 1;
+    }
+
