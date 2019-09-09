@@ -508,7 +508,7 @@ class FileProxy:
         except FileNotFoundError:
             logger.debug("temporary file already destroyed: %s", fn)
 
-    def patch(self, diff: str, *, context: str = '/') -> None:
+    def patch(self, context: str, diff: str) -> None:
         """Attempts to atomically apply a given patch to the filesystem.
 
         Note that this operation is atomic: That is, the patch will either
@@ -518,16 +518,19 @@ class FileProxy:
 
         Parameters
         ----------
+        context: str
+            The file or directory to which the patch should be applied.
         diff: str
             The contents of patch, given in a unified diff format.
-        context: str
-            The file or directory to which the patch should be applied. By
-            default, the patch will be applied to the root of the filesystem
-            (i.e.,  :code:`/`).
 
         Raises
         ------
         PatchFailed
             If an error occurred during the application of the patch.
         """
-        raise NotImplementedError
+        with self.tempfile(suffix='.diff') as fn_diff:
+            self.write(fn_diff, diff)
+            cmd = f'patch -p0 -u < {shlex.quote(fn_diff)}'
+            code, output, duration = self.__shell.execute(cmd, context=context)
+            if code != 0:
+                raise PatchFailedError(retcode=code, output=output)
