@@ -524,7 +524,7 @@ class FileProxy:
             The file or directory to which the patch should be applied. By
             default, the patch will be applied to the root of the filesystem
             (i.e.,  :code:`/`).
-        
+
         Raises
         ------
         PatchFailed
