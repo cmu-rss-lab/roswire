@@ -530,14 +530,25 @@ class FileProxy:
         PatchFailed
             If an error occurred during the application of the patch.
         FileNotFoundError
-            If the given context does not exist.
+            If the given context is neither a file or directory.
         """
         if not os.path.isabs(context):
             raise ValueError("context must be supplied as an absolute path")
 
         with self.tempfile(suffix='.diff') as fn_diff:
             self.write(fn_diff, diff)
-            cmd = f'patch -u -t {shlex.quote(fn_diff)}'
+
+            safe_context = shlex.quote(context)
+            safe_fn_diff = shlex.quote(fn_diff)
+            if self.isdir(context):
+                cmd = f'patch -u -f -i {safe_fn_diff} -d {safe_context}'
+            elif self.isfile(context):
+                cmd = f'patch -u -f -i {safe_fn_diff} {safe_context}'
+            else:
+                msg = f"context is neither a file or directory: {context}"
+                raise FileNotFound(msg)
+
+            logger.debug("applying patch via command: %s", cmd)
             code, output, duration = self.__shell.execute(cmd)
             if code != 0:
                 raise PatchFailedError(retcode=code, output=output)
