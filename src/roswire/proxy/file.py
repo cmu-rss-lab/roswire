@@ -476,7 +476,7 @@ class FileProxy:
         code, output, duration = self.__shell.execute(cmd)
         # TODO capture context
         if code != 0:
-            raise OSError(f"failed to create temporary directory")
+            raise OSError("failed to create temporary directory")
 
         return output
 
@@ -525,12 +525,19 @@ class FileProxy:
 
         Raises
         ------
+        ValueError
+            If the given context is not an absolute path.
         PatchFailed
             If an error occurred during the application of the patch.
+        FileNotFoundError
+            If the given context does not exist.
         """
+        if not os.path.isabs(context):
+            raise ValueError("context must be supplied as an absolute path")
+
         with self.tempfile(suffix='.diff') as fn_diff:
             self.write(fn_diff, diff)
-            cmd = f'patch -u -i {shlex.quote(fn_diff)}'
-            code, output, duration = self.__shell.execute(cmd, context=context)
+            cmd = f'patch -u -t {shlex.quote(fn_diff)}'
+            code, output, duration = self.__shell.execute(cmd)
             if code != 0:
                 raise PatchFailedError(retcode=code, output=output)
