@@ -90,6 +90,10 @@ Apply a source code patch and rebuild the application
    with open('example.diff') as f:
       diff = f.read()
 
+   # we use 'launch' to create a temporary container for the application
+   # when the context is closed, either by reaching the end of the with
+   # block or by abruptly encountering an exception, the container will be
+   # automatically destroyed.
    with rsw.launch('roswire/example:mavros') as system:
       print("applying patch...")
       context = '/ros_ws/src/mavros/mavros/src/mavros_node.cpp'
