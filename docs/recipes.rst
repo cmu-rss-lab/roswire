@@ -91,13 +91,16 @@ Apply a source code patch and rebuild the application
       diff = f.read()
 
    with rsw.launch('roswire/example:mavros') as system:
-      # apply the patch
+      print("applying patch...")
       context = '/ros_ws/src/mavros/mavros/src/mavros_node.cpp'
       system.files.patch(context, diff)
+      print("patch applied")
 
       # rebuild via catkin tools
+      print("rebuilding...")
       dir_workspace = '/ros_ws'
       system.catkin(dir_workspace).build()
+      print("rebuilt")
 
 
 Below are the contents of :code:`example.diff`.
