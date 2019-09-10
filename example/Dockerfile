@@ -3,7 +3,7 @@ FROM ros:indigo
 # install core utilities
 WORKDIR /ros_ws
 RUN apt-get update \
- && apt-get install -y --no-install-recommends \
+ && apt-get install -y --force-yes --no-install-recommends \
       apt-utils \
       sudo \
       xvfb \
