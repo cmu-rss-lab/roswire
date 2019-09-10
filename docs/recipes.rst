@@ -75,3 +75,23 @@ Running the code snippet above produces the following output:
   Messages: TF2Error, TFMessage
   Services: FrameGraph
   Actions: LookupTransform
+
+
+Call a ROS service and record the state of the system to a ROS bag
+------------------------------------------------------------------
+
+
+.. code:: python
+
+   import roswire
+
+   rsw = roswire.ROSWire()
+   with rsw.launch('roswire/example:mavros') as system:
+
+      # launch a temporary ROS session inside the app container
+      # once the context is closed, the ROS session will be terminated and all
+      # of its associated nodes will be automatically killed.
+      with system.roscore() as ros:
+
+         # use roslaunch to launch the application inside the ROS session
+         pass
