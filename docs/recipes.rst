@@ -75,3 +75,51 @@ Running the code snippet above produces the following output:
   Messages: TF2Error, TFMessage
   Services: FrameGraph
   Actions: LookupTransform
+
+
+Apply a source code patch and rebuild the application
+-----------------------------------------------------
+
+
+.. code:: python
+
+   import roswire
+
+   rsw = roswire.ROSWire()
+
+   with open('example.diff') as f:
+      diff = f.read()
+
+   # we use 'launch' to create a temporary container for the application
+   # when the context is closed, either by reaching the end of the with
+   # block or by abruptly encountering an exception, the container will be
+   # automatically destroyed.
+   with rsw.launch('roswire/example:mavros') as system:
+      print("applying patch...")
+      context = '/ros_ws/src/mavros/mavros/src/mavros_node.cpp'
+      system.files.patch(context, diff)
+      print("patch applied")
+
+      # rebuild via catkin tools
+      print("rebuilding...")
+      dir_workspace = '/ros_ws'
+      catkin = system.catkin(dir_workspace)
+      catkin.build()
+      print("rebuilt")
+
+
+Below are the contents of :code:`example.diff`.
+
+.. code:: diff
+
+   --- mavros_node.cpp	2019-09-09 23:22:23.000000000 +0000
+   +++ mavros_node.cpp	2019-09-10 00:23:23.952098138 +0000
+   @@ -20,6 +20,6 @@
+    	mavros::MavRos mavros;
+    	mavros.spin();
+    
+   -	return 0;
+   +	return 1;
+    }
+    
+   
