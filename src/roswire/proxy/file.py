@@ -530,7 +530,7 @@ class FileProxy:
         """
         with self.tempfile(suffix='.diff') as fn_diff:
             self.write(fn_diff, diff)
-            cmd = f'patch -p0 -u < {shlex.quote(fn_diff)}'
+            cmd = f'patch -u -i {shlex.quote(fn_diff)}'
             code, output, duration = self.__shell.execute(cmd, context=context)
             if code != 0:
                 raise PatchFailedError(retcode=code, output=output)
