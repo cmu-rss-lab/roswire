@@ -105,12 +105,13 @@ Below are the contents of :code:`example.diff`.
 .. code:: diff
 
    --- mavros_node.cpp	2019-09-09 23:22:23.000000000 +0000
-   +++ mavros_node.cpp	2019-09-09 23:42:52.419422343 +0000
+   +++ mavros_node.cpp	2019-09-10 00:23:23.952098138 +0000
    @@ -20,6 +20,6 @@
-           mavros::MavRos mavros;
-           mavros.spin();
-
+    	mavros::MavRos mavros;
+    	mavros.spin();
+    
    -	return 0;
    +	return 1;
     }
-
+    
+   
