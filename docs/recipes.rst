@@ -83,7 +83,10 @@ Call a ROS service and record the state of the system to a ROS bag
 
 .. code:: python
 
+   import time
    import roswire
+
+   FN_SITL = '/ros_ws/src/ArduPilot/build/sitl/bin/arducopter'
 
    rsw = roswire.ROSWire()
    with rsw.launch('roswire/example:mavros') as system:
@@ -92,6 +95,12 @@ Call a ROS service and record the state of the system to a ROS bag
       # once the context is closed, the ROS session will be terminated and all
       # of its associated nodes will be automatically killed.
       with system.roscore() as ros:
+         # for this example, we need to separately launch a software-in-the-loop
+         # simulator for the robot platform
+         ps_sitl = system.shell.popen(f'{FN_SITL} --model copter')
 
          # use roslaunch to launch the application inside the ROS session
-         pass
+         ros.launch('mavros', 'apm.launch', fcu_url='tcp://127.0.0.1:5760@5760')
+         time.sleep(5)
+
+         ps_sitl.kill()
