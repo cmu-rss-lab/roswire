@@ -55,3 +55,6 @@ exec \"\$@\"" > "${ROS_WSPACE}/entrypoint.sh" \
  && chmod +x "${ROS_WSPACE}/entrypoint.sh"
 ENTRYPOINT ["/ros_ws/entrypoint.sh"]
 CMD ["/bin/bash"]
+
+# copy parameters
+COPY copter.parm src/ArduPilot/copter.parm
