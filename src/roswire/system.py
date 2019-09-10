@@ -27,6 +27,8 @@ class System:
         A unique identifier for the underlying container.
     description: SystemDescription
         A static description of the associated ROS application.
+    messages: TypeDatabase
+        A database of message types for the associated ROS application.
     shell: ShellProxy
         Provides access to a bash shell for this container.
     files: FileProxy
@@ -55,6 +57,10 @@ class System:
     @property
     def shell(self) -> ShellProxy:
         return self.container.shell
+
+    @property
+    def messages(self) -> TypeDatabase:
+        return self.description.types
 
     def catkin(self, directory: str) -> CatkinProxy:
         """Returns an interface to a given catkin workspace.
