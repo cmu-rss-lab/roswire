@@ -546,7 +546,7 @@ class FileProxy:
                 cmd = f'patch -u -f -i {safe_fn_diff} {safe_context}'
             else:
                 msg = f"context is neither a file or directory: {context}"
-                raise FileNotFound(msg)
+                raise FileNotFoundError(msg)
 
             logger.debug("applying patch via command: %s", cmd)
             code, output, duration = self.__shell.execute(cmd)
