@@ -99,7 +99,8 @@ Apply a source code patch and rebuild the application
       # rebuild via catkin tools
       print("rebuilding...")
       dir_workspace = '/ros_ws'
-      system.catkin(dir_workspace).build()
+      catkin = system.catkin(dir_workspace)
+      catkin.build()
       print("rebuilt")
 
 
