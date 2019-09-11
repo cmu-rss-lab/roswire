@@ -541,7 +541,7 @@ class FileProxy:
             safe_context = shlex.quote(context)
             safe_fn_diff = shlex.quote(fn_diff)
             if self.isdir(context):
-                cmd = f'patch -u -f -i {safe_fn_diff} -d {safe_context}'
+                cmd = f'patch -u -p0 -f -i {safe_fn_diff} -d {safe_context}'
             elif self.isfile(context):
                 cmd = f'patch -u -f -i {safe_fn_diff} {safe_context}'
             else:
