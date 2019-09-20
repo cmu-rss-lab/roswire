@@ -77,6 +77,13 @@ Running the code snippet above produces the following output:
   Actions: LookupTransform
 
 
+Call a ROS service and record the state of the system to a ROS bag
+------------------------------------------------------------------
+
+.. literalinclude:: recipes/service_call.py
+   :language: python
+
+
 Apply a source code patch and rebuild the application
 -----------------------------------------------------
 
@@ -122,4 +129,3 @@ Below are the contents of :code:`example.diff`.
    +	return 1;
     }
     
-   
