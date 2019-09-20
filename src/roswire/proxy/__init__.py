@@ -114,8 +114,8 @@ class ROSProxy:
 
     def launch(self,
                filename: str,
-               package: Optional[str] = None,
                *,
+               package: Optional[str] = None,
                args: Optional[Dict[str, Union[int, str]]] = None,
                prefix: Optional[str] = None
                ) -> None:
