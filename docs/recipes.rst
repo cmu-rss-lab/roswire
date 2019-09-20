@@ -58,8 +58,8 @@ Running the code snippet above produces the following output:
   Actions: LookupTransform
 
 
-Call a ROS service and record the state of the system to a ROS bag
-------------------------------------------------------------------
+Call a ROS service
+------------------
 
 .. literalinclude:: recipes/service_call.py
    :language: python
