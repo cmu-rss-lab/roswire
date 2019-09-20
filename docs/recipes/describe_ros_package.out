@@ -1,0 +1,7 @@
+PACKAGE DETAILS
+--------------------------------------------------------------------------------
+Name: tf2_msgs
+Path: /opt/ros/indigo/share/bond
+Messages: TF2Error, TFMessage
+Services: FrameGraph
+Actions: LookupTransform

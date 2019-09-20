@@ -28,34 +28,12 @@ Running the example above produces the following output:
 Produce a description of a given ROS package
 --------------------------------------------
 
-.. code:: python
-
-  import roswire
-
-  rsw = roswire.ROSWire()
-  description = rsw.descriptions.load_or_build('roswire/example:mavros')
-  package = description.packages['tf2_msgs']
-
-  print("PACKAGE DETAILS")
-  print('-' * 80)
-  print(f"Name: {package.name}")
-  print(f"Path: {package.path}")
-  print(f"Messages: {', '.join(m.name for m in package.messages)}")
-  print(f"Services: {', '.join(s.name for s in package.services)}")
-  print(f"Actions: {', '.join(a.name for a in package.actions)}")
-
+.. literalinclude:: recipes/describe_ros_package.py
+   :language: python
 
 Running the code snippet above produces the following output:
 
-.. code:: shell
-
-  PACKAGE DETAILS
-  --------------------------------------------------------------------------------
-  Name: tf2_msgs
-  Path: /opt/ros/indigo/share/bond
-  Messages: TF2Error, TFMessage
-  Services: FrameGraph
-  Actions: LookupTransform
+.. literalinclude:: recipes/describe_ros_package.out
 
 
 Call a ROS service
