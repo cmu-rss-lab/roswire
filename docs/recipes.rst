@@ -22,20 +22,7 @@ that appear in a given Docker image.
 
 Running the example above produces the following output:
 
-.. code:: shell
-
-  catkin
-  genmsg
-  gencpp
-  genlisp
-  genpy
-  cmake_modules
-  test_find_tinyxml
-  class_loader
-  cpp_common
-  mavlink
-  libmavconn
-  ...
+.. literalinclude:: recipes/list_all_ros_packages.out
 
 
 Produce a description of a given ROS package
