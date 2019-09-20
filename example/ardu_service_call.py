@@ -24,7 +24,6 @@ with rsw.launch('roswire/example:mavros') as system:
 
         # use roslaunch to launch the application inside the ROS session
         ros.launch('apm.launch', package='mavros', args={'fcu_url': 'tcp://127.0.0.1:5760@5760'})
-        time.sleep(5)
 
         # let's wait some time for the copter to become armable
         time.sleep(60)
@@ -32,11 +31,12 @@ with rsw.launch('roswire/example:mavros') as system:
         # arm the copter
         request_arm = CommandBoolRequest(value=True)
         response_arm = ros.services['/mavros/cmd/arming'].call(request_arm)
-        print(response_arm)
+        assert response_arm.success
 
         # switch to guided mode
         request_guided = SetModeRequest(base_mode=0, custom_mode='GUIDED')
-        ros.services['/mavros/set_mode'].call(request_guided)
+        response_guided = ros.services['/mavros/set_mode'].call(request_guided)
+        assert response_arm.success
 
         # takeoff to 50 metres above the ground
         request_takeoff = CommandTOLRequest(min_pitch=0.0,
@@ -45,6 +45,12 @@ with rsw.launch('roswire/example:mavros') as system:
                                             longitude=0.0,
                                             altitude=50.0)
         response_takeoff = ros.services['/mavros/cmd/takeoff'].call(request_takeoff)
-        print(response_takeoff)
+        assert response_takeoff.success
 
+        # wait for the copter to reach the target altitude
+        print("waiting for copter to reach altitude...")
+        time.sleep(30)
+        print("finished waiting")
+
+        # kill the simulator
         ps_sitl.kill()
