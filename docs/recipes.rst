@@ -17,14 +17,8 @@ List all ROS packages within a Docker image
 The following example prints a list of the names of all of the ROS packages
 that appear in a given Docker image.
 
-.. code:: python
-
-  import roswire
-
-  rsw = roswire.ROSWire()
-  description = rsw.descriptions.load_or_build('roswire/example:mavros')
-  for package in description.packages:
-    print(package)
+.. literalinclude:: recipes/list_all_ros_packages.py
+   :language: python
 
 Running the example above produces the following output:
 
