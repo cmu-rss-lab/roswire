@@ -55,3 +55,10 @@ Below are the contents of :code:`example.diff`.
 
 .. literalinclude:: recipes/example.diff
    :language: diff
+
+
+Record ROS topic data to a ROS bag
+----------------------------------
+
+.. literalinclude:: recipes/record_to_bag.py
+   :language: python
