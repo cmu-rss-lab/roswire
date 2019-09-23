@@ -1,0 +1,47 @@
+" ============================================================================
+" Netrw Directory Listing                                        (netrw v156)
+"   /home/chris/tools/roswire/docs/recipes
+"   Sorted by      name
+"   Sort sequence: [\/]$,\<core\%(\.\d\+\)\=\>,\.h$,\.c$,\.cpp$,\~\=\*$,*,\.o$,\.obj$,\.info$,\.swp$,\.bak$,\~$
+"   Quick Help: <F1>:help  -:go up dir  D:delete  R:rename  s:sort-by  x:special
+" ==============================================================================
+../
+roswire/
+| .eggs/
+| .git/
+| .mypy_cache/
+| .pytest_cache/
+| docs/
+| | .eggs/
+| | _build/
+| | _static/
+| | _templates/
+| | recipes/
+| | | describe_ros_package.out
+| | | describe_ros_package.py
+| | | example.diff
+| | | list_all_ros_packages.out
+| | | list_all_ros_packages.py
+| | | patch_and_rebuild.py
+| | | service_call.py
+| | .gitignore
+| | Makefile
+| | api.rst
+| | conf.py
+| | index.rst
+| | recipes.rst
+| example/
+| src/
+| test/
+| .gitignore
+| .travis.yml
+| CHANGELOG.md
+| LICENSE
+| Makefile
+| Pipfile
+| README.rst
+| debug.txt
+| setup.cfg
+| setup.py
+| temp.bag
+| test.py
