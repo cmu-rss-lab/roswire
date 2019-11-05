@@ -259,9 +259,9 @@ class Message:
             return val.to_dict()
 
         if typ in (list, tuple):
-            if not typ:
+            if not val:
                 return []
-            typ_item = type(typ[0])
+            typ_item = type(val[0])
             if typ_item == Time or isinstance(typ_item, Message):
                 return [vv.to_dict() for vv in val]
             # includes (str, int, float)
