@@ -156,6 +156,7 @@ class BagRecorderProxy:
             an optional list of topics that should be excluded from the bag.
         """
         self.__lock: threading.Lock = threading.Lock()
+        self.__process: Optional[Popen] = None
         self.__started: bool = False
         self.__stopped: bool = False
         self.__shell: ShellProxy = shell
@@ -205,11 +206,10 @@ class BagRecorderProxy:
             if self.__started:
                 raise exceptions.RecorderAlreadyStarted
             self.__started = True
-            # FIXME bad mounting?!
             cmd: str = ("rosbag record -q -a"
-                        f" -O {self.__fn_host_temp}"
+                        f" -O {self.__fn_container}"
                         f" __name:={self.__bag_name}")
-            self.__shell.non_blocking_execute(cmd)
+            self.__process = self.__shell.popen(cmd)
             logger.debug("started bag recording")
 
     def stop(self, save: bool = True) -> None:
@@ -234,7 +234,10 @@ class BagRecorderProxy:
 
             name_node = f'/{self.__bag_name}'
             del self.__nodes[name_node]
-            time.sleep(10)  # FIXME
+            time.sleep(5)  # FIXME
+
+            assert self.__process
+            self.__process.kill()
 
             if os.path.exists(self.__fn_host_temp):
                 if save:
