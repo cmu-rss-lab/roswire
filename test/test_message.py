@@ -1,5 +1,4 @@
 import pytest
-import yaml
 
 from roswire.definitions import (TypeDatabase, FormatDatabase, MsgFormat,
                                  Time, Duration)
