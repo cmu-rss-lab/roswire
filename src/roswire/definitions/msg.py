@@ -255,14 +255,14 @@ class Message:
     def _to_dict_value(val: Any) -> Any:
         typ = type(val)
 
-        if typ in (Time, Duration) or isinstance(typ, Message):
+        if typ in (Time, Duration) or issubclass(typ, Message):
             return val.to_dict()
 
         if typ in (list, tuple):
             if not val:
                 return []
             typ_item = type(val[0])
-            if typ_item == Time or isinstance(typ_item, Message):
+            if typ_item == Time or issubclass(typ_item, Message):
                 return [vv.to_dict() for vv in val]
             # includes (str, int, float)
             return list(val)
