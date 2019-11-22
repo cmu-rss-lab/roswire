@@ -68,7 +68,7 @@ class ServiceProxy:
         if not fmt_response:
             return None
 
-        d = yaml.load(output)
+        d = yaml.safe_load(output)
         db_type = self._description.types
         return db_type.from_dict(fmt_response, d)
 
