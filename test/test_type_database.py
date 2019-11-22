@@ -145,7 +145,7 @@ def test_md5sum():
 
 def test_encode_and_decode():
     db_type = load_mavros_type_db()
-    Waypoint = db_type['Waypoint']
+    Waypoint = db_type['mavros_msgs/Waypoint']
     wp = Waypoint(frame=3,
                   command=82,
                   is_current=False,
