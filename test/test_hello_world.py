@@ -13,6 +13,7 @@ from roswire.proxy import ShellProxy, FileProxy, ContainerProxy
 NAME_IMAGE = 'hello-world'
 
 
+@pytest.mark.skip(reason='this takes 10-15 minutes')
 def test_description():
     rsw = ROSWire()
     desc = rsw.descriptions.build(NAME_IMAGE, save=False)

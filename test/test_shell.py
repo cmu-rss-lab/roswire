@@ -9,6 +9,9 @@ from roswire.exceptions import EnvNotFoundError
 
 from test_basic import build_shell_proxy
 
+pytest.skip('These tests rely on a local Docker image',
+            allow_module_level=True)
+
 
 def test_wait():
     with build_shell_proxy() as shell:

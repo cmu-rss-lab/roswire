@@ -19,7 +19,7 @@ _USING_TRAVIS = os.environ.get('TRAVIS') == 'true'
 
 def skip_if_on_travis(f):
     if _USING_TRAVIS:
-        return pytest.mark.skipif(reason='skipping test on Travis')
+        return pytest.mark.skipif(f, reason='skipping test on Travis')
     else:
         return f
 
@@ -101,6 +101,7 @@ def build_file_and_shell_proxy() -> Iterator[Tuple[FileProxy, ShellProxy]]:
         yield sut.files, sut.shell
 
 
+@skip_if_on_travis
 def test_parameters():
     with build_test_environment() as (sut, ros):
         assert ros.topic_to_type == {'/rosout': 'rosgraph_msgs/Log',
@@ -120,6 +121,7 @@ def test_parameters():
             ros.parameters['/hello']
 
 
+@skip_if_on_travis
 def test_arducopter():
     logging.basicConfig()
     with build_ardu() as (sut, ros):

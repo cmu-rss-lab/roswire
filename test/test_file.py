@@ -10,6 +10,9 @@ from roswire.proxy import FileProxy
 
 from test_basic import build_file_proxy
 
+pytest.skip('currently relies on another Docker image',
+            allow_module_level=True)
+
 
 def test_exists():
     with build_file_proxy() as files:
