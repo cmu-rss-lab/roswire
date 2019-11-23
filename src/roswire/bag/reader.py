@@ -19,7 +19,9 @@ from ..definitions.decode import (decode_uint8, read_uint8,
                                   decode_uint32, read_uint32,
                                   decode_uint64, read_uint64,
                                   decode_string,
-                                  decode_time, read_time)
+                                  decode_time, read_time,
+                                  read_sized,
+                                  read_encoded_header)
 
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -122,12 +124,6 @@ class BagReader:
         self._skip_sized(ptr)
         self._skip_sized(ptr)
 
-    def _read_sized(self, ptr=None) -> bytes:
-        ptr = ptr if ptr else self.__fp
-        size = read_uint32(ptr)
-        logger.debug("reading sized block: %d bytes", size)
-        return ptr.read(size)
-
     def _read_version(self) -> str:
         return decode_string(self.__fp.readline()).rstrip()
 
@@ -136,16 +132,7 @@ class BagReader:
                      *,
                      ptr=None
                      ) -> Dict[str, bytes]:
-        fields: Dict[str, bytes] = {}
-        header = self._read_sized(ptr)
-        while header:
-            size = decode_uint32(header[:4])
-            header = header[4:]
-            name, sep, value = header[:size].partition(b'\x3d')
-            if sep == '':
-                raise Exception('error reading header field')
-            fields[decode_string(name)] = value
-            header = header[size:]
+        fields = read_encoded_header(ptr if ptr else self.__fp)
         if op_expected:
             assert 'op' in fields
             op_actual: OpCode = OpCode(fields['op'])
@@ -196,7 +183,7 @@ class BagReader:
         # obtain a summary of the number of messages for each connection
         # represented in this chunk
         connections: List[Tuple[int, int]] = []
-        contents: bytes = self._read_sized()
+        contents: bytes = read_sized(self.__fp)
         for i in range(num_connections):
             uid = decode_uint32(contents[0:4])
             count = decode_uint32(contents[4:8])
@@ -298,7 +285,7 @@ class BagReader:
         chunk = self.__pos_to_chunk[pos]
         self._seek(chunk.pos_data)
         if chunk.compression == Compression.NONE:
-            bfr = BytesIO(self._read_sized())
+            bfr = BytesIO(read_sized(self.__fp))
         else:
             raise NotImplementedError
 
@@ -326,7 +313,7 @@ class BagReader:
         msg_typ = self.__db_type[msg_typ_name]
 
         # read the raw message data
-        raw = self._read_sized(bfr)
+        raw = read_sized(bfr)
         content = msg_typ.read(BytesIO(raw))
         msg = BagMessage(topic, t, content)
         logger.debug("decoded message: %s", msg)

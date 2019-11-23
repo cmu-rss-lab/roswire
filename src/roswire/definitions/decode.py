@@ -4,7 +4,7 @@ This module provides code for decoding and deserialising binary ROS messages
 into Python data structures.
 """
 from typing import (Optional, Iterator, Callable, Any, List, Type, TypeVar,
-                    BinaryIO)
+                    BinaryIO, Dict)
 import functools
 import struct
 
@@ -118,6 +118,12 @@ def decode_string(b: bytes) -> str:
     return b.decode('utf-8')
 
 
+def read_sized(b: BinaryIO) -> bytes:
+    """Reads a variable-length block of bytes from a bytestream."""
+    size = read_uint32(b)
+    return b.read(size)
+
+
 def read_fixed_length_string(size: int, b: BinaryIO) -> str:
     """Reads a fixed-length string from a bytestream."""
     return decode_string(b.read(size))
@@ -136,6 +142,21 @@ def string_reader(length: Optional[int] = None
         return read_string
     else:
         return functools.partial(read_fixed_length_string, length)
+
+
+def read_encoded_header(b: BinaryIO) -> Dict[str, bytes]:
+    """Reads an encoded header."""
+    fields: Dict[str, bytes] = {}
+    header = read_sized(b)
+    while header:
+        size = decode_uint32(header[:4])
+        header = header[4:]
+        name, sep, value = header[:size].partition(b'\x3d')
+        if sep == '':
+            raise Exception('error reading header field')
+        fields[decode_string(name)] = value
+        header = header[size:]
+    return fields
 
 
 def simple_array_reader(typ: str,
