@@ -1,16 +1,16 @@
 import re
 
-from roswire.proxy.tcpros import decode_header
+from roswire.proxy.tcpros import TCPROSHeader
 
 
-def hex2bytes(s: str) -> bytes:
+def _hex2bytes(s: str) -> bytes:
     s = re.sub(r'\s+', '', s, flags=re.UNICODE)
     return bytes.fromhex(s)
 
 
-def test_decode_header():
+def test_encode_and_decode_header():
     # source: http://wiki.ros.org/ROS/Connection%20Header
-    b = hex2bytes("""
+    b = _hex2bytes("""
 b0 00 00 00
    20 00 00 00
       6d 65 73 73 61 67 65 5f 64 65 66 69 6e 69 74 69 6f 6e 3d 73 74 72 69 6e 67
@@ -31,12 +31,13 @@ b0 00 00 00
    05 00 00 00
       68 65 6c 6c 6f""")
 
+    header = TCPROSHeader(
+        message_definition='string data\n\n',
+        callerid='/rostopic_4767_1316912741557',
+        latching=True,
+        md5sum='992ce8a1687cec8c8bd883ec73ca41d1',
+        topic='/chatter',
+        type_='std_msgs/String')
 
-    assert decode_header(b) == {
-        'message_definition': 'string data\n\n',
-        'callerid': '/rostopic_4767_1316912741557',
-        'latching': '1',
-        'md5sum': '992ce8a1687cec8c8bd883ec73ca41d1',
-        'topic': '/chatter',
-        'type': 'std_msgs/String'
-    }
+    assert TCPROSHeader.decode(b) == header
+    assert TCPROSHeader.decode(header.encode()) == header

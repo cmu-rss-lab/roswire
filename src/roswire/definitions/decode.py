@@ -159,6 +159,12 @@ def read_encoded_header(b: BinaryIO) -> Dict[str, bytes]:
     return fields
 
 
+def read_string_dictionary(b: BinaryIO) -> Dict[str, str]:
+    """Reads a variable-length string-to-string map."""
+    field_to_bytes: Dict[str, bytes] = read_encoded_header(b)
+    return {f: decode_string(v) for (f, v) in field_to_bytes.items()}
+
+
 def simple_array_reader(typ: str,
                         length: Optional[int] = None
                         ) -> Callable[[BinaryIO], List[Any]]:
