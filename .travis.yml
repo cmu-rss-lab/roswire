@@ -4,15 +4,10 @@ services:
 python:
 - '3.6'
 install:
-- pip install coveralls
-- pip install pycodestyle
-- pip install sphinx~=1.8.5
-- pip install solar-theme~=1.3.3
-- pip install mypy mypy-extensions
+- pip install -r requirements.dev.txt
 - pip install --upgrade .
 script:
-- pycodestyle --show-source src
-- mypy src --ignore-missing-imports
+- tox
 notifications:
   email: false
 before_deploy:
