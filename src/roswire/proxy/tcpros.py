@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
-__all__ = ('TCPROSHeader',)
+__all__ = ('TCPROSHeader', 'TCPROSMessage')
 
 from io import BytesIO
-from typing import Dict, Union, Optional, BinaryIO
+from typing import Dict, Union, Optional, BinaryIO, Mapping, Type
 
 import attr
 
+from ..definitions.msg import Message
 from ..definitions.encode import write_uint32, write_encoded_header
-from ..definitions.decode import read_string_dictionary
+from ..definitions.decode import read_uint32, read_string_dictionary
 
 _UTF8_ONE = '1'.encode('utf-8')
 
@@ -118,3 +119,61 @@ class TCPROSHeader:
                             error=error,
                             topic=topic,
                             service=service)
+
+
+@attr.s(auto_attribs=True, slots=True)
+class TCPROSMessage:
+    header: TCPROSHeader
+    message: Message
+
+    def encode(self) -> bytes:
+        """Returns a binary encoding of this message."""
+        b = BytesIO()
+        self.write(b)
+        return b.getvalue()
+
+    def write(self, b: BytesIO) -> None:
+        """Writes this message to a binary stream."""
+        self.header.write(b)
+
+        # write a placeholder size
+        position_message_size = b.tell()
+        write_uint32(0, b)
+        position_message_data = b.tell()
+        self.message.write(b)
+        position_message_end = b.tell()
+
+        # compute the true size and update
+        size_message = position_message_end - position_message_data
+        b.seek(position_message_size)
+        write_uint32(size_message, b)
+        b.seek(position_message_end)
+
+    @classmethod
+    def decode(cls,
+               types: Mapping[str, Type[Message]],
+               b: bytes
+               ) -> 'TCPROSMessage':
+        """Decodes a TCPROS message from its binary form.
+
+        Parameters
+        ----------
+        types: Mapping[str, Type[Message]]
+            A collection of types indexed by name.
+        b: bytes
+            A binary blob.
+        """
+        return cls.read(types, BytesIO(b))
+
+    @classmethod
+    def read(cls,
+             types: Mapping[str, Type[Message]],
+             b: BytesIO
+             ) -> 'TCPROSMessage':
+        """Reads a TCPROS message from a binary stream."""
+        header = TCPROSHeader.read(b)
+        type_ = types[header.type_]
+        message_size = read_uint32(b)
+        message = type_.read(b)
+        return TCPROSMessage(header=header,
+                             message=message)
