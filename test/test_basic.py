@@ -14,6 +14,14 @@ from roswire.description import SystemDescription
 from roswire.definitions import TypeDatabase, FormatDatabase, PackageDatabase
 
 DIR_TEST = os.path.dirname(__file__)
+_USING_TRAVIS = os.environ.get('TRAVIS') == 'true'
+
+
+def skip_if_on_travis(f):
+    if _USING_TRAVIS:
+        return pytest.mark.skipif(reason='skipping test on Travis')
+    else:
+        return f
 
 
 def load_hello_world_type_db() -> TypeDatabase:

@@ -2,7 +2,7 @@
 __all__ = ('Package', 'PackageDatabase')
 
 from typing import (Tuple, List, Dict, Union, Any, Iterator, Collection,
-                    Mapping)
+                    Mapping, Callable, Iterable)
 import os
 
 import attr
@@ -12,15 +12,16 @@ from .msg import MsgFormat
 from .srv import SrvFormat
 from .action import ActionFormat
 from ..proxy import FileProxy, ShellProxy
+from ..util import tuple_from_iterable
 
 
-@attr.s(frozen=True)
+@attr.s(frozen=True, auto_attribs=True, slots=True)
 class Package:
-    name: str = attr.ib()
-    path: str = attr.ib()
-    messages: Tuple[MsgFormat, ...] = attr.ib(converter=tuple)
-    services: Tuple[SrvFormat, ...] = attr.ib(converter=tuple)
-    actions: Tuple[ActionFormat, ...] = attr.ib(converter=tuple)
+    name: str
+    path: str
+    messages: Tuple[MsgFormat, ...] = attr.ib(converter=tuple_from_iterable)
+    services: Tuple[SrvFormat, ...] = attr.ib(converter=tuple_from_iterable)
+    actions: Tuple[ActionFormat, ...] = attr.ib(converter=tuple_from_iterable)
 
     @staticmethod
     def build(path: str, files: FileProxy) -> 'Package':

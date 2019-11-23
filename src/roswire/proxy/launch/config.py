@@ -9,7 +9,6 @@ import logging
 
 import attr
 
-from ...util import build_tuple
 from ...exceptions import FailedToParseLaunchFile
 from ...name import (namespace_join, canonical_name, name_is_global,
                      namespaces_of)

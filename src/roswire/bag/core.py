@@ -8,6 +8,7 @@ import attr
 
 from ..definitions.base import Time
 from ..definitions.msg import Message
+from ..util import tuple_from_iterable
 
 
 class OpCode(Enum):
@@ -28,57 +29,64 @@ class Compression(Enum):
     BZ2 = 'bz2'
 
 
-@attr.s(frozen=True, slots=True)
+@attr.s(frozen=True, slots=True, auto_attribs=True)
 class BagMessage:
-    topic: str = attr.ib()
-    time: Time = attr.ib()
-    message: Message = attr.ib()
+    topic: str
+    time: Time
+    message: Message
 
 
-@attr.s(frozen=True, slots=True)
+@attr.s(frozen=True, slots=True, auto_attribs=True)
 class ChunkConnection:
-    # connection id
-    uid: int = attr.ib()
-    # number of messages that arrived on this connection in the chunk
-    count: int = attr.ib()
+    """
+    Attributes
+    ----------
+    uid: str
+        The connection identifier
+    count: int
+        The number of messages that arrived on this connection in the chunk
+    """
+    uid: int
+    count: int
 
 
-@attr.s(frozen=True, slots=True)
+@attr.s(frozen=True, slots=True, auto_attribs=True)
 class Chunk:
-    pos_record: int = attr.ib()
-    pos_data: int = attr.ib()
-    time_start: Time = attr.ib()
-    time_end: Time = attr.ib()
-    connections: Tuple[ChunkConnection, ...] = attr.ib(converter=tuple)
-    compression: Compression = attr.ib()
-    size_uncompressed: int = attr.ib()
-    size_compressed: int = attr.ib()
+    pos_record: int
+    pos_data: int
+    time_start: Time
+    time_end: Time
+    connections: Tuple[ChunkConnection, ...] = \
+        attr.ib(converter=tuple_from_iterable)
+    compression: Compression
+    size_uncompressed: int
+    size_compressed: int
 
 
-@attr.s(frozen=True, slots=True)
+@attr.s(frozen=True, slots=True, auto_attribs=True)
 class ConnectionInfo:
-    conn: int = attr.ib()
-    topic: str = attr.ib()
-    topic_original: str = attr.ib()
-    typ: str = attr.ib()
-    md5sum: str = attr.ib()
-    message_definition: str = attr.ib()
-    callerid: Optional[str] = attr.ib()
-    latching: Optional[str] = attr.ib()
+    conn: int
+    topic: str
+    topic_original: str
+    typ: str
+    md5sum: str
+    message_definition: str
+    callerid: Optional[str]
+    latching: Optional[str]
 
 
-@attr.s(frozen=True, slots=True)
+@attr.s(frozen=True, slots=True, auto_attribs=True)
 class BagHeader:
-    index_pos: int = attr.ib()
-    conn_count: int = attr.ib()
-    chunk_count: int = attr.ib()
+    index_pos: int
+    conn_count: int
+    chunk_count: int
 
 
-@attr.s(frozen=True, slots=True)
+@attr.s(frozen=True, slots=True, auto_attribs=True)
 class IndexEntry:
-    time: Time = attr.ib()
-    pos: int = attr.ib()
-    offset: int = attr.ib()
+    time: Time
+    pos: int
+    offset: int
 
 
 Index = Dict[int, List[IndexEntry]]
