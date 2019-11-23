@@ -4,7 +4,7 @@ This module provides code for encoding and serialising Python data structures
 into their corresponding ROS binary representations.
 """
 from typing import (Optional, Iterator, Callable, Any, List, Type, TypeVar,
-                    BinaryIO, Sequence)
+                    BinaryIO, Sequence, Dict)
 import functools
 import struct
 
@@ -84,6 +84,28 @@ write_byte = simple_writer('byte')
 write_bool = simple_writer('bool')
 write_time = writer(encode_time)
 write_duration = writer(encode_duration)
+
+
+def write_encoded_header(contents: Dict[str, bytes], out: BinaryIO) -> None:
+    # write a length of zero for now and correct that length once the
+    # fields have been written
+    pos_size = out.tell()
+    write_uint32(0, out)
+    pos_content = out.tell()
+
+    for name, bin_value in contents.items():
+        bin_name = f'{name}='.encode('utf-8')
+        size_field = len(bin_name) + len(bin_value)
+        write_uint32(size_field, out)
+        out.write(bin_name)
+        out.write(bin_value)
+
+    # correct the length
+    pos_end = out.tell()
+    size_total = pos_end - pos_content
+    out.seek(pos_size)
+    write_uint32(size_total, out)
+    out.seek(pos_end)
 
 
 def string_writer(length: Optional[int] = None
