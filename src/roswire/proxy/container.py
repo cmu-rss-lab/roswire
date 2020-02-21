@@ -11,19 +11,17 @@ import logging
 import shutil
 import os
 
+import attr
 from docker import DockerClient
 from docker import APIClient as DockerAPIClient
 from docker.models.images import Image as DockerImage
 from docker.models.containers import Container as DockerContainer
-import attr
+from loguru import logger
 
 from .file import FileProxy
 from .shell import ShellProxy
 from ..util import Stopwatch
 from ..exceptions import ROSWireException
-
-logger: logging.Logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 @attr.s(frozen=True)
@@ -131,15 +129,15 @@ class ContainerProxyManager:
     def _build_shared_directory(self, uuid: UUID) -> Iterator[str]:
         dir_host = os.path.join(self.__dir_host_ws, 'containers', uuid.hex)
         try:
-            logger.debug("creating container directory: %s", dir_host)
+            logger.debug(f"creating container directory: {dir_host}")
             os.makedirs(dir_host, exist_ok=True)
-            logger.debug("created container directory: %s", dir_host)
+            logger.debug(f"created container directory: {dir_host}")
             yield dir_host
         finally:
             if os.path.exists(dir_host):
-                logger.debug("destroying container directory: %s", dir_host)
+                logger.debug(f"destroying container directory: {dir_host}")
                 shutil.rmtree(dir_host)
-                logger.debug("destroyed container directory: %s", dir_host)
+                logger.debug(f"destroyed container directory: {dir_host}")
 
     @contextlib.contextmanager
     def _container(self,
@@ -153,7 +151,7 @@ class ContainerProxyManager:
                         "chmod 444 /.environment && "
                         "echo 'ENVFILE CREATED' && /bin/bash")
         cmd_env_file = f"/bin/bash -c {shlex.quote(cmd_env_file)}"
-        logger.debug("building docker container: %s", uuid)
+        logger.debug(f"building docker container: {uuid}")
         dockerc = self.__client_docker.containers.create(
             image_or_name,
             cmd_env_file,
@@ -178,12 +176,12 @@ class ContainerProxyManager:
                     break
             assert env_is_ready
 
-            logger.debug("finished building container: %s", uuid)
+            logger.debug(f"finished building container: {uuid}")
             yield dockerc
         finally:
-            logger.debug("destroying docker container: %s", uuid)
+            logger.debug(f"destroying docker container: {uuid}")
             dockerc.remove(force=True)
-            logger.debug("destroyed docker container: %s", uuid)
+            logger.debug(f"destroyed docker container: {uuid}")
 
     @contextlib.contextmanager
     def launch(self,
@@ -213,7 +211,7 @@ class ContainerProxyManager:
         """
         api_docker = self.__api_docker
         uuid = uuid4()
-        logger.debug("UUID for container: %s", uuid)
+        logger.debug(f"UUID for container: {uuid}")
         with self._build_shared_directory(uuid) as dir_shared:
             with self._container(image_or_name, dir_shared, uuid, ports=ports) as dockerc:  # noqa: pycodestyle
                 yield ContainerProxy._from_docker(api_docker,
