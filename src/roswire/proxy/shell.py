@@ -14,12 +14,10 @@ import psutil
 from docker import DockerClient
 from docker import APIClient as DockerAPIClient
 from docker.models.containers import Container as DockerContainer
+from loguru import logger
 
 from ..util import Stopwatch
 from .. import exceptions
-
-logger: logging.Logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 class Popen:
@@ -236,7 +234,7 @@ class ShellProxy:
                     kill_after: int = 1,
                     identifier: Optional[str] = None
                     ) -> str:
-        logger.debug("instrumenting command: %s", command)
+        logger.debug(f"instrumenting command: {command}")
         q = shlex.quote
         command = f'source /.environment && {command}'
         if identifier:
@@ -245,7 +243,7 @@ class ShellProxy:
         if time_limit:
             command = (f'timeout --kill-after={kill_after} '
                        f'--signal=SIGTERM {time_limit} {command}')
-        logger.debug("instrumented command: %s", command)
+        logger.debug(f"instrumented command: {command}")
         return command
 
     def popen(self,
@@ -335,7 +333,7 @@ class ShellProxy:
             The return code, output, and wall-clock running time of the
             execution.
         """
-        logger.debug("executing command: %s", command)
+        logger.debug(f"executing command: {command}")
         dockerc = self.__container_docker
         command = self._instrument(command, time_limit, kill_after)
 
@@ -347,7 +345,8 @@ class ShellProxy:
         timer.stop()
         duration = timer.duration
         output = output.decode('utf-8').rstrip('\n')
-        logger.debug("executed command [%s] (retcode: %d; time: %.3f s)\n%s",
+        logger.debug("executed command [{}] "
+                     "(retcode: {:d}; time: {:.3f} s)\n{}",
                      command, retcode, timer.duration, output)
         return retcode, output, timer.duration
 
