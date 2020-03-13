@@ -18,7 +18,6 @@ from docker.models.containers import Container as DockerContainer
 from loguru import logger
 
 from .file import FileProxy
-from .shell import ShellProxy
 from ..util import Stopwatch
 from ..exceptions import ROSWireException
 
@@ -33,7 +32,7 @@ class ContainerProxy:
         Provides access to the underlying Docker container via Dockerblade.
     uuid: UUID
         A unique identifier for this container.
-    shell: ShellProxy
+    shell: dockerblade.Shell
         Provides access to a bash shell for this container.
     files: FileProxy
         Provides access to the filesystem for this container.
@@ -48,13 +47,13 @@ class ContainerProxy:
     _dockerblade: dockerblade.Container = attr.ib(repr=False)
     uuid: UUID = attr.ib(repr=True)
     ws_host: str = attr.ib(repr=False)
-    shell: ShellProxy = attr.ib(init=False, repr=False)
+    shell: dockerblade.Shell = attr.ib(init=False, repr=False)
     files: FileProxy = attr.ib(init=False, repr=False)
 
     def __attrs_post_init__(self) -> None:
         daemon = self._dockerblade.daemon
         docker_container = self._dockerblade._docker
-        shell = ShellProxy(daemon.api, docker_container, self.pid)
+        shell = self._dockerblade.shell()
         files = FileProxy(docker_container, shell)
         object.__setattr__(self, 'shell', shell)
         object.__setattr__(self, 'files', files)
@@ -201,7 +200,7 @@ class ContainerProxyManager:
         with contextlib.ExitStack() as stack:
             dir_shared = stack.enter_context(self._build_shared_directory(uuid))  # noqa
             dockerc = stack.enter_context(self._container(image_or_name, dir_shared, uuid, ports=ports))  # noqa
-            dockerb = stack.enter_context(self._dockerblade.attach(dockerc.id))
+            dockerb = self._dockerblade.attach(dockerc.id)
             yield ContainerProxy(dockerb, uuid, dir_shared)
 
     def image(self, tag: str) -> DockerImage:
