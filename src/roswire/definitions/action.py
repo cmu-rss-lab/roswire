@@ -1,7 +1,9 @@
-__all__ = ['ActionFormat']
+# -*- coding: utf-8 -*-
+__all__ = ('ActionFormat',)
 
 from typing import Optional, List, Dict, Any
 import os
+import re
 
 import attr
 
@@ -57,7 +59,7 @@ class ActionFormat:
         name_feed = f"{name}Feedback"
         name_res = f"{name}Result"
 
-        sections: List[str] = [ss.strip() for ss in s.split('\n---')]
+        sections: List[str] = [ss.strip() for ss in s.split('---')]
         try:
             s_goal, s_res, s_feed = sections
         except ValueError:
