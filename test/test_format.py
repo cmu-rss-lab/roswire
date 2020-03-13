@@ -135,6 +135,20 @@ float32 percent_complete
     assert Field('float32', 'percent_complete') in feedback.fields
 
 
+def test_empty_action_from_string():
+    """see #332"""
+    s = "---\n---\n"
+    fmt = ActionFormat.from_string("PkgName", "MessageName", s)
+    assert fmt.goal is not None
+    assert not fmt.goal.fields
+
+    assert fmt.result is not None
+    assert not fmt.result.fields
+
+    assert fmt.feedback is not None
+    assert not fmt.feedback.fields
+
+
 def test_field_to_and_from_dict():
     d = {'type': 'uint32', 'name': 'foo'}
     f = Field('uint32', 'foo')
