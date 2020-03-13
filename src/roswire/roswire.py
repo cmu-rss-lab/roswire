@@ -4,7 +4,7 @@ This module provides access to the ROSWire session.
 """
 __all__ = ('ROSWire',)
 
-from typing import Optional, Dict, Iterator
+from typing import Dict, Iterator, Optional, Sequence
 from uuid import uuid4
 import os
 import pathlib
@@ -90,6 +90,7 @@ class ROSWire:
     @contextlib.contextmanager
     def launch(self,
                image: str,
+               sources: Sequence[str],
                description: Optional[SystemDescription] = None,
                *,
                ports: Optional[Dict[int, int]] = None
@@ -100,6 +101,9 @@ class ROSWire:
         ----------
         image: str
             the name of the Docker image.
+        sources: Sequence[str]
+            The sequence of setup files that should be used to load the ROS
+            workspace.
         description: Optional[SystemDescription]
             an optional static description of the ROS application.
             If no description is provided, ROSWire will attempt to load one
@@ -110,7 +114,9 @@ class ROSWire:
             represent host ports.
         """
         if not description:
-            description = self.descriptions.load_or_build(image)
-        with self.containers.launch(image, ports=ports) as container:
+            description = self.descriptions.load_or_build(image, sources)
+        with self.containers.launch(image,
+                                    ports=ports,
+                                    sources=sources) as container:
             container = container
             yield System(container, description)

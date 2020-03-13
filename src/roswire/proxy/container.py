@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__ = ('ContainerProxy', 'ContainerProxyManager')
 
-from typing import Iterator, Optional, Union, Dict
+from typing import Dict, Iterator, Optional, Sequence, Union
 from uuid import UUID, uuid4
 from ipaddress import IPv4Address, IPv6Address
 import ipaddress
@@ -186,6 +186,7 @@ class ContainerProxyManager:
     @contextlib.contextmanager
     def launch(self,
                image_or_name: Union[str, DockerImage],
+               sources: Sequence[str],
                *,
                ports: Optional[Dict[int, int]] = None
                ) -> Iterator['ContainerProxy']:
@@ -199,6 +200,9 @@ class ContainerProxyManager:
         image_or_name: Union[str, DockerImage]
             The image that should be used to create the container, or the name
             of that image.
+        sources: Sequence[str]
+            The sequence of setup files that should be used to load the ROS
+            workspace.
         ports: Dict[int, int], optional
             An optional dictionary specifying port mappings between the host
             and container, where keys represent container ports and values

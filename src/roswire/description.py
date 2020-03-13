@@ -5,24 +5,23 @@ and provides a manager for persisting those descriptions to disk.
 """
 __all__ = ('SystemDescription', 'SystemDescriptionManager')
 
-from typing import Union, Dict, Any
+from typing import Any, Dict, Sequence, Union
 from uuid import UUID
+import base64
 import contextlib
 import logging
 import os
 
-import yaml
-import attr
 from docker.models.images import Image as DockerImage
+from loguru import logger
+import attr
+import yaml
 
 from .definitions import TypeDatabase, FormatDatabase, PackageDatabase
 from .proxy import ContainerProxyManager
 
-logger: logging.Logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
-
-@attr.s(slots=True)
+@attr.s(slots=True, frozen=True, auto_attribs=True)
 class SystemDescription:
     """
     An immutable description of all of the packages, types, and
@@ -33,6 +32,9 @@ class SystemDescription:
     ----------
     sha256: str
         The ID of the Docker image for the application.
+    sources: Sequence[str]
+        The sequence of setup files that should be used to load the ROS
+        workspace for the application.
     types: TypeDatabase
         A database of types for the application.
     formats: FormatDatabase
@@ -40,10 +42,11 @@ class SystemDescription:
     packages: PackageDatabase
         A database of the packages contained within the application.
     """
-    sha256: str = attr.ib()
-    types: TypeDatabase = attr.ib()
-    formats: FormatDatabase = attr.ib()
-    packages: PackageDatabase = attr.ib()
+    sha256: str
+    sources: Sequence[str]
+    types: TypeDatabase
+    formats: FormatDatabase
+    packages: PackageDatabase
 
     @staticmethod
     def from_file(fn: str) -> 'SystemDescription':
@@ -54,22 +57,24 @@ class SystemDescription:
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> 'SystemDescription':
         sha256: str = d['sha256']
+        sources: Sequence[str] = tuple(d['sources'])
         packages = PackageDatabase.from_dict(d['packages'])
         formats = FormatDatabase.build(packages)
         types = TypeDatabase.build(formats)
         return SystemDescription(sha256=sha256,
+                                 sources=sources,
                                  packages=packages,
                                  formats=formats,
                                  types=types)
 
     def to_dict(self) -> Dict[str, Any]:
         return {'sha256': self.sha256,
+                'sources': list(self.sources),
                 'packages': self.packages.to_dict()}
 
 
 class SystemDescriptionManager:
-    """
-    Builds and stores static descriptions of containerised ROS applications.
+    """Builds and stores descriptions of containerised ROS applications.
 
     Attributes
     ----------
@@ -90,16 +95,35 @@ class SystemDescriptionManager:
     def dir(self) -> str:
         return self.__dir_cache
 
+    def _path_for_image_with_sources(self,
+                                     image_or_tag: Union[str, DockerImage],
+                                     sources: Sequence[str]
+                                     ) -> str:
+        sha256 = self.__containers.image_sha256(image_or_tag)
+        return self._path_for_sha256_with_sources(sha256, sources)
+
+    def _path_for_sha256_with_sources(self,
+                                      sha256: str,
+                                      sources: Sequence[str]
+                                      ) -> str:
+        unencoded_path = ':'.join([sha256] + list(sources))
+        encoded_path = \
+            base64.b64encode(unencoded_path.encode('utf-8')).decode('utf-8')
+        return os.path.join(self.__dir_cache, encoded_path)
+
     def load(self,
-             image_or_tag: Union[str, DockerImage]
+             image_or_tag: Union[str, DockerImage],
+             sources: Sequence[str]
              ) -> SystemDescription:
-        """
-        Attempts to load the description for a given Docker image from disk.
+        """Attempts to load the description for a given Docker image from disk.
 
         Parameters
         ----------
         image_or_tag: Union[str, DockerImage]
             the name or object for the Docker image.
+        sources: Sequence[str]
+            The sequence of setup files that should be used to load the ROS
+            workspace.
 
         Returns
         -------
@@ -111,30 +135,33 @@ class SystemDescriptionManager:
         FileNotFoundError
             if no description for the given image is stored on disk.
         """
-        sha256 = self.__containers.image_sha256(image_or_tag)
-        fn = os.path.join(self.__dir_cache, sha256)
+        filename = self._path_for_image_with_sources(image_or_tag, sources)
         try:
-            return SystemDescription.from_file(fn)
+            return SystemDescription.from_file(filename)
         except FileNotFoundError:
-            logger.exception("failed to load description for image: %s",
-                             image_or_tag)
+            logger.exception('failed to load description for image '
+                             f'[{image_or_tag}]: file [{filename}] not found.')
             raise
 
-    def saved(self, image_or_tag: Union[str, DockerImage]) -> bool:
-        """Determines whether a description for an image has been saved."""
-        sha256 = self.__containers.image_sha256(image_or_tag)
-        fn = os.path.join(self.__dir_cache, sha256)
-        return os.path.exists(fn)
+    def saved(self,
+              image_or_tag: Union[str, DockerImage],
+              sources: Sequence[str]
+              ) -> bool:
+        """Determines whether an application description has been saved."""
+        filename = self._path_for_image_with_sources(image_or_tag, sources)
+        return os.path.exists(filename)
 
     def save(self, description: SystemDescription) -> None:
         """Saves a given description to disk."""
-        fn = os.path.join(self.__dir_cache, description.sha256)
+        filename = self._path_for_sha256_with_sources(description.sha256,
+                                                      description.sources)
         yml = description.to_dict()
-        with open(fn, 'w') as f:
+        with open(filename, 'w') as f:
             yaml.dump(yml, f, default_flow_style=False)
 
     def build(self,
               image_or_tag: Union[str, DockerImage],
+              sources: Sequence[str],
               save: bool = True
               ) -> SystemDescription:
         """
@@ -145,6 +172,9 @@ class SystemDescriptionManager:
         ----------
         image_or_tag: Union[str, DockerImage]
             The name or object for the Docker image.
+        sources: Sequence[str]
+            The sequence of setup files that should be used to load the ROS
+            workspace.
         save: bool
             If :code:`True`, the description will be saved to disk.
 
@@ -153,14 +183,15 @@ class SystemDescriptionManager:
         SystemDescription
             A description of the application contained within the given image.
         """
-        sha256 = self.__containers.image_sha256(image_or_tag)
-        with self.__containers.launch(image_or_tag) as container:
+        with self.__containers.launch(image_or_tag, sources=sources) as container:  # noqa
             paths = PackageDatabase.paths(container.shell, container.files)
             db_package = PackageDatabase.from_paths(container.files, paths)
         db_format = FormatDatabase.build(db_package)
         db_type = TypeDatabase.build(db_format)
 
+        sha256 = self.__containers.image_sha256(image_or_tag)
         description = SystemDescription(sha256=sha256,
+                                        sources=sources,
                                         packages=db_package,
                                         formats=db_format,
                                         types=db_type)
@@ -170,6 +201,7 @@ class SystemDescriptionManager:
 
     def load_or_build(self,
                       image_or_tag: Union[str, DockerImage],
+                      sources: Sequence[str],
                       save: bool = True
                       ) -> SystemDescription:
         """
@@ -181,6 +213,9 @@ class SystemDescriptionManager:
         ----------
         image_or_tag: Union[str, DockerImage]
             the name or object for the Docker image.
+        sources: Sequence[str]
+            The sequence of setup files that should be used to load the ROS
+            workspace.
         save: bool
             if :code:`True`, the description will be saved to disk in the
             event that it needs to be built from scratch.
@@ -190,6 +225,6 @@ class SystemDescriptionManager:
         SystemDescription
             A description of the application contained within the given image.
         """
-        if self.saved(image_or_tag):
-            return self.load(image_or_tag)
-        return self.build(image_or_tag, save)
+        if self.saved(image_or_tag, sources):
+            return self.load(image_or_tag, sources)
+        return self.build(image_or_tag, sources, save)
