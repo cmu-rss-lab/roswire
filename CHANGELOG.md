@@ -5,6 +5,8 @@
 * Added required `sources` positional argument to `launch` method for `ROSWire`
   and most methods for `DescriptionManager` to allow user to specify the setup
   files that should be used by the application.
+* Used `dockerblade` as a dependency to reduce the size of the code base,
+  ease maintenance, and improve cohesion.
 
 
 # 0.0.5 (2019-08-28)
