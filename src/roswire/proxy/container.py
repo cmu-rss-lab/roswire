@@ -34,7 +34,7 @@ class ContainerProxy:
         A unique identifier for this container.
     shell: dockerblade.Shell
         Provides access to a bash shell for this container.
-    files: FileProxy
+    files: dockerblade.FileSystem
         Provides access to the filesystem for this container.
     pid: int
         The PID of this container process on the host machine.
@@ -48,13 +48,13 @@ class ContainerProxy:
     uuid: UUID = attr.ib(repr=True)
     ws_host: str = attr.ib(repr=False)
     shell: dockerblade.Shell = attr.ib(init=False, repr=False)
-    files: FileProxy = attr.ib(init=False, repr=False)
+    files: dockerblade.FileSystem = attr.ib(init=False, repr=False)
 
     def __attrs_post_init__(self) -> None:
         daemon = self._dockerblade.daemon
         docker_container = self._dockerblade._docker
         shell = self._dockerblade.shell()
-        files = FileProxy(docker_container, shell)
+        files = self._dockerblade.filesystem()
         object.__setattr__(self, 'shell', shell)
         object.__setattr__(self, 'files', files)
 
