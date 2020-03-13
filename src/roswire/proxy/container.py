@@ -12,6 +12,7 @@ import shutil
 import os
 
 import attr
+import dockerblade
 from docker import DockerClient
 from docker import APIClient as DockerAPIClient
 from docker.models.images import Image as DockerImage
@@ -103,31 +104,29 @@ class ContainerProxy:
         return self._container_docker.commit(repo, tag)
 
 
+@attr.s(auto_attribs=True)
 class ContainerProxyManager:
     """
     Provides an interface for accessing and inspecting Docker images, and
     launching Docker containers.
     """
-    def __init__(self,
-                 client_docker: DockerClient,
-                 api_docker: DockerAPIClient,
-                 dir_host_ws: str
-                 ) -> None:
-        self.__dir_host_ws = dir_host_ws
-        self.__client_docker = client_docker
-        self.__api_docker = api_docker
+    _dir_host_workspace: str
+    _dockerblade: dockerblade.DockerDaemon = \
+        attr.ib(factory=dockerblade.DockerDaemon)
 
     @property
-    def client_docker(self) -> DockerClient:
-        return self.__client_docker
+    def docker_client(self) -> DockerClient:
+        return self._dockerblade.client
 
     @property
-    def api_docker(self) -> DockerAPIClient:
-        return self.__api_docker
+    def docker_api(self) -> DockerAPIClient:
+        return self._dockerblade.api
 
     @contextlib.contextmanager
     def _build_shared_directory(self, uuid: UUID) -> Iterator[str]:
-        dir_host = os.path.join(self.__dir_host_ws, 'containers', uuid.hex)
+        dir_host = os.path.join(self._dir_host_workspace,
+                                'containers',
+                                uuid.hex)
         try:
             logger.debug(f"creating container directory: {dir_host}")
             os.makedirs(dir_host, exist_ok=True)
@@ -152,7 +151,7 @@ class ContainerProxyManager:
                         "echo 'ENVFILE CREATED' && /bin/bash")
         cmd_env_file = f"/bin/bash -c {shlex.quote(cmd_env_file)}"
         logger.debug(f"building docker container: {uuid}")
-        dockerc = self.__client_docker.containers.create(
+        dockerc = self.docker_client.containers.create(
             image_or_name,
             cmd_env_file,
             user='root',
@@ -169,7 +168,7 @@ class ContainerProxyManager:
 
             # wait until .environment file is ready
             env_is_ready = False
-            for line in self.__api_docker.logs(dockerc.id, stream=True):
+            for line in self.docker_api.logs(dockerc.id, stream=True):
                 line = line.strip().decode('utf-8')
                 if line == 'ENVFILE CREATED':
                     env_is_ready = True
@@ -213,19 +212,18 @@ class ContainerProxyManager:
         ContainerProxy
             The constructed container.
         """
-        api_docker = self.__api_docker
         uuid = uuid4()
         logger.debug(f"UUID for container: {uuid}")
         with self._build_shared_directory(uuid) as dir_shared:
             with self._container(image_or_name, dir_shared, uuid, ports=ports) as dockerc:  # noqa: pycodestyle
-                yield ContainerProxy._from_docker(api_docker,
+                yield ContainerProxy._from_docker(self.docker_api,
                                                   dockerc,
                                                   uuid,
                                                   dir_shared)
 
     def image(self, tag: str) -> DockerImage:
         """Retrieves the Docker image with a given tag."""
-        return self.__client_docker.images.get(tag)
+        return self.docker_client.images.get(tag)
 
     def image_sha256(self, tag_or_image: Union[str, DockerImage]) -> str:
         """Computes the SHA256 for a given Docker image."""

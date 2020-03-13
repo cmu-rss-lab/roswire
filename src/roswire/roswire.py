@@ -61,12 +61,7 @@ class ROSWire:
                 raise ROSWireException(m)
 
         self.__dir_workspace = os.path.abspath(dir_workspace)
-        self.__client_docker = DockerClient()
-        self.__api_docker = \
-            DockerAPIClient(base_url='unix://var/run/docker.sock')
-        self.__containers = ContainerProxyManager(self.__client_docker,
-                                                  self.__api_docker,
-                                                  self.__dir_workspace)
+        self.__containers = ContainerProxyManager(self.__dir_workspace)
         dir_descriptions = os.path.join(dir_workspace, 'descriptions')
         self.__descriptions = SystemDescriptionManager(self.__containers,
                                                        dir_descriptions)
@@ -77,7 +72,7 @@ class ROSWire:
 
     @property
     def client_docker(self) -> DockerClient:
-        return self.__client_docker
+        return self.__containers.docker_client
 
     @property
     def containers(self) -> ContainerProxyManager:
