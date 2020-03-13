@@ -3,8 +3,6 @@ __all__ = ('ContainerProxy', 'ContainerProxyManager')
 
 from typing import Dict, Iterator, Optional, Sequence, Union
 from uuid import UUID, uuid4
-from ipaddress import IPv4Address, IPv6Address
-import ipaddress
 import shlex
 import contextlib
 import logging
@@ -31,6 +29,8 @@ class ContainerProxy:
 
     Attributes
     ----------
+    dockerblade: dockerblade.Container
+        Provides access to the underlying Docker container via Dockerblade.
     uuid: UUID
         A unique identifier for this container.
     shell: ShellProxy
@@ -45,43 +45,27 @@ class ContainerProxy:
     ip_address: str
         The IP address for this container on the host network.
     """
-    uuid: UUID = attr.ib()
-    pid: int = attr.ib()
-    shell: ShellProxy = attr.ib()
-    files: FileProxy = attr.ib()
-    ws_host: str = attr.ib()
-    _api_docker: DockerAPIClient = attr.ib()
-    _container_docker: DockerContainer = attr.ib()
+    _dockerblade: dockerblade.Container = attr.ib(repr=False)
+    uuid: UUID = attr.ib(repr=True)
+    ws_host: str = attr.ib(repr=False)
+    shell: ShellProxy = attr.ib(init=False, repr=False)
+    files: FileProxy = attr.ib(init=False, repr=False)
 
-    @staticmethod
-    def _from_docker(api_docker: DockerAPIClient,
-                     container_docker: DockerContainer,
-                     uuid: UUID,
-                     ws_host: str
-                     ) -> 'ContainerProxy':
-        """Constructs a proxy from a given Docker container."""
-        info = api_docker.inspect_container(container_docker.id)
-        pid = int(info['State']['Pid'])
-        shell = ShellProxy(api_docker, container_docker, pid)
-        files = FileProxy(container_docker, shell)
-        return ContainerProxy(uuid=uuid,
-                              shell=shell,
-                              files=files,
-                              pid=pid,
-                              ws_host=ws_host,
-                              api_docker=api_docker,
-                              container_docker=container_docker)
+    def __attrs_post_init__(self) -> None:
+        daemon = self._dockerblade.daemon
+        docker_container = self._dockerblade._docker
+        shell = ShellProxy(daemon.api, docker_container, self.pid)
+        files = FileProxy(docker_container, shell)
+        object.__setattr__(self, 'shell', shell)
+        object.__setattr__(self, 'files', files)
+
+    @property
+    def pid(self) -> int:
+        return self._dockerblade.pid
 
     @property
     def ip_address(self) -> str:
-        container = self._container_docker
-        api = self._api_docker
-        docker_info = api.inspect_container(container.id)
-        address = docker_info['NetworkSettings']['IPAddress']
-        try:
-            return str(IPv4Address(address))
-        except ipaddress.AddressValueError:
-            return str(IPv6Address(address))
+        raise self._dockerblade.ip_address
 
     def persist(self,
                 repo: Optional[str] = None,
@@ -101,7 +85,7 @@ class ContainerProxy:
         DockerImage
             A description of the persisted image.
         """
-        return self._container_docker.commit(repo, tag)
+        return self._dockerblade.persist(repo, tag)
 
 
 @attr.s(auto_attribs=True)
@@ -217,10 +201,8 @@ class ContainerProxyManager:
         with contextlib.ExitStack() as stack:
             dir_shared = stack.enter_context(self._build_shared_directory(uuid))  # noqa
             dockerc = stack.enter_context(self._container(image_or_name, dir_shared, uuid, ports=ports))  # noqa
-            yield ContainerProxy._from_docker(self.docker_api,
-                                              dockerc,
-                                              uuid,
-                                              dir_shared)
+            dockerb = stack.enter_context(self._dockerblade.attach(dockerc.id))
+            yield ContainerProxy(dockerb, uuid, dir_shared)
 
     def image(self, tag: str) -> DockerImage:
         """Retrieves the Docker image with a given tag."""
