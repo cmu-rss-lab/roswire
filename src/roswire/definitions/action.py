@@ -67,17 +67,8 @@ class ActionFormat:
             raise exceptions.ParsingError(m)
 
         goal = MsgFormat.from_string(package, name_goal, s_goal)
-
-        if s_feed:
-            feed = MsgFormat.from_string(package, name_feed, s_feed)
-        else:
-            feed = None
-
-        if s_res:
-            res = MsgFormat.from_string(package, name_res, s_res)
-        else:
-            res = None
-
+        feed = MsgFormat.from_string(package, name_feed, s_feed)
+        res = MsgFormat.from_string(package, name_res, s_res)
         return ActionFormat(package, name, s, goal, feed, res)
 
     @staticmethod
