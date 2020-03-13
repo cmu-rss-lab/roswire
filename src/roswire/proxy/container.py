@@ -30,6 +30,9 @@ class ContainerProxy:
     ----------
     dockerblade: dockerblade.Container
         Provides access to the underlying Docker container via Dockerblade.
+    sources: Sequence[str]
+        The sequence of setup files that should be used to load the ROS
+        workspace.
     uuid: UUID
         A unique identifier for this container.
     shell: dockerblade.Shell
@@ -45,6 +48,7 @@ class ContainerProxy:
         The IP address for this container on the host network.
     """
     _dockerblade: dockerblade.Container = attr.ib(repr=False)
+    _sources: Sequence[str] = attr.ib(repr=False)
     uuid: UUID = attr.ib(repr=True)
     ws_host: str = attr.ib(repr=False)
     shell: dockerblade.Shell = attr.ib(init=False, repr=False)
@@ -53,7 +57,7 @@ class ContainerProxy:
     def __attrs_post_init__(self) -> None:
         daemon = self._dockerblade.daemon
         docker_container = self._dockerblade._docker
-        shell = self._dockerblade.shell()
+        shell = self._dockerblade.shell('/bin/bash', sources=self._sources)
         files = self._dockerblade.filesystem()
         object.__setattr__(self, 'shell', shell)
         object.__setattr__(self, 'files', files)
@@ -201,7 +205,7 @@ class ContainerProxyManager:
             dir_shared = stack.enter_context(self._build_shared_directory(uuid))  # noqa
             dockerc = stack.enter_context(self._container(image_or_name, dir_shared, uuid, ports=ports))  # noqa
             dockerb = self._dockerblade.attach(dockerc.id)
-            yield ContainerProxy(dockerb, uuid, dir_shared)
+            yield ContainerProxy(dockerb, sources, uuid, dir_shared)
 
     def image(self, tag: str) -> DockerImage:
         """Retrieves the Docker image with a given tag."""
