@@ -214,12 +214,13 @@ class ContainerProxyManager:
         """
         uuid = uuid4()
         logger.debug(f"UUID for container: {uuid}")
-        with self._build_shared_directory(uuid) as dir_shared:
-            with self._container(image_or_name, dir_shared, uuid, ports=ports) as dockerc:  # noqa: pycodestyle
-                yield ContainerProxy._from_docker(self.docker_api,
-                                                  dockerc,
-                                                  uuid,
-                                                  dir_shared)
+        with contextlib.ExitStack() as stack:
+            dir_shared = stack.enter_context(self._build_shared_directory(uuid))  # noqa
+            dockerc = stack.enter_context(self._container(image_or_name, dir_shared, uuid, ports=ports))  # noqa
+            yield ContainerProxy._from_docker(self.docker_api,
+                                              dockerc,
+                                              uuid,
+                                              dir_shared)
 
     def image(self, tag: str) -> DockerImage:
         """Retrieves the Docker image with a given tag."""
