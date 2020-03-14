@@ -5,7 +5,9 @@ from typing import (Tuple, List, Dict, Union, Any, Iterator, Collection,
                     Mapping, Callable, Iterable)
 import os
 
+from loguru import logger
 import attr
+import dockerblade
 import shlex
 
 from .msg import MsgFormat
@@ -105,8 +107,9 @@ class PackageDatabase(Mapping[str, Package]):
         for path in package_paths:
             try:
                 all_packages = files.find(path, 'package.xml')
-            except OSError:
-                # path is not a directory
+            except dockerblade.exceptions.DockerBladeException:
+                logger.warning('unable to find directory in ROS_PACKAGE_PATH:'
+                               f' {path}')
                 continue
             package_dirs = [os.path.dirname(p) for p in all_packages]
             paths.extend(package_dirs)
