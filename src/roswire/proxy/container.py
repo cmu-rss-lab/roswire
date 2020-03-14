@@ -68,7 +68,7 @@ class ContainerProxy:
 
     @property
     def ip_address(self) -> str:
-        raise self._dockerblade.ip_address
+        return self._dockerblade.ip_address
 
     def persist(self,
                 repo: Optional[str] = None,
