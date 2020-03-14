@@ -11,14 +11,13 @@ import logging
 import xml.etree.ElementTree as ET
 
 import attr
+import dockerblade
 import yaml
 
 from .rosparam import load_from_yaml_string as load_rosparam_from_string
 from .config import ROSConfig, NodeConfig, Parameter
 from .context import LaunchContext
 from ..substitution import resolve as resolve_args
-from ..shell import ShellProxy
-from ..file import FileProxy
 from ...name import (namespace_join, global_name, namespace, name_is_global,
                      name_is_private)
 from ...exceptions import FailedToParseLaunchFile
@@ -113,7 +112,10 @@ def tag(name: str, legal_attributes: Collection[str] = tuple()):
 
 
 class LaunchFileReader:
-    def __init__(self, shell: ShellProxy, files: FileProxy) -> None:
+    def __init__(self,
+                 shell: dockerblade.Shell,
+                 files: dockerblade.FileSystem
+                 ) -> None:
         self.__shell = shell
         self.__files = files
 
