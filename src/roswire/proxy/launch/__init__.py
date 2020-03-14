@@ -181,7 +181,7 @@ class LaunchFileReader:
         if binfile is not None:
             value = self.__files.read(binfile, binary=True)
         if command is not None:
-            retcode, value, duration = self.__shell.execute(command)
+            value = self.__shell.check_output(command, text=True)
 
         logger.debug("obtained value for parameter [{name}]: {value}")
 
