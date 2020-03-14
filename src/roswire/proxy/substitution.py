@@ -12,8 +12,8 @@ import shlex
 import functools
 import logging
 
-from .shell import ShellProxy
-from .file import FileProxy
+import dockerblade
+
 from ..exceptions import EnvNotFoundError, SubstitutionError
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -22,8 +22,8 @@ logger.setLevel(logging.DEBUG)
 R_ARG = re.compile(r'\$\(.+?\)')
 
 
-def resolve_arg(shell: ShellProxy,
-                files: FileProxy,
+def resolve_arg(shell: dockerblade.Shell,
+                files: dockerblade.FileSystem,
                 s: str,
                 context: Optional[Dict[str, Any]] = None
                 ) -> str:
@@ -75,8 +75,8 @@ def resolve_arg(shell: ShellProxy,
     return s
 
 
-def resolve(shell: ShellProxy,
-            files: FileProxy,
+def resolve(shell: dockerblade.Shell,
+            files: dockerblade.FileSystem,
             s: str,
             context: Optional[Dict[str, str]] = None
             ) -> str:
