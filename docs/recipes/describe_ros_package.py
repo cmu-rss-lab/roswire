@@ -1,7 +1,8 @@
 import roswire
 
 rsw = roswire.ROSWire()
-description = rsw.descriptions.load_or_build('roswire/example:mavros')
+sources = ['/opt/ros/indigo/setup.bash', '/ros_ws/devel/setup.bash']
+description = rsw.descriptions.load_or_build('roswire/example:mavros', sources)
 package = description.packages['tf2_msgs']
 
 print("PACKAGE DETAILS")
