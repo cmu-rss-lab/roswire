@@ -11,20 +11,18 @@ import threading
 import subprocess
 import os
 
-from .file import FileProxy
-from .shell import ShellProxy, Popen
+from loguru import logger
+import dockerblade
+
 from .node import NodeManagerProxy
 from .. import exceptions
-
-logger: logging.Logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 class BagPlayerProxy:
     def __init__(self,
                  fn_container: str,
-                 shell: ShellProxy,
-                 files: FileProxy,
+                 shell: dockerblade.Shell,
+                 files: dockerblade.FileSystem,
                  *,
                  delete_file_after_use: bool = False
                  ) -> None:
@@ -35,7 +33,7 @@ class BagPlayerProxy:
         self.__delete_file_after_use = delete_file_after_use
         self.__started = False
         self.__stopped = False
-        self._process: Optional[Popen] = None
+        self._process: Optional[dockerblade.Popen] = None
 
     @property
     def started(self) -> bool:
@@ -86,8 +84,8 @@ class BagPlayerProxy:
             if retcode != 0:
                 out = '\n'.join(self._process.stream)
                 raise exceptions.PlayerFailure(retcode, out)
-        except subprocess.TimeoutExpired:
-            raise exceptions.PlayerTimeout
+        except subprocess.TimeoutExpired as error:
+            raise exceptions.PlayerTimeout from error
 
     def start(self) -> None:
         """Starts playback from the bag.
@@ -102,9 +100,11 @@ class BagPlayerProxy:
             if self.__started:
                 raise exceptions.PlayerAlreadyStarted
             self.__started = True
-            cmd: str = f"rosbag play -q {self.__fn_container}"
-            self._process = self.__shell.popen(cmd)
-            logger.debug("started bag playback")
+            command: str = f"rosbag play -q {self.__fn_container}"
+            self._process = self.__shell.popen(cmd,
+                                               stdout=False,
+                                               stderr=False)
+            logger.debug('started bag playback')
 
     def stop(self) -> None:
         """Stops playback from the bag.
@@ -133,7 +133,7 @@ class BagRecorderProxy:
     def __init__(self,
                  fn_dest: str,
                  ws_host: str,
-                 shell: ShellProxy,
+                 shell: dockerblade.Shell,
                  nodes: NodeManagerProxy,
                  exclude_topics: Optional[Collection[str]] = None
                  ) -> None:
@@ -148,7 +148,7 @@ class BagRecorderProxy:
             the destination filepath for the bag (on the host).
         ws_host: str
             the workspace directory for the associated container (on the host).
-        shell: ShellProxy
+        shell: Shell
             a shell proxy.
         nodes: NodeManagerProxy
             access to nodes for the associated ROS graph.
@@ -159,7 +159,7 @@ class BagRecorderProxy:
         self.__process: Optional[Popen] = None
         self.__started: bool = False
         self.__stopped: bool = False
-        self.__shell: ShellProxy = shell
+        self.__shell: dockerblade.Shell = shell
         self.__nodes: NodeManagerProxy = nodes
 
         # FIXME generate a bag name
@@ -206,10 +206,12 @@ class BagRecorderProxy:
             if self.__started:
                 raise exceptions.RecorderAlreadyStarted
             self.__started = True
-            cmd: str = ("rosbag record -q -a"
-                        f" -O {self.__fn_container}"
-                        f" __name:={self.__bag_name}")
-            self.__process = self.__shell.popen(cmd)
+            command: str = ("rosbag record -q -a"
+                            f" -O {self.__fn_container}"
+                            f" __name:={self.__bag_name}")
+            self.__process = self.__shell.popen(command,
+                                                stderr=False,
+                                                stdout=False)
             logger.debug("started bag recording")
 
     def stop(self, save: bool = True) -> None:
@@ -242,11 +244,11 @@ class BagRecorderProxy:
             if os.path.exists(self.__fn_host_temp):
                 if save:
                     shutil.copyfile(self.__fn_host_temp, self.__fn_host_dest)
-                    logger.debug("bag file saved to %s", self.__fn_host_dest)
+                    logger.debug(f"bag file saved to {self.__fn_host_dest}")
                 else:
                     logger.debug("bag file will not be saved")
                 os.remove(self.__fn_host_temp)
             else:
-                logger.debug("temporary bag file not found on host: %s",
-                             self.__fn_host_temp)
+                logger.debug("temporary bag file not found on "
+                             f"host: {self.__fn_host_temp}")
         logger.debug("stopped bag recording")
