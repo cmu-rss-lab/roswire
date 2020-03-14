@@ -17,7 +17,6 @@ from docker.models.images import Image as DockerImage
 from docker.models.containers import Container as DockerContainer
 from loguru import logger
 
-from .file import FileProxy
 from ..util import Stopwatch
 from ..exceptions import ROSWireException
 
