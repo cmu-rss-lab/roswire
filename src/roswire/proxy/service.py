@@ -8,7 +8,6 @@ import logging
 import shlex
 import json
 
-from dockerblade import Shell
 from loguru import logger
 import attr
 import dockerblade
@@ -36,7 +35,7 @@ class ServiceProxy:
     url: str
     format: SrvFormat
     _description: SystemDescription
-    _shell: Shell
+    _shell: dockerblade.Shell
 
     def call(self, message: Optional[Message] = None) -> Optional[Message]:
         """Calls this service.
@@ -78,7 +77,7 @@ class ServiceManagerProxy(Mapping[str, ServiceProxy]):
                  description: SystemDescription,
                  host_ip_master: str,
                  api: xmlrpc.client.ServerProxy,
-                 shell: Shell
+                 shell: dockerblade.Shell
                  ) -> None:
         self.__description = description
         self.__host_ip_master = host_ip_master
