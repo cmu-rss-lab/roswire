@@ -6,13 +6,11 @@ from urllib.parse import urlparse
 import xmlrpc.client
 import logging
 
+from dockerblade import Shell
+from loguru import logger
 import psutil
 
-from .shell import ShellProxy
 from ..exceptions import ROSWireException, NodeNotFoundError
-
-logger = logging.getLogger(__name__)  # type: logging.Logger
-logger.setLevel(logging.DEBUG)
 
 
 class NodeProxy:
@@ -34,7 +32,7 @@ class NodeProxy:
     def __init__(self,
                  name: str,
                  url_host_network: str,
-                 shell: ShellProxy
+                 shell: Shell
                  ) -> None:
         self.__name = name
         self.__url = url_host_network
@@ -80,7 +78,7 @@ class NodeProxy:
 
     def shutdown(self) -> None:
         """Instructs this node to shutdown."""
-        self.__shell.execute(f'rosnode kill {self.name}')
+        self.__shell.run(f'rosnode kill {self.name}')
 
 
 class NodeManagerProxy(Mapping[str, NodeProxy]):
@@ -88,20 +86,18 @@ class NodeManagerProxy(Mapping[str, NodeProxy]):
     def __init__(self,
                  host_ip_master: str,
                  api: xmlrpc.client.ServerProxy,
-                 shell: ShellProxy
+                 shell: Shell
                  ) -> None:
         self.__host_ip_master: str = host_ip_master
         self.__api: xmlrpc.client.ServerProxy = api
-        self.__shell: ShellProxy = shell
+        self.__shell: Shell = shell
 
     @property
     def api(self) -> xmlrpc.client.ServerProxy:
         return self.__api
 
     def __get_node_names(self) -> Set[str]:
-        """
-        Fetches a list of the names of all active nodes.
-        """
+        """Fetches a list of the names of all active nodes."""
         names: Set[str] = set()
         code, status, state = self.api.getSystemState('/.roswire')
         for s in state:
@@ -163,6 +159,6 @@ class NodeManagerProxy(Mapping[str, NodeProxy]):
         try:
             node = self[name]
         except NodeNotFoundError:
-            logger.exception("failed to delete node [%s]: not found.", name)
+            logger.exception(f"failed to delete node [{name}]: not found.")
             raise
         node.shutdown()
