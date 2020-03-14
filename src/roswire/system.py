@@ -130,8 +130,8 @@ class System:
             An interface to the launched ROS Master.
         """
         assert port > 1023
-        cmd = "roscore -p {}".format(port)
-        self.shell.non_blocking_execute(cmd)
+        command = f"roscore -p {port}"
+        process = self.shell.popen(command)
         try:
             yield ROSProxy(description=self.description,
                            shell=self.shell,
@@ -140,4 +140,6 @@ class System:
                            ip_address=self.ip_address,
                            port=port)
         finally:
-            self.shell.execute("pkill roscore")
+            process.terminate()
+            process.wait(2.0)
+            process.kill()
