@@ -144,7 +144,7 @@ class ROSProxy:
         if prefix:
             cmd = [prefix] + cmd
         cmd_str = ' '.join(cmd)
-        self.__shell.non_blocking_execute(cmd_str)
+        self.__shell.popen(cmd_str, stdout=False, stderr=False)
 
     def record(self,
                fn: str,
