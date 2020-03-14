@@ -90,7 +90,7 @@ class ROSConfig:
         return attr.evolve(self, roslaunch_files=roslaunch_files)
 
     def with_node(self, node: NodeConfig) -> 'ROSConfig':
-        logger.debug("adding node to config: {node}")
+        logger.debug(f"adding node to config: {node}")
         full_name = node.full_name
         used_names = {n.full_name for n in self.nodes}
         if node.full_name in used_names:
