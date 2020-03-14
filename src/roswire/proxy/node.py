@@ -6,8 +6,8 @@ from urllib.parse import urlparse
 import xmlrpc.client
 import logging
 
-from dockerblade import Shell
 from loguru import logger
+import dockerblade
 import psutil
 
 from ..exceptions import ROSWireException, NodeNotFoundError
@@ -32,7 +32,7 @@ class NodeProxy:
     def __init__(self,
                  name: str,
                  url_host_network: str,
-                 shell: Shell
+                 shell: dockerblade.Shell
                  ) -> None:
         self.__name = name
         self.__url = url_host_network
@@ -86,11 +86,11 @@ class NodeManagerProxy(Mapping[str, NodeProxy]):
     def __init__(self,
                  host_ip_master: str,
                  api: xmlrpc.client.ServerProxy,
-                 shell: Shell
+                 shell: dockerblade.Shell
                  ) -> None:
         self.__host_ip_master: str = host_ip_master
         self.__api: xmlrpc.client.ServerProxy = api
-        self.__shell: Shell = shell
+        self.__shell: dockerblade.Shell = shell
 
     @property
     def api(self) -> xmlrpc.client.ServerProxy:
