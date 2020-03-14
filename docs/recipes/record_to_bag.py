@@ -2,9 +2,13 @@ import time
 
 import roswire
 
+FN_SITL = '/ros_ws/src/ArduPilot/build/sitl/bin/arducopter'
+FN_PARAMS = '/ros_ws/src/ArduPilot/copter.parm'
+
 rsw = roswire.ROSWire()
 
-with rsw.launch('roswire/example:mavros') as system:
+sources = ['/opt/ros/indigo/setup.bash', '/ros_ws/devel/setup.bash']
+with rsw.launch('roswire/example:mavros', sources) as system:
     with system.roscore() as ros:
         # for this example, we need to separately launch a software-in-the-loop
         # simulator for the robot platform
