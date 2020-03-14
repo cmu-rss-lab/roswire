@@ -1,13 +1,11 @@
-__all__ = ['ParameterServerProxy']
+# -*- coding: utf-8 -*-
+__all__ = ('ParameterServerProxy',)
 
 from typing import Iterator, Any, Mapping
 import xmlrpc.client
-import logging
+
 
 from .. import exceptions
-
-logger = logging.getLogger(__name__)  # type: logging.Logger
-logger.setLevel(logging.DEBUG)
 
 
 class ParameterServerProxy(Mapping[str, Any]):
