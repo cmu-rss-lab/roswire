@@ -156,7 +156,7 @@ class BagRecorderProxy:
             an optional list of topics that should be excluded from the bag.
         """
         self.__lock: threading.Lock = threading.Lock()
-        self.__process: Optional[Popen] = None
+        self.__process: Optional[dockerblade.Popen] = None
         self.__started: bool = False
         self.__stopped: bool = False
         self.__shell: dockerblade.Shell = shell
