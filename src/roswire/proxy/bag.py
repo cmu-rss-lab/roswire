@@ -101,7 +101,7 @@ class BagPlayerProxy:
                 raise exceptions.PlayerAlreadyStarted
             self.__started = True
             command: str = f"rosbag play -q {self.__fn_container}"
-            self._process = self.__shell.popen(cmd,
+            self._process = self.__shell.popen(command,
                                                stdout=False,
                                                stderr=False)
             logger.debug('started bag playback')
