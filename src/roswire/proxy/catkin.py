@@ -4,17 +4,15 @@ __all__ = ('CatkinProxy', 'CatkinToolsProxy', 'CatkinMakeProxy')
 from typing import Optional, List
 import abc
 import shlex
-import logging
 
-from .shell import ShellProxy
+from loguru import logger
+from dockerblade import Shell
+
 from ..exceptions import CatkinBuildFailed, CatkinCleanFailed
-
-logger: logging.Logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 class CatkinProxy(abc.ABC):
-    def __init__(self, shell: ShellProxy, directory: str) -> None:
+    def __init__(self, shell: Shell, directory: str) -> None:
         """Constructs a catkin proxy for a given workspace."""
         self._directory = directory
         self._shell = shell
@@ -77,15 +75,14 @@ class CatkinToolsProxy(CatkinProxy):
             context = self.directory
 
         command_str = ' '.join(command)
-        logger.debug("cleaning via: %s", command_str)
-        retcode, output, duration_secs = \
-            shell.execute(command_str, context=context)
-        duration_mins = duration_secs / 60
+        logger.debug(f"cleaning via: {command_str}")
+        result = shell.run(command_str, cwd=context, text=True)
+        duration_mins = result.duration / 60
         logger.debug("clean completed after %.2f minutes [retcode: %d]:\n%s",
-                     duration_mins, retcode, output)
+                     duration_mins, result.returncode, result.output)
 
-        if retcode != 0:
-            raise CatkinCleanFailed(retcode, output)
+        if result.returncode != 0:
+            raise CatkinCleanFailed(result.returncode, result.output)
 
     def build(self,
               packages: Optional[List[str]] = None,
@@ -97,7 +94,6 @@ class CatkinToolsProxy(CatkinProxy):
               context: Optional[str] = None,
               time_limit: Optional[int] = None
               ) -> None:
-        shell = self._shell
         command = ['catkin', 'build', '--no-status', '--no-notify']
         if packages:
             command += [shlex.quote(p) for p in packages]
@@ -113,15 +109,17 @@ class CatkinToolsProxy(CatkinProxy):
             context = self.directory
 
         command_str = ' '.join(command)
-        logger.debug("building via: %s", command_str)
-        retcode, output, duration_secs = \
-            shell.execute(command_str, context=context, time_limit=time_limit)
-        duration_mins = duration_secs / 60
+        logger.debug(f"building via: {command_str}")
+        result = self._shell.run(command_str,
+                                 cwd=context,
+                                 time_limit=time_limit,
+                                 text=True)
+        duration_mins = result.duration / 60
         logger.debug("build completed after %.2f minutes [retcode: %d]:\n%s",
-                     duration_mins, retcode, output)
+                     duration_mins, result.returncode, result.output)
 
-        if retcode != 0:
-            raise CatkinBuildFailed(retcode, output)
+        if result.returncode != 0:
+            raise CatkinBuildFailed(result.returncode, result.output)
 
 
 class CatkinMakeProxy(CatkinProxy):
