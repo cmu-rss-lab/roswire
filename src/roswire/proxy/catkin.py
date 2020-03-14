@@ -6,13 +6,13 @@ import abc
 import shlex
 
 from loguru import logger
-from dockerblade import Shell
+import dockerblade
 
 from ..exceptions import CatkinBuildFailed, CatkinCleanFailed
 
 
 class CatkinProxy(abc.ABC):
-    def __init__(self, shell: Shell, directory: str) -> None:
+    def __init__(self, shell: dockerblade.Shell, directory: str) -> None:
         """Constructs a catkin proxy for a given workspace."""
         self._directory = directory
         self._shell = shell
