@@ -98,7 +98,9 @@ class PackageDatabase(Mapping[str, Package]):
         and `db['foo'] = bar`).
     """
     @staticmethod
-    def paths(shell: ShellProxy, files: dockerblade.FileSystem) -> List[str]:
+    def paths(shell: dockerblade.Shell,
+              files: dockerblade.FileSystem
+              ) -> List[str]:
         """Parses :code:`ROS_PACKAGE_PATH` for a given shell."""
         path_str = shell.environ('ROS_PACKAGE_PATH')
         package_paths: List[str] = path_str.strip().split(':')
