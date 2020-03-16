@@ -6,9 +6,9 @@ import os
 import re
 
 import attr
+import dockerblade
 
 from .msg import MsgFormat
-from ..proxy import FileProxy
 from .. import exceptions
 
 
@@ -25,7 +25,10 @@ class ActionFormat:
     result = attr.ib(type=Optional[MsgFormat])
 
     @staticmethod
-    def from_file(package: str, fn: str, files: FileProxy) -> 'ActionFormat':
+    def from_file(package: str,
+                  fn: str,
+                  files: dockerblade.FileSystem
+                  ) -> 'ActionFormat':
         """
         Constructs a message format from a .msg file for a given package.
 
