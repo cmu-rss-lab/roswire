@@ -13,7 +13,6 @@ import shlex
 from .msg import MsgFormat
 from .srv import SrvFormat
 from .action import ActionFormat
-from ..proxy import FileProxy, ShellProxy
 from ..util import tuple_from_iterable
 
 
@@ -26,7 +25,7 @@ class Package:
     actions: Tuple[ActionFormat, ...] = attr.ib(converter=tuple_from_iterable)
 
     @staticmethod
-    def build(path: str, files: FileProxy) -> 'Package':
+    def build(path: str, files: dockerblade.FileSystem) -> 'Package':
         """Constructs a description of a package at a given path."""
         name: str = os.path.basename(path)
         messages: List[MsgFormat] = []
@@ -99,7 +98,7 @@ class PackageDatabase(Mapping[str, Package]):
         and `db['foo'] = bar`).
     """
     @staticmethod
-    def paths(shell: ShellProxy, files: FileProxy) -> List[str]:
+    def paths(shell: ShellProxy, files: dockerblade.FileSystem) -> List[str]:
         """Parses :code:`ROS_PACKAGE_PATH` for a given shell."""
         path_str = shell.environ('ROS_PACKAGE_PATH')
         package_paths: List[str] = path_str.strip().split(':')
@@ -116,7 +115,7 @@ class PackageDatabase(Mapping[str, Package]):
         return paths
 
     @staticmethod
-    def from_paths(files: FileProxy,
+    def from_paths(files: dockerblade.FileSystem,
                    paths: List[str],
                    ignore_bad_paths: bool = True
                    ) -> 'PackageDatabase':
@@ -126,7 +125,7 @@ class PackageDatabase(Mapping[str, Package]):
 
         Parameters
         ----------
-        files: FileProxy
+        files: dockerblade.FileSystem
             access to the filesystem.
         paths: List[str]
             a list of the absolute paths of the packages.
