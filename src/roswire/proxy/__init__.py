@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 __all__ = (
-    'ShellProxy',
     'ServiceManagerProxy',
     'ParameterServerProxy',
     'NodeManagerProxy',
@@ -9,7 +8,6 @@ __all__ = (
     'ROSProxy',
     'BagRecorderProxy',
     'BagPlayerProxy',
-    'FileProxy',
     'ContainerProxy',
     'CatkinProxy',
     'CatkinToolsProxy',
@@ -25,8 +23,8 @@ import shlex
 import logging
 import time
 
-from .shell import ShellProxy
-from .file import FileProxy
+import dockerblade
+
 from .catkin import CatkinProxy, CatkinToolsProxy, CatkinMakeProxy
 from .container import ContainerProxy, ContainerProxyManager
 from .parameters import ParameterServerProxy
@@ -60,8 +58,8 @@ class ROSProxy:
     """
     def __init__(self,
                  description: SystemDescription,
-                 shell: ShellProxy,
-                 files: FileProxy,
+                 shell: dockerblade.Shell,
+                 files: dockerblade.FileSystem,
                  ws_host: str,
                  ip_address: str,
                  port: int = 11311
