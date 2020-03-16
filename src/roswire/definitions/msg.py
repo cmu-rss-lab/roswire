@@ -11,11 +11,11 @@ import re
 import os
 
 import attr
+import dockerblade
 from toposort import toposort_flatten as toposort
 
 from .base import is_builtin, Time, Duration
 from .decode import is_simple
-from ..proxy import FileProxy
 from .. import exceptions
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -116,7 +116,10 @@ class MsgFormat:
         return [fn_to_fmt[fn] for fn in toposorted]
 
     @staticmethod
-    def from_file(package: str, fn: str, files: FileProxy) -> 'MsgFormat':
+    def from_file(package: str,
+                  fn: str,
+                  files: dockerblade.FileSystem
+                  ) -> 'MsgFormat':
         """
         Constructs a message format from a .msg file for a given package.
 
