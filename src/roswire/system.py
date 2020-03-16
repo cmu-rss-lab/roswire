@@ -7,10 +7,11 @@ import contextlib
 import logging
 
 import attr
+import dockerblade
 
 from .description import SystemDescription
 from .definitions import TypeDatabase, FormatDatabase, PackageDatabase
-from .proxy import (ShellProxy, ROSProxy, FileProxy, ContainerProxy,
+from .proxy import (ROSProxy, ContainerProxy,
                     CatkinProxy, CatkinToolsProxy, CatkinMakeProxy)
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -29,9 +30,9 @@ class System:
         A static description of the associated ROS application.
     messages: TypeDatabase
         A database of message types for the associated ROS application.
-    shell: ShellProxy
+    shell: dockerblade.Shell
         Provides access to a bash shell for this container.
-    files: FileProxy
+    files: dockerblade.FileSystem
         Provides access to the filesystem for this container.
     ws_host: str
         The absolute path to the shared directory for this container's
@@ -55,7 +56,7 @@ class System:
         return self.container.ip_address
 
     @property
-    def shell(self) -> ShellProxy:
+    def shell(self) -> dockerblade.Shell:
         return self.container.shell
 
     @property
@@ -109,7 +110,7 @@ class System:
         return CatkinMakeProxy(self.shell, directory)
 
     @property
-    def files(self) -> FileProxy:
+    def files(self) -> dockerblade.FileSystem:
         return self.container.files
 
     @contextlib.contextmanager
