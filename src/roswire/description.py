@@ -11,6 +11,7 @@ import base64
 import contextlib
 import logging
 import os
+import typing
 
 from docker.models.images import Image as DockerImage
 from loguru import logger
@@ -18,7 +19,9 @@ import attr
 import yaml
 
 from .definitions import TypeDatabase, FormatDatabase, PackageDatabase
-from .proxy import ContainerProxyManager
+
+if typing.TYPE_CHECKING:
+    from .proxy import ContainerProxyManager
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -82,7 +85,7 @@ class SystemDescriptionManager:
         The absolute path of the directory where descriptions are stored.
     """
     def __init__(self,
-                 containers: ContainerProxyManager,
+                 containers: 'ContainerProxyManager',
                  dir_cache: str
                  ) -> None:
         self.__containers = containers
