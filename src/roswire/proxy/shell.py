@@ -350,6 +350,8 @@ class ShellProxy:
                      command, retcode, timer.duration, output)
         return retcode, output, timer.duration
 
+    run = execute
+
     def non_blocking_execute(self,
                              *args,
                              **kwargs
