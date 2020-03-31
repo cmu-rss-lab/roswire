@@ -6,6 +6,30 @@ class ROSWireException(Exception):
     """Base class used by all ROSWire exceptions."""
 
 
+@_attr.s(frozen=True, auto_exc=True, auto_attribs=True)
+class UnexpectedServiceCallError(ROSWireException):
+    """An unexpected error occurred during a service call.
+
+    Attributes
+    ----------
+    service_name: str
+        The name of the service that was called.
+    retcode: int
+        The return code that was produced by rosservice.
+    output: str
+        The output that was produced by rosservice
+    """
+    service_name: str
+    retcode: int
+    output: str
+
+    def __str__(self) -> str:
+        m = (f"Unexpected exit code [{self.retcode}] occurred "
+             f" during call to service [{self.service_name}]. "
+             f"Produced output: \"{self.output}\"")
+        return m
+
+
 class FailedToParseLaunchFile(ROSWireException):
     """An attempt to parse a launch file failed."""
 

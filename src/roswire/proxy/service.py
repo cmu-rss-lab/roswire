@@ -13,6 +13,7 @@ import yaml
 
 from .shell import ShellProxy
 from .. import exceptions
+from ..exceptions import UnexpectedServiceCallError
 from ..definitions import Message, SrvFormat, MsgFormat
 from ..description import SystemDescription
 
@@ -51,6 +52,13 @@ class ServiceProxy:
         -------
         Optional[Message]
             The reply produced by the service, if any.
+
+        Raises
+        ------
+        ROSWireException
+            If illegal arguments are provided to the service call.
+        UnexpectedServiceCallError
+            If an unexpected error occurred during the service call.
         """
         if not message:
             yml = '{}'
@@ -62,7 +70,9 @@ class ServiceProxy:
         if code == 2:
             raise exceptions.ROSWireException('illegal service call args')
         if code != 0:
-            raise exceptions.ROSWireException('unexpected error during service call')  # noqa
+            raise UnexpectedServiceCallError(service_name=self.name,
+                                             retcode=code,
+                                             output=output)
 
         fmt_response: Optional[MsgFormat] = self.format.response
         if not fmt_response:
