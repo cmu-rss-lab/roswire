@@ -23,7 +23,7 @@ import roswire
 # -- Project information -----------------------------------------------------
 
 project = 'roswire'
-copyright = '2019, Christopher Steven Timperley'
+copyright = '2020, Christopher Steven Timperley'
 author = 'Christopher Steven Timperley'
 
 # The short X.Y version
@@ -47,6 +47,7 @@ A Python library for inspecting and interacting with ROS applications.
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx_autodoc_typehints',
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
