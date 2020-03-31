@@ -27,16 +27,16 @@ class ContainerProxy:
 
     Attributes
     ----------
-    dockerblade: dockerblade.Container
+    dockerblade: dockerblade.container.Container
         Provides access to the underlying Docker container via Dockerblade.
     sources: Sequence[str]
         The sequence of setup files that should be used to load the ROS
         workspace.
     uuid: UUID
         A unique identifier for this container.
-    shell: dockerblade.Shell
+    shell: dockerblade.shell.Shell
         Provides access to a bash shell for this container.
-    files: dockerblade.FileSystem
+    files: dockerblade.files.FileSystem
         Provides access to the filesystem for this container.
     pid: int
         The PID of this container process on the host machine.
@@ -46,12 +46,12 @@ class ContainerProxy:
     ip_address: str
         The IP address for this container on the host network.
     """
-    _dockerblade: dockerblade.Container = attr.ib(repr=False)
+    _dockerblade: dockerblade.container.Container = attr.ib(repr=False)
     _sources: Sequence[str] = attr.ib(repr=False)
     uuid: UUID = attr.ib(repr=True)
     ws_host: str = attr.ib(repr=False)
-    shell: dockerblade.Shell = attr.ib(init=False, repr=False)
-    files: dockerblade.FileSystem = attr.ib(init=False, repr=False)
+    shell: dockerblade.shell.Shell = attr.ib(init=False, repr=False)
+    files: dockerblade.files.FileSystem = attr.ib(init=False, repr=False)
 
     def __attrs_post_init__(self) -> None:
         daemon = self._dockerblade.daemon
@@ -97,8 +97,8 @@ class ContainerProxyManager:
     launching Docker containers.
     """
     _dir_host_workspace: str
-    _dockerblade: dockerblade.DockerDaemon = \
-        attr.ib(factory=dockerblade.DockerDaemon)
+    _dockerblade: dockerblade.daemon.DockerDaemon = \
+        attr.ib(factory=dockerblade.daemon.DockerDaemon)
 
     @property
     def docker_client(self) -> DockerClient:
