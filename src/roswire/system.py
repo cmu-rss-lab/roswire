@@ -30,9 +30,9 @@ class System:
         A static description of the associated ROS application.
     messages: TypeDatabase
         A database of message types for the associated ROS application.
-    shell: dockerblade.Shell
+    shell: dockerblade.shell.Shell
         Provides access to a bash shell for this container.
-    files: dockerblade.FileSystem
+    files: dockerblade.files.FileSystem
         Provides access to the filesystem for this container.
     ws_host: str
         The absolute path to the shared directory for this container's
@@ -56,7 +56,7 @@ class System:
         return self.container.ip_address
 
     @property
-    def shell(self) -> dockerblade.Shell:
+    def shell(self) -> dockerblade.shell.Shell:
         return self.container.shell
 
     @property
@@ -110,7 +110,7 @@ class System:
         return CatkinMakeProxy(self.shell, directory)
 
     @property
-    def files(self) -> dockerblade.FileSystem:
+    def files(self) -> dockerblade.files.FileSystem:
         return self.container.files
 
     @contextlib.contextmanager
