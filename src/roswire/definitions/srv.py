@@ -5,9 +5,9 @@ from typing import Optional, List, Dict, Any
 import os
 
 import attr
+import dockerblade
 
 from .msg import MsgFormat, Constant, Field
-from ..proxy import FileProxy
 from .. import exceptions
 
 
@@ -20,7 +20,10 @@ class SrvFormat:
     response = attr.ib(type=Optional[MsgFormat])
 
     @staticmethod
-    def from_file(package: str, fn: str, files: FileProxy) -> 'SrvFormat':
+    def from_file(package: str,
+                  fn: str,
+                  files: dockerblade.FileSystem
+                  ) -> 'SrvFormat':
         """Constructs a service format from a .srv file for a given package.
 
         Parameters:

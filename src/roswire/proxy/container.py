@@ -3,8 +3,6 @@ __all__ = ('ContainerProxy', 'ContainerProxyManager')
 
 from typing import Dict, Iterator, Optional, Sequence, Union
 from uuid import UUID, uuid4
-from ipaddress import IPv4Address, IPv6Address
-import ipaddress
 import shlex
 import contextlib
 import logging
@@ -12,14 +10,13 @@ import shutil
 import os
 
 import attr
+import dockerblade
 from docker import DockerClient
 from docker import APIClient as DockerAPIClient
 from docker.models.images import Image as DockerImage
 from docker.models.containers import Container as DockerContainer
 from loguru import logger
 
-from .file import FileProxy
-from .shell import ShellProxy
 from ..util import Stopwatch
 from ..exceptions import ROSWireException
 
@@ -30,11 +27,16 @@ class ContainerProxy:
 
     Attributes
     ----------
+    dockerblade: dockerblade.container.Container
+        Provides access to the underlying Docker container via Dockerblade.
+    sources: Sequence[str]
+        The sequence of setup files that should be used to load the ROS
+        workspace.
     uuid: UUID
         A unique identifier for this container.
-    shell: ShellProxy
+    shell: dockerblade.shell.Shell
         Provides access to a bash shell for this container.
-    files: FileProxy
+    files: dockerblade.files.FileSystem
         Provides access to the filesystem for this container.
     pid: int
         The PID of this container process on the host machine.
@@ -44,43 +46,28 @@ class ContainerProxy:
     ip_address: str
         The IP address for this container on the host network.
     """
-    uuid: UUID = attr.ib()
-    pid: int = attr.ib()
-    shell: ShellProxy = attr.ib()
-    files: FileProxy = attr.ib()
-    ws_host: str = attr.ib()
-    _api_docker: DockerAPIClient = attr.ib()
-    _container_docker: DockerContainer = attr.ib()
+    _dockerblade: dockerblade.container.Container = attr.ib(repr=False)
+    _sources: Sequence[str] = attr.ib(repr=False)
+    uuid: UUID = attr.ib(repr=True)
+    ws_host: str = attr.ib(repr=False)
+    shell: dockerblade.shell.Shell = attr.ib(init=False, repr=False)
+    files: dockerblade.files.FileSystem = attr.ib(init=False, repr=False)
 
-    @staticmethod
-    def _from_docker(api_docker: DockerAPIClient,
-                     container_docker: DockerContainer,
-                     uuid: UUID,
-                     ws_host: str
-                     ) -> 'ContainerProxy':
-        """Constructs a proxy from a given Docker container."""
-        info = api_docker.inspect_container(container_docker.id)
-        pid = int(info['State']['Pid'])
-        shell = ShellProxy(api_docker, container_docker, pid)
-        files = FileProxy(container_docker, shell)
-        return ContainerProxy(uuid=uuid,
-                              shell=shell,
-                              files=files,
-                              pid=pid,
-                              ws_host=ws_host,
-                              api_docker=api_docker,
-                              container_docker=container_docker)
+    def __attrs_post_init__(self) -> None:
+        daemon = self._dockerblade.daemon
+        docker_container = self._dockerblade._docker
+        shell = self._dockerblade.shell('/bin/bash', sources=self._sources)
+        files = self._dockerblade.filesystem()
+        object.__setattr__(self, 'shell', shell)
+        object.__setattr__(self, 'files', files)
+
+    @property
+    def pid(self) -> int:
+        return self._dockerblade.pid
 
     @property
     def ip_address(self) -> str:
-        container = self._container_docker
-        api = self._api_docker
-        docker_info = api.inspect_container(container.id)
-        address = docker_info['NetworkSettings']['IPAddress']
-        try:
-            return str(IPv4Address(address))
-        except ipaddress.AddressValueError:
-            return str(IPv6Address(address))
+        return self._dockerblade.ip_address
 
     def persist(self,
                 repo: Optional[str] = None,
@@ -100,34 +87,32 @@ class ContainerProxy:
         DockerImage
             A description of the persisted image.
         """
-        return self._container_docker.commit(repo, tag)
+        return self._dockerblade.persist(repo, tag)
 
 
+@attr.s(auto_attribs=True)
 class ContainerProxyManager:
     """
     Provides an interface for accessing and inspecting Docker images, and
     launching Docker containers.
     """
-    def __init__(self,
-                 client_docker: DockerClient,
-                 api_docker: DockerAPIClient,
-                 dir_host_ws: str
-                 ) -> None:
-        self.__dir_host_ws = dir_host_ws
-        self.__client_docker = client_docker
-        self.__api_docker = api_docker
+    _dir_host_workspace: str
+    _dockerblade: dockerblade.daemon.DockerDaemon = \
+        attr.ib(factory=dockerblade.daemon.DockerDaemon)
 
     @property
-    def client_docker(self) -> DockerClient:
-        return self.__client_docker
+    def docker_client(self) -> DockerClient:
+        return self._dockerblade.client
 
     @property
-    def api_docker(self) -> DockerAPIClient:
-        return self.__api_docker
+    def docker_api(self) -> DockerAPIClient:
+        return self._dockerblade.api
 
     @contextlib.contextmanager
     def _build_shared_directory(self, uuid: UUID) -> Iterator[str]:
-        dir_host = os.path.join(self.__dir_host_ws, 'containers', uuid.hex)
+        dir_host = os.path.join(self._dir_host_workspace,
+                                'containers',
+                                uuid.hex)
         try:
             logger.debug(f"creating container directory: {dir_host}")
             os.makedirs(dir_host, exist_ok=True)
@@ -152,7 +137,7 @@ class ContainerProxyManager:
                         "echo 'ENVFILE CREATED' && /bin/bash")
         cmd_env_file = f"/bin/bash -c {shlex.quote(cmd_env_file)}"
         logger.debug(f"building docker container: {uuid}")
-        dockerc = self.__client_docker.containers.create(
+        dockerc = self.docker_client.containers.create(
             image_or_name,
             cmd_env_file,
             user='root',
@@ -169,7 +154,7 @@ class ContainerProxyManager:
 
             # wait until .environment file is ready
             env_is_ready = False
-            for line in self.__api_docker.logs(dockerc.id, stream=True):
+            for line in self.docker_api.logs(dockerc.id, stream=True):
                 line = line.strip().decode('utf-8')
                 if line == 'ENVFILE CREATED':
                     env_is_ready = True
@@ -213,19 +198,17 @@ class ContainerProxyManager:
         ContainerProxy
             The constructed container.
         """
-        api_docker = self.__api_docker
         uuid = uuid4()
         logger.debug(f"UUID for container: {uuid}")
-        with self._build_shared_directory(uuid) as dir_shared:
-            with self._container(image_or_name, dir_shared, uuid, ports=ports) as dockerc:  # noqa: pycodestyle
-                yield ContainerProxy._from_docker(api_docker,
-                                                  dockerc,
-                                                  uuid,
-                                                  dir_shared)
+        with contextlib.ExitStack() as stack:
+            dir_shared = stack.enter_context(self._build_shared_directory(uuid))  # noqa
+            dockerc = stack.enter_context(self._container(image_or_name, dir_shared, uuid, ports=ports))  # noqa
+            dockerb = self._dockerblade.attach(dockerc.id)
+            yield ContainerProxy(dockerb, sources, uuid, dir_shared)
 
     def image(self, tag: str) -> DockerImage:
         """Retrieves the Docker image with a given tag."""
-        return self.__client_docker.images.get(tag)
+        return self.docker_client.images.get(tag)
 
     def image_sha256(self, tag_or_image: Union[str, DockerImage]) -> str:
         """Computes the SHA256 for a given Docker image."""

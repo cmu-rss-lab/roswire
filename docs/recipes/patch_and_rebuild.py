@@ -9,7 +9,8 @@ with open('example.diff') as f:
 # when the context is closed, either by reaching the end of the with
 # block or by abruptly encountering an exception, the container will be
 # automatically destroyed.
-with rsw.launch('roswire/example:mavros') as system:
+sources = ['/opt/ros/indigo/setup.bash', '/ros_ws/devel/setup.bash']
+with rsw.launch('roswire/example:mavros', sources) as system:
     print("applying patch...")
     context = '/ros_ws/src/mavros/mavros/src/mavros_node.cpp'
     system.files.patch(context, diff)

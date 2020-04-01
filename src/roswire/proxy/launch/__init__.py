@@ -10,21 +10,18 @@ from copy import deepcopy
 import logging
 import xml.etree.ElementTree as ET
 
+from loguru import logger
 import attr
+import dockerblade
 import yaml
 
 from .rosparam import load_from_yaml_string as load_rosparam_from_string
 from .config import ROSConfig, NodeConfig, Parameter
 from .context import LaunchContext
 from ..substitution import resolve as resolve_args
-from ..shell import ShellProxy
-from ..file import FileProxy
 from ...name import (namespace_join, global_name, namespace, name_is_global,
                      name_is_private)
 from ...exceptions import FailedToParseLaunchFile
-
-logger: logging.Logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 _TAG_TO_LOADER = {}
 
@@ -95,7 +92,7 @@ def tag(name: str, legal_attributes: Collection[str] = tuple()):
                     cfg: ROSConfig,
                     elem: ET.Element
                     ) -> Tuple[LaunchContext, ROSConfig]:
-            logger.debug("parsing <%s> tag", name)
+            logger.debug("parsing <{name}> tag")
             for attribute in elem.attrib:
                 if attribute not in legal_attributes:
                     m = '<{}> tag contains illegal attribute: {}'
@@ -113,7 +110,10 @@ def tag(name: str, legal_attributes: Collection[str] = tuple()):
 
 
 class LaunchFileReader:
-    def __init__(self, shell: ShellProxy, files: FileProxy) -> None:
+    def __init__(self,
+                 shell: dockerblade.Shell,
+                 files: dockerblade.FileSystem
+                 ) -> None:
         self.__shell = shell
         self.__files = files
 
@@ -159,7 +159,7 @@ class LaunchFileReader:
                         ) -> Tuple[LaunchContext, ROSConfig]:
         name = self._read_required(tag, 'name', ctx)
         typ = self._read_optional(tag, 'type', ctx) or 'auto'
-        logger.debug("adding parameter [%s] with type [%s]", name, typ)
+        logger.debug("adding parameter [{name}] with type [{typ}]")
 
         # obtain value from either 'value', 'textfile', 'binfile', or
         # 'command' exclusively.
@@ -181,9 +181,9 @@ class LaunchFileReader:
         if binfile is not None:
             value = self.__files.read(binfile, binary=True)
         if command is not None:
-            retcode, value, duration = self.__shell.execute(command)
+            value = self.__shell.check_output(command, text=True)
 
-        logger.debug("obtained value for parameter [%s]: %s", name, value)
+        logger.debug("obtained value for parameter [{name}]: {value}")
 
         # compute the fully qualified name
         if name_is_global(name):
@@ -235,9 +235,9 @@ class LaunchFileReader:
 
             if subst_value:
                 yml_text = self._resolve_args(yml_text, ctx)
-            logger.debug("parsing rosparam YAML:\n%s", yml_text)
+            logger.debug("parsing rosparam YAML:\n{yml_text}")
             data = load_rosparam_from_string(yml_text)
-            logger.debug("rosparam values: %s", data)
+            logger.debug("rosparam values: {data}")
             if not isinstance(data, dict) and not param:
                 m = "<rosparam> requires 'param' for non-dictionary values"
                 raise FailedToParseLaunchFile(m)
@@ -350,7 +350,7 @@ class LaunchFileReader:
                           tag: ET.Element
                           ) -> Tuple[LaunchContext, ROSConfig]:
         include_filename = self._read_required(tag, 'file', ctx)
-        logger.debug("include file: %s", include_filename)
+        logger.debug("include file: {include_filename}")
         cfg = cfg.with_roslaunch_file(include_filename)
 
         # create context
@@ -373,7 +373,7 @@ class LaunchFileReader:
         child_tags = [t for t in tag if t.tag in ('env', 'arg')]
         ctx_child, cfg = self._load_tags(ctx_child, cfg, child_tags)
         ctx_child = ctx_child.process_include_args()
-        logger.debug("prepared include context: %s", ctx_child)
+        logger.debug("prepared include context: {ctx_child}")
 
         logger.debug("loading include file")
         launch = self._parse_file(include_filename)
@@ -469,7 +469,7 @@ class LaunchFileReader:
 
     def _resolve_args(self, s: str, ctx: LaunchContext) -> str:
         """Resolves all substitution args in a given string."""
-        logger.debug("resolve [%s] with context: %s", s, ctx.resolve_dict)
+        logger.debug("resolve [{s}] with context: {ctx.resolve_dict}")
         return resolve_args(self.__shell, self.__files, s, ctx.resolve_dict)
 
     def read(self, fn: str, argv: Optional[Sequence[str]] = None) -> ROSConfig:
@@ -492,5 +492,5 @@ class LaunchFileReader:
 
         launch = self._parse_file(fn)
         ctx, cfg = self._load_tags(ctx, cfg, list(launch))
-        logger.debug("launch configuration: %s", cfg)
+        logger.debug("launch configuration: {cfg}")
         return cfg

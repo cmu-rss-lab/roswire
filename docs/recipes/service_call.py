@@ -8,7 +8,8 @@ FN_SITL = '/ros_ws/src/ArduPilot/build/sitl/bin/arducopter'
 FN_PARAMS = '/ros_ws/src/ArduPilot/copter.parm'
 
 rsw = roswire.ROSWire()
-with rsw.launch('roswire/example:mavros') as system:
+sources = ['/opt/ros/indigo/setup.bash', '/ros_ws/devel/setup.bash']
+with rsw.launch('roswire/example:mavros', sources) as system:
     # Fetch the dynamically generated types for the messages that we want to send
     SetModeRequest = system.messages['mavros_msgs/SetModeRequest']
     CommandBoolRequest = system.messages['mavros_msgs/CommandBoolRequest']

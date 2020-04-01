@@ -60,25 +60,6 @@ ROS
    :members:
 
 
-Shell
------
-
-.. py:module:: roswire.proxy.shell
-.. autoclass:: ShellProxy()
-  :members:
-
-.. autoclass:: Popen()
-  :members:
-
-
-Filesystem
-----------
-
-.. py:module:: roswire.proxy.file
-.. autoclass:: FileProxy()
-  :members:
-
-
 Descriptions
 ------------
 

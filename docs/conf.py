@@ -23,7 +23,7 @@ import roswire
 # -- Project information -----------------------------------------------------
 
 project = 'roswire'
-copyright = '2019, Christopher Steven Timperley'
+copyright = '2020, Christopher Steven Timperley'
 author = 'Christopher Steven Timperley'
 
 # The short X.Y version
@@ -47,6 +47,7 @@ A Python library for inspecting and interacting with ROS applications.
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx_autodoc_typehints',
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
@@ -207,8 +208,9 @@ epub_exclude_files = ['search.html']
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
-#    'python': ('https://docs.python.org/3', None),
-#    'docker': ('https://https://docker-py.readthedocs.io/en/stable/', None)
+    'python': ('https://docs.python.org/3', None),
+    'docker': ('https://docker-py.readthedocs.io/en/stable/', None),
+    'dockerblade': ('https://christimperley.github.io/dockerblade', None)
 }
 
 # -- Options for todo extension ----------------------------------------------

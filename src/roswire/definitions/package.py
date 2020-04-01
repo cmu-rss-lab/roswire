@@ -5,13 +5,14 @@ from typing import (Tuple, List, Dict, Union, Any, Iterator, Collection,
                     Mapping, Callable, Iterable)
 import os
 
+from loguru import logger
 import attr
+import dockerblade
 import shlex
 
 from .msg import MsgFormat
 from .srv import SrvFormat
 from .action import ActionFormat
-from ..proxy import FileProxy, ShellProxy
 from ..util import tuple_from_iterable
 
 
@@ -24,7 +25,7 @@ class Package:
     actions: Tuple[ActionFormat, ...] = attr.ib(converter=tuple_from_iterable)
 
     @staticmethod
-    def build(path: str, files: FileProxy) -> 'Package':
+    def build(path: str, files: dockerblade.FileSystem) -> 'Package':
         """Constructs a description of a package at a given path."""
         name: str = os.path.basename(path)
         messages: List[MsgFormat] = []
@@ -97,7 +98,9 @@ class PackageDatabase(Mapping[str, Package]):
         and `db['foo'] = bar`).
     """
     @staticmethod
-    def paths(shell: ShellProxy, files: FileProxy) -> List[str]:
+    def paths(shell: dockerblade.Shell,
+              files: dockerblade.FileSystem
+              ) -> List[str]:
         """Parses :code:`ROS_PACKAGE_PATH` for a given shell."""
         path_str = shell.environ('ROS_PACKAGE_PATH')
         package_paths: List[str] = path_str.strip().split(':')
@@ -105,15 +108,16 @@ class PackageDatabase(Mapping[str, Package]):
         for path in package_paths:
             try:
                 all_packages = files.find(path, 'package.xml')
-            except OSError:
-                # path is not a directory
+            except dockerblade.exceptions.DockerBladeException:
+                logger.warning('unable to find directory in ROS_PACKAGE_PATH:'
+                               f' {path}')
                 continue
             package_dirs = [os.path.dirname(p) for p in all_packages]
             paths.extend(package_dirs)
         return paths
 
     @staticmethod
-    def from_paths(files: FileProxy,
+    def from_paths(files: dockerblade.FileSystem,
                    paths: List[str],
                    ignore_bad_paths: bool = True
                    ) -> 'PackageDatabase':
@@ -123,7 +127,7 @@ class PackageDatabase(Mapping[str, Package]):
 
         Parameters
         ----------
-        files: FileProxy
+        files: dockerblade.FileSystem
             access to the filesystem.
         paths: List[str]
             a list of the absolute paths of the packages.

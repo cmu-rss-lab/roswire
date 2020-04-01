@@ -8,19 +8,17 @@ import logging
 import shlex
 import json
 
+from loguru import logger
 import attr
+import dockerblade
 import yaml
 
-from .shell import ShellProxy
 from .. import exceptions
 from ..definitions import Message, SrvFormat, MsgFormat
 from ..description import SystemDescription
 
-logger: logging.Logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
-
-@attr.s(slots=True)
+@attr.s(slots=True, auto_attribs=True)
 class ServiceProxy:
     """Provides access to a ROS service.
 
@@ -33,11 +31,11 @@ class ServiceProxy:
     format: SrvFormat
         The :code:`.srv` definition for this service.
     """
-    name: str = attr.ib()
-    url: str = attr.ib()
-    format: SrvFormat = attr.ib()
-    _description: SystemDescription = attr.ib()
-    _shell: ShellProxy = attr.ib()
+    name: str
+    url: str
+    format: SrvFormat
+    _description: SystemDescription
+    _shell: dockerblade.Shell
 
     def call(self, message: Optional[Message] = None) -> Optional[Message]:
         """Calls this service.
@@ -56,13 +54,13 @@ class ServiceProxy:
             yml = '{}'
         else:
             yml = yaml.dump(message.to_dict())
-        cmd = f"rosservice call {self.name} '{yml}'"
-        code, output, duration = self._shell.execute(cmd)
-
-        if code == 2:
-            raise exceptions.ROSWireException('illegal service call args')
-        if code != 0:
-            raise exceptions.ROSWireException('unexpected error during service call')  # noqa
+        command = f"rosservice call {self.name} '{yml}'"
+        try:
+            output = self._shell.check_output(command)
+        except dockerblade.exceptions.CalledProcessError as error:
+            if error.returncode == 2:
+                raise exceptions.ROSWireException('illegal service call args') from error  # noqa
+            raise exceptions.ROSWireException('unexpected error during service call') from error  # noqa
 
         fmt_response: Optional[MsgFormat] = self.format.response
         if not fmt_response:
@@ -79,7 +77,7 @@ class ServiceManagerProxy(Mapping[str, ServiceProxy]):
                  description: SystemDescription,
                  host_ip_master: str,
                  api: xmlrpc.client.ServerProxy,
-                 shell: ShellProxy
+                 shell: dockerblade.Shell
                  ) -> None:
         self.__description = description
         self.__host_ip_master = host_ip_master
@@ -136,11 +134,12 @@ class ServiceManagerProxy(Mapping[str, ServiceProxy]):
         url_host = f"{parsed.scheme}://{self.__host_ip_master}:{parsed.port}"
 
         # find the format for the service
-        code, name_fmt, duration = \
-            self.__shell.execute(f'rosservice type {name}')
-        if code != 0:
+        command = f'rosservice type {name}'
+        try:
+            name_fmt = self.__shell.check_output(command, text=True)
+        except dockerblade.exceptions.CalledProcessError as error:
             m = f"unable to determine type for service [{name}]"
-            raise exceptions.ROSWireException(m)
+            raise exceptions.ROSWireException(m) from error
         fmt = self.__description.formats.services[name_fmt]
         return ServiceProxy(name,
                             url_host,

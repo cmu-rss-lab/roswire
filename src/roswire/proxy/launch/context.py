@@ -6,15 +6,12 @@ __all__ = ('LaunchContext',)
 
 from typing import Tuple, Mapping, Any, Optional, Sequence, Dict
 from copy import deepcopy
-import logging
 
+from loguru import logger
 import attr
 
 from ...name import canonical_name, name_is_legal, namespace_join
 from ...exceptions import FailedToParseLaunchFile
-
-logger: logging.Logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 @attr.s(frozen=True, slots=True)
@@ -110,13 +107,13 @@ class LaunchContext:
 
     def with_argv(self, argv: Sequence[str]) -> 'LaunchContext':
         # ignore parameter assignment mappings
-        logger.debug("loading argv: %s", argv)
+        logger.debug(f"loading argv: {argv}")
         mappings: Dict[str, str] = {}
         for arg in (a for a in argv if ':=' in a):
             var, sep, val = [a.strip() for a in arg.partition(':=')]
             if not var.startswith('__'):
                 mappings[var] = val
-        logger.debug("loaded argv: %s", mappings)
+        logger.debug(f"loaded argv: {mappings}")
         resolve_dict = self.resolve_dict.copy()
         resolve_dict['arg'] = mappings
         return attr.evolve(self, resolve_dict=resolve_dict)
@@ -131,7 +128,7 @@ class LaunchContext:
                  value: Optional[Any] = None,
                  doc: Optional[str] = None
                  ) -> 'LaunchContext':
-        logger.debug("adding arg [%s] to context", name)
+        logger.debug(f"adding arg [{name}] to context")
         arg_names = self.arg_names
         if name in self.arg_names:
             if not self.pass_all_args:
