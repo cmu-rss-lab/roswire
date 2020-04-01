@@ -1,4 +1,4 @@
-# 1.0.0 (????-??-??)
+# 1.0.0 (2020-31-03)
 
 * Added `ports` keyword argument to `launch` method for `ROSWire`, allowing
   users to specify an optional container-host port mapping.
