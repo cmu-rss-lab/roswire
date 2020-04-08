@@ -6,6 +6,10 @@ python:
 install:
 - pip install -r requirements.dev.txt
 - pip install --upgrade .
+# see #337: flag potential twine issues before attempting to upload to PyPI
+- python setup.py sdist
+- python setup.py bdist_wheel
+- twine check dist/*
 script:
 - tox
 notifications:
