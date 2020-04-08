@@ -1,3 +1,8 @@
+# 1.0.1 (????-??-??)
+
+* Bug fix: Updated `proxy.substitution` module to use DockerBlade API
+
+
 # 1.0.0 (2020-31-03)
 
 * Added `ports` keyword argument to `launch` method for `ROSWire`, allowing

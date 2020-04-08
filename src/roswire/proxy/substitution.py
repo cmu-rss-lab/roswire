@@ -9,6 +9,7 @@ from typing import Optional, Dict, Any
 import os
 import re
 import shlex
+import subprocess
 import functools
 
 from loguru import logger
@@ -63,9 +64,10 @@ def resolve_arg(shell: dockerblade.Shell,
     if kind == 'find':
         package = params[0]
         cmd = f'rospack find {shlex.quote(package)}'
-        retcode, location, duration = shell.execute(cmd)
-        if retcode != 0:
-            raise SubstitutionError(f'failed to locate package: {package}')
+        try:
+            location = shell.check_output(cmd)
+        except subprocess.CalledProcessError as err:
+            raise SubstitutionError(f'failed to locate package: {package}') from err  # noqa
         return location.strip()
 
     # TODO $(anon name)
