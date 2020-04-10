@@ -104,3 +104,12 @@ class PatchFailedError(ROSWireException):
     """An error occurred during the application of a patch."""
     retcode: int
     output: str
+
+
+@_attr.s(frozen=True, auto_exc=True, auto_attribs=True, str=False)
+class SourceNotFoundError(ValueError, ROSWireException):
+    """A given source could not be found inside the container."""
+    source: str
+
+    def __str__(self) -> str:
+        return f"source not found in container: {self.source}"

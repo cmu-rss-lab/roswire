@@ -18,7 +18,7 @@ from docker.models.containers import Container as DockerContainer
 from loguru import logger
 
 from ..util import Stopwatch
-from ..exceptions import ROSWireException
+from ..exceptions import ROSWireException, SourceNotFoundError
 
 
 @attr.s(frozen=True)
@@ -45,6 +45,12 @@ class ContainerProxy:
         workspace on the host machine.
     ip_address: str
         The IP address for this container on the host network.
+
+    Raises
+    ------
+    SourceNotFoundError:
+        If at least one of the given sources could not be found inside the
+        container.
     """
     _dockerblade: dockerblade.container.Container = attr.ib(repr=False)
     _sources: Sequence[str] = attr.ib(repr=False)
@@ -56,8 +62,14 @@ class ContainerProxy:
     def __attrs_post_init__(self) -> None:
         daemon = self._dockerblade.daemon
         docker_container = self._dockerblade._docker
-        shell = self._dockerblade.shell('/bin/bash', sources=self._sources)
         files = self._dockerblade.filesystem()
+
+        # #338 ensure that the given sources exist
+        for source in self._sources:
+            if not files.exists(source):
+                raise SourceNotFoundError(source)
+
+        shell = self._dockerblade.shell('/bin/bash', sources=self._sources)
         object.__setattr__(self, 'shell', shell)
         object.__setattr__(self, 'files', files)
 

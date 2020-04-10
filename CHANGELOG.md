@@ -1,6 +1,8 @@
 # 1.0.1 (????-??-??)
 
 * Bug fix: Updated `proxy.substitution` module to use DockerBlade API
+* Containers will now raise a `SourceNotFoundError` if a given source does
+  not exist inside the container (#338).
 
 
 # 1.0.0 (2020-31-03)
