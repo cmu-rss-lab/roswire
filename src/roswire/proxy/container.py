@@ -144,14 +144,10 @@ class ContainerProxyManager:
                    *,
                    ports: Optional[Dict[int, int]] = None
                    ) -> Iterator[DockerContainer]:
-        cmd_env_file = ("export | tee /.environment > /dev/null && "
-                        "chmod 444 /.environment && "
-                        "echo 'ENVFILE CREATED' && /bin/bash")
-        cmd_env_file = f"/bin/bash -c {shlex.quote(cmd_env_file)}"
         logger.debug(f"building docker container: {uuid}")
         dockerc = self.docker_client.containers.create(
             image_or_name,
-            cmd_env_file,
+            '/bin/sh',
             user='root',
             name=uuid,
             volumes={dir_host_shared: {'bind': '/.roswire', 'mode': 'rw'}},
@@ -162,18 +158,7 @@ class ContainerProxyManager:
         logger.debug("created docker container")
         try:
             dockerc.start()
-            logger.debug("started docker container")
-
-            # wait until .environment file is ready
-            env_is_ready = False
-            for line in self.docker_api.logs(dockerc.id, stream=True):
-                line = line.strip().decode('utf-8')
-                if line == 'ENVFILE CREATED':
-                    env_is_ready = True
-                    break
-            assert env_is_ready
-
-            logger.debug(f"finished building container: {uuid}")
+            logger.debug(f"started docker container: {uuid}")
             yield dockerc
         finally:
             logger.debug(f"destroying docker container: {uuid}")

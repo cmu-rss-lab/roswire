@@ -3,6 +3,10 @@
 * Bug fix: Updated `proxy.substitution` module to use DockerBlade API
 * Containers will now raise a `SourceNotFoundError` if a given source does
   not exist inside the container (#338).
+* Container spawning no longer relies on the creation of a temporary file
+  for storing environment variables inside the container. This allows
+  ROSWire to work with more Docker images without the need for manual
+  changes.
 
 
 # 1.0.0 (2020-31-03)
