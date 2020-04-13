@@ -7,6 +7,8 @@
   for storing environment variables inside the container. This allows
   ROSWire to work with more Docker images without the need for manual
   changes.
+* Bag recorder now implements the `exclude_topics` parameter rather than
+  ignoring it.
 
 
 # 1.0.0 (2020-31-03)
