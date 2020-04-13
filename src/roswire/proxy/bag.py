@@ -140,7 +140,7 @@ class BagRecorderProxy:
         """
         Notes
         -----
-            This object should not be constructed directly.
+        This object should not be constructed directly.
 
         Parameters
         ----------
@@ -152,7 +152,7 @@ class BagRecorderProxy:
             a shell proxy.
         nodes: NodeManagerProxy
             access to nodes for the associated ROS graph.
-        excluded_topics: Optional[Collection[str]] = None
+        exclude_topics: Optional[Collection[str]] = None
             an optional list of topics that should be excluded from the bag.
         """
         self.__lock: threading.Lock = threading.Lock()
