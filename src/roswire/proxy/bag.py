@@ -136,7 +136,7 @@ class BagRecorderProxy:
                  ws_host: str,
                  shell: dockerblade.Shell,
                  nodes: NodeManagerProxy,
-                 exclude_topics: Optional[Collection[str]] = None
+                 exclude_topics: Optional[str] = None
                  ) -> None:
         """
         Notes
