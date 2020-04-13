@@ -161,6 +161,7 @@ class BagRecorderProxy:
         self.__stopped: bool = False
         self.__shell: dockerblade.Shell = shell
         self.__nodes: NodeManagerProxy = nodes
+        self.__exclude_topics: Collection[str] = exclude_topics or tuple()
 
         # FIXME generate a bag name
         self.__bag_name: str = "my_bag"
