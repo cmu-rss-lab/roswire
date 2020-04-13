@@ -4,6 +4,7 @@ __all__ = ('BagRecorderProxy', 'BagPlayerProxy')
 
 from typing import Optional, Collection
 import logging
+import shlex
 import shutil
 import time
 import pathlib
@@ -135,12 +136,12 @@ class BagRecorderProxy:
                  ws_host: str,
                  shell: dockerblade.Shell,
                  nodes: NodeManagerProxy,
-                 exclude_topics: Optional[Collection[str]] = None
+                 exclude_topics: Optional[str] = None
                  ) -> None:
         """
         Notes
         -----
-            This object should not be constructed directly.
+        This object should not be constructed directly.
 
         Parameters
         ----------
@@ -152,8 +153,9 @@ class BagRecorderProxy:
             a shell proxy.
         nodes: NodeManagerProxy
             access to nodes for the associated ROS graph.
-        excluded_topics: Optional[Collection[str]] = None
-            an optional list of topics that should be excluded from the bag.
+        exclude_topics: Optional[str] = None
+            an optional regular expression specifying the topics that should
+            be excluded from the bag.
         """
         self.__lock: threading.Lock = threading.Lock()
         self.__process: Optional[dockerblade.Popen] = None
@@ -161,6 +163,7 @@ class BagRecorderProxy:
         self.__stopped: bool = False
         self.__shell: dockerblade.Shell = shell
         self.__nodes: NodeManagerProxy = nodes
+        self.__exclude_topics: Optional[str] = exclude_topics
 
         # FIXME generate a bag name
         self.__bag_name: str = "my_bag"
@@ -206,9 +209,12 @@ class BagRecorderProxy:
             if self.__started:
                 raise exceptions.RecorderAlreadyStarted
             self.__started = True
-            command: str = ("rosbag record -q -a"
-                            f" -O {self.__fn_container}"
-                            f" __name:={self.__bag_name}")
+            args = ['rosbag record', '-q', '-a',
+                    f'-O {self.__fn_container}',
+                    f'__name:={self.__bag_name}']
+            if self.__exclude_topics:
+                args += ['-x', shlex.quote(self.__exclude_topics)]
+            command = ' '.join(args)
             self.__process = self.__shell.popen(command,
                                                 stderr=False,
                                                 stdout=False)

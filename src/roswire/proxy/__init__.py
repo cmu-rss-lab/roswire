@@ -146,22 +146,23 @@ class ROSProxy:
 
     def record(self,
                fn: str,
-               exclude_topics: Optional[Collection[str]] = None
+               exclude_topics: Optional[str] = None
                ) -> BagRecorderProxy:
         """Provides an interface to rosbag for recording ROS topics to disk.
 
         Note
         ----
-            This method records bag files to the host machine, and not to the
-            container where the ROS instance is running.
+        This method records bag files to the host machine, and not to the
+        container where the ROS instance is running.
 
         Parameters
         ----------
         fn: str
             The name of the file, on the host machine, to which the bag should
             be recorded
-        exclude_topics: Collection[str], optional
-            An optional collection of topics that should not be recorded.
+        exclude_topics: str, optional
+            An optional regular expression specifying the topics that should
+            be excluded from the bag.
 
         Returns
         -------
