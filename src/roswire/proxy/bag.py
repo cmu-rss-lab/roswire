@@ -207,9 +207,12 @@ class BagRecorderProxy:
             if self.__started:
                 raise exceptions.RecorderAlreadyStarted
             self.__started = True
-            command: str = ("rosbag record -q -a"
-                            f" -O {self.__fn_container}"
-                            f" __name:={self.__bag_name}")
+            args = ['rosbag record', '-q', '-a',
+                    f'-O {self.__fn_container}',
+                    f'__name:={self.__bag_name}']
+            if self.__exclude_topics:
+                args += [f"-x {' '.join(self.__exclude_topics}"]
+            command = ' '.join(args)
             self.__process = self.__shell.popen(command,
                                                 stderr=False,
                                                 stdout=False)
