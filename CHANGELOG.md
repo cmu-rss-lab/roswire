@@ -20,6 +20,7 @@
 * Renamed `ParameterServerProxy` to `ParameterServer`.
 * Renamed `ServiceProxy` and `ServiceProxyManager` to `Service` and
   `ServiceManager`.
+* Removed `client_docker` property from `ROSWire`.
 
 
 # 1.0.0 (2020-31-03)

@@ -9,8 +9,6 @@ import os
 import logging
 import contextlib
 
-from docker import DockerClient
-
 from .exceptions import ROSWireException
 from .description import SystemDescription, SystemDescriptionManager
 from .system import System
@@ -64,10 +62,6 @@ class ROSWire:
     @property
     def workspace(self) -> str:
         return self.__dir_workspace
-
-    @property
-    def client_docker(self) -> DockerClient:
-        return self.__containers.docker_client
 
     @property
     def containers(self) -> ContainerManager:
