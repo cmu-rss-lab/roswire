@@ -9,9 +9,9 @@ __all__ = (
     'BagRecorderProxy',
     'BagPlayerProxy',
     'ContainerProxy',
-    'CatkinProxy',
-    'CatkinToolsProxy',
-    'CatkinMakeProxy',
+    'CatkinInterface',
+    'CatkinTools',
+    'CatkinMake',
     'ContainerProxyManager'
 )
 
@@ -25,7 +25,7 @@ import time
 
 import dockerblade
 
-from .catkin import CatkinProxy, CatkinToolsProxy, CatkinMakeProxy
+from .catkin import CatkinInterface, CatkinTools, CatkinMake
 from .container import ContainerProxy, ContainerProxyManager
 from .parameters import ParameterServerProxy
 from .bag import BagRecorderProxy, BagPlayerProxy

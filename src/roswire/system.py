@@ -12,7 +12,7 @@ import dockerblade
 from .description import SystemDescription
 from .definitions import TypeDatabase, FormatDatabase, PackageDatabase
 from .proxy import (ROSProxy, ContainerProxy,
-                    CatkinProxy, CatkinToolsProxy, CatkinMakeProxy)
+                    CatkinInterface, CatkinTools, CatkinMake)
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -63,8 +63,8 @@ class System:
     def messages(self) -> TypeDatabase:
         return self.description.types
 
-    def catkin(self, directory: str) -> CatkinProxy:
-        """Returns an interface to a given catkin workspace.
+    def catkin(self, directory: str) -> CatkinInterface:
+        """Returns an interface to a catkin workspace.
 
         Parameters
         ----------
@@ -73,14 +73,14 @@ class System:
 
         Returns
         -------
-        CatkinProxy
+        CatkinInterface
             An interface to the given workspace.
         """
         # TODO decide whether to use catkin_tools or catkin_make
         return self.catkin_tools(directory)
 
-    def catkin_tools(self, directory: str) -> CatkinToolsProxy:
-        """Returns an interface to a given catkin tools workspace.
+    def catkin_tools(self, directory: str) -> CatkinTools:
+        """Returns an interface to a catkin tools workspace.
 
         Parameters
         ----------
@@ -89,13 +89,13 @@ class System:
 
         Returns
         -------
-        CatkinToolsProxy
+        CatkinTools
             An interface to the given workspace.
         """
-        return CatkinToolsProxy(self.shell, directory)
+        return CatkinTools(shell=self.shell, directory=directory)
 
-    def catkin_make(self, directory: str) -> CatkinMakeProxy:
-        """Returns an interface to a given catkin_make workspace.
+    def catkin_make(self, directory: str) -> CatkinMake:
+        """Returns an interface to a catkin_make workspace.
 
         Parameters
         ----------
@@ -104,10 +104,10 @@ class System:
 
         Returns
         -------
-        CatkinMakeProxy
+        CatkinMake
             An interface to the given workspace.
         """
-        return CatkinMakeProxy(self.shell, directory)
+        return CatkinMake(shell=self.shell, directory=directory)
 
     @property
     def files(self) -> dockerblade.files.FileSystem:

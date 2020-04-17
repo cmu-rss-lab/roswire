@@ -9,6 +9,8 @@
   changes.
 * Bag recorder now implements the `exclude_topics` parameter rather than
   ignoring it.
+* Renamed `CatkinProxy`, `CatkinMakeProxy`, and `CatkinToolsProxy` to
+  `CatkinInterface`, `CatkinMake`, and `CatkinTools`, respectively.
 
 
 # 1.0.0 (2020-31-03)

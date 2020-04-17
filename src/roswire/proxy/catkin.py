@@ -1,26 +1,28 @@
 # -*- coding: utf-8 -*-
-__all__ = ('CatkinProxy', 'CatkinToolsProxy', 'CatkinMakeProxy')
+"""
+This module provides a unified interface for interacting with the catkin
+and catkin_make build systems.
+"""
+__all__ = ('CatkinInterface', 'CatkinTools', 'CatkinMake')
 
 from typing import Optional, List
 import abc
 import shlex
 
 from loguru import logger
+import attr
 import dockerblade
 
 from ..exceptions import CatkinBuildFailed, CatkinCleanFailed
 
 
-class CatkinProxy(abc.ABC):
-    def __init__(self, shell: dockerblade.Shell, directory: str) -> None:
-        """Constructs a catkin proxy for a given workspace."""
-        self._directory = directory
-        self._shell = shell
-
+class CatkinInterface(abc.ABC):
+    """Provides an interface to a catkin-based workspace."""
     @property
+    @abc.abstractmethod
     def directory(self) -> str:
         """The directory of this catkin workspace."""
-        return self._directory
+        ...
 
     @abc.abstractmethod
     def clean(self,
@@ -58,8 +60,12 @@ class CatkinProxy(abc.ABC):
         ...
 
 
-class CatkinToolsProxy(CatkinProxy):
+@attr.s(frozen=True, slots=True, auto_attribs=True)
+class CatkinTools(CatkinInterface):
     """Provides an interface to a catkin workspace created via catkin tools."""
+    directory: str
+    _shell: dockerblade.shell.Shell
+
     def clean(self,
               packages: Optional[List[str]] = None,
               orphans: bool = False,
@@ -122,8 +128,12 @@ class CatkinToolsProxy(CatkinProxy):
             raise CatkinBuildFailed(result.returncode, result.output)
 
 
-class CatkinMakeProxy(CatkinProxy):
+@attr.s(frozen=True, slots=True, auto_attribs=True)
+class CatkinMake(CatkinInterface):
     """Provides an interface to a catkin workspace created via catkin_make."""
+    directory: str
+    _shell: dockerblade.shell.Shell
+
     def clean(self,
               packages: Optional[List[str]] = None,
               orphans: bool = False,
