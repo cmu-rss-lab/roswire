@@ -2,8 +2,6 @@
 from .bag import BagRecorderProxy, BagPlayerProxy
 from .catkin import CatkinInterface, CatkinTools, CatkinMake
 from .container import ContainerProxy, ContainerProxyManager
-from ..description import SystemDescription
-from ..exceptions import ROSWireException
 from .node import NodeProxy, NodeManagerProxy
 from .parameters import ParameterServerProxy
 from .roscore import ROSCore
