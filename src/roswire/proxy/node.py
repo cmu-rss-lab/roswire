@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('NodeManagerProxy', 'NodeProxy')
+__all__ = ('NodeManager', 'Node')
 
 from typing import Iterator, Set, Mapping, Optional
 from urllib.parse import urlparse
@@ -12,7 +12,7 @@ import psutil
 from ..exceptions import ROSWireException, NodeNotFoundError
 
 
-class NodeProxy:
+class Node:
     """Provides access to a ROS node.
 
     Attributes
@@ -80,7 +80,7 @@ class NodeProxy:
         self.__shell.run(f'rosnode kill {self.name}')
 
 
-class NodeManagerProxy(Mapping[str, NodeProxy]):
+class NodeManager(Mapping[str, Node]):
     """Provides access to all nodes on a ROS graph."""
     def __init__(self,
                  host_ip_master: str,
@@ -112,7 +112,7 @@ class NodeManagerProxy(Mapping[str, NodeProxy]):
         """Returns an iterator over the names of all active nodes."""
         yield from self.__get_node_names()
 
-    def __getitem__(self, name: str) -> NodeProxy:
+    def __getitem__(self, name: str) -> Node:
         """Attempts to fetch a given node.
 
         Parameters
@@ -122,7 +122,7 @@ class NodeManagerProxy(Mapping[str, NodeProxy]):
 
         Returns
         -------
-        NodeProxy
+        Node
             An interface to the given node.
 
         Raises
@@ -140,7 +140,7 @@ class NodeManagerProxy(Mapping[str, NodeProxy]):
         # convert URI to host network
         port = urlparse(uri_container).port
         uri_host = f"http://{self.__host_ip_master}:{port}"
-        return NodeProxy(name, uri_host, self.__shell)
+        return Node(name, uri_host, self.__shell)
 
     def __delitem__(self, name: str) -> None:
         """Shutdown and deregister a given node.

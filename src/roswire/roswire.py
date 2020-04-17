@@ -14,7 +14,7 @@ from docker import DockerClient
 from .exceptions import ROSWireException
 from .description import SystemDescription, SystemDescriptionManager
 from .system import System
-from .proxy import ContainerProxyManager
+from .proxy import ContainerManager
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -27,7 +27,7 @@ class ROSWire:
 
     Attributes
     ----------
-    containers: ContainerProxyManager
+    containers: ContainerManager
         A manager for building and connecting to Docker containers.
     descriptions: SystemDescriptionManager
         A manager for building, loading, and storing static descriptions of
@@ -56,7 +56,7 @@ class ROSWire:
                 raise ROSWireException(m)
 
         self.__dir_workspace = os.path.abspath(dir_workspace)
-        self.__containers = ContainerProxyManager(self.__dir_workspace)
+        self.__containers = ContainerManager(self.__dir_workspace)
         dir_descriptions = os.path.join(dir_workspace, 'descriptions')
         self.__descriptions = SystemDescriptionManager(self.__containers,
                                                        dir_descriptions)
@@ -70,7 +70,7 @@ class ROSWire:
         return self.__containers.docker_client
 
     @property
-    def containers(self) -> ContainerProxyManager:
+    def containers(self) -> ContainerManager:
         return self.__containers
 
     @property

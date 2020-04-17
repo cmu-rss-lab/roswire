@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('ServiceProxy', 'ServiceManagerProxy')
+__all__ = ('Service', 'ServiceManager')
 
 from typing import Iterator, Set, Mapping, Optional
 from urllib.parse import urlparse
@@ -15,7 +15,7 @@ from ..description import SystemDescription
 
 
 @attr.s(slots=True, auto_attribs=True)
-class ServiceProxy:
+class Service:
     """Provides access to a ROS service.
 
     Attributes
@@ -67,12 +67,12 @@ class ServiceProxy:
         return db_type.from_dict(fmt_response, d)
 
 
-class ServiceManagerProxy(Mapping[str, ServiceProxy]):
+class ServiceManager(Mapping[str, Service]):
     """Provides access to the registered services on a ROS graph."""
     def __init__(self,
                  description: SystemDescription,
                  host_ip_master: str,
-                 api: xmlrpc.client.ServerProxy,
+                 api: xmlrpc.client.Server,
                  shell: dockerblade.Shell
                  ) -> None:
         self.__description = description
@@ -98,7 +98,7 @@ class ServiceManagerProxy(Mapping[str, ServiceProxy]):
         """Returns an iterator over the names of all registered services."""
         yield from self.__get_service_names()
 
-    def __getitem__(self, name: str) -> ServiceProxy:
+    def __getitem__(self, name: str) -> Service:
         """Fetches a proxy for a service with a given name.
 
         Parameters
@@ -108,7 +108,7 @@ class ServiceManagerProxy(Mapping[str, ServiceProxy]):
 
         Returns
         -------
-        ServiceProxy
+        Service
             A proxy to the given service.
 
         Raises
@@ -137,8 +137,8 @@ class ServiceManagerProxy(Mapping[str, ServiceProxy]):
             m = f"unable to determine type for service [{name}]"
             raise exceptions.ROSWireException(m) from error
         fmt = self.__description.formats.services[name_fmt]
-        return ServiceProxy(name,
-                            url_host,
-                            fmt,
-                            self.__description,
-                            self.__shell)
+        return Service(name=name,
+                       url=url_host,
+                       format=fmt,
+                       description=self.__description,
+                       shell=self.__shell)

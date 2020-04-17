@@ -18,7 +18,7 @@ import yaml
 from .definitions import TypeDatabase, FormatDatabase, PackageDatabase
 
 if typing.TYPE_CHECKING:
-    from .proxy import ContainerProxyManager
+    from .proxy import ContainerManager
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -82,7 +82,7 @@ class SystemDescriptionManager:
         The absolute path of the directory where descriptions are stored.
     """
     def __init__(self,
-                 containers: 'ContainerProxyManager',
+                 containers: 'ContainerManager',
                  dir_cache: str
                  ) -> None:
         self.__containers = containers

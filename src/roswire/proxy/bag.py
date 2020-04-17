@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # http://wiki.ros.org/Bags/Format/2.0
-__all__ = ('BagRecorderProxy', 'BagPlayerProxy')
+__all__ = ('BagRecorder', 'BagPlayer')
 
 from typing import Optional
 import shlex
@@ -13,11 +13,11 @@ import os
 from loguru import logger
 import dockerblade
 
-from .node import NodeManagerProxy
+from .node import NodeManager
 from .. import exceptions
 
 
-class BagPlayerProxy:
+class BagPlayer:
     def __init__(self,
                  fn_container: str,
                  shell: dockerblade.Shell,
@@ -44,7 +44,7 @@ class BagPlayerProxy:
         """Indicates whether or not playback has stopped."""
         return self.__stopped
 
-    def __enter__(self) -> 'BagPlayerProxy':
+    def __enter__(self) -> 'BagPlayer':
         self.start()
         return self
 
@@ -128,12 +128,12 @@ class BagPlayerProxy:
         logger.debug("stopped bag playback")
 
 
-class BagRecorderProxy:
+class BagRecorder:
     def __init__(self,
                  fn_dest: str,
                  ws_host: str,
                  shell: dockerblade.Shell,
-                 nodes: NodeManagerProxy,
+                 nodes: NodeManager,
                  exclude_topics: Optional[str] = None
                  ) -> None:
         """
@@ -149,7 +149,7 @@ class BagRecorderProxy:
             the workspace directory for the associated container (on the host).
         shell: Shell
             a shell proxy.
-        nodes: NodeManagerProxy
+        nodes: NodeManager
             access to nodes for the associated ROS graph.
         exclude_topics: Optional[str] = None
             an optional regular expression specifying the topics that should
@@ -160,7 +160,7 @@ class BagRecorderProxy:
         self.__started: bool = False
         self.__stopped: bool = False
         self.__shell: dockerblade.Shell = shell
-        self.__nodes: NodeManagerProxy = nodes
+        self.__nodes: NodeManager = nodes
         self.__exclude_topics: Optional[str] = exclude_topics
 
         # FIXME generate a bag name
@@ -182,7 +182,7 @@ class BagRecorderProxy:
         """Indicates whether or not recording has stopped."""
         return self.__stopped
 
-    def __enter__(self) -> 'BagRecorderProxy':
+    def __enter__(self) -> 'BagRecorder':
         self.start()
         return self
 

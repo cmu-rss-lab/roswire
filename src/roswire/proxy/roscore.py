@@ -10,12 +10,12 @@ import time
 from loguru import logger
 import dockerblade
 
-from .bag import BagRecorderProxy, BagPlayerProxy
+from .bag import BagRecorder, BagPlayer
 from ..description import SystemDescription
 from ..exceptions import ROSWireException
-from .node import NodeManagerProxy
-from .parameters import ParameterServerProxy
-from .service import ServiceManagerProxy
+from .node import NodeManager
+from .parameters import ParameterServer
+from .service import ServiceManager
 
 
 class ROSCore:
@@ -27,11 +27,11 @@ class ROSCore:
         The URI of the ROS Master.
     connection: xmlrpc.client.ServerProxy
         The XML-RPC connection to the ROS master.
-    nodes: NodeManagerProxy
+    nodes: NodeManager
         Provides access to the nodes running on this ROS Master.
-    services: ServiceManagerProxy
+    services: ServiceManager
         Provides access to the services advertised on this ROS Master.
-    parameters: ParameterServerProxy
+    parameters: ParameterServer
         Provides access to the parameter server for this ROS Master.
     topic_to_type: Dict[str, str]
         A mapping from topic names to the names of their message types.
@@ -55,27 +55,27 @@ class ROSCore:
         logger.debug("connecting to ROS Master: %s", self.__uri)
         self.__connection = xmlrpc.client.ServerProxy(self.__uri)
         time.sleep(5)  # FIXME #1
-        self.__parameters = ParameterServerProxy(self.__connection)
-        self.__nodes: NodeManagerProxy = \
-            NodeManagerProxy(self.__ip_address,
-                             self.__connection,
-                             self.__shell)
-        self.__services: ServiceManagerProxy = \
-            ServiceManagerProxy(self.__description,
-                                self.__ip_address,
-                                self.__connection,
-                                self.__shell)
+        self.__parameters = ParameterServer(self.__connection)
+        self.__nodes: NodeManager = \
+            NodeManager(self.__ip_address,
+                        self.__connection,
+                        self.__shell)
+        self.__services: ServiceManager = \
+            ServiceManager(self.__description,
+                           self.__ip_address,
+                           self.__connection,
+                           self.__shell)
 
     @property
-    def nodes(self) -> NodeManagerProxy:
+    def nodes(self) -> NodeManager:
         return self.__nodes
 
     @property
-    def services(self) -> ServiceManagerProxy:
+    def services(self) -> ServiceManager:
         return self.__services
 
     @property
-    def parameters(self) -> ParameterServerProxy:
+    def parameters(self) -> ParameterServer:
         return self.__parameters
 
     @property
@@ -127,7 +127,7 @@ class ROSCore:
     def record(self,
                fn: str,
                exclude_topics: Optional[str] = None
-               ) -> BagRecorderProxy:
+               ) -> BagRecorder:
         """Provides an interface to rosbag for recording ROS topics to disk.
 
         Note
@@ -146,20 +146,20 @@ class ROSCore:
 
         Returns
         -------
-        BagRecorderProxy
+        BagRecorder
             An interface for dynamically interacting with the bag recorder.
         """
-        return BagRecorderProxy(fn,
-                                self.__ws_host,
-                                self.__shell,
-                                self.__nodes,
-                                exclude_topics=exclude_topics)
+        return BagRecorder(fn,
+                           self.__ws_host,
+                           self.__shell,
+                           self.__nodes,
+                           exclude_topics=exclude_topics)
 
     def playback(self,
                  fn: str,
                  *,
                  file_on_host: bool = True
-                 ) -> BagPlayerProxy:
+                 ) -> BagPlayer:
         """Provides an interface to rosbag for replaying bag files from disk.
 
         Parameters
@@ -173,7 +173,7 @@ class ROSCore:
 
         Returns
         -------
-        BagPlayerProxy
+        BagPlayer
             An interface for dynamically controlling the bag player.
         """
         fn_ctr: str
@@ -190,7 +190,7 @@ class ROSCore:
         else:
             fn_ctr = fn
         logger.debug("playing back bag file: %s", fn_ctr)
-        return BagPlayerProxy(fn_ctr,
-                              self.__shell,
-                              self.__files,
-                              delete_file_after_use=delete_file_after_use)
+        return BagPlayer(fn_ctr,
+                         self.__shell,
+                         self.__files,
+                         delete_file_after_use=delete_file_after_use)

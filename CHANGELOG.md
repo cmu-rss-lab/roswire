@@ -1,4 +1,4 @@
-# 1.0.1 (????-??-??)
+# 1.1.0 (????-??-??)
 
 * Bug fix: Updated `proxy.substitution` module to use DockerBlade API
 * Containers will now raise a `SourceNotFoundError` if a given source does
@@ -12,6 +12,14 @@
 * Renamed `CatkinProxy`, `CatkinMakeProxy`, and `CatkinToolsProxy` to
   `CatkinInterface`, `CatkinMake`, and `CatkinTools`, respectively.
 * Renamed `ROSProxy` to `ROSCore`.
+* Renamed `BagPlayerProxy` and `BagRecorderProxy` to `BagPlayer` and
+  `BagRecorder`, respectively.
+* Renamed `ContainerProxy` and `ContainerManagerProxy` to `Container` and
+  `ContainerManager`.
+* Renamed `NodeProxy` and `NodeManagerProxy` to `Node` and `NodeManager`.
+* Renamed `ParameterServerProxy` to `ParameterServer`.
+* Renamed `ServiceProxy` and `ServiceProxyManager` to `Service` and
+  `ServiceManager`.
 
 
 # 1.0.0 (2020-31-03)

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from .bag import BagRecorderProxy, BagPlayerProxy
+from .bag import BagRecorder, BagPlayer
 from .catkin import CatkinInterface, CatkinTools, CatkinMake
-from .container import ContainerProxy, ContainerProxyManager
-from .node import NodeProxy, NodeManagerProxy
-from .parameters import ParameterServerProxy
+from .container import Container, ContainerManager
+from .node import Node, NodeManager
+from .parameters import ParameterServer
 from .roscore import ROSCore
-from .service import ServiceProxy, ServiceManagerProxy
+from .service import Service, ServiceManager

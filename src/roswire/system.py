@@ -11,8 +11,7 @@ import dockerblade
 
 from .description import SystemDescription
 from .definitions import TypeDatabase
-from .proxy import (ROSCore, ContainerProxy,
-                    CatkinInterface, CatkinTools, CatkinMake)
+from .proxy import ROSCore, Container, CatkinInterface, CatkinTools, CatkinMake
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -37,10 +36,10 @@ class System:
     ws_host: str
         The absolute path to the shared directory for this container's
         workspace on the host machine.
-    container: ContainerProxy
+    container: Container
         Provides access to the underlying Docker container.
     """
-    container: ContainerProxy = attr.ib()
+    container: Container = attr.ib()
     description: SystemDescription = attr.ib()
 
     @property

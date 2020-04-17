@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('ParameterServerProxy',)
+__all__ = ('ParameterServer',)
 
 from typing import Iterator, Any, Mapping
 import xmlrpc.client
@@ -8,7 +8,7 @@ import xmlrpc.client
 from .. import exceptions
 
 
-class ParameterServerProxy(Mapping[str, Any]):
+class ParameterServer(Mapping[str, Any]):
     """
     See: http://wiki.ros.org/ROS/Parameter%20Server%20API
     """

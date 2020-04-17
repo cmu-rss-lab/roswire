@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('ContainerProxy', 'ContainerProxyManager')
+__all__ = ('Container', 'ContainerManager')
 
 from typing import Dict, Iterator, Optional, Sequence, Union
 from uuid import UUID, uuid4
@@ -19,7 +19,7 @@ from ..exceptions import SourceNotFoundError
 
 
 @attr.s(frozen=True)
-class ContainerProxy:
+class Container:
     """Provides an interface to a Docker container running on this host.
 
     Attributes
@@ -98,7 +98,7 @@ class ContainerProxy:
 
 
 @attr.s(auto_attribs=True)
-class ContainerProxyManager:
+class ContainerManager:
     """
     Provides an interface for accessing and inspecting Docker images, and
     launching Docker containers.
@@ -166,7 +166,7 @@ class ContainerProxyManager:
                sources: Sequence[str],
                *,
                ports: Optional[Dict[int, int]] = None
-               ) -> Iterator['ContainerProxy']:
+               ) -> Iterator['Container']:
         """
         Launches a context-managed Docker container for a given image. Upon
         exiting the context, whether gracefully or abruptly (i.e., via an
@@ -187,7 +187,7 @@ class ContainerProxyManager:
 
         Yields
         ------
-        ContainerProxy
+        Container
             The constructed container.
         """
         uuid = uuid4()
@@ -196,7 +196,7 @@ class ContainerProxyManager:
             dir_shared = stack.enter_context(self._build_shared_directory(uuid))  # noqa
             dockerc = stack.enter_context(self._container(image_or_name, dir_shared, uuid, ports=ports))  # noqa
             dockerb = self._dockerblade.attach(dockerc.id)
-            yield ContainerProxy(dockerb, sources, uuid, dir_shared)
+            yield Container(dockerb, sources, uuid, dir_shared)
 
     def image(self, tag: str) -> DockerImage:
         """Retrieves the Docker image with a given tag."""
