@@ -5,7 +5,6 @@ This file provides data structures that represent ROS launch configurations.
 __all__ = ('ROSConfig', 'NodeConfig')
 
 from typing import Tuple, FrozenSet, Optional, Dict, Any
-import logging
 
 from loguru import logger
 import attr
@@ -91,7 +90,6 @@ class ROSConfig:
 
     def with_node(self, node: NodeConfig) -> 'ROSConfig':
         logger.debug(f"adding node to config: {node}")
-        full_name = node.full_name
         used_names = {n.full_name for n in self.nodes}
         if node.full_name in used_names:
             m = 'multiple definitions of node [{}] in launch configuration'

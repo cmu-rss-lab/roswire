@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 __all__ = ('Package', 'PackageDatabase')
 
-from typing import (Tuple, List, Dict, Union, Any, Iterator, Collection,
-                    Mapping, Callable, Iterable)
+from typing import Tuple, List, Dict, Any, Iterator, Collection, Mapping
 import os
 
 from loguru import logger
 import attr
 import dockerblade
-import shlex
 
 from .msg import MsgFormat
 from .srv import SrvFormat

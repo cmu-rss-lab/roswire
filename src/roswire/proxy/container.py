@@ -3,9 +3,7 @@ __all__ = ('ContainerProxy', 'ContainerProxyManager')
 
 from typing import Dict, Iterator, Optional, Sequence, Union
 from uuid import UUID, uuid4
-import shlex
 import contextlib
-import logging
 import shutil
 import os
 
@@ -17,8 +15,7 @@ from docker.models.images import Image as DockerImage
 from docker.models.containers import Container as DockerContainer
 from loguru import logger
 
-from ..util import Stopwatch
-from ..exceptions import ROSWireException, SourceNotFoundError
+from ..exceptions import SourceNotFoundError
 
 
 @attr.s(frozen=True)
@@ -60,8 +57,6 @@ class ContainerProxy:
     files: dockerblade.files.FileSystem = attr.ib(init=False, repr=False)
 
     def __attrs_post_init__(self) -> None:
-        daemon = self._dockerblade.daemon
-        docker_container = self._dockerblade._docker
         files = self._dockerblade.filesystem()
 
         # #338 ensure that the given sources exist

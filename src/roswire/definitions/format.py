@@ -2,14 +2,14 @@
 __all__ = ('FormatDatabase',)
 
 from types import MappingProxyType
-from typing import Collection, Mapping, Dict, Set, List, Any
+from typing import Mapping, Dict, Set, Any
 
 import yaml
 
 from .msg import MsgFormat
 from .srv import SrvFormat
 from .action import ActionFormat
-from .package import Package, PackageDatabase
+from .package import PackageDatabase
 
 
 class FormatDatabase:

@@ -7,8 +7,7 @@ import os
 import attr
 import dockerblade
 
-from .msg import MsgFormat, Constant, Field
-from .. import exceptions
+from .msg import MsgFormat
 
 
 @attr.s(frozen=True)

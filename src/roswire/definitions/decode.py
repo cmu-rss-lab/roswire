@@ -3,8 +3,7 @@
 This module provides code for decoding and deserialising binary ROS messages
 into Python data structures.
 """
-from typing import (Optional, Iterator, Callable, Any, List, Type, TypeVar,
-                    BinaryIO, Dict)
+from typing import Optional, Callable, Any, List, TypeVar, BinaryIO, Dict
 import functools
 import struct
 

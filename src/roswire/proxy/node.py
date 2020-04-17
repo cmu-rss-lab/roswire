@@ -4,7 +4,6 @@ __all__ = ('NodeManagerProxy', 'NodeProxy')
 from typing import Iterator, Set, Mapping, Optional
 from urllib.parse import urlparse
 import xmlrpc.client
-import logging
 
 from loguru import logger
 import dockerblade

@@ -4,19 +4,14 @@ This file implements a proxy for parsing the contents of launch files.
 """
 __all__ = ('LaunchFileReader',)
 
-from typing import (List, Optional, Sequence, Collection, Dict, Any, Mapping,
-                    Tuple, Union, overload)
-from copy import deepcopy
-import logging
+from typing import Any, Collection, Optional, overload, Sequence, Tuple, Union
 import xml.etree.ElementTree as ET
 
 from loguru import logger
-import attr
 import dockerblade
-import yaml
 
 from .rosparam import load_from_yaml_string as load_rosparam_from_string
-from .config import ROSConfig, NodeConfig, Parameter
+from .config import ROSConfig, NodeConfig
 from .context import LaunchContext
 from ..substitution import resolve as resolve_args
 from ...name import (namespace_join, global_name, namespace, name_is_global,

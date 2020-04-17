@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-This file provides data structures that represent ROS launch configurations.
+This module provides data structures that represent ROS launch configurations.
 """
 __all__ = ('LaunchContext',)
 
-from typing import Tuple, Mapping, Any, Optional, Sequence, Dict
+from typing import Tuple, Any, Optional, Sequence, Dict
 from copy import deepcopy
 
 from loguru import logger

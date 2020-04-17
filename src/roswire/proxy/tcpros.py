@@ -2,7 +2,7 @@
 __all__ = ('TCPROSHeader', 'TCPROSMessage')
 
 from io import BytesIO
-from typing import Dict, Union, Optional, BinaryIO, Mapping, Type
+from typing import Dict, Optional, BinaryIO, Mapping, Type
 
 import attr
 
@@ -173,7 +173,8 @@ class TCPROSMessage:
         """Reads a TCPROS message from a binary stream."""
         header = TCPROSHeader.read(b)
         type_ = types[header.type_]
-        message_size = read_uint32(b)
+        # read message size
+        read_uint32(b)
         message = type_.read(b)
         return TCPROSMessage(header=header,
                              message=message)

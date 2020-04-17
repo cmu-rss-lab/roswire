@@ -1,12 +1,10 @@
 __all__ = ('Constant', 'ConstantValue', 'Field', 'MsgFormat', 'Message')
 
-from typing import (Type, Optional, Any, Union, Tuple, List, Dict, ClassVar,
-                    Collection, Set, Iterator, Mapping, Callable, BinaryIO)
+from typing import (Optional, Any, Union, Tuple, List, Dict, ClassVar,
+                    Collection, Set, Iterator, Mapping, BinaryIO)
 from io import BytesIO
 import logging
-import functools
 import hashlib
-import struct
 import re
 import os
 

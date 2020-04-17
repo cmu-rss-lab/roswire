@@ -6,10 +6,7 @@ and provides a manager for persisting those descriptions to disk.
 __all__ = ('SystemDescription', 'SystemDescriptionManager')
 
 from typing import Any, Dict, Sequence, Union
-from uuid import UUID
 import base64
-import contextlib
-import logging
 import os
 import typing
 

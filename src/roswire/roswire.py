@@ -5,21 +5,16 @@ This module provides access to the ROSWire session.
 __all__ = ('ROSWire',)
 
 from typing import Dict, Iterator, Optional, Sequence
-from uuid import uuid4
 import os
-import pathlib
 import logging
 import contextlib
-import shutil
 
 from docker import DockerClient
-from docker import APIClient as DockerAPIClient
 
 from .exceptions import ROSWireException
 from .description import SystemDescription, SystemDescriptionManager
 from .system import System
-from .proxy import ContainerProxy, ContainerProxyManager
-from .definitions import FormatDatabase, PackageDatabase, TypeDatabase
+from .proxy import ContainerProxyManager
 
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

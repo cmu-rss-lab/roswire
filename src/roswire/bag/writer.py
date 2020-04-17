@@ -9,13 +9,16 @@ https://github.com/ros/ros_comm/blob/melodic-devel/tools/rosbag/src/rosbag/bag.p
 """
 __all__ = ('BagWriter',)
 
-from typing import BinaryIO, Iterable, Dict, Type, Tuple
+from typing import BinaryIO, Iterable, Dict, Type, Tuple, List, Optional
 import logging
 
 from .core import (BagMessage, OpCode, Compression, ConnectionInfo, Chunk,
                    Index, IndexEntry, ChunkConnection)
 from ..definitions import Message
-from ..definitions.encode import *
+from ..definitions.encode import (encode_uint32, write_uint32,
+                                  encode_uint64,
+                                  encode_time, write_time,
+                                  write_encoded_header)
 
 BIN_CHUNK_INFO_VERSION = encode_uint32(1)
 BIN_INDEX_VERSION = encode_uint32(1)
@@ -233,7 +236,7 @@ class BagWriter:
 
     def _write_chunk_info_record(self, chunk: Chunk) -> None:
         num_connections = len(chunk.connections)
-        pos_header = self.__fp.tell()
+        # pos_header = self.__fp.tell()
         self._write_header(OpCode.CHUNK_INFO, {
             'ver': BIN_CHUNK_INFO_VERSION,
             'chunk_pos': encode_uint64(chunk.pos_record),

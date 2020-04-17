@@ -3,7 +3,6 @@ __all__ = ('ActionFormat',)
 
 from typing import Optional, List, Dict, Any
 import os
-import re
 
 import attr
 import dockerblade

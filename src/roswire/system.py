@@ -10,7 +10,7 @@ import attr
 import dockerblade
 
 from .description import SystemDescription
-from .definitions import TypeDatabase, FormatDatabase, PackageDatabase
+from .definitions import TypeDatabase
 from .proxy import (ROSCore, ContainerProxy,
                     CatkinInterface, CatkinTools, CatkinMake)
 

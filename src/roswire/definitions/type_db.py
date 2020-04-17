@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 __all__ = ('TypeDatabase',)
 
-from typing import (Collection, Type, Mapping, Iterator, Dict, ClassVar, Any,
-                    Sequence, Callable, BinaryIO, List)
+from typing import (Collection, Type, Mapping, Iterator, Dict, Any, Callable,
+                    BinaryIO)
 from collections import OrderedDict
 
 import attr

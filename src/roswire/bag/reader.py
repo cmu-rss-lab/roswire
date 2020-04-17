@@ -1,23 +1,20 @@
 # -*- coding: utf-8 -*-
 __all__ = ('BagReader',)
 
-from typing import (Dict, Sequence, Union, Optional, Tuple, List, Type,
-                    Callable, Collection, Set, Iterator)
+from typing import Dict, Optional, Tuple, List, Type, Collection, Set, Iterator
 from io import BytesIO
 from functools import reduce
 import os
-import bz2
-import datetime
 import logging
 import heapq
 
-from .core import *
+from .core import (OpCode, Compression, BagMessage, ChunkConnection, Chunk,
+                   ConnectionInfo, BagHeader, IndexEntry, Index)
 from ..definitions.base import Time, Duration
 from ..definitions.msg import Message
 from ..definitions.type_db import TypeDatabase
-from ..definitions.decode import (decode_uint8, read_uint8,
-                                  decode_uint32, read_uint32,
-                                  decode_uint64, read_uint64,
+from ..definitions.decode import (decode_uint32, read_uint32,
+                                  decode_uint64,
                                   decode_string,
                                   decode_time, read_time,
                                   read_sized,

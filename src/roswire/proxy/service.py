@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
-__all__ = ('ServiceProxy', 'ServiceProxyManager')
+__all__ = ('ServiceProxy', 'ServiceManagerProxy')
 
-from typing import Iterator, Any, List, Set, Mapping, Optional
+from typing import Iterator, Set, Mapping, Optional
 from urllib.parse import urlparse
 import xmlrpc.client
-import logging
-import shlex
-import json
 
-from loguru import logger
 import attr
 import dockerblade
 import yaml

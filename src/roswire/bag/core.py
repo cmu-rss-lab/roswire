@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __all__ = ('OpCode', 'Compression', 'BagMessage', 'ChunkConnection', 'Chunk',
            'ConnectionInfo', 'BagHeader', 'IndexEntry', 'Index')
 

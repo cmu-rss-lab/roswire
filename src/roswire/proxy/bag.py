@@ -2,12 +2,10 @@
 # http://wiki.ros.org/Bags/Format/2.0
 __all__ = ('BagRecorderProxy', 'BagPlayerProxy')
 
-from typing import Optional, Collection
-import logging
+from typing import Optional
 import shlex
 import shutil
 import time
-import pathlib
 import threading
 import subprocess
 import os

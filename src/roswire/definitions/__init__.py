@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from .base import Time, Duration
 from .msg import Constant, ConstantValue, Field, MsgFormat, Message
 from .srv import SrvFormat

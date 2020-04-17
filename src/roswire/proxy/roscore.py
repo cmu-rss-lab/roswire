@@ -1,25 +1,21 @@
 # -*- coding: utf-8 -*-
 __all__ = ('ROSCore',)
 
-from typing import (Tuple, Dict, Optional, Iterator, Any, List, Union,
-                    Collection)
+from typing import Dict, List, Optional, Union
 import os
 import xmlrpc.client
 import shlex
-import logging
 import time
 
 from loguru import logger
 import dockerblade
 
 from .bag import BagRecorderProxy, BagPlayerProxy
-from .catkin import CatkinInterface, CatkinTools, CatkinMake
-from .container import ContainerProxy, ContainerProxyManager
 from ..description import SystemDescription
 from ..exceptions import ROSWireException
-from .node import NodeProxy, NodeManagerProxy
+from .node import NodeManagerProxy
 from .parameters import ParameterServerProxy
-from .service import ServiceProxy, ServiceManagerProxy
+from .service import ServiceManagerProxy
 
 
 class ROSCore:

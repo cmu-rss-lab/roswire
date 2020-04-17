@@ -11,8 +11,7 @@ https://plse.cs.washington.edu/daikon/download/doc/developer/File-formats.html#D
 """
 __all__ = ('bag_to_decls', 'bag_to_daikon')
 
-from typing import (Dict, Type, Set, FrozenSet, List, Union, Iterator,
-                    Collection, Mapping, Any)
+from typing import Set, FrozenSet, List, Iterator, Collection, Mapping, Any
 from collections import OrderedDict
 from functools import reduce
 
@@ -123,8 +122,8 @@ class TraceWriter:
             else:
                 str_val = str(var_val)
             lines += [var_name, str_val, '1']
-        self.__fp.writelines(f'{l}\n' for l in lines)
-        self.__fp.write('\n')
+        fp.writelines(f'{l}\n' for l in lines)
+        fp.write('\n')
 
     def close(self) -> None:
         self.__fp.close()
