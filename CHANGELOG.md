@@ -11,6 +11,7 @@
   ignoring it.
 * Renamed `CatkinProxy`, `CatkinMakeProxy`, and `CatkinToolsProxy` to
   `CatkinInterface`, `CatkinMake`, and `CatkinTools`, respectively.
+* Renamed `ROSProxy` to `ROSCore`.
 
 
 # 1.0.0 (2020-31-03)

@@ -11,7 +11,7 @@ import dockerblade
 
 from .description import SystemDescription
 from .definitions import TypeDatabase, FormatDatabase, PackageDatabase
-from .proxy import (ROSProxy, ContainerProxy,
+from .proxy import (ROSCore, ContainerProxy,
                     CatkinInterface, CatkinTools, CatkinMake)
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -114,11 +114,11 @@ class System:
         return self.container.files
 
     @contextlib.contextmanager
-    def roscore(self, port: int = 11311) -> Iterator[ROSProxy]:
+    def roscore(self, port: int = 11311) -> Iterator[ROSCore]:
         """
-        Launches a context-managed ROS Master (i.e., roscore) inside the
-        container. Upon exiting the context, the ROS master (and its
-        associated resources) will be destroyed.
+        Launches a context-managed roscore inside the container.
+        Upon exiting the context, the ROS master (and its associated resources)
+        will be destroyed.
 
         Parameters
         ----------
@@ -127,19 +127,19 @@ class System:
 
         Yields
         ------
-        ROSProxy
+        ROSCore
             An interface to the launched ROS Master.
         """
         assert port > 1023
         command = f"roscore -p {port}"
         process = self.shell.popen(command)
         try:
-            yield ROSProxy(description=self.description,
-                           shell=self.shell,
-                           files=self.files,
-                           ws_host=self.ws_host,
-                           ip_address=self.ip_address,
-                           port=port)
+            yield ROSCore(description=self.description,
+                          shell=self.shell,
+                          files=self.files,
+                          ws_host=self.ws_host,
+                          ip_address=self.ip_address,
+                          port=port)
         finally:
             process.terminate()
             process.wait(2.0)
