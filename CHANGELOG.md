@@ -1,4 +1,4 @@
-# 1.1.0 (????-??-??)
+# 1.1.0 (2020-23-04)
 
 * Bug fix: Updated `proxy.substitution` module to use DockerBlade API
 * Containers will now raise a `SourceNotFoundError` if a given source does
