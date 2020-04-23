@@ -14,18 +14,18 @@ from ...name import (namespace_join, canonical_name, name_is_global,
                      namespaces_of)
 
 
-@attr.s(frozen=True, slots=True)
+@attr.s(frozen=True, slots=True, auto_attribs=True)
 class Parameter:
-    name: str = attr.ib()
-    value: str = attr.ib()  # TODO convert to appropriate type
+    name: str
+    value: str  # TODO convert to appropriate type
 
 
-@attr.s(frozen=True, slots=True)
+@attr.s(frozen=True, slots=True, auto_attribs=True)
 class NodeConfig:
-    namespace: str = attr.ib()
-    name: str = attr.ib()
-    typ: str = attr.ib()
-    package: str = attr.ib()
+    namespace: str
+    name: str
+    typ: str
+    package: str
     remappings: Tuple[Tuple[str, str], ...] = attr.ib(default=tuple())
     filename: Optional[str] = attr.ib(default=None)
     output: Optional[str] = attr.ib(default=None)

@@ -1,3 +1,10 @@
+# 1.2.0 (????-??-??)
+
+* Moved methods in `substitution` module into `ArgumentResolver` class.
+* Added handling of executables and resources for `$(find ...)` commands.
+* Fixed handling of namespaces for `node` elements in XML launch files.
+
+
 # 1.1.0 (2020-23-04)
 
 * Bug fix: Updated `proxy.substitution` module to use DockerBlade API
