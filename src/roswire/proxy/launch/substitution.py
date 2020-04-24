@@ -9,7 +9,7 @@ https://github.com/ros/ros_comm/tree/kinetic-devel/tools/roslaunch/src/roslaunch
 """
 __all__ = ('ArgumentResolver',)
 
-from typing import Any, Dict, Sequence
+from typing import Any, Dict, Match, Sequence
 import os
 import re
 import shlex
@@ -150,7 +150,7 @@ class ArgumentResolver:
             raise NotImplementedError
         s = R_ARG.sub(lambda m: self._resolve_arg(m.group(0)), s)
 
-        def process_find_arg(match: re.Match) -> str:
+        def process_find_arg(match: Match[str]) -> str:
             # split tag and optional trailing path
             tag: str
             path: str
