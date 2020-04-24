@@ -5,8 +5,9 @@ from typing import Dict, Optional, Tuple, List, Type, Collection, Set, Iterator
 from io import BytesIO
 from functools import reduce
 import os
-import logging
 import heapq
+
+from loguru import logger
 
 from .core import (OpCode, Compression, BagMessage, ChunkConnection, Chunk,
                    ConnectionInfo, BagHeader, IndexEntry, Index)
@@ -21,10 +22,6 @@ from ..definitions.decode import (decode_uint32, read_uint32,
                                   read_encoded_header)
 
 
-logger: logging.Logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-
 class BagReader:
     def __init__(self, fn: str, db_type: TypeDatabase) -> None:
         self.__fp = open(fn, 'rb')
@@ -33,10 +30,10 @@ class BagReader:
 
         version = self._read_version()
         assert version == '#ROSBAG V2.0'
-        logger.debug("bag version: %s", version)
+        logger.debug(f"bag version: {version}")
 
         self.__header = self._read_header_record()
-        logger.debug("bag header: %s", self.__header)
+        logger.debug(f"bag header: {self.__header}")
 
         # skip past chunks
         self._seek(self.__header.index_pos)
@@ -59,12 +56,10 @@ class BagReader:
 
         # read the index
         self.__index: Index = self._read_index()
-        logger.debug("topics: %s", self.topics)
+        logger.debug(f"topics: {self.topics}")
         for conn_id, indices in self.__index.items():
-            logger.debug("conn %d [%s]: %d messages",
-                         conn_id,
-                         self.__connections[conn_id].topic,
-                         len(indices))
+            topic = self.__connections[conn_id].topic
+            logger.debug(f"conn {conn_id} [{topic}]: {len(indices)} messages")
 
     @property
     def connections(self) -> Tuple[ConnectionInfo, ...]:
@@ -151,8 +146,8 @@ class BagReader:
     def _read_connection_record(self) -> ConnectionInfo:
         header = self._read_header(OpCode.CONNECTION_INFO)
         conn = self._read_header()
-        logger.debug("conn record header: %s", header)
-        logger.debug("conn header: %s", conn)
+        logger.debug(f"conn record header: {header}")
+        logger.debug(f"conn header: {conn}")
         callerid: Optional[str] = None
         latching: Optional[str] = None
         if 'callerid' in conn:
@@ -213,14 +208,14 @@ class BagReader:
                       compression=compression,
                       connections=connections)
 
-        logger.debug("decoded chunk: %s", chunk)
+        logger.debug("decoded chunk: {chunk}")
         return chunk
 
     def _read_index(self) -> Index:
         logger.debug("reading index")
         index: Index = {c.conn: [] for c in self.connections}
         for chunk in self.chunks:
-            logger.debug("reading index for chunk: %s", chunk)
+            logger.debug(f"reading index for chunk: {chunk}")
             pos = chunk.pos_record
             self._seek(pos)
             self._skip_record()
@@ -313,7 +308,7 @@ class BagReader:
         raw = read_sized(bfr)
         content = msg_typ.read(BytesIO(raw))
         msg = BagMessage(topic, t, content)
-        logger.debug("decoded message: %s", msg)
+        logger.debug(f"decoded message: {msg}")
         return msg
 
     def read_messages(self,

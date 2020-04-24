@@ -4,7 +4,6 @@ __all__ = ('System',)
 from typing import Iterator
 from uuid import UUID
 import contextlib
-import logging
 
 import attr
 import dockerblade
@@ -12,9 +11,6 @@ import dockerblade
 from .description import SystemDescription
 from .definitions import TypeDatabase
 from .proxy import ROSCore, Container, CatkinInterface, CatkinTools, CatkinMake
-
-logger: logging.Logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 @attr.s(frozen=True)

@@ -10,7 +10,8 @@ https://github.com/ros/ros_comm/blob/melodic-devel/tools/rosbag/src/rosbag/bag.p
 __all__ = ('BagWriter',)
 
 from typing import BinaryIO, Iterable, Dict, Type, Tuple, List, Optional
-import logging
+
+from loguru import logger
 
 from .core import (BagMessage, OpCode, Compression, ConnectionInfo, Chunk,
                    Index, IndexEntry, ChunkConnection)
@@ -22,9 +23,6 @@ from ..definitions.encode import (encode_uint32, write_uint32,
 
 BIN_CHUNK_INFO_VERSION = encode_uint32(1)
 BIN_INDEX_VERSION = encode_uint32(1)
-
-logger: logging.Logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 class BagWriter:
@@ -88,7 +86,7 @@ class BagWriter:
                        ) -> None:
         typ = message.message.__class__
         connection = self._get_connection(message.topic, typ)
-        logger.debug("writing message on connection [%s]", connection.topic)
+        logger.debug(f"writing message on connection [{connection.topic}]")
 
         pos_header = self.__fp.tell()
         self._write_header(OpCode.MESSAGE_DATA, {
@@ -171,7 +169,7 @@ class BagWriter:
                                 conn: int,
                                 entries: List[IndexEntry]
                                 ) -> None:
-        logger.debug("writing connection index [%d]", conn)
+        logger.debug(f"writing connection index [{conn}]")
         num_entries = len(entries)
         size_data = num_entries * 12
         self._write_header(OpCode.INDEX_DATA, {

@@ -3,21 +3,18 @@ __all__ = ('Constant', 'ConstantValue', 'Field', 'MsgFormat', 'Message')
 from typing import (Optional, Any, Union, Tuple, List, Dict, ClassVar,
                     Collection, Set, Iterator, Mapping, BinaryIO)
 from io import BytesIO
-import logging
 import hashlib
 import re
 import os
 
+from loguru import logger
+from toposort import toposort_flatten as toposort
 import attr
 import dockerblade
-from toposort import toposort_flatten as toposort
 
 from .base import is_builtin, Time, Duration
 from .decode import is_simple
 from .. import exceptions
-
-logger: logging.Logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 R_TYPE = r"[a-zA-Z0-9_/]+(?:\[\d*\])?"
 R_NAME = r"[a-zA-Z0-9_/]+"
@@ -176,7 +173,7 @@ class MsgFormat:
                     typ_resolved = f'{package}/{typ}'
 
                 if typ != typ_resolved:
-                    logger.debug("resolved type [%s]: %s", typ, typ_resolved)
+                    logger.debug(f"resolved type [{typ}]: {typ_resolved}")
                     typ = typ_resolved
 
                 field: Field = Field(typ, name_field)
@@ -240,11 +237,11 @@ class MsgFormat:
 
     def md5sum(self, name_to_msg: Mapping[str, 'MsgFormat']) -> str:
         """Computes the MD5 sum for this format."""
-        logger.debug("generating md5sum: %s", self.fullname)
+        logger.debug(f"generating md5sum: {self.fullname}")
         txt = self.md5text(name_to_msg)
-        logger.debug("generated md5 text [%s]:\n%s", self.fullname, txt)
+        logger.debug(f"generated md5 text [{self.fullname}]:\n{txt}")
         md5sum = hashlib.md5(txt.encode('utf-8')).hexdigest()
-        logger.debug("generated md5sum [%s]: %s", self.fullname, md5sum)
+        logger.debug(f"generated md5sum [{self.fullname}]: {md5sum}")
         return md5sum
 
 

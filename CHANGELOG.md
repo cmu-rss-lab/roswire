@@ -7,6 +7,7 @@
 * Fixed handling of `launch-prefix` for `node` elements in XML launch files.
 * Fixed bad type annotation in `proxy.launch.substitution` that broke Python
   3.6 compatibility.
+* Moved all logging from Python's built-in logging library to loguru.
 
 
 # 1.1.0 (2020-23-04)

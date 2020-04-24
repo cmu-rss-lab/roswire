@@ -6,16 +6,14 @@ __all__ = ('ROSWire',)
 
 from typing import Dict, Iterator, Optional, Sequence
 import os
-import logging
 import contextlib
+
+from loguru import logger
 
 from .exceptions import ROSWireException
 from .description import SystemDescription, SystemDescriptionManager
 from .system import System
 from .proxy import ContainerManager
-
-logger: logging.Logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 class ROSWire:
@@ -48,9 +46,9 @@ class ROSWire:
                 logger.debug("initialising default workspace")
                 os.mkdir(dir_workspace)
         else:
-            logger.debug("using specified workspace: %s", dir_workspace)
+            logger.debug(f"using specified workspace: {dir_workspace}")
             if not os.path.exists(dir_workspace):
-                m = "workspace not found: {}".format(dir_workspace)
+                m = f"workspace not found: {dir_workspace}"
                 raise ROSWireException(m)
 
         self.__dir_workspace = os.path.abspath(dir_workspace)
