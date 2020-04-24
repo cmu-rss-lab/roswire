@@ -190,7 +190,7 @@ class LaunchFileReader:
             fullname = namespace_join(ctx.namespace, name)
 
         # register the parameter
-        cfg = cfg.with_param(fullname, value)
+        cfg = cfg.with_param(name=fullname, typ=typ, value=value)
 
         return ctx, cfg
 
@@ -237,7 +237,7 @@ class LaunchFileReader:
             if not isinstance(data, dict) and not param:
                 m = "<rosparam> requires 'param' for non-dictionary values"
                 raise FailedToParseLaunchFile(m)
-            cfg = cfg.with_param(full_param, data)
+            cfg = cfg.with_param(name=full_param, typ='yaml', value=data)
 
         # handle dump command
         if cmd == 'dump':

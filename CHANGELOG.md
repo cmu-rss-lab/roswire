@@ -8,6 +8,7 @@
 * Fixed bad type annotation in `proxy.launch.substitution` that broke Python
   3.6 compatibility.
 * Moved all logging from Python's built-in logging library to loguru.
+* Added `to_xml_tree` method to `LaunchConfig`.
 
 
 # 1.1.0 (2020-23-04)
