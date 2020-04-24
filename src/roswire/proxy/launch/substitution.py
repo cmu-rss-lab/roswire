@@ -19,7 +19,7 @@ from loguru import logger
 import attr
 import dockerblade
 
-from ...exceptions import EnvNotFoundError, SubstitutionError
+from ...exceptions import SubstitutionError
 
 R_ARG = re.compile(r'\$\(.+?\)')
 R_FIND_ARG = re.compile(r'\$\(find .+?\)([^\s]+)')
@@ -55,7 +55,7 @@ class ArgumentResolver:
         if kind == 'optenv':
             try:
                 return shell.environ(params[0])
-            except EnvNotFoundError:
+            except dockerblade.exceptions.EnvNotFoundError:
                 return ' '.join(params[1:])
         if kind == 'dirname':
             try:
