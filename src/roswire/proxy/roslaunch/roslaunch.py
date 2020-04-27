@@ -22,7 +22,7 @@ class ROSLaunchManager:
     def read(self,
              filename: str,
              *,
-             package: str,
+             package: Optional[str] = None,
              argv: Optional[Sequence[str]] = None
              ) -> LaunchConfig:
         """Produces a summary of the effects of a launch file.
