@@ -109,7 +109,6 @@ def tag(name: str, legal_attributes: Collection[str] = tuple()):
 class LaunchFileReader:
     _shell: dockerblade.Shell
     _files: dockerblade.FileSystem
-    _workspaces: Sequence[str]
 
     def _parse_file(self, fn: str) -> ET.Element:
         """Parses a given XML launch file to a root XML element."""
@@ -469,7 +468,6 @@ class LaunchFileReader:
         resolve_ctx = ctx.resolve_dict or {}
         resolver = ArgumentResolver(shell=self._shell,
                                     files=self._files,
-                                    workspaces=self._workspaces,
                                     context=resolve_ctx)
         return resolver.resolve(s)
 

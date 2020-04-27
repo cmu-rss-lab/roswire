@@ -9,7 +9,7 @@ https://github.com/ros/ros_comm/tree/kinetic-devel/tools/roslaunch/src/roslaunch
 """
 __all__ = ('ArgumentResolver',)
 
-from typing import Any, Dict, Match, Sequence
+from typing import Any, Dict, Match
 import os
 import re
 import shlex
@@ -29,7 +29,6 @@ R_FIND_ARG = re.compile(r'\$\(find .+?\)([^\s]+)')
 class ArgumentResolver:
     shell: dockerblade.Shell
     files: dockerblade.FileSystem
-    workspaces: Sequence[str]
     context: Dict[str, Any] = attr.ib(default=None)
 
     def _resolve_arg(self, s: str) -> str:
@@ -88,10 +87,14 @@ class ArgumentResolver:
         path_original = path
 
         # look for executable in lib/ directory of workspaces
-        for path_workspace in self.workspaces:
-            path_in_ws = os.path.join(path_workspace, 'lib', package, path)
-            if self.files.access(path_in_ws, os.X_OK):
-                return path_in_ws
+        catkin_find_command = ("catkin_find --first-only --libexec "
+                               f"{shlex.quote(package)} {shlex.quote(path)}")
+        try:
+            path_in_ws = self.shell.check_output(catkin_find_command)
+            path_in_ws = path_in_ws.strip()
+            return path_in_ws
+        except dockerblade.CalledProcessError:
+            pass
 
         # look for executable in source directory of package
         path_package = self._find_package_path(package)
@@ -103,10 +106,15 @@ class ArgumentResolver:
         return path_in_package
 
     def _find_resource(self, package: str, path: str) -> str:
-        for path_workspace in self.workspaces:
-            path_in_ws = os.path.join(path_workspace, 'share', package, path)
-            if self.files.isfile(path_in_ws):
-                return path_in_ws
+        catkin_find_command = ("catkin_find --first-only --share "
+                               f"{shlex.quote(package)} {shlex.quote(path)}")
+        try:
+            path_in_ws = self.shell.check_output(catkin_find_command)
+            path_in_ws = path_in_ws.strip()
+            return path_in_ws
+        except dockerblade.CalledProcessError:
+            pass
+
         path_package = self._find_package_path(package)
         path_in_package = os.path.join(path_package, path)
         if not self.files.isfile(path_in_package):
