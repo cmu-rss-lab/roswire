@@ -6,6 +6,8 @@ import xml.etree.ElementTree as ET
 
 import attr
 
+from ....name import namespace_join
+
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
 class NodeConfig:
