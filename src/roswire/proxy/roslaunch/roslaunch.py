@@ -24,7 +24,7 @@ class ROSLaunchManager:
              package: str
              ) -> LaunchConfig:
         """Produces a summary of the effects of a launch file.
-        
+
         Parameters
         ----------
         filename: str
