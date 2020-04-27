@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__ = ('ROSLaunchManager',)
 
-from typing import List, Mapping, Optional, Union
+from typing import List, Mapping, Optional, Sequence, Union
 import os
 import shlex
 
@@ -10,6 +10,7 @@ import attr
 import dockerblade
 
 from .config import LaunchConfig
+from .reader import LaunchFileReader
 from ... import exceptions as exc
 
 
@@ -21,7 +22,8 @@ class ROSLaunchManager:
     def read(self,
              filename: str,
              *,
-             package: str
+             package: str,
+             argv: Optional[Sequence[str]] = None
              ) -> LaunchConfig:
         """Produces a summary of the effects of a launch file.
 
@@ -32,8 +34,20 @@ class ROSLaunchManager:
             file inside the container.
         package: str, optional
             The name of the package to which the launch file belongs.
+        argv: Sequence[str], optional
+            An optional sequence of command-line arguments that should be
+            supplied to :code:`roslaunch`.
+
+        Raises
+        ------
+        PackageNotFound
+            If the given package could not be found.
+        LaunchFileNotFound
+            If the given launch file could not be found in the package.
         """
-        raise NotImplementedError
+        filename = self.locate(filename, package=package)
+        reader = LaunchFileReader(shell=self._shell, files=self._files)
+        return reader.read(filename, argv)
 
     def locate(self, filename: str, *, package: Optional[str] = None) -> str:
         """Locates a given launch file.
