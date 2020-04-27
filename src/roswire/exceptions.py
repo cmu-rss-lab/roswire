@@ -7,7 +7,8 @@ class ROSWireException(Exception):
 
 
 @_attr.s(frozen=True, auto_exc=True, auto_attribs=True, str=False)
-class PackageNotFound(ROSWireException):
+class PackageNotFound(ValueError, ROSWireException):
+    """No package was found with a given name."""
     package: str
 
     def __str__(self) -> str:
