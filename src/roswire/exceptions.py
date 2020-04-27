@@ -6,6 +6,14 @@ class ROSWireException(Exception):
     """Base class used by all ROSWire exceptions."""
 
 
+@_attr.s(frozen=True, auto_exc=True, auto_attribs=True, str=False)
+class PackageNotFound(ROSWireException):
+    package: str
+
+    def __str__(self) -> str:
+        return f"Could not find package with name: {self.package}"
+
+
 class FailedToParseLaunchFile(ROSWireException):
     """An attempt to parse a launch file failed."""
 
