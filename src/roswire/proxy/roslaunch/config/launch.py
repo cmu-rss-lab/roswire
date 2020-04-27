@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__ = ('LaunchConfig',)
 
-from typing import Tuple, FrozenSet, Optional, Dict, Any
+from typing import Tuple, FrozenSet, Dict, Any
 import xml.etree.ElementTree as ET
 
 from loguru import logger
@@ -10,8 +10,7 @@ import attr
 from .node import NodeConfig
 from .parameter import Parameter
 from ....exceptions import FailedToParseLaunchFile
-from ....name import (namespace_join, canonical_name, name_is_global,
-                      namespaces_of)
+from ....name import canonical_name, name_is_global, namespaces_of
 
 
 @attr.s(frozen=True, slots=True)
