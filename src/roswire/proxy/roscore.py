@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__ = ('ROSCore',)
 
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Mapping, Optional, Union
 import os
 import xmlrpc.client
 import shlex
@@ -52,7 +52,7 @@ class ROSCore:
         self.__port = port
         self.__ip_address = ip_address
         self.__uri = f"http://{ip_address}:{port}"
-        logger.debug("connecting to ROS Master: %s", self.__uri)
+        logger.debug(f"connecting to ROS Master: {self.__uri}")
         self.__connection = xmlrpc.client.ServerProxy(self.__uri)
         time.sleep(5)  # FIXME #1
         self.__parameters = ParameterServer(self.__connection)
@@ -95,7 +95,8 @@ class ROSCore:
                *,
                package: Optional[str] = None,
                args: Optional[Dict[str, Union[int, str]]] = None,
-               prefix: Optional[str] = None
+               prefix: Optional[str] = None,
+               launch_prefixes: Optional[Mapping[str, str]] = None
                ) -> None:
         """Provides an interface to roslaunch.
 
@@ -110,14 +111,36 @@ class ROSCore:
             Keyword arguments that should be supplied to roslaunch.
         prefix: str, optional
             An optional prefix to add before the roslaunch command.
+        launch_prefixes: Mapping[str, str], optional
+            An optional mapping from nodes, given by their names, to their
+            individual launch prefix.
         """
+        shell = self.__shell
         if not args:
             args = {}
+        if not launch_prefixes:
+            launch_prefixes = {}
         launch_args: List[str] = [f'{arg}:={val}' for arg, val in args.items()]
-        cmd = ['roslaunch']
+
+        if launch_prefixes:
+            m = "individual launch prefixes are not yet implemented"
+            raise NotImplementedError(m)
+
+        # determine the absolute path of the launch file
         if package:
-            cmd += [shlex.quote(package)]
-        cmd += [shlex.quote(filename)]
+            filename_original = filename
+            logger.debug(f'determing location of launch file [{filename}]'
+                         f' in package [{package}]')
+            package_escaped = shlex.quote(package)
+            find_package_command = f'rospack find {package_escaped}'
+            package_path = shell.check_output(find_package_command,
+                                              stderr=False)
+            filename = os.path.join(package_path, 'launch', filename)
+            logger.debug('determined location of launch file'
+                         f' [{filename_original}] in package [{package}]: '
+                         f'{filename}')
+
+        cmd = ['roslaunch', shlex.quote(filename)]
         cmd += launch_args
         if prefix:
             cmd = [prefix] + cmd
@@ -184,12 +207,12 @@ class ROSCore:
             else:
                 delete_file_after_use = True
                 fn_ctr = self.__files.mktemp(suffix='.bag')
-                logger.debug("copying bag from host [%s] to container [%s]",
-                             fn, fn_ctr)
+                logger.debug(f"copying bag from host [{fn}] "
+                             f"to container [{fn_ctr}]")
                 self.__files.copy_from_host(fn, fn_ctr)
         else:
             fn_ctr = fn
-        logger.debug("playing back bag file: %s", fn_ctr)
+        logger.debug(f"playing back bag file: {fn_ctr}")
         return BagPlayer(fn_ctr,
                          self.__shell,
                          self.__files,

@@ -41,7 +41,7 @@ class ROSWire:
             logger.debug("no workspace specified: using default workspace.")
             dir_home = os.path.expanduser("~")
             dir_workspace = os.path.join(dir_home, ".roswire")
-            logger.debug("default workspace: %s", dir_workspace)
+            logger.debug(f"default workspace: {dir_workspace}")
             if not os.path.exists(dir_workspace):
                 logger.debug("initialising default workspace")
                 os.mkdir(dir_workspace)
