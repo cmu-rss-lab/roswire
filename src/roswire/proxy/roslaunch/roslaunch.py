@@ -53,6 +53,30 @@ class ROSLaunchManager:
         reader = LaunchFileReader(shell=self._shell, files=self._files)
         return reader.read(filename, argv)
 
+    def write(self,
+              config: LaunchConfig,
+              *,
+              filename: Optional[str] = None
+              ) -> str:
+        """Writes a given launch configuration to disk as an XML launch file.
+
+        Parameters
+        ----------
+        config: LaunchConfig
+            A launch configuration.
+        filename: str, optional
+            The name of the file to which the configuration should be written.
+            If no filename is given, a temporary file will be created. It is
+            the responsibility of the caller to ensure that the temporary file
+            is appropriately destroyed.
+
+        Returns
+        -------
+        str
+            The absolute path to the generated XML launch file.
+        """
+        raise NotImplementedError
+
     def locate(self, filename: str, *, package: Optional[str] = None) -> str:
         """Locates a given launch file.
 
