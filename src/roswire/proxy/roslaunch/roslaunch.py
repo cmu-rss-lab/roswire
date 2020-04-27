@@ -19,6 +19,10 @@ class ROSLaunchManager:
     _shell: dockerblade.shell.Shell = attr.ib(repr=False)
     _files: dockerblade.files.FileSystem = attr.ib(repr=False)
 
+    def __call__(self, *args, **kwargs) -> None:
+        """Provides an alias for :code:`launch`."""
+        return self.launch(*args, **kwargs)
+
     def read(self,
              filename: str,
              *,
