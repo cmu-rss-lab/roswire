@@ -71,5 +71,3 @@ class ROSLaunchManager:
             cmd = [prefix] + cmd
         cmd_str = ' '.join(cmd)
         shell.popen(cmd_str, stdout=False, stderr=False)
-
-
