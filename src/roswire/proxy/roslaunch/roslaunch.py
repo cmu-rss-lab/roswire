@@ -4,6 +4,7 @@ __all__ = ('ROSLaunchManager',)
 from typing import List, Mapping, Optional, Sequence, Union
 import os
 import shlex
+import xml.etree.ElementTree as ET
 
 from loguru import logger
 import attr
@@ -75,7 +76,11 @@ class ROSLaunchManager:
         str
             The absolute path to the generated XML launch file.
         """
-        raise NotImplementedError
+        if not filename:
+            filename = self._files.mkstemp(suffix='.xml.launch')
+        contents = ET.tostring(config.to_xml_tree().getroot())
+        self._files.write(filename, contents)
+        return filename  # type: ignore
 
     def locate(self, filename: str, *, package: Optional[str] = None) -> str:
         """Locates a given launch file.
