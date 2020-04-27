@@ -9,6 +9,7 @@
   3.6 compatibility.
 * Moved all logging from Python's built-in logging library to loguru.
 * Added `to_xml_tree` method to `LaunchConfig`.
+* Added `PackageNotFound` and `LaunchFileNotFound` exception.
 
 
 # 1.1.0 (2020-23-04)
