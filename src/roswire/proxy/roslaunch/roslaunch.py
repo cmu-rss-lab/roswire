@@ -9,6 +9,7 @@ from loguru import logger
 import attr
 import dockerblade
 
+from .config import LaunchConfig
 from ... import exceptions as exc
 
 
@@ -17,25 +18,34 @@ class ROSLaunchManager:
     _shell: dockerblade.shell.Shell = attr.ib(repr=False)
     _files: dockerblade.files.FileSystem = attr.ib(repr=False)
 
-    def locate(self,
-               package: str,
-               filename: str,
-               *,
-               check_exists: bool = True
-               ) -> str:
-        """Finds the location of a launch file within a given package.
+    def read(self,
+             filename: str,
+             *,
+             package: str
+             ) -> LaunchConfig:
+        """Produces a summary of the effects of a launch file.
+        
+        Parameters
+        ----------
+        filename: str
+            The name of the launch file, or an absolute path to the launch
+            file inside the container.
+        package: str, optional
+            The name of the package to which the launch file belongs.
+        """
+        raise NotImplementedError
+
+    def locate(self, filename: str, *, package: Optional[str] = None) -> str:
+        """Locates a given launch file.
 
         Parameters
         ----------
-        package: str
-            The name of the package.
         filename: str
-            The name of the launch file.
-        check_exists: bool
-            If :code:`True`, an additional check will ensure that the given
-            launch file can be found in the launch directory of the package.
-            If :code:`False`, an exception will only be raised if the given
-            package cannot be found.
+            The name of the launch file, or an absolute path to the launch
+            file inside the container.
+        package: str, optional
+            Optionally specifies the name of the package to which the launch
+            file belongs.
 
         Returns
         -------
@@ -47,8 +57,11 @@ class ROSLaunchManager:
             If the given package could not be found.
         LaunchFileNotFound
             If the given launch file could not be found in the package.
-            Only raised if :code:`check_exists` is :code:`True`.
         """
+        if not package:
+            assert os.path.isabs(filename)
+            return filename
+
         filename_original = filename
         logger.debug(f'determing location of launch file [{filename}]'
                      f' in package [{package}]')
@@ -58,7 +71,7 @@ class ROSLaunchManager:
         except dockerblade.CalledProcessError as err:
             raise exc.PackageNotFound(package) from err
         path = os.path.join(path, 'launch', filename)
-        if check_exists and not self._files.isfile(path):
+        if not self._files.isfile(path):
             raise exc.LaunchFileNotFound(path=path)
         logger.debug('determined location of launch file'
                      f' [{filename_original}] in package [{package}]: '
@@ -102,11 +115,7 @@ class ROSLaunchManager:
             args = {}
         if not launch_prefixes:
             launch_prefixes = {}
-        if package:
-            filename = self.locate(filename, package, check_exists=False)
-
-        if not self._files.isfile(filename):
-            raise exc.LaunchFileNotFound(filename)
+        filename = self.locate(filename, package=package)
 
         if launch_prefixes:
             m = "individual launch prefixes are not yet implemented"
