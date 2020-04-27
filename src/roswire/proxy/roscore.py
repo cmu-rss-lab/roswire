@@ -94,9 +94,6 @@ class ROSCore:
             raise ROSWireException("bad API call!")
         return {name: typ for (name, typ) in result}
 
-    def launch(self, *args, **kwargs) -> None:
-        self.roslaunch.launch(*args, **kwargs)
-
     def record(self,
                fn: str,
                exclude_topics: Optional[str] = None
