@@ -13,6 +13,7 @@
 * Added `roslaunch` property to `ROSCore`, which exposes a `ROSLaunchManager`.
   The manager provides various `roslaunch`-related functionality including
   locating, generating, parsing, flattening, and launching launch files.
+* Removed `launch` method from `ROSCore`. Replaced with `roslaunch`.
 
 
 # 1.1.0 (2020-23-04)
