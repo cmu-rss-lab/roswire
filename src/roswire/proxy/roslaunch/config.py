@@ -2,7 +2,7 @@
 """
 This file provides data structures that represent ROS launch configurations.
 """
-__all__ = ('ROSConfig', 'NodeConfig')
+__all__ = ('LaunchConfig', 'NodeConfig')
 
 from typing import Tuple, FrozenSet, Optional, Dict, Any
 import xml.etree.ElementTree as ET
@@ -87,7 +87,7 @@ class NodeConfig:
 
 
 @attr.s(frozen=True, slots=True)
-class ROSConfig:
+class LaunchConfig:
     nodes: FrozenSet[NodeConfig] = attr.ib(default=frozenset(),
                                            converter=frozenset)
     executables: Tuple[str, ...] = attr.ib(default=tuple())
@@ -96,7 +96,7 @@ class ROSConfig:
     clear_params: Tuple[str, ...] = attr.ib(default=tuple())
     errors: Tuple[str, ...] = attr.ib(default=tuple())
 
-    def with_clear_param(self, ns: str) -> 'ROSConfig':
+    def with_clear_param(self, ns: str) -> 'LaunchConfig':
         """
         Specifies a parameter that should be cleared before new parameters
         are set.
@@ -107,7 +107,7 @@ class ROSConfig:
         clear_params = self.clear_params + (ns,)
         return attr.evolve(self, clear_params=clear_params)
 
-    def with_param(self, name: str, typ: str, value: Any) -> 'ROSConfig':
+    def with_param(self, name: str, typ: str, value: Any) -> 'LaunchConfig':
         """Adds a parameter to this configuration."""
         param = Parameter(name=name, typ=typ, value=value)
         params = self.params.copy()
@@ -124,16 +124,16 @@ class ROSConfig:
         params[name] = param
         return attr.evolve(self, params=params, errors=errors)
 
-    def with_executable(self, executable: str) -> 'ROSConfig':
+    def with_executable(self, executable: str) -> 'LaunchConfig':
         """Specify an executable that should be run at launch."""
         executables = self.executables + (executable,)
         return attr.evolve(self, executables=executables)
 
-    def with_roslaunch_file(self, filename: str) -> 'ROSConfig':
+    def with_roslaunch_file(self, filename: str) -> 'LaunchConfig':
         roslaunch_files = self.roslaunch_files + (filename,)
         return attr.evolve(self, roslaunch_files=roslaunch_files)
 
-    def with_node(self, node: NodeConfig) -> 'ROSConfig':
+    def with_node(self, node: NodeConfig) -> 'LaunchConfig':
         logger.debug(f"adding node to config: {node}")
         used_names = {n.full_name for n in self.nodes}
         if node.full_name in used_names:
