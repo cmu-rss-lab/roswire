@@ -8,7 +8,7 @@ from loguru import logger
 import attr
 
 from .node import NodeConfig
-from .parameter import ParameterConfig
+from .parameter import Parameter
 from ....exceptions import FailedToParseLaunchFile
 from ....name import (namespace_join, canonical_name, name_is_global,
                       namespaces_of)
