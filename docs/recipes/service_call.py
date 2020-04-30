@@ -24,7 +24,7 @@ with rsw.launch('roswire/example:mavros', sources) as system:
         ps_sitl = system.shell.popen(f'{FN_SITL} --model copter --defaults {FN_PARAMS}')
 
         # use roslaunch to launch the application inside the ROS session
-        ros.launch('apm.launch', package='mavros', args={'fcu_url': 'tcp://127.0.0.1:5760@5760'})
+        ros.roslaunch('apm.launch', package='mavros', args={'fcu_url': 'tcp://127.0.0.1:5760@5760'})
 
         # let's wait some time for the copter to become armable
         time.sleep(60)
