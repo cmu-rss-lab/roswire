@@ -12,7 +12,7 @@ import attr
 import dockerblade
 
 from .rosparam import load_from_yaml_string as load_rosparam_from_string
-from .config import ROSConfig, NodeConfig
+from .config import LaunchConfig, NodeConfig
 from .context import LaunchContext
 from .substitution import ArgumentResolver
 from ...name import (namespace_join, global_name, namespace, name_is_global,
@@ -85,9 +85,9 @@ def tag(name: str, legal_attributes: Collection[str] = tuple()):
     def wrap(loader):
         def wrapped(self,
                     ctx: LaunchContext,
-                    cfg: ROSConfig,
+                    cfg: LaunchConfig,
                     elem: ET.Element
-                    ) -> Tuple[LaunchContext, ROSConfig]:
+                    ) -> Tuple[LaunchContext, LaunchConfig]:
             logger.debug(f"parsing <{name}> tag")
             for attribute in elem.attrib:
                 if attribute not in legal_attributes:
@@ -122,9 +122,9 @@ class LaunchFileReader:
 
     def _load_tags(self,
                    ctx: LaunchContext,
-                   cfg: ROSConfig,
+                   cfg: LaunchConfig,
                    tags: Sequence[ET.Element]
-                   ) -> Tuple[LaunchContext, ROSConfig]:
+                   ) -> Tuple[LaunchContext, LaunchConfig]:
         for tag in (t for t in tags if t.tag in _TAG_TO_LOADER):
             loader = _TAG_TO_LOADER[tag.tag]
             ctx, cfg = loader(self, ctx, cfg, tag)
@@ -133,9 +133,9 @@ class LaunchFileReader:
     @tag('group', ['ns'])
     def _load_group_tag(self,
                         ctx: LaunchContext,
-                        cfg: ROSConfig,
+                        cfg: LaunchConfig,
                         tag: ET.Element
-                        ) -> Tuple[LaunchContext, ROSConfig]:
+                        ) -> Tuple[LaunchContext, LaunchConfig]:
         # create context for group
         ns = self._read_namespace(ctx, tag)
         ctx_child = ctx.child(ns)
@@ -149,9 +149,9 @@ class LaunchFileReader:
     @tag('param', ['name', 'value', 'type', 'textfile', 'binfile', 'command'])
     def _load_param_tag(self,
                         ctx: LaunchContext,
-                        cfg: ROSConfig,
+                        cfg: LaunchConfig,
                         tag: ET.Element
-                        ) -> Tuple[LaunchContext, ROSConfig]:
+                        ) -> Tuple[LaunchContext, LaunchConfig]:
         name = self._read_required(tag, 'name', ctx)
         typ = self._read_optional(tag, 'type', ctx) or 'auto'
         logger.debug(f"adding parameter [{name}] with type [{typ}]")
@@ -196,9 +196,9 @@ class LaunchFileReader:
     @tag('rosparam', ['command', 'ns', 'file', 'param', 'subst_value'])
     def _load_rosparam_tag(self,
                            ctx: LaunchContext,
-                           cfg: ROSConfig,
+                           cfg: LaunchConfig,
                            tag: ET.Element
-                           ) -> Tuple[LaunchContext, ROSConfig]:
+                           ) -> Tuple[LaunchContext, LaunchConfig]:
         filename = self._read_optional(tag, 'file', ctx)
         subst_value = self._read_optional_bool(tag, 'subst_value', ctx, False)
         ns = self._read_optional(tag, 'ns', ctx) or ''
@@ -253,9 +253,9 @@ class LaunchFileReader:
     @tag('remap', ['from', 'to'])
     def _load_remap_tag(self,
                         ctx: LaunchContext,
-                        cfg: ROSConfig,
+                        cfg: LaunchConfig,
                         tag: ET.Element
-                        ) -> Tuple[LaunchContext, ROSConfig]:
+                        ) -> Tuple[LaunchContext, LaunchConfig]:
         frm = self._read_required(tag, 'from', ctx)
         to = self._read_required(tag, 'to', ctx)
         ctx = ctx.with_remapping(frm, to)
@@ -265,9 +265,9 @@ class LaunchFileReader:
                   'respawn', 'ns', 'output', 'args', 'ns', 'launch-prefix'])
     def _load_node_tag(self,
                        ctx: LaunchContext,
-                       cfg: ROSConfig,
+                       cfg: LaunchConfig,
                        tag: ET.Element
-                       ) -> Tuple[LaunchContext, ROSConfig]:
+                       ) -> Tuple[LaunchContext, LaunchConfig]:
         name = self._read_required(tag, 'name', ctx)
         package = self._read_required(tag, 'pkg', ctx)
         node_type = self._read_required(tag, 'type', ctx)
@@ -314,9 +314,9 @@ class LaunchFileReader:
     @tag('arg', ['name', 'default', 'value', 'doc'])
     def _load_arg_tag(self,
                       ctx: LaunchContext,
-                      cfg: ROSConfig,
+                      cfg: LaunchConfig,
                       tag: ET.Element
-                      ) -> Tuple[LaunchContext, ROSConfig]:
+                      ) -> Tuple[LaunchContext, LaunchConfig]:
         name = self._read_required(tag, 'name', ctx)
         value = self._read_optional(tag, 'value', ctx)
         default = self._read_optional(tag, 'default', ctx)
@@ -330,9 +330,9 @@ class LaunchFileReader:
     @tag('env', ['name', 'value'])
     def _load_env_tag(self,
                       ctx: LaunchContext,
-                      cfg: ROSConfig,
+                      cfg: LaunchConfig,
                       tag: ET.Element
-                      ) -> Tuple[LaunchContext, ROSConfig]:
+                      ) -> Tuple[LaunchContext, LaunchConfig]:
         name = self._read_required(tag, 'name', ctx)
         value = self._read_required(tag, 'value', ctx)
         ctx = ctx.with_env_arg(name, value)
@@ -341,9 +341,9 @@ class LaunchFileReader:
     @tag('include', ['file', 'pass_all_args', 'ns', 'clear_params'])
     def _load_include_tag(self,
                           ctx: LaunchContext,
-                          cfg: ROSConfig,
+                          cfg: LaunchConfig,
                           tag: ET.Element
-                          ) -> Tuple[LaunchContext, ROSConfig]:
+                          ) -> Tuple[LaunchContext, LaunchConfig]:
         include_filename = self._read_required(tag, 'file', ctx)
         logger.debug(f"include file: {include_filename}")
         cfg = cfg.with_roslaunch_file(include_filename)
@@ -471,20 +471,23 @@ class LaunchFileReader:
                                     context=resolve_ctx)
         return resolver.resolve(s)
 
-    def read(self, fn: str, argv: Optional[Sequence[str]] = None) -> ROSConfig:
+    def read(self,
+             fn: str,
+             argv: Optional[Sequence[str]] = None
+             ) -> LaunchConfig:
         """Parses the contents of a given launch file.
 
         Returns
         -------
-        ROSConfig
+        LaunchConfig
             A description of the launch configuration.
 
         Reference
         ---------
-            http://wiki.ros.org/roslaunch/XML/node
-            http://docs.ros.org/kinetic/api/roslaunch/html/roslaunch.xmlloader.XmlLoader-class.html
+        * http://wiki.ros.org/roslaunch/XML/node
+        * http://docs.ros.org/kinetic/api/roslaunch/html/roslaunch.xmlloader.XmlLoader-class.html
         """
-        cfg = ROSConfig()
+        cfg = LaunchConfig()
         ctx = LaunchContext(namespace='/', filename=fn)
         if argv:
             ctx = ctx.with_argv(argv)

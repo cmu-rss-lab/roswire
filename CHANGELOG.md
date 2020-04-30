@@ -9,6 +9,11 @@
   3.6 compatibility.
 * Moved all logging from Python's built-in logging library to loguru.
 * Added `to_xml_tree` method to `LaunchConfig`.
+* Added `PackageNotFound` and `LaunchFileNotFound` exception.
+* Added `roslaunch` property to `ROSCore`, which exposes a `ROSLaunchManager`.
+  The manager provides various `roslaunch`-related functionality including
+  locating, generating, parsing, flattening, and launching launch files.
+* Removed `launch` method from `ROSCore`. Replaced with `roslaunch`.
 
 
 # 1.1.0 (2020-23-04)

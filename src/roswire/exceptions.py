@@ -6,6 +6,24 @@ class ROSWireException(Exception):
     """Base class used by all ROSWire exceptions."""
 
 
+@_attr.s(frozen=True, auto_exc=True, auto_attribs=True, str=False)
+class PackageNotFound(ValueError, ROSWireException):
+    """No package was found with a given name."""
+    package: str
+
+    def __str__(self) -> str:
+        return f"Could not find package with name: {self.package}"
+
+
+@_attr.s(frozen=True, auto_exc=True, auto_attribs=True, str=False)
+class LaunchFileNotFound(ValueError, ROSWireException):
+    """No launch file was found at the given path."""
+    path: str
+
+    def __str__(self) -> str:
+        return f"Could not find launch file at path: {self.path}"
+
+
 class FailedToParseLaunchFile(ROSWireException):
     """An attempt to parse a launch file failed."""
 
