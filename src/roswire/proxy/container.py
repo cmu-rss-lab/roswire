@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__ = ('Container', 'ContainerManager')
 
-from typing import Dict, Iterator, Optional, Sequence, Union
+from typing import Dict, Iterator, Mapping, Optional, Sequence, Union
 from uuid import UUID, uuid4
 import contextlib
 import shutil
@@ -29,6 +29,9 @@ class Container:
     sources: Sequence[str]
         The sequence of setup files that should be used to load the ROS
         workspace.
+    environment: Mapping[str, str], optional
+        An optional set of environment variables, indexed by name, that should
+        be used by the container.
     uuid: UUID
         A unique identifier for this container.
     shell: dockerblade.shell.Shell
@@ -53,6 +56,7 @@ class Container:
     _sources: Sequence[str] = attr.ib(repr=False)
     uuid: UUID = attr.ib(repr=True)
     ws_host: str = attr.ib(repr=False)
+    _environment: Mapping[str, str] = attr.ib(repr=False, factory=dict)
     shell: dockerblade.shell.Shell = attr.ib(init=False, repr=False)
     files: dockerblade.files.FileSystem = attr.ib(init=False, repr=False)
 
@@ -64,7 +68,9 @@ class Container:
             if not files.exists(source):
                 raise SourceNotFoundError(source)
 
-        shell = self._dockerblade.shell('/bin/bash', sources=self._sources)
+        shell = self._dockerblade.shell('/bin/bash',
+                                        sources=self._sources,
+                                        environment=self._environment)
         object.__setattr__(self, 'shell', shell)
         object.__setattr__(self, 'files', files)
 
