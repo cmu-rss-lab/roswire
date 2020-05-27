@@ -1,3 +1,9 @@
+# 1.2.1 (2020-05-27)
+
+* Bug fix: Avoid abrupt container termination due to use of default
+  entrypoint by using `/bin/sh` as an entrypoint.
+
+
 # 1.2.0 (2020-05-27)
 
 * Moved methods in `substitution` module into `ArgumentResolver` class.

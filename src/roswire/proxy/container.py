@@ -145,6 +145,7 @@ class ContainerManager:
             '/bin/sh',
             user='root',
             name=uuid,
+            entrypoint='/bin/sh -c',
             volumes={dir_host_shared: {'bind': '/.roswire', 'mode': 'rw'}},
             ports=ports,
             stdin_open=True,
