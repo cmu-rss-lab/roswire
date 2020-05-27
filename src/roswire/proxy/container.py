@@ -29,8 +29,8 @@ class Container:
     sources: Sequence[str]
         The sequence of setup files that should be used to load the ROS
         workspace.
-    environment: Mapping[str, str], optional
-        An optional set of environment variables, indexed by name, that should
+    environment: Mapping[str, str]
+        A set of additional environment variables, indexed by name, that should
         be used by the container.
     uuid: UUID
         A unique identifier for this container.
@@ -172,7 +172,8 @@ class ContainerManager:
                image_or_name: Union[str, DockerImage],
                sources: Sequence[str],
                *,
-               ports: Optional[Dict[int, int]] = None
+               ports: Optional[Dict[int, int]] = None,
+               environment: Optional[Dict[str, str]] = None
                ) -> Iterator['Container']:
         """
         Launches a context-managed Docker container for a given image. Upon
@@ -191,6 +192,9 @@ class ContainerManager:
             An optional dictionary specifying port mappings between the host
             and container, where keys represent container ports and values
             represent host ports.
+        environment: Mapping[str, str], optional
+            An optional set of additional environment variables, indexed by
+            name, that should be used by the container.
 
         Yields
         ------
@@ -199,11 +203,17 @@ class ContainerManager:
         """
         uuid = uuid4()
         logger.debug(f"UUID for container: {uuid}")
+        if not environment:
+            environment = {}
         with contextlib.ExitStack() as stack:
             dir_shared = stack.enter_context(self._build_shared_directory(uuid))  # noqa
             dockerc = stack.enter_context(self._container(image_or_name, dir_shared, uuid, ports=ports))  # noqa
             dockerb = self._dockerblade.attach(dockerc.id)
-            yield Container(dockerb, sources, uuid, dir_shared)
+            yield Container(dockerblade=dockerb,
+                            sources=sources,
+                            uuid=uuid,
+                            ws_host=dir_shared,
+                            environment=environment)
 
     def image(self, tag: str) -> DockerImage:
         """Retrieves the Docker image with a given tag."""
