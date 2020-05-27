@@ -21,8 +21,8 @@ R_NAME = r"[a-zA-Z0-9_/]+"
 R_VAL = r".+"
 R_COMMENT = r"(#.*)?"
 R_FIELD = re.compile(f"^\s*({R_TYPE})\s+({R_NAME})\s*{R_COMMENT}$")
-R_STRING_CONSTANT = re.compile(f"^\s*string\s+(\w+)\s*=\s*(.+)\s*$")
-R_OTHER_CONSTANT = re.compile(f"^\s*(\w+)\s+(\w+)\s*=\s*([^\s]+).*$")
+R_STRING_CONSTANT = re.compile("^\s*string\s+(\w+)\s*=\s*(.+)\s*$")
+R_OTHER_CONSTANT = re.compile("^\s*(\w+)\s+(\w+)\s*=\s*([^\s]+).*$")
 R_BLANK = re.compile(f"^\s*{R_COMMENT}$")
 
 ConstantValue = Union[str, int, float]

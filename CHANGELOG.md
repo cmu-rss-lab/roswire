@@ -1,4 +1,4 @@
-# 1.2.0 (????-??-??)
+# 1.2.0 (2020-05-27)
 
 * Moved methods in `substitution` module into `ArgumentResolver` class.
 * Added handling of executables and resources for `$(find ...)` commands.
@@ -16,7 +16,7 @@
 * Removed `launch` method from `ROSCore`. Replaced with `roslaunch`.
 
 
-# 1.1.0 (2020-23-04)
+# 1.1.0 (2020-04-23)
 
 * Bug fix: Updated `proxy.substitution` module to use DockerBlade API
 * Containers will now raise a `SourceNotFoundError` if a given source does
@@ -41,7 +41,7 @@
 * Removed `client_docker` property from `ROSWire`.
 
 
-# 1.0.0 (2020-31-03)
+# 1.0.0 (2020-03-31)
 
 * Added `ports` keyword argument to `launch` method for `ROSWire`, allowing
   users to specify an optional container-host port mapping.

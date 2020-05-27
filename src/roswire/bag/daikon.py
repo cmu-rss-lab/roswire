@@ -122,7 +122,7 @@ class TraceWriter:
             else:
                 str_val = str(var_val)
             lines += [var_name, str_val, '1']
-        fp.writelines(f'{l}\n' for l in lines)
+        fp.writelines(f'{line}\n' for line in lines)
         fp.write('\n')
 
     def close(self) -> None:
