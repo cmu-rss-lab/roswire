@@ -75,7 +75,8 @@ class ROSWire:
                sources: Sequence[str],
                description: Optional[SystemDescription] = None,
                *,
-               ports: Optional[Dict[int, int]] = None
+               ports: Optional[Dict[int, int]] = None,
+               environment: Optional[Mapping[str, str]] = None
                ) -> Iterator[System]:
         """Launches a ROS application using a provided Docker image.
 
@@ -94,11 +95,15 @@ class ROSWire:
             an optional dictionary specifying port mappings between the host
             and container, where keys represent container ports and values
             represent host ports.
+        environment: Mapping[str, str], optional
+            an optional set of additional environment variables, indexed by
+            name, that should be used by the system.
         """
         if not description:
             description = self.descriptions.load_or_build(image, sources)
         with self.containers.launch(image,
                                     ports=ports,
-                                    sources=sources) as container:
+                                    sources=sources,
+                                    environment=environment) as container:
             container = container
             yield System(container, description)
