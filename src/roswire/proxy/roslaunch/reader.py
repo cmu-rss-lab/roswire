@@ -258,6 +258,7 @@ class LaunchFileReader:
                         ) -> Tuple[LaunchContext, LaunchConfig]:
         frm = self._read_required(tag, 'from', ctx)
         to = self._read_required(tag, 'to', ctx)
+        # FIXME #65 account for namespaces
         ctx = ctx.with_remapping(frm, to)
         return ctx, cfg
 
