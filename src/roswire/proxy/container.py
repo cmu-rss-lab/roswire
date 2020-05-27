@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__ = ('Container', 'ContainerManager')
 
-from typing import Dict, Iterator, Optional, Sequence, Union
+from typing import Dict, Iterator, Mapping, Optional, Sequence, Union
 from uuid import UUID, uuid4
 import contextlib
 import shutil
@@ -29,6 +29,9 @@ class Container:
     sources: Sequence[str]
         The sequence of setup files that should be used to load the ROS
         workspace.
+    environment: Mapping[str, str]
+        A set of additional environment variables, indexed by name, that should
+        be used by the container.
     uuid: UUID
         A unique identifier for this container.
     shell: dockerblade.shell.Shell
@@ -53,6 +56,7 @@ class Container:
     _sources: Sequence[str] = attr.ib(repr=False)
     uuid: UUID = attr.ib(repr=True)
     ws_host: str = attr.ib(repr=False)
+    _environment: Mapping[str, str] = attr.ib(repr=False, factory=dict)
     shell: dockerblade.shell.Shell = attr.ib(init=False, repr=False)
     files: dockerblade.files.FileSystem = attr.ib(init=False, repr=False)
 
@@ -64,7 +68,9 @@ class Container:
             if not files.exists(source):
                 raise SourceNotFoundError(source)
 
-        shell = self._dockerblade.shell('/bin/bash', sources=self._sources)
+        shell = self._dockerblade.shell('/bin/bash',
+                                        sources=self._sources,
+                                        environment=self._environment)
         object.__setattr__(self, 'shell', shell)
         object.__setattr__(self, 'files', files)
 
@@ -166,7 +172,8 @@ class ContainerManager:
                image_or_name: Union[str, DockerImage],
                sources: Sequence[str],
                *,
-               ports: Optional[Dict[int, int]] = None
+               ports: Optional[Dict[int, int]] = None,
+               environment: Optional[Mapping[str, str]] = None
                ) -> Iterator['Container']:
         """
         Launches a context-managed Docker container for a given image. Upon
@@ -185,6 +192,9 @@ class ContainerManager:
             An optional dictionary specifying port mappings between the host
             and container, where keys represent container ports and values
             represent host ports.
+        environment: Mapping[str, str], optional
+            An optional set of additional environment variables, indexed by
+            name, that should be used by the container.
 
         Yields
         ------
@@ -193,11 +203,17 @@ class ContainerManager:
         """
         uuid = uuid4()
         logger.debug(f"UUID for container: {uuid}")
+        if not environment:
+            environment = {}
         with contextlib.ExitStack() as stack:
             dir_shared = stack.enter_context(self._build_shared_directory(uuid))  # noqa
             dockerc = stack.enter_context(self._container(image_or_name, dir_shared, uuid, ports=ports))  # noqa
             dockerb = self._dockerblade.attach(dockerc.id)
-            yield Container(dockerb, sources, uuid, dir_shared)
+            yield Container(dockerblade=dockerb,
+                            sources=sources,
+                            uuid=uuid,
+                            ws_host=dir_shared,
+                            environment=environment)
 
     def image(self, tag: str) -> DockerImage:
         """Retrieves the Docker image with a given tag."""

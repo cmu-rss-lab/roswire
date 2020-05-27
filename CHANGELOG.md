@@ -1,3 +1,9 @@
+# 1.3.0 (XXXX-XX-XX)
+
+* Added ability to specify additional environment variables when launching
+  systems.
+
+
 # 1.2.1 (2020-05-27)
 
 * Bug fix: Avoid abrupt container termination due to use of default
