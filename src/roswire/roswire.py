@@ -4,7 +4,7 @@ This module provides access to the ROSWire session.
 """
 __all__ = ('ROSWire',)
 
-from typing import Dict, Iterator, Optional, Sequence
+from typing import Dict, Iterator, Mapping, Optional, Sequence
 import os
 import contextlib
 
