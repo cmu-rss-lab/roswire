@@ -173,7 +173,7 @@ class ContainerManager:
                sources: Sequence[str],
                *,
                ports: Optional[Dict[int, int]] = None,
-               environment: Optional[Dict[str, str]] = None
+               environment: Optional[Mapping[str, str]] = None
                ) -> Iterator['Container']:
         """
         Launches a context-managed Docker container for a given image. Upon
