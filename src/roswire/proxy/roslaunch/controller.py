@@ -23,3 +23,7 @@ class ROSLaunchController:
     def terminate(self) -> None:
         """Terminates this roslaunch process."""
         self._popen.terminate()
+
+    def close(self) -> None:
+        """Terminates this roslaunch process."""
+        self.terminate()
