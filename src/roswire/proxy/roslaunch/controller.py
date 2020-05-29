@@ -18,11 +18,13 @@ class ROSLaunchController:
         The absolute path of the XML launch file used by this process.
     command: str
         The command string that was used by this process.
+    popen: dockerblade.popen.Popen
+        An interface to the underlying exec process for this roslaunch process.
     pid: Optional[int]
         The PID of the launch process inside the container, if known.
     """
     filename: str
-    _popen: dockerblade.popen.Popen = attr.ib(repr=False)
+    popen: dockerblade.popen.Popen = attr.ib(repr=False)
 
     def __enter__(self) -> 'ROSLaunchController':
         return self
@@ -35,16 +37,16 @@ class ROSLaunchController:
         self.close()
 
     @property
-    def pid(self) -> Optional[int]:
-        return self._popen.pid
+    def stream(self) -> Iterator[str]:
+        yield from self.popen.stream()  # type: ignore
 
-    @property
-    def command(self) -> str:
-        return self._popen.args
+    def is_running(self) -> bool:
+        """Checks whether or not this roslaunch process is still running."""
+        return self.popen.finished
 
     def terminate(self) -> None:
         """Terminates this roslaunch process."""
-        self._popen.terminate()
+        self.popen.terminate()
 
     def close(self) -> None:
         """Terminates this roslaunch process."""
