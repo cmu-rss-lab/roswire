@@ -11,6 +11,7 @@ import attr
 import dockerblade
 
 from .config import LaunchConfig
+from .controller import ROSLaunchController
 from .reader import LaunchFileReader
 from ... import exceptions as exc
 
@@ -128,7 +129,7 @@ class ROSLaunchManager:
                args: Optional[Mapping[str, Union[int, str]]] = None,
                prefix: Optional[str] = None,
                launch_prefixes: Optional[Mapping[str, str]] = None
-               ) -> None:
+               ) -> ROSLaunchController:
         """Provides an interface to the roslaunch command.
 
         Parameters
@@ -145,6 +146,11 @@ class ROSLaunchManager:
         launch_prefixes: Mapping[str, str], optional
             An optional mapping from nodes, given by their names, to their
             individual launch prefix.
+
+        Returns
+        -------
+        ROSLaunchController
+            An interface for inspecting and managing the launch process.
 
         Raises
         ------
@@ -170,6 +176,9 @@ class ROSLaunchManager:
         if prefix:
             cmd = [prefix] + cmd
         cmd_str = ' '.join(cmd)
-        shell.popen(cmd_str, stdout=False, stderr=False)
+        popen = shell.popen(cmd_str, stdout=False, stderr=False)
+
+        return ROSLaunchController(filename=filename,
+                                   popen=popen)
 
     __call__ = launch
