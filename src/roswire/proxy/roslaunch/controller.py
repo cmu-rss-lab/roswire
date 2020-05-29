@@ -13,8 +13,11 @@ class ROSLaunchController:
     ----------
     filename: str
         The absolute path of the XML launch file used by this process.
+    command: str
+        The command string that was used by this process.
     """
     filename: str
+    command: str
     _popen: dockerblade.popen.Popen = attr.ib(repr=False)
 
     def terminate(self) -> None:
