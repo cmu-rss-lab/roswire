@@ -2,7 +2,7 @@
 __all__ = ('ROSLaunchController',)
 
 from types import TracebackType
-from typing import Optional, Type
+from typing import Iterator, Optional, Type
 
 import attr
 import dockerblade
