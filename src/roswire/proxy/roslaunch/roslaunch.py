@@ -122,8 +122,8 @@ class ROSLaunchManager:
             raise exc.LaunchFileNotFound(path=path)
         logger.debug('determined location of launch file'
                      f' [{filename_original}] in package [{package}]: '
-                     f'{filename}')
-        return filename
+                     f'{path}')
+        return path
 
     def launch(self,
                filename: str,
