@@ -63,7 +63,7 @@ class Node:
     @property
     def pid_host(self) -> int:
         if self.__pid_host is None:
-            self.__pid_host = self.__shell.local_to_host_pid(self.pid)
+            self.__pid_host = self.__shell._local_to_host_pid(self.pid)
             assert self.__pid_host is not None
         return self.__pid_host
 

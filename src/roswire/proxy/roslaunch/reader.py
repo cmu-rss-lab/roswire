@@ -4,7 +4,8 @@ This file implements a proxy for parsing the contents of launch files.
 """
 __all__ = ('LaunchFileReader',)
 
-from typing import Any, Collection, Optional, overload, Sequence, Tuple, Union
+from typing import (Any, Callable, Collection, Optional, overload, Sequence,
+                    Tuple, Union)
 import xml.etree.ElementTree as ET
 
 from loguru import logger
@@ -20,6 +21,10 @@ from ...name import (namespace_join, global_name, namespace, name_is_global,
 from ...exceptions import FailedToParseLaunchFile
 
 _TAG_TO_LOADER = {}
+
+Loader = \
+    Callable[['LaunchFileReader', LaunchContext, LaunchConfig, ET.Element],
+             Tuple[LaunchContext, LaunchConfig]]
 
 
 def _read_contents(tag: ET.Element) -> str:
@@ -79,11 +84,13 @@ def convert_str_to_type(s: str, typ: str) -> Union[bool, int, str, float]:
     raise ValueError(f'unknown parameter type: {typ}')
 
 
-def tag(name: str, legal_attributes: Collection[str] = tuple()):
+def tag(name: str,
+        legal_attributes: Collection[str] = tuple()
+        ) -> Callable[[Loader], Loader]:
     legal_attributes = frozenset(list(legal_attributes) + ['if', 'unless'])
 
-    def wrap(loader):
-        def wrapped(self,
+    def wrap(loader: Loader) -> Loader:
+        def wrapped(self: 'LaunchFileReader',
                     ctx: LaunchContext,
                     cfg: LaunchConfig,
                     elem: ET.Element
@@ -403,7 +410,12 @@ class LaunchFileReader:
                             default: bool
                             ) -> bool: ...
 
-    def _read_optional_bool(self, elem, attrib, ctx, default=None):
+    def _read_optional_bool(self,
+                            elem: ET.Element,
+                            attrib: str,
+                            ctx: LaunchContext,
+                            default: Optional[bool] = None
+                            ) -> Optional[bool]:
         s = self._read_optional(elem, attrib, ctx)
         if s is None:
             return default
@@ -425,7 +437,12 @@ class LaunchFileReader:
                              default: float
                              ) -> float: ...
 
-    def _read_optional_float(self, elem, attrib, ctx, default=None):
+    def _read_optional_float(self,
+                             elem: ET.Element,
+                             attrib: str,
+                             ctx: LaunchContext,
+                             default: Optional[float] = None
+                             ) -> Optional[float]:
         s = self._read_optional(elem, attrib, ctx)
         if s is None:
             return default

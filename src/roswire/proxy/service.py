@@ -52,7 +52,7 @@ class Service:
             yml = yaml.dump(message.to_dict())
         command = f"rosservice call {self.name} '{yml}'"
         try:
-            output = self._shell.check_output(command)
+            output = self._shell.check_output(command, text=True)
         except dockerblade.exceptions.CalledProcessError as error:
             if error.returncode == 2:
                 raise exceptions.ROSWireException('illegal service call args') from error  # noqa
