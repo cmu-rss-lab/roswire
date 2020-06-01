@@ -42,7 +42,7 @@ class ROSLaunchController:
 
     def is_running(self) -> bool:
         """Checks whether or not this roslaunch process is still running."""
-        return self.popen.finished
+        return not self.popen.finished
 
     def terminate(self) -> None:
         """Terminates this roslaunch process."""
