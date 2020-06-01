@@ -114,10 +114,10 @@ class ROSLaunchManager:
                      f' in package [{package}]')
         command = f'rospack find {shlex.quote(package)}'
         try:
-            filename = self._shell.check_output(command, stderr=False)
+            package_path = self._shell.check_output(command, stderr=False)
         except dockerblade.CalledProcessError as err:
             raise exc.PackageNotFound(package) from err
-        filename = os.path.join(filename, 'launch', filename_original)
+        filename = os.path.join(package_path, 'launch', filename_original)
         if not self._files.isfile(filename):
             raise exc.LaunchFileNotFound(path=filename)
         logger.debug('determined location of launch file'
