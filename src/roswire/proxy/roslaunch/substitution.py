@@ -77,7 +77,7 @@ class ArgumentResolver:
     def _find_package_path(self, package: str) -> str:
         cmd = f'rospack find {shlex.quote(package)}'
         try:
-            location = self.shell.check_output(cmd)
+            location = self.shell.check_output(cmd, text=True)
         except subprocess.CalledProcessError as err:
             raise SubstitutionError(f'failed to locate package: {package}') from err  # noqa
         return location.strip()
@@ -90,7 +90,8 @@ class ArgumentResolver:
         catkin_find_command = ("catkin_find --first-only --libexec "
                                f"{shlex.quote(package)} {shlex.quote(path)}")
         try:
-            path_in_ws = self.shell.check_output(catkin_find_command)
+            path_in_ws = self.shell.check_output(catkin_find_command,
+                                                 text=True)
             path_in_ws = path_in_ws.strip()
             return path_in_ws
         except dockerblade.CalledProcessError:
@@ -109,7 +110,8 @@ class ArgumentResolver:
         catkin_find_command = ("catkin_find --first-only --share "
                                f"{shlex.quote(package)} {shlex.quote(path)}")
         try:
-            path_in_ws = self.shell.check_output(catkin_find_command)
+            path_in_ws = self.shell.check_output(catkin_find_command,
+                                                 text=True)
             path_in_ws = path_in_ws.strip()
             return path_in_ws
         except dockerblade.CalledProcessError:

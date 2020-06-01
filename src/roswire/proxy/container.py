@@ -80,7 +80,9 @@ class Container:
 
     @property
     def ip_address(self) -> str:
-        return self._dockerblade.ip_address
+        ip_address = self._dockerblade.ip_address
+        assert ip_address
+        return ip_address
 
     def persist(self,
                 repo: Optional[str] = None,

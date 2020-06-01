@@ -20,10 +20,6 @@ class ROSLaunchManager:
     _shell: dockerblade.shell.Shell = attr.ib(repr=False)
     _files: dockerblade.files.FileSystem = attr.ib(repr=False)
 
-    def __call__(self, *args, **kwargs) -> None:
-        """Provides an alias for :code:`launch`."""
-        return self.launch(*args, **kwargs)
-
     def read(self,
              filename: str,
              *,
@@ -77,7 +73,7 @@ class ROSLaunchManager:
             The absolute path to the generated XML launch file.
         """
         if not filename:
-            filename = self._files.mkstemp(suffix='.xml.launch')
+            filename = self._files.mktemp(suffix='.xml.launch')
         contents = ET.tostring(config.to_xml_tree().getroot())
         self._files.write(filename, contents)
         return filename  # type: ignore
@@ -114,7 +110,9 @@ class ROSLaunchManager:
                      f' in package [{package}]')
         command = f'rospack find {shlex.quote(package)}'
         try:
-            package_path = self._shell.check_output(command, stderr=False)
+            package_path = self._shell.check_output(command,
+                                                    stderr=False,
+                                                    text=True)
         except dockerblade.CalledProcessError as err:
             raise exc.PackageNotFound(package) from err
         filename = os.path.join(package_path, 'launch', filename_original)
@@ -175,3 +173,5 @@ class ROSLaunchManager:
             cmd = [prefix] + cmd
         cmd_str = ' '.join(cmd)
         shell.popen(cmd_str, stdout=False, stderr=False)
+
+    __call__ = launch

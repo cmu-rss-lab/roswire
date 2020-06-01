@@ -2,7 +2,8 @@
 # http://wiki.ros.org/Bags/Format/2.0
 __all__ = ('BagRecorder', 'BagPlayer')
 
-from typing import Optional
+from types import TracebackType
+from typing import Optional, Type
 import shlex
 import shutil
 import time
@@ -32,7 +33,7 @@ class BagPlayer:
         self.__delete_file_after_use = delete_file_after_use
         self.__started = False
         self.__stopped = False
-        self._process: Optional[dockerblade.Popen] = None
+        self._process: Optional[dockerblade.popen.Popen] = None
 
     @property
     def started(self) -> bool:
@@ -48,7 +49,11 @@ class BagPlayer:
         self.start()
         return self
 
-    def __exit__(self, ex_type, ex_val, ex_tb) -> None:
+    def __exit__(self,
+                 ex_type: Optional[Type[BaseException]],
+                 ex_val: Optional[BaseException],
+                 ex_tb: Optional[TracebackType]
+                 ) -> None:
         if ex_type is not None:
             logger.error("error occurred during bag playback",
                          exc_info=(ex_type, ex_val, ex_tb))
@@ -81,7 +86,7 @@ class BagPlayer:
             retcode = self._process.returncode
             assert retcode is not None
             if retcode != 0:
-                out = '\n'.join(self._process.stream)
+                out = '\n'.join(self._process.stream)  # type: ignore
                 raise exceptions.PlayerFailure(retcode, out)
         except subprocess.TimeoutExpired as error:
             raise exceptions.PlayerTimeout from error
@@ -119,7 +124,7 @@ class BagPlayer:
                 raise exceptions.PlayerNotStarted
             assert self._process
             self._process.kill()
-            out = '\n'.join(list(self._process.stream))
+            out = '\n'.join(list(self._process.stream))  # type: ignore
             logger.debug("player output:\n%s", out)
             self._process = None
             if self.__delete_file_after_use:
@@ -156,7 +161,7 @@ class BagRecorder:
             be excluded from the bag.
         """
         self.__lock: threading.Lock = threading.Lock()
-        self.__process: Optional[dockerblade.Popen] = None
+        self.__process: Optional[dockerblade.popen.Popen] = None
         self.__started: bool = False
         self.__stopped: bool = False
         self.__shell: dockerblade.Shell = shell
@@ -186,7 +191,11 @@ class BagRecorder:
         self.start()
         return self
 
-    def __exit__(self, ex_type, ex_val, ex_tb) -> None:
+    def __exit__(self,
+                 ex_type: Optional[Type[BaseException]],
+                 ex_val: Optional[BaseException],
+                 ex_tb: Optional[TracebackType]
+                 ) -> None:
         if ex_type is not None:
             logger.error("error occurred during bag recording",
                          exc_info=(ex_type, ex_val, ex_tb))

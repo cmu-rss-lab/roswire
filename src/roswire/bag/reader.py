@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 __all__ = ('BagReader',)
 
-from typing import Dict, Optional, Tuple, List, Type, Collection, Set, Iterator
+from typing import (BinaryIO, Dict, Optional, Tuple, List, Type, Collection,
+                    Set, Iterator)
 from io import BytesIO
 from functools import reduce
 import os
@@ -104,15 +105,15 @@ class BagReader:
         """A mapping from topics to their respective types."""
         return {c.topic: self.__db_type[c.typ] for c in self.connections}
 
-    def _seek(self, pos: int, ptr=None) -> None:
+    def _seek(self, pos: int, ptr: Optional[BinaryIO] = None) -> None:
         ptr = ptr if ptr else self.__fp
         ptr.seek(pos)
 
-    def _skip_sized(self, ptr=None) -> None:
+    def _skip_sized(self, ptr: Optional[BinaryIO] = None) -> None:
         ptr = ptr if ptr else self.__fp
         ptr.seek(read_uint32(ptr), os.SEEK_CUR)
 
-    def _skip_record(self, ptr=None) -> None:
+    def _skip_record(self, ptr: Optional[BinaryIO] = None) -> None:
         self._skip_sized(ptr)
         self._skip_sized(ptr)
 
@@ -122,7 +123,7 @@ class BagReader:
     def _read_header(self,
                      op_expected: Optional[OpCode] = None,
                      *,
-                     ptr=None
+                     ptr: Optional[BinaryIO] = None
                      ) -> Dict[str, bytes]:
         fields = read_encoded_header(ptr if ptr else self.__fp)
         if op_expected:
@@ -163,7 +164,7 @@ class BagReader:
                               md5sum=decode_string(conn['md5sum']),
                               message_definition=decode_string(conn['message_definition']))  # noqa
 
-    def _read_chunk_info_record(self):
+    def _read_chunk_info_record(self) -> Chunk:
         header = self._read_header(OpCode.CHUNK_INFO)
         ver: int = decode_uint32(header['ver'])
         assert ver == 1
@@ -174,7 +175,7 @@ class BagReader:
 
         # obtain a summary of the number of messages for each connection
         # represented in this chunk
-        connections: List[Tuple[int, int]] = []
+        connections: List[ChunkConnection] = []
         contents: bytes = read_sized(self.__fp)
         for i in range(num_connections):
             uid = decode_uint32(contents[0:4])
@@ -243,9 +244,6 @@ class BagReader:
             offset = read_uint32(self.__fp)
             entry = IndexEntry(time=time, pos=pos_chunk, offset=offset)
             index[uid].append(entry)
-
-    def _read_chunk_record(self):
-        raise NotImplementedError
 
     def _get_connections(self,
                          topics: Optional[Collection[str]] = None

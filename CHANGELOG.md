@@ -1,7 +1,9 @@
 # 1.3.0 (XXXX-XX-XX)
 
 * Added ability to specify additional environment variables when launching
-  systems.
+  systems
+* Allowed mypy to discover type hints via PEP 561
+* Added missing type annotations
 
 
 # 1.2.1 (2020-05-27)
