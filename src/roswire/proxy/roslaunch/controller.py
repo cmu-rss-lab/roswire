@@ -40,7 +40,8 @@ class ROSLaunchController:
     def stream(self) -> Iterator[str]:
         yield from self.popen.stream()  # type: ignore
 
-    def is_running(self) -> bool:
+    @property
+    def running(self) -> bool:
         """Checks whether or not this roslaunch process is still running."""
         return not self.popen.finished
 
