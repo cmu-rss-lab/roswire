@@ -1,21 +1,13 @@
-from typing import Iterator, Tuple
-import contextlib
-import logging
-import time
-
+# -*- coding: utf-8 -*-
 import pytest
 
 import roswire
-import roswire.exceptions
-from roswire import ROSWire, ROSProxy, System, SystemDescription
-from roswire.proxy import ShellProxy, FileProxy, ContainerProxy
-
-NAME_IMAGE = 'hello-world'
 
 
 @pytest.mark.skip(reason='this takes 10-15 minutes')
 def test_description():
-    rsw = ROSWire()
+    NAME_IMAGE = 'hello-world'
+    rsw = roswire.ROSWire()
     desc = rsw.descriptions.build(NAME_IMAGE, save=False)
     assert set(desc.packages) == {
         'nodelet_core',

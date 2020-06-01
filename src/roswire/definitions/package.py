@@ -143,9 +143,11 @@ class PackageDatabase(Mapping[str, Package]):
             try:
                 package = Package.build(p, files)
             except FileNotFoundError:
+                logger.exception(f"unable to build package: {p}")
                 if not ignore_bad_paths:
                     raise
-            packages.append(package)
+            else:
+                packages.append(package)
         return PackageDatabase(packages)
 
     def __init__(self, packages: Collection[Package]) -> None:

@@ -1,16 +1,7 @@
-from typing import Iterator
-import contextlib
-import tempfile
-import shutil
-import os
-
+# -*- coding: utf-8 -*-
 import pytest
 
-from roswire.proxy import FileProxy
 from roswire.definitions import MsgFormat, SrvFormat, Package, PackageDatabase
-
-from test_file import build_file_proxy
-from test_basic import build_shell_proxy
 
 
 def test_to_and_from_dict():
@@ -18,12 +9,15 @@ def test_to_and_from_dict():
     msg_tf = MsgFormat.from_dict({
         'package': pkg,
         'name': 'tfMessage',
+        'definition': 'geometry_msgs/TransformStamped[] transforms\n',
         'fields': [{'type': 'geometry_msgs/TransformStamped[]',
                     'name': 'transforms'}]})
     srv_fg = SrvFormat.from_dict({
         'package': pkg,
         'name': 'FrameGraph',
+        'definition': '---\nstring dot_graph\n',
         'response': {
+            'definition': 'string dot_graph\n',
             'fields': [{'type': 'string', 'name': 'dot_graph'}]}})
     p = Package(name=pkg,
                 path='/ros_ws/src/geometry/tf',
@@ -33,118 +27,229 @@ def test_to_and_from_dict():
     assert p == Package.from_dict(p.to_dict())
 
 
-def test_build():
-    with build_file_proxy() as files:
-        path = '/ros_ws/src/geometry/tf'
-        expected = Package.from_dict({
-            'path': path,
-            'name': 'tf',
-            'messages': [
-                {'name': 'tfMessage',
-                 'fields': [{'type': 'geometry_msgs/TransformStamped[]',
-                             'name': 'transforms'}]}
-            ],
-            'services': [
-                {'name': 'FrameGraph',
-                 'response': {
-                 'fields': [{'type': 'string',
-                             'name': 'dot_graph'}]}}
-            ]
-        })
-        actual = Package.build(path, files)
-        assert actual == expected
-
-
-def test_database_paths():
-    with build_shell_proxy() as shell:
-        expected = [
-            '/ros_ws/src/catkin',
-            '/ros_ws/src/genmsg',
-            '/ros_ws/src/gencpp',
-            '/ros_ws/src/genlisp',
-            '/ros_ws/src/genpy',
-            '/ros_ws/src/cmake_modules',
-            '/ros_ws/src/class_loader',
-            '/ros_ws/src/roscpp_core/cpp_common',
-            '/ros_ws/src/mavlink',
-            '/ros_ws/src/mavros/libmavconn',
-            '/ros_ws/src/message_generation',
-            '/ros_ws/src/message_runtime',
-            '/ros_ws/src/orocos_kinematics_dynamics/orocos_kdl',
-            '/ros_ws/src/ros/rosbuild',
-            '/ros_ws/src/ros/rosclean',
-            '/ros_ws/src/roscpp_core/roscpp_traits',
-            '/ros_ws/src/ros_comm/rosgraph',
-            '/ros_ws/src/ros/roslang',
-            '/ros_ws/src/ros_comm/rosmaster',
-            '/ros_ws/src/ros_comm/rosmsg',
-            '/ros_ws/src/rospack',
-            '/ros_ws/src/ros/roslib',
-            '/ros_ws/src/ros_comm/rosparam',
-            '/ros_ws/src/ros_comm/rospy',
-            '/ros_ws/src/ros_comm/rosservice',
-            '/ros_ws/src/roscpp_core/rostime',
-            '/ros_ws/src/roscpp_core/roscpp_serialization',
-            '/ros_ws/src/ros_comm/roslaunch',
-            '/ros_ws/src/ros/rosunit',
-            '/ros_ws/src/angles',
-            '/ros_ws/src/ros_comm/rosconsole',
-            '/ros_ws/src/pluginlib',
-            '/ros_ws/src/rosconsole_bridge',
-            '/ros_ws/src/ros_comm/roslz4',
-            '/ros_ws/src/ros_comm/rosbag_storage',
-            '/ros_ws/src/ros_comm/rostest',
-            '/ros_ws/src/std_msgs',
-            '/ros_ws/src/common_msgs/actionlib_msgs',
-            '/ros_ws/src/common_msgs/diagnostic_msgs',
-            '/ros_ws/src/common_msgs/geometry_msgs',
-            '/ros_ws/src/geometry/eigen_conversions',
-            '/ros_ws/src/mavros/mavros_msgs',
-            '/ros_ws/src/common_msgs/nav_msgs',
-            '/ros_ws/src/ros_comm_msgs/rosgraph_msgs',
-            '/ros_ws/src/common_msgs/sensor_msgs',
-            '/ros_ws/src/ros_comm_msgs/std_srvs',
-            '/ros_ws/src/geometry2/tf2_msgs',
-            '/ros_ws/src/geometry2/tf2',
-            '/ros_ws/src/urdf/urdf_parser_plugin',
-            '/ros_ws/src/common_msgs/visualization_msgs',
-            '/ros_ws/src/ros_comm/xmlrpcpp',
-            '/ros_ws/src/ros_comm/roscpp',
-            '/ros_ws/src/ros_comm/rosout',
-            '/ros_ws/src/vision_opencv/cv_bridge',
-            '/ros_ws/src/diagnostics/diagnostic_updater',
-            '/ros_ws/src/ros_comm/message_filters',
-            '/ros_ws/src/image_common/image_transport',
-            '/ros_ws/src/ros_comm/rosnode',
-            '/ros_ws/src/ros_comm/rostopic',
-            '/ros_ws/src/ros_comm/roswtf',
-            '/ros_ws/src/geometry2/tf2_py',
-            '/ros_ws/src/ros_comm/topic_tools',
-            '/ros_ws/src/ros_comm/rosbag',
-            '/ros_ws/src/actionlib',
-            '/ros_ws/src/geometry2/tf2_ros',
-            '/ros_ws/src/mavros/mavros',
-            '/ros_ws/src/geometry/tf',
-            '/ros_ws/src/urdf/urdf',
-            '/ros_ws/src/mavros/mavros_extras',
-            '/opt/ros/indigo/share',
-            '/opt/ros/indigo/stacks'
+@pytest.mark.parametrize('filesystem', ['fetch'], indirect=True)
+def test_build(filesystem):
+    path = '/opt/ros/melodic/share/tf'
+    expected = Package.from_dict({
+        'path': path,
+        'name': 'tf',
+        'messages': [
+            {'name': 'tfMessage',
+             'definition': 'geometry_msgs/TransformStamped[] transforms\n',
+             'fields': [{'type': 'geometry_msgs/TransformStamped[]',
+                         'name': 'transforms'}]}
+        ],
+        'services': [
+            {'name': 'FrameGraph',
+             'definition': '---\nstring dot_graph\n',
+             'response': {
+                'definition': 'string dot_graph',
+                'fields': [{'type': 'string',
+                            'name': 'dot_graph'}]}}
         ]
-        actual = PackageDatabase.paths(shell)
-        assert actual == expected
+    })
+    actual = Package.build(path, filesystem)
+    assert actual == expected
 
 
-def test_database_from_paths():
-    with build_file_proxy() as files:
-        paths = [
-            '/ros_ws/src/angles',
-            '/ros_ws/src/mavros',
-            '/ros_ws/src/geometry2/tf2',
-            '/ros_ws/src/geometry2/tf2_msgs',
-            '/ros_ws/src/geometry2/tf2_py',
-            '/ros_ws/src/geometry2/tf2_ros'
-        ]
-        db = PackageDatabase.from_paths(files, paths)
-        assert len(db) == len(paths)
-        assert set(db) == {'angles', 'mavros', 'tf2',
-                           'tf2_msgs', 'tf2_py', 'tf2_ros'}
+@pytest.mark.parametrize('sut', ['fetch'], indirect=True)
+def test_database_paths(sut):
+    expected = {
+        '/opt/ros/melodic/share/moveit_ros_occupancy_map_monitor',
+        '/opt/ros/melodic/share/common_msgs',
+        '/opt/ros/melodic/share/nodelet_core',
+        '/opt/ros/melodic/share/ros_comm',
+        '/opt/ros/melodic/share/bond_core',
+        '/opt/ros/melodic/share/ros_base',
+        '/opt/ros/melodic/share/ros_core',
+        '/opt/ros/melodic/share/roscpp_core',
+        '/opt/ros/melodic/share/ros',
+        '/opt/ros/melodic/share/actionlib',
+        '/opt/ros/melodic/share/actionlib_msgs',
+        '/opt/ros/melodic/share/amcl',
+        '/opt/ros/melodic/share/angles',
+        '/opt/ros/melodic/share/base_local_planner',
+        '/opt/ros/melodic/share/bond',
+        '/opt/ros/melodic/share/bondcpp',
+        '/opt/ros/melodic/share/bondpy',
+        '/opt/ros/melodic/share/camera_calibration_parsers',
+        '/opt/ros/melodic/share/camera_info_manager',
+        '/opt/ros/melodic/share/catkin',
+        '/opt/ros/melodic/share/class_loader',
+        '/opt/ros/melodic/share/clear_costmap_recovery',
+        '/opt/ros/melodic/share/cmake_modules',
+        '/opt/ros/melodic/share/control_msgs',
+        '/opt/ros/melodic/share/control_toolbox',
+        '/opt/ros/melodic/share/costmap_2d',
+        '/opt/ros/melodic/share/cpp_common',
+        '/opt/ros/melodic/share/cv_bridge',
+        '/opt/ros/melodic/share/depth_image_proc',
+        '/opt/ros/melodic/share/diagnostic_msgs',
+        '/opt/ros/melodic/share/diagnostic_updater',
+        '/opt/ros/melodic/share/dynamic_reconfigure',
+        '/opt/ros/melodic/share/eigen_conversions',
+        '/opt/ros/melodic/share/eigen_stl_containers',
+        '/opt/ros/melodic/share/eigenpy',
+        '/ros_ws/src/fetch_ros/fetch_depth_layer',
+        '/ros_ws/src/fetch_ros/fetch_description',
+        '/ros_ws/src/fetch_gazebo/fetch_gazebo',
+        '/ros_ws/src/fetch_gazebo/fetch_gazebo_demo',
+        '/ros_ws/src/fetch_ros/fetch_ikfast_plugin',
+        '/ros_ws/src/fetch_ros/fetch_maps',
+        '/ros_ws/src/fetch_ros/fetch_moveit_config',
+        '/ros_ws/src/fetch_ros/fetch_navigation',
+        '/opt/ros/melodic/share/gazebo_dev',
+        '/opt/ros/melodic/share/gazebo_msgs',
+        '/opt/ros/melodic/share/gazebo_plugins',
+        '/opt/ros/melodic/share/gazebo_ros',
+        '/opt/ros/melodic/share/gencpp',
+        '/opt/ros/melodic/share/geneus',
+        '/opt/ros/melodic/share/genlisp',
+        '/opt/ros/melodic/share/genmsg',
+        '/opt/ros/melodic/share/gennodejs',
+        '/opt/ros/melodic/share/genpy',
+        '/opt/ros/melodic/share/geometric_shapes',
+        '/opt/ros/melodic/share/geometry_msgs',
+        '/opt/ros/melodic/share/grasping_msgs',
+        '/opt/ros/melodic/share/image_geometry',
+        '/opt/ros/melodic/share/image_proc',
+        '/opt/ros/melodic/share/image_transport',
+        '/opt/ros/melodic/share/interactive_markers',
+        '/opt/ros/melodic/share/joint_state_publisher',
+        '/opt/ros/melodic/share/kdl_conversions',
+        '/opt/ros/melodic/share/kdl_parser',
+        '/opt/ros/melodic/share/laser_geometry',
+        '/opt/ros/melodic/share/map_msgs',
+        '/opt/ros/melodic/share/map_server',
+        '/opt/ros/melodic/share/media_export',
+        '/opt/ros/melodic/share/message_filters',
+        '/opt/ros/melodic/share/message_generation',
+        '/opt/ros/melodic/share/message_runtime',
+        '/opt/ros/melodic/share/mk',
+        '/opt/ros/melodic/share/move_base',
+        '/opt/ros/melodic/share/move_base_msgs',
+        '/opt/ros/melodic/share/moveit_commander',
+        '/opt/ros/melodic/share/moveit_core',
+        '/opt/ros/melodic/share/moveit_fake_controller_manager',
+        '/opt/ros/melodic/share/moveit_kinematics',
+        '/opt/ros/melodic/share/moveit_msgs',
+        '/opt/ros/melodic/share/moveit_planners_ompl',
+        '/opt/ros/melodic/share/moveit_python',
+        '/opt/ros/melodic/share/moveit_ros_manipulation',
+        '/opt/ros/melodic/share/moveit_ros_move_group',
+        '/opt/ros/melodic/share/moveit_ros_perception',
+        '/opt/ros/melodic/share/moveit_ros_planning',
+        '/opt/ros/melodic/share/moveit_ros_planning_interface',
+        '/opt/ros/melodic/share/moveit_ros_robot_interaction',
+        '/opt/ros/melodic/share/moveit_ros_visualization',
+        '/opt/ros/melodic/share/moveit_ros_warehouse',
+        '/opt/ros/melodic/share/moveit_simple_controller_manager',
+        '/opt/ros/melodic/share/nav_core',
+        '/opt/ros/melodic/share/nav_msgs',
+        '/opt/ros/melodic/share/navfn',
+        '/opt/ros/melodic/share/nodelet',
+        '/opt/ros/melodic/share/nodelet_topic_tools',
+        '/opt/ros/melodic/share/object_recognition_msgs',
+        '/opt/ros/melodic/share/octomap',
+        '/opt/ros/melodic/share/octomap_msgs',
+        '/opt/ros/melodic/share/ompl',
+        '/opt/ros/melodic/share/open_karto',
+        '/opt/ros/melodic/share/orocos_kdl',
+        '/opt/ros/melodic/share/pcl_conversions',
+        '/opt/ros/melodic/share/pcl_msgs',
+        '/opt/ros/melodic/share/pcl_ros',
+        '/opt/ros/melodic/share/pluginlib',
+        '/opt/ros/melodic/share/polled_camera',
+        '/opt/ros/melodic/share/python_orocos_kdl',
+        '/opt/ros/melodic/share/python_qt_binding',
+        '/opt/ros/melodic/share/random_numbers',
+        '/opt/ros/melodic/share/realtime_tools',
+        '/opt/ros/melodic/share/resource_retriever',
+        '/opt/ros/melodic/share/rgbd_launch',
+        '/opt/ros/melodic/share/robot_controllers',
+        '/opt/ros/melodic/share/robot_controllers_interface',
+        '/opt/ros/melodic/share/robot_controllers_msgs',
+        '/opt/ros/melodic/share/robot_state_publisher',
+        '/opt/ros/melodic/share/ros_environment',
+        '/opt/ros/melodic/share/rosbag',
+        '/opt/ros/melodic/share/rosbag_migration_rule',
+        '/opt/ros/melodic/share/rosbag_storage',
+        '/opt/ros/melodic/share/rosbash',
+        '/opt/ros/melodic/share/rosboost_cfg',
+        '/opt/ros/melodic/share/rosbuild',
+        '/opt/ros/melodic/share/rosclean',
+        '/opt/ros/melodic/share/rosconsole',
+        '/opt/ros/melodic/share/rosconsole_bridge',
+        '/opt/ros/melodic/share/roscpp',
+        '/opt/ros/melodic/share/roscpp_serialization',
+        '/opt/ros/melodic/share/roscpp_traits',
+        '/opt/ros/melodic/share/roscreate',
+        '/opt/ros/melodic/share/rosgraph',
+        '/opt/ros/melodic/share/rosgraph_msgs',
+        '/opt/ros/melodic/share/roslang',
+        '/opt/ros/melodic/share/roslaunch',
+        '/opt/ros/melodic/share/roslib',
+        '/opt/ros/melodic/share/roslisp',
+        '/opt/ros/melodic/share/roslz4',
+        '/opt/ros/melodic/share/rosmake',
+        '/opt/ros/melodic/share/rosmaster',
+        '/opt/ros/melodic/share/rosmsg',
+        '/opt/ros/melodic/share/rosnode',
+        '/opt/ros/melodic/share/rosout',
+        '/opt/ros/melodic/share/rospack',
+        '/opt/ros/melodic/share/rosparam',
+        '/opt/ros/melodic/share/rospy',
+        '/opt/ros/melodic/share/rosservice',
+        '/opt/ros/melodic/share/rostest',
+        '/opt/ros/melodic/share/rostime',
+        '/opt/ros/melodic/share/rostopic',
+        '/opt/ros/melodic/share/rosunit',
+        '/opt/ros/melodic/share/roswtf',
+        '/opt/ros/melodic/share/rotate_recovery',
+        '/opt/ros/melodic/share/rviz',
+        '/opt/ros/melodic/share/sensor_msgs',
+        '/opt/ros/melodic/share/shape_msgs',
+        '/opt/ros/melodic/share/simple_grasping',
+        '/opt/ros/melodic/share/slam_karto',
+        '/opt/ros/melodic/share/smclib',
+        '/opt/ros/melodic/share/sparse_bundle_adjustment',
+        '/opt/ros/melodic/share/srdfdom',
+        '/opt/ros/melodic/share/std_msgs',
+        '/opt/ros/melodic/share/std_srvs',
+        '/opt/ros/melodic/share/stereo_msgs',
+        '/opt/ros/melodic/share/teleop_twist_keyboard',
+        '/opt/ros/melodic/share/tf',
+        '/opt/ros/melodic/share/tf2',
+        '/opt/ros/melodic/share/tf2_eigen',
+        '/opt/ros/melodic/share/tf2_geometry_msgs',
+        '/opt/ros/melodic/share/tf2_kdl',
+        '/opt/ros/melodic/share/tf2_msgs',
+        '/opt/ros/melodic/share/tf2_py',
+        '/opt/ros/melodic/share/tf2_ros',
+        '/opt/ros/melodic/share/tf_conversions',
+        '/opt/ros/melodic/share/topic_tools',
+        '/opt/ros/melodic/share/trajectory_msgs',
+        '/opt/ros/melodic/share/urdf',
+        '/opt/ros/melodic/share/urdfdom_py',
+        '/opt/ros/melodic/share/visualization_msgs',
+        '/opt/ros/melodic/share/voxel_grid',
+        '/opt/ros/melodic/share/warehouse_ros',
+        '/opt/ros/melodic/share/xacro',
+        '/opt/ros/melodic/share/xmlrpcpp'
+    }
+    actual = set(PackageDatabase.paths(sut.shell, sut.files))
+    assert actual == expected
+
+
+@pytest.mark.parametrize('filesystem', ['fetch'], indirect=True)
+def test_database_from_paths(filesystem):
+    paths = [
+        '/opt/ros/melodic/share/angles',
+        '/opt/ros/melodic/share/tf2',
+        '/opt/ros/melodic/share/tf2_msgs',
+        '/opt/ros/melodic/share/tf2_py',
+        '/opt/ros/melodic/share/tf2_ros'
+    ]
+    db = PackageDatabase.from_paths(filesystem, paths)
+    assert len(db) == len(paths)
+    assert set(db) == {'angles', 'tf2', 'tf2_msgs', 'tf2_py', 'tf2_ros'}

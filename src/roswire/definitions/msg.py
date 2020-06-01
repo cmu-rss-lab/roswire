@@ -14,7 +14,7 @@ import dockerblade
 
 from .base import is_builtin, Time, Duration
 from .decode import is_simple
-from .. import exceptions
+from .. import exceptions as exc
 
 R_TYPE = r"[a-zA-Z0-9_/]+(?:\[\d*\])?"
 R_NAME = r"[a-zA-Z0-9_/]+"
@@ -103,12 +103,19 @@ class MsgFormat:
 
     @staticmethod
     def toposort(fmts: Collection['MsgFormat']) -> List['MsgFormat']:
-        fn_to_fmt: Dict[str, MsgFormat] = {f.fullname: f for f in fmts}
+        fn_to_fmt: Dict[str, MsgFormat] = {fmt.fullname: fmt for fmt in fmts}
         fn_to_deps: Dict[str, Set[str]] = \
-            {fn: {f.base_typ for f in fmt.fields if not is_builtin(f.base_typ)}
-             for fn, fmt in fn_to_fmt.items()}
+            {filename: {f.base_typ for f in fmt.fields
+                        if not is_builtin(f.base_typ)}
+             for filename, fmt in fn_to_fmt.items()}
         toposorted = list(toposort(fn_to_deps))
-        return [fn_to_fmt[fn] for fn in toposorted]
+        missing_packages: Set[str] = set(toposorted) - set(fn_to_fmt)
+        if missing_packages:
+            logger.error("Messages are relied upon but are not present in "
+                         f"the format database: {', '.join(missing_packages)}")
+            missing_package_name = next(iter(missing_packages))
+            raise exc.PackageNotFound(missing_package_name)
+        return [fn_to_fmt[filename] for filename in toposorted]
 
     @staticmethod
     def from_file(package: str,
@@ -179,7 +186,7 @@ class MsgFormat:
                 field: Field = Field(typ, name_field)
                 fields.append(field)
             else:
-                raise exceptions.ParsingError(f"failed to parse line: {line}")
+                raise exc.ParsingError(f"failed to parse line: {line}")
 
         return MsgFormat(package, name, text, fields, constants)  # type: ignore  # noqa
 

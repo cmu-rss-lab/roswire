@@ -1,14 +1,13 @@
-from typing import List
-
+# -*- coding: utf-8 -*-
 import pytest
 
-from roswire.proxy import FileProxy
+from typing import List
+import os
+
 from roswire.definitions import (Constant, Field, MsgFormat, SrvFormat,
                                  ActionFormat, Time, Package, PackageDatabase,
                                  FormatDatabase)
-import roswire.exceptions
-
-from test_file import build_file_proxy
+import dockerblade
 
 
 def test_msg_from_string():
@@ -164,13 +163,16 @@ def test_constant_to_and_from_dict():
 
 
 def test_msg_format_to_and_from_dict():
+    definition = 'geometry_msgs/TransformStamped[] transforms\n'
     d = {'package': 'tf',
          'name': 'tfMessage',
+         'definition': definition,
          'fields': [
              {'type': 'geometry_msgs/TransformStamped[]',
               'name': 'transforms'}]}
     f = MsgFormat(package='tf',
                   name='tfMessage',
+                  definition=definition,
                   constants=[],
                   fields=[Field('geometry_msgs/TransformStamped[]', 'transforms')])
     assert MsgFormat.from_dict(d) == f
@@ -182,9 +184,15 @@ def test_srv_format_to_and_from_dict():
     name = 'SetMap'
     name_request = 'SetMapRequest'
     name_response = 'SetMapResponse'
+    # it doesn't matter what these are set to
+    definition_service = 'FOO'
+    definition_request = 'BAR'
+    definition_response = 'COOL'
     d = {'package': pkg,
          'name': name,
+         'definition': definition_service,
          'request': {
+            'definition': definition_request,
             'fields': [
                 {'type': 'nav_msgs/OccupancyGrid',
                  'name': 'map'},
@@ -192,13 +200,16 @@ def test_srv_format_to_and_from_dict():
                  'name': 'initial_pose'}]
          },
          'response': {
+            'definition': definition_response,
             'fields': [{'type': 'bool', 'name': 'success'}]
          }}
     f = SrvFormat(
             package=pkg,
             name=name,
+            definition=definition_service,
             request=MsgFormat(
                 package=pkg,
+                definition=definition_request,
                 name=name_request,
                 constants=[],
                 fields=[Field('nav_msgs/OccupancyGrid', 'map'),
@@ -206,6 +217,7 @@ def test_srv_format_to_and_from_dict():
                               'initial_pose')]),
             response=MsgFormat(
                 package=pkg,
+                definition=definition_response,
                 name=name_response,
                 constants=[],
                 fields=[Field('bool', 'success')]))
@@ -218,19 +230,28 @@ def test_action_format_to_and_from_dict():
     name = 'TwoInts'
     name_goal = 'TwoIntsGoal'
     name_result = 'TwoIntsResult'
+    # it doesn't matter what these are set to
+    definition_action = 'FOO'
+    definition_goal = 'BAR'
+    definition_result = 'COOL'
     d = {'package': pkg,
          'name': name,
+         'definition': definition_action,
          'goal': {
+            'definition': definition_goal,
             'fields': [{'type': 'int64', 'name': 'a'},
                        {'type': 'int64', 'name': 'b'}]
          },
          'result': {
+            'definition': definition_result,
             'fields': [{'type': 'int64', 'name': 'sum'}]
          }}
     f = ActionFormat(
             package=pkg,
             name=name,
+            definition=definition_action,
             goal=MsgFormat(
+                definition=definition_goal,
                 package=pkg,
                 name=name_goal,
                 constants=[],
@@ -239,6 +260,7 @@ def test_action_format_to_and_from_dict():
             feedback=None,
             result=MsgFormat(
                 package=pkg,
+                definition=definition_result,
                 name=name_result,
                 constants=[],
                 fields=[Field('int64', 'sum')]))
@@ -246,144 +268,150 @@ def test_action_format_to_and_from_dict():
     assert ActionFormat.from_dict(f.to_dict()) == f
 
 
-def test_action_from_file():
-    with build_file_proxy() as files:
-        # read .action file
-        pkg = 'tf2_msgs'
-        fn = '/ros_ws/src/geometry2/tf2_msgs/action/LookupTransform.action'
-        fmt = ActionFormat.from_file(pkg, fn, files)
-        assert fmt.package == pkg
-        assert fmt.name == 'LookupTransform'
-        assert fmt.fullname == 'tf2_msgs/LookupTransform'
+@pytest.mark.parametrize('filesystem', ['fetch'], indirect=True)
+def test_action_from_file(filesystem):
+    # read .action file
+    pkg = 'tf2_msgs'
+    pkg_dir = '/opt/ros/melodic/share/tf2_msgs'
+    fn = os.path.join(pkg_dir, 'action/LookupTransform.action')
+    fmt = ActionFormat.from_file(pkg, fn, filesystem)
+    assert fmt.package == pkg
+    assert fmt.name == 'LookupTransform'
+    assert fmt.fullname == 'tf2_msgs/LookupTransform'
 
-        goal: MsgFormat = fmt.goal
-        assert not goal.constants
-        assert len(goal.fields) == 7
-        assert Field('string', 'target_frame') in goal.fields
-        assert Field('string', 'source_frame') in goal.fields
-        assert Field('time', 'source_time') in goal.fields
-        assert Field('duration', 'timeout') in goal.fields
-        assert Field('time', 'target_time') in goal.fields
-        assert Field('string', 'fixed_frame') in goal.fields
-        assert Field('bool', 'advanced') in goal.fields
+    goal: MsgFormat = fmt.goal
+    assert not goal.constants
+    assert len(goal.fields) == 7
+    assert Field('string', 'target_frame') in goal.fields
+    assert Field('string', 'source_frame') in goal.fields
+    assert Field('time', 'source_time') in goal.fields
+    assert Field('duration', 'timeout') in goal.fields
+    assert Field('time', 'target_time') in goal.fields
+    assert Field('string', 'fixed_frame') in goal.fields
+    assert Field('bool', 'advanced') in goal.fields
 
-        assert fmt.result
-        res: MsgFormat = fmt.result
-        assert not res.constants
-        assert len(res.fields) == 2
-        assert Field('geometry_msgs/TransformStamped', 'transform') in res.fields
-        assert Field('tf2_msgs/TF2Error', 'error') in res.fields
+    assert fmt.result
+    res: MsgFormat = fmt.result
+    assert not res.constants
+    assert len(res.fields) == 2
+    assert Field('geometry_msgs/TransformStamped', 'transform') in res.fields
+    assert Field('tf2_msgs/TF2Error', 'error') in res.fields
 
-        assert not fmt.feedback
+    # attempt to read .msg file
+    fn = os.path.join(pkg_dir, 'msg/TFMessage.msg')
+    with pytest.raises(AssertionError):
+        ActionFormat.from_file(pkg, fn, filesystem)
 
-        # attempt to read .msg file
-        fn = '/ros_ws/src/geometry2/tf2_msgs/msg/TFMessage.msg'
-        with pytest.raises(AssertionError):
-            ActionFormat.from_file(pkg, fn, files)
-
-        # attempt to read non-existent file
-        fn = '/ros_ws/src/geometry2/tf2_msgs/action/Spooky.action'
-        with pytest.raises(FileNotFoundError):
-            ActionFormat.from_file(pkg, fn, files)
-
-
-def test_srv_from_file():
-    with build_file_proxy() as files:
-        # read .srv file
-        pkg = 'nav_msgs'
-        fn = '/ros_ws/src/common_msgs/nav_msgs/srv/SetMap.srv'
-        fmt = SrvFormat.from_file(pkg, fn, files)
-        assert fmt.package == pkg
-        assert fmt.name == 'SetMap'
-        assert fmt.fullname == 'nav_msgs/SetMap'
-
-        req: MsgFormat = fmt.request
-        assert not req.constants
-        assert len(req.fields) == 2
-        assert Field('nav_msgs/OccupancyGrid', 'map') in req.fields
-        assert Field('geometry_msgs/PoseWithCovarianceStamped', 'initial_pose') in req.fields
-
-        assert fmt.response
-        res: MsgFormat = fmt.response
-        assert not res.constants
-        assert len(res.fields) == 1
-        assert Field('bool', 'success') in res.fields
-
-        # attempt to read .action file
-        fn = '/ros_ws/src/geometry2/tf2_msgs/action/LookupTransform.action'
-        with pytest.raises(AssertionError):
-            SrvFormat.from_file(pkg, fn, files)
-
-        # attempt to read non-existent file
-        fn = '/ros_ws/src/common_msgs/nav_msgs/srv/Spooky.srv'
-        with pytest.raises(FileNotFoundError):
-            SrvFormat.from_file(pkg, fn, files)
+    # attempt to read non-existent file
+    fn = os.path.join(pkg_dir, 'action/Spooky.action')
+    with pytest.raises(dockerblade.exceptions.ContainerFileNotFound):
+        ActionFormat.from_file(pkg, fn, filesystem)
 
 
-def test_msg_from_file():
-    with build_file_proxy() as files:
-        # read .msg file
-        pkg = 'tf2_msgs'
-        fn = '/ros_ws/src/geometry2/tf2_msgs/msg/TFMessage.msg'
-        fmt = MsgFormat.from_file(pkg, fn, files)
-        assert fmt.package == pkg
-        assert fmt.name == 'TFMessage'
-        assert fmt.fullname == 'tf2_msgs/TFMessage'
-        assert not fmt.constants
-        assert len(fmt.fields) == 1
-        assert Field('geometry_msgs/TransformStamped[]', 'transforms') in fmt.fields
+@pytest.mark.parametrize('filesystem', ['fetch'], indirect=True)
+def test_srv_from_file(filesystem):
+    # read .srv file
+    pkg = 'nav_msgs'
+    pkg_dir = '/opt/ros/melodic/share/nav_msgs'
+    fn = os.path.join(pkg_dir, 'srv/SetMap.srv')
+    fmt = SrvFormat.from_file(pkg, fn, filesystem)
+    assert fmt.package == pkg
+    assert fmt.name == 'SetMap'
+    assert fmt.fullname == 'nav_msgs/SetMap'
 
-        # attempt to read .action file
-        fn = '/ros_ws/src/geometry2/tf2_msgs/action/LookupTransform.action'
-        with pytest.raises(AssertionError):
-            SrvFormat.from_file(pkg, fn, files)
+    req: MsgFormat = fmt.request
+    assert not req.constants
+    assert len(req.fields) == 2
+    assert Field('nav_msgs/OccupancyGrid', 'map') in req.fields
+    assert Field('geometry_msgs/PoseWithCovarianceStamped', 'initial_pose') in req.fields
 
-        # attempt to read non-existent file
-        fn = '/ros_ws/src/geometry2/tf2_msgs/msg/Spooky.msg'
-        with pytest.raises(FileNotFoundError):
-            MsgFormat.from_file(pkg, fn, files)
+    assert fmt.response
+    res: MsgFormat = fmt.response
+    assert not res.constants
+    assert len(res.fields) == 1
+    assert Field('bool', 'success') in res.fields
 
+    # attempt to read .action file
+    fn = '/opt/ros/melodic/share/tf2_msgs/action/LookupTransform.action'
+    with pytest.raises(AssertionError):
+        SrvFormat.from_file(pkg, fn, filesystem)
 
-def test_build_format_database():
-    with build_file_proxy() as files:
-        paths = [
-            '/ros_ws/src/geometry2/tf2_msgs',
-            '/ros_ws/src/geometry/tf'
-        ]
-        db_package = PackageDatabase.from_paths(files, paths)
-        db_format = FormatDatabase.build(db_package)
-        name_messages: Set[str] = set(db_format.messages)
-        name_services: Set[str] = set(db_format.services)
-        name_actions: Set[str] = set(db_format.actions)
-        assert name_messages == {
-            'tf/tfMessage',
-            'tf/FrameGraphResponse',
-            'tf2_msgs/TFMessage',
-            'tf2_msgs/TF2Error',
-            'tf2_msgs/FrameGraphResponse',
-            'tf2_msgs/LookupTransformGoal',
-            'tf2_msgs/LookupTransformResult'
-        }
-        assert name_services == {
-            'tf/FrameGraph',
-            'tf2_msgs/FrameGraph'
-        }
-        assert name_actions == {'tf2_msgs/LookupTransform'}
+    # attempt to read non-existent file
+    fn = os.path.join(pkg_dir, 'srv/Spooky.srv')
+    with pytest.raises(dockerblade.exceptions.ContainerFileNotFound):
+        SrvFormat.from_file(pkg, fn, filesystem)
 
 
-def test_msg_toposort():
-    with build_file_proxy() as files:
-        paths = [
-            '/ros_ws/src/geometry2/tf2_msgs',
-            '/ros_ws/src/geometry/tf',
-            '/ros_ws/src/common_msgs/geometry_msgs',
-            '/ros_ws/src/std_msgs'
-        ]
-        db_package = PackageDatabase.from_paths(files, paths)
-        db_format = FormatDatabase.build(db_package)
+@pytest.mark.parametrize('filesystem', ['fetch'], indirect=True)
+def test_msg_from_file(filesystem):
+    # read .msg file
+    pkg = 'tf2_msgs'
+    pkg_dir = '/opt/ros/melodic/share/tf2_msgs/'
+    fn = os.path.join(pkg_dir, 'msg/TFMessage.msg')
+    fmt = MsgFormat.from_file(pkg, fn, filesystem)
+    assert fmt.package == pkg
+    assert fmt.name == 'TFMessage'
+    assert fmt.fullname == 'tf2_msgs/TFMessage'
+    assert not fmt.constants
+    assert len(fmt.fields) == 1
+    assert Field('geometry_msgs/TransformStamped[]', 'transforms') in fmt.fields
 
-        msgs = db_format.messages.values()
-        msgs = MsgFormat.toposort(msgs)
+    # attempt to read .action file
+    fn = os.path.join(pkg_dir, 'action/LookupTransform.action')
+    with pytest.raises(AssertionError):
+        SrvFormat.from_file(pkg, fn, filesystem)
+
+    # attempt to read non-existent file
+    fn = os.path.join(pkg_dir, 'msg/Spooky.msg')
+    with pytest.raises(dockerblade.exceptions.ContainerFileNotFound):
+        MsgFormat.from_file(pkg, fn, filesystem)
+
+
+@pytest.mark.parametrize('filesystem', ['fetch'], indirect=True)
+def test_build_format_database(filesystem):
+    paths = [
+        '/opt/ros/melodic/share/tf2_msgs',
+        '/opt/ros/melodic/share/tf'
+    ]
+    db_package = PackageDatabase.from_paths(filesystem, paths)
+    db_format = FormatDatabase.build(db_package)
+    name_messages: Set[str] = set(db_format.messages)
+    name_services: Set[str] = set(db_format.services)
+    name_actions: Set[str] = set(db_format.actions)
+    assert name_messages == {
+        'tf/tfMessage',
+        'tf/FrameGraphResponse',
+        'tf2_msgs/FrameGraphResponse',
+        'tf2_msgs/LookupTransformAction',
+        'tf2_msgs/LookupTransformActionFeedback',
+        'tf2_msgs/LookupTransformActionGoal',
+        'tf2_msgs/LookupTransformActionResult',
+        'tf2_msgs/LookupTransformFeedback',
+        'tf2_msgs/LookupTransformGoal',
+        'tf2_msgs/LookupTransformResult',
+        'tf2_msgs/TF2Error',
+        'tf2_msgs/TFMessage'
+    }
+    assert name_services == {
+        'tf/FrameGraph',
+        'tf2_msgs/FrameGraph'
+    }
+    assert name_actions == {'tf2_msgs/LookupTransform'}
+
+
+@pytest.mark.parametrize('filesystem', ['fetch'], indirect=True)
+def test_msg_toposort(filesystem):
+    paths = [
+        '/ros_ws/src/geometry2/tf2_msgs',
+        '/ros_ws/src/geometry/tf',
+        '/ros_ws/src/common_msgs/geometry_msgs',
+        '/ros_ws/src/std_msgs'
+    ]
+    db_package = PackageDatabase.from_paths(filesystem, paths)
+    db_format = FormatDatabase.build(db_package)
+
+    msgs = db_format.messages.values()
+    msgs = MsgFormat.toposort(msgs)
 
 
 def test_msg_flatten():
