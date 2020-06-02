@@ -1,4 +1,4 @@
-# 1.3.0 (XXXX-XX-XX)
+# 1.3.0 (2020-06-02)
 
 * Added ability to specify additional environment variables when launching
   systems
