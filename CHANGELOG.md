@@ -4,6 +4,8 @@
   systems
 * Allowed mypy to discover type hints via PEP 561
 * Added missing type annotations
+* Added ROSLaunchController for dynamically inspecting and controlling
+  roslaunch processes
 
 
 # 1.2.1 (2020-05-27)
