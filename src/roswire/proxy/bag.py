@@ -231,8 +231,7 @@ class BagRecorder:
             command = ' '.join(args)
             self.__process = self.__shell.popen(command,
                                                 stderr=False,
-                                                stdout=False,
-                                                text=True)
+                                                stdout=False)
             logger.debug("started bag recording")
 
     def stop(self, save: bool = True) -> None:
