@@ -1,3 +1,10 @@
+# 1.4.0 (XXXX-XX-XX)
+
+* Added `restrict_to_topics` argument to `record` method of `ROSCore`, allowing
+  users to restrict bag recording to specific topics by supplying a regular
+  expression in the same manner as the `rosbag` command line tool.
+
+
 # 1.3.0 (2020-06-02)
 
 * Added ability to specify additional environment variables when launching
