@@ -96,7 +96,8 @@ class ROSCore:
 
     def record(self,
                fn: str,
-               exclude_topics: Optional[str] = None
+               exclude_topics: Optional[str] = None,
+               restrict_to_topics: Optional[str] = None
                ) -> BagRecorder:
         """Provides an interface to rosbag for recording ROS topics to disk.
 
@@ -113,6 +114,9 @@ class ROSCore:
         exclude_topics: str, optional
             An optional regular expression specifying the topics that should
             be excluded from the bag.
+        restrict_to_topics: str, optional
+            An optional regular expression specifying the topics to which
+            recording should be restricted.
 
         Returns
         -------
@@ -123,7 +127,8 @@ class ROSCore:
                            self.__ws_host,
                            self.__shell,
                            self.__nodes,
-                           exclude_topics=exclude_topics)
+                           exclude_topics=exclude_topics,
+                           restrict_to_topics=restrict_to_topics)
 
     def playback(self,
                  fn: str,
