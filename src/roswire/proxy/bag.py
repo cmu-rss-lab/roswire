@@ -226,10 +226,13 @@ class BagRecorder:
                     f'__name:={self.__bag_name}']
             if self.__exclude_topics:
                 args += ['-x', shlex.quote(self.__exclude_topics)]
+            if self.__restrict_to_topics:
+                args += ['-e', shlex.quote(self.__restrict_to_topics)]
             command = ' '.join(args)
             self.__process = self.__shell.popen(command,
                                                 stderr=False,
-                                                stdout=False)
+                                                stdout=False,
+                                                text=True)
             logger.debug("started bag recording")
 
     def stop(self, save: bool = True) -> None:
