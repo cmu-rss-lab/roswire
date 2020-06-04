@@ -221,13 +221,15 @@ class BagRecorder:
             if self.__started:
                 raise exceptions.RecorderAlreadyStarted
             self.__started = True
-            args = ['rosbag record', '-q', '-a',
+            args = ['rosbag record', '-q',
                     f'-O {self.__fn_container}',
                     f'__name:={self.__bag_name}']
             if self.__exclude_topics:
                 args += ['-x', shlex.quote(self.__exclude_topics)]
             if self.__restrict_to_topics:
                 args += ['-e', shlex.quote(self.__restrict_to_topics)]
+            else:
+                args.append('-a')
             command = ' '.join(args)
             self.__process = self.__shell.popen(command,
                                                 stderr=False,
