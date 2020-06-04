@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__ = ('ParameterServer',)
 
-from typing import Iterator, Any, Mapping
+from typing import Any, Iterator, Mapping, Sequence
 import xmlrpc.client
 
 
@@ -33,7 +33,8 @@ class ParameterServer(Mapping[str, Any]):
         """
         assert isinstance(key, str)
         conn = self.__connection
-        code, msg, result = conn.hasParam(self.__caller_id, key)
+        code, msg, result = \
+            conn.hasParam(self.__caller_id, key)  # type: ignore
         if code != 1:
             raise exceptions.ROSWireException("bad API call!")
         assert isinstance(result, bool)
@@ -44,8 +45,11 @@ class ParameterServer(Mapping[str, Any]):
         Returns an iterator over the names of the parameters stored on the
         server.
         """
-        conn = self.__connection
-        code, msg, result = conn.getParamNames(self.__caller_id)
+        code: int
+        msg: str
+        result: Sequence[str]
+        code, msg, result = \
+            self.__connection.getParamNames(self.__caller_id)  # type: ignore
         if code != 1:
             raise exceptions.ROSWireException("bad API call!")
         yield from result
@@ -66,8 +70,8 @@ class ParameterServer(Mapping[str, Any]):
             ParameterNotFoundError: if no parameter with the given key is found
                 on the parameter server.
         """
-        conn = self.__connection
-        code, msg, result = conn.getParam(self.__caller_id, key)
+        code, msg, result = \
+            self.__connection.getParam(self.__caller_id, key)  # type: ignore
         if code == -1:
             raise exceptions.ParameterNotFoundError(key)
         if code != 1:
@@ -79,8 +83,8 @@ class ParameterServer(Mapping[str, Any]):
         Sets the value of a parameter on the server. If the value is a
         dictionary, it will be treated as a parameter tree.
         """
-        conn = self.__connection
-        code, msg, result = conn.setParam(self.__caller_id, key, value)
+        code, msg, result = \
+            self.__connection.setParam(self.__caller_id, key, value)  # type: ignore  # noqa
         if code != 1:
             raise exceptions.ROSWireException("bad API call!")
 
@@ -95,8 +99,8 @@ class ParameterServer(Mapping[str, Any]):
             KeyError: if no parameter or parameter tree is found with the
                 given key on the server.
         """
-        conn = self.__connection
-        code, msg, result = conn.deleteParam(self.__caller_id, key)
+        code, msg, result = \
+            self.__connection.deleteParam(self.__caller_id, key)  # type: ignore  # noqa
         if code == -1:
             raise exceptions.ParameterNotFoundError(key)
         if code != 1:

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__ = ('NodeManager', 'Node')
 
-from typing import Iterator, Set, Mapping, Optional
+from typing import Iterator, Mapping, Optional, Set, Sequence, Tuple
 from urllib.parse import urlparse
 import xmlrpc.client
 
@@ -52,7 +52,7 @@ class Node:
 
     @property
     def pid(self) -> int:
-        code, status, pid = self.api.getPid('/.roswire')
+        code, status, pid = self.api.getPid('/.roswire')  # type: ignore
         if code != 1:
             m = f"failed to obtain PID [{self.name}]: {status} (code: {code})"
             raise ROSWireException(m)
@@ -98,7 +98,11 @@ class NodeManager(Mapping[str, Node]):
     def __get_node_names(self) -> Set[str]:
         """Fetches a list of the names of all active nodes."""
         names: Set[str] = set()
-        code, status, state = self.api.getSystemState('/.roswire')
+        code: int
+        status: str
+        state: Tuple[Tuple[str, Sequence[str]], Tuple[str, Sequence[str]], Tuple[str, Sequence[str]]]  # noqa
+        code, status, state = \
+            self.api.getSystemState('/.roswire')  # type: ignore
         for s in state:
             for t, l in s:
                 names.update(n for n in l)
@@ -130,7 +134,11 @@ class NodeManager(Mapping[str, Node]):
         NodeNotFoundError
             If there is no node with the given name.
         """
-        code, status, uri_container = self.api.lookupNode('/.roswire', name)
+        code: int
+        status: str
+        uri_container: str
+        code, status, uri_container = \
+            self.api.lookupNode('/.roswire', name)  # type: ignore
         if code == -1:
             raise NodeNotFoundError(name)
         if code != 1:

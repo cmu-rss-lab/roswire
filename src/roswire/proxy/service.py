@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__ = ('Service', 'ServiceManager')
 
-from typing import Iterator, Set, Mapping, Optional
+from typing import Iterator, Mapping, Optional, Set, Sequence, Tuple
 from urllib.parse import urlparse
 import xmlrpc.client
 
@@ -81,7 +81,11 @@ class ServiceManager(Mapping[str, Service]):
         self.__shell = shell
 
     def __get_service_names(self) -> Set[str]:
-        code, msg, state = self.__api.getSystemState('/.roswire')
+        code: int
+        msg: str
+        state: Tuple[Tuple[str, Sequence[str]], Tuple[str, Sequence[str]], Tuple[str, Sequence[str]]]  # noqa
+        code, msg, state = \
+            self.__api.getSystemState('/.roswire')  # type: ignore
         if code != 1:
             m = "an unexpected error occurred when retrieving services"
             m = f"{m}: {msg} (code: {code})"
@@ -116,7 +120,11 @@ class ServiceManager(Mapping[str, Service]):
         ServiceNotFound
             If no service is found with the given name.
         """
-        code, msg, url_container = self.__api.lookupService('/.roswire', name)
+        code: int
+        msg: str
+        url_container: str
+        code, msg, url_container = \
+            self.__api.lookupService('/.roswire', name)  # type: ignore
 
         if code == -1:
             raise exceptions.ServiceNotFoundError(name)

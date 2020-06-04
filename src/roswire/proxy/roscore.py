@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__ = ('ROSCore',)
 
-from typing import Dict, Optional
+from typing import Dict, Sequence, Optional, Tuple
 import os
 import xmlrpc.client
 import time
@@ -88,8 +88,11 @@ class ROSCore:
 
     @property
     def topic_to_type(self) -> Dict[str, str]:
-        conn = self.connection
-        code, msg, result = conn.getTopicTypes(self.__caller_id)
+        code: int
+        msg: str
+        result: Sequence[Tuple[str, str]]
+        code, msg, result = \
+            self.connection.getTopicTypes(self.__caller_id)  # type: ignore
         if code != 1:
             raise ROSWireException("bad API call!")
         return {name: typ for (name, typ) in result}
