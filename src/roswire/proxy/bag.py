@@ -139,7 +139,8 @@ class BagRecorder:
                  ws_host: str,
                  shell: dockerblade.Shell,
                  nodes: NodeManager,
-                 exclude_topics: Optional[str] = None
+                 exclude_topics: Optional[str] = None,
+                 restrict_to_topics: Optional[str] = None
                  ) -> None:
         """
         Notes
@@ -156,9 +157,12 @@ class BagRecorder:
             a shell proxy.
         nodes: NodeManager
             access to nodes for the associated ROS graph.
-        exclude_topics: Optional[str] = None
+        exclude_topics: str, optional
             an optional regular expression specifying the topics that should
             be excluded from the bag.
+        restrict_to_topics: str, optional
+            An optional regular expression specifying the topics to which
+            recording should be restricted.
         """
         self.__lock: threading.Lock = threading.Lock()
         self.__process: Optional[dockerblade.popen.Popen] = None
@@ -167,6 +171,7 @@ class BagRecorder:
         self.__shell: dockerblade.Shell = shell
         self.__nodes: NodeManager = nodes
         self.__exclude_topics: Optional[str] = exclude_topics
+        self.__restrict_to_topics: Optional[str] = restrict_to_topics
 
         # FIXME generate a bag name
         self.__bag_name: str = "my_bag"
@@ -216,11 +221,15 @@ class BagRecorder:
             if self.__started:
                 raise exceptions.RecorderAlreadyStarted
             self.__started = True
-            args = ['rosbag record', '-q', '-a',
+            args = ['rosbag record', '-q',
                     f'-O {self.__fn_container}',
                     f'__name:={self.__bag_name}']
             if self.__exclude_topics:
                 args += ['-x', shlex.quote(self.__exclude_topics)]
+            if self.__restrict_to_topics:
+                args += ['-e', shlex.quote(self.__restrict_to_topics)]
+            else:
+                args.append('-a')
             command = ' '.join(args)
             self.__process = self.__shell.popen(command,
                                                 stderr=False,
