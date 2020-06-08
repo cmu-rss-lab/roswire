@@ -28,11 +28,22 @@ R_BLANK = re.compile(f"^\s*{R_COMMENT}$")
 ConstantValue = Union[str, int, float]
 
 
-@attr.s(frozen=True, str=False)
+@attr.s(frozen=True, slots=True, str=False, auto_attribs=True)
 class Constant:
-    typ = attr.ib(type=str)
-    name = attr.ib(type=str)
-    value = attr.ib(type=Union[str, int, float])
+    """Provides a constant definition for an associated message format.
+
+    Attributes
+    ----------
+    typ: str
+        The name of the type used by this constant.
+    name: str
+        The name of this constant.
+    value: Union[str, int, float]
+        The value of this constant.
+    """
+    typ: str
+    name: str
+    value: Union[str, int, float]
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> 'Constant':
@@ -49,6 +60,15 @@ class Constant:
 
 @attr.s(frozen=True, str=False, slots=True, auto_attribs=True)
 class Field:
+    """Provides a description of a message field.
+
+    Attributes
+    ----------
+    typ: str
+        The name of the type used this field.
+    name: str
+        The name of this field.
+    """
     typ: str
     name: str
 
