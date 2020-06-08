@@ -11,47 +11,72 @@ from .msg import MsgFormat
 from .. import exceptions
 
 
-@attr.s(frozen=True)
+@attr.s(frozen=True, auto_attribs=True, slots=True)
 class ActionFormat:
+    """Provides an immutable definition of a
+    `ROS Action <https://www.christimperley.co.uk/roswire/>`_.
+
+    Attributes
+    ----------
+    package: str
+        The name of the package to which this action belongs.
+    name: str
+        The name of this action.
+    definition: str
+        The plaintext definition of this action (e.g., the contents of a
+        .action file).
+    goal: MsgFormat
+        The definition of the goal message for this action.
+    feedback: Optional[MsgFormat]
+        The definition of the optional feedback message for this action, if
+        it has one.
+    result: Optional[MsgFormat]
+        The definition of the optional result message for this action, if
+        it has one.
     """
-    Reference: http://wiki.ros.org/actionlib
-    """
-    package = attr.ib(type=str)
-    name = attr.ib(type=str)
-    definition = attr.ib(type=str)
-    goal = attr.ib(type=MsgFormat)
-    feedback = attr.ib(type=Optional[MsgFormat])
-    result = attr.ib(type=Optional[MsgFormat])
+    package: str
+    name: str
+    definition: str
+    goal: MsgFormat
+    feedback: Optional[MsgFormat]
+    result: Optional[MsgFormat]
 
     @staticmethod
     def from_file(package: str,
-                  fn: str,
+                  filename: str,
                   files: dockerblade.FileSystem
                   ) -> 'ActionFormat':
-        """
-        Constructs a message format from a .msg file for a given package.
+        """Constructs an action format from a .action file for a given package.
 
-        Parameters:
-            package: the name of the package that provides the file.
-            fn: the path to the .msg file.
-            files: a proxy for accessing the filesystem.
+        Parameters
+        ----------
+        package: str
+            The name of the package that provides the file.
+        filename: str
+            The path to the .msg file.
+        files: dockerblade.FileSystem
+            An interface to the filesystem that hosts the .action file.
 
-        Raises:
-            FileNotFoundError: if the given file cannot be found.
+        Raises
+        ------
+        FileNotFoundError
+            If the given file cannot be found.
         """
-        assert fn.endswith('.action'), \
+        assert filename.endswith('.action'), \
             'action format files must end in .action'
-        name: str = os.path.basename(fn[:-7])
-        contents: str = files.read(fn)
+        name: str = os.path.basename(filename[:-7])
+        contents: str = files.read(filename)
         return ActionFormat.from_string(package, name, contents)
 
     @staticmethod
     def from_string(package: str, name: str, s: str) -> 'ActionFormat':
-        """
-        Constructs an action format from its description.
+        """Constructs an action format from its definition (i.e., the contents
+        of a .action file).
 
-        Raises:
-            ParsingError: if the description cannot be parsed.
+        Raises
+        ------
+        ParsingError
+            If the description cannot be parsed.
         """
         goal: MsgFormat
         feed: Optional[MsgFormat]
@@ -113,4 +138,5 @@ class ActionFormat:
 
     @property
     def fullname(self) -> str:
+        """The fully qualified name of this action."""
         return f"{self.package}/{self.name}"

@@ -30,10 +30,14 @@ ROS
 ---
 
 .. py:module:: roswire.proxy
-.. autoclass:: ROSProxy()
+.. autoclass:: ROSCore()
   :members:
 
-.. autoclass:: NodeManagerProxy()
+
+Nodes
+-----
+
+.. autoclass:: NodeManager()
   :show-inheritance:
   :members:
   :inherited-members:
@@ -43,10 +47,14 @@ ROS
   .. automethod:: __iter__
   .. automethod:: __len__
 
-.. autoclass:: NodeProxy()
+.. autoclass:: Node()
    :members:
 
-.. autoclass:: ServiceManagerProxy()
+
+Services
+--------
+
+.. autoclass:: ServiceManager()
   :show-inheritance:
   :members:
   :inherited-members:
@@ -56,7 +64,7 @@ ROS
   .. automethod:: __iter__
   .. automethod:: __len__
 
-.. autoclass:: ServiceProxy()
+.. autoclass:: Service()
    :members:
 
 
@@ -78,22 +86,25 @@ Descriptions
 .. autoclass:: FormatDatabase()
 
 
-Containers
-----------
+Messages
+--------
+.. autoclass:: Message()
+   :members:
 
-.. py:module:: roswire
+.. autoclass:: MsgFormat()
+   :members:
 
-Internally, roswire uses the following classes to facilitate its interactions
-with Docker. The majority of users should not need to interact with these
-classes directly; instead, they should use interact with :class:`System`
-instances that are generated using :meth:`ROSWire.launch`.
+.. autoclass:: Field()
+   :members:
 
-.. py:module:: roswire.proxy.container
-.. autoclass:: ContainerProxyManager()
-  :members:
+.. autoclass:: Constant()
+   :members:
 
-.. autoclass:: ContainerProxy()
-  :members:
+.. autoclass:: SrvFormat()
+   :members:
+
+.. autoclass:: ActionFormat()
+   :members:
 
 
 Exceptions

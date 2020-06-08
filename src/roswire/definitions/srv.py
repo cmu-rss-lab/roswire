@@ -10,40 +10,67 @@ import dockerblade
 from .msg import MsgFormat
 
 
-@attr.s(frozen=True)
+@attr.s(frozen=True, auto_attribs=True, slots=True)
 class SrvFormat:
-    package = attr.ib(type=str)
-    name = attr.ib(type=str)
-    definition = attr.ib(type=str)
-    request = attr.ib(type=Optional[MsgFormat])
-    response = attr.ib(type=Optional[MsgFormat])
+    """Provides an immutable definition of a given
+    `ROS service format <http://wiki.ros.org/srv>`_.
+
+    Attributes
+    ----------
+    package: str
+        The name of the package that defines this service format.
+    name: str
+        The unqualified name of the service format.
+    definition: str
+        The plaintext contents of the associated .srv file.
+    request: Optional[MsgFormat]
+        The definition of the optional request message for this service, if
+        it has one.
+    response: Optional[MsgFormat]
+        The definition of the optional response message for this service, if
+        it has one.
+    """
+    package: str
+    name: str
+    definition: str
+    request: Optional[MsgFormat]
+    response: Optional[MsgFormat]
 
     @staticmethod
     def from_file(package: str,
-                  fn: str,
+                  filename: str,
                   files: dockerblade.FileSystem
                   ) -> 'SrvFormat':
         """Constructs a service format from a .srv file for a given package.
 
-        Parameters:
-            package: the name of the package that provides the file.
-            fn: the path to the .srv file.
-            files: a proxy for accessing the filesystem.
+        Parameters
+        ----------
+        package: str
+            The name of the package that provides the file.
+        filename: str
+            The absolute path to the .srv file.
+        files: dockerblade.FileSystem
+            An interface to the filesystem that hosts the .srv file.
 
-        Raises:
-            FileNotFoundError: if the given file cannot be found.
+        Raises
+        ------
+        FileNotFoundError
+            If the given file cannot be found.
         """
-        assert fn.endswith('.srv'), 'service format files must end in .srv'
-        name: str = os.path.basename(fn[:-4])
-        contents: str = files.read(fn)
+        assert filename.endswith('.srv'), \
+            'service format files must end in .srv'
+        name: str = os.path.basename(filename[:-4])
+        contents: str = files.read(filename)
         return SrvFormat.from_string(package, name, contents)
 
     @staticmethod
     def from_string(package: str, name: str, s: str) -> 'SrvFormat':
-        """Constructs a service format from its description.
+        """Constructs a service format from its definition.
 
-        Raises:
-            ParsingError: if the description cannot be parsed.
+        Raises
+        ------
+        ParsingError
+            If the description cannot be parsed.
         """
         req: Optional[MsgFormat] = None
         res: Optional[MsgFormat] = None
@@ -98,4 +125,5 @@ class SrvFormat:
 
     @property
     def fullname(self) -> str:
+        """The fully qualified name of this service format."""
         return f"{self.package}/{self.name}"
