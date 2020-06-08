@@ -62,3 +62,10 @@ Record ROS topic data to a ROS bag
 
 .. literalinclude:: recipes/record_to_bag.py
    :language: python
+
+
+Observe the state of a running ROS system
+-----------------------------------------
+
+.. literalinclude:: recipes/inspect_runtime.py
+   :language: python

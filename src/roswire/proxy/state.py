@@ -16,11 +16,11 @@ class SystemState:
 
     Attributes
     ----------
-    publishers
+    publishers: Mapping[str, Collection[str]]
         A mapping from topics to the names of publishers to that topic.
-    subscribers
+    subscribers: Mapping[str, Collection[str]]
         A mapping from topics to the names of subscribers to that topic.
-    services
+    services: Mapping[str, Collection[str]]
         A mapping from services to the names of providers of that service.
     """
     publishers: Mapping[str, Collection[str]]

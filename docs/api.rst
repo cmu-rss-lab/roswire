@@ -34,6 +34,10 @@ ROS
   :members:
 
 
+.. autoclass:: SystemState()
+   :members:
+
+
 ROS Launch
 ----------
 
