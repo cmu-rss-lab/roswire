@@ -47,10 +47,10 @@ class Constant:
         return f"{self.typ} {self.name}={str(self.value)}"
 
 
-@attr.s(frozen=True, str=False)
+@attr.s(frozen=True, str=False, slots=True, auto_attribs=True)
 class Field:
-    typ: str = attr.ib()
-    name: str = attr.ib()
+    typ: str
+    name: str
 
     @property
     def is_array(self) -> bool:
@@ -253,7 +253,9 @@ class MsgFormat:
 
 
 class Message:
-    """Base class used by all messages."""
+    """Each ROS message type has its own class that is dynamically generated
+    by ROSWire at runtime. This is the base class that is used by all of those
+    messages."""
     format: ClassVar[MsgFormat]
 
     @staticmethod
@@ -290,10 +292,12 @@ class Message:
 
     @classmethod
     def read(cls, b: BinaryIO) -> 'Message':
+        """Reads a binary encoding of this message from a given stream."""
         raise NotImplementedError
 
     @classmethod
     def decode(cls, b: bytes) -> 'Message':
+        """Decodes a binary encoding of this message."""
         return cls.read(BytesIO(b))
 
     def write(self, b: BinaryIO) -> None:

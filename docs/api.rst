@@ -78,6 +78,21 @@ Descriptions
 .. autoclass:: FormatDatabase()
 
 
+Messages
+--------
+.. autoclass:: Message()
+   :members:
+
+.. autoclass:: MsgFormat()
+   :members:
+
+.. autoclass:: Field()
+   :members:
+
+.. autoclass:: Constant()
+   :members:
+
+
 Exceptions
 ----------
 
