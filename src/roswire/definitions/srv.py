@@ -57,7 +57,8 @@ class SrvFormat:
         FileNotFoundError
             If the given file cannot be found.
         """
-        assert filename.endswith('.srv'), 'service format files must end in .srv'
+        assert filename.endswith('.srv'), \
+            'service format files must end in .srv'
         name: str = os.path.basename(filename[:-4])
         contents: str = files.read(filename)
         return SrvFormat.from_string(package, name, contents)

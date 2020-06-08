@@ -178,7 +178,8 @@ class MsgFormat:
         FileNotFoundError
             If the given file cannot be found.
         """
-        assert filename.endswith('.msg'), 'message format files must end in .msg'
+        assert filename.endswith('.msg'), \
+            'message format files must end in .msg'
         name: str = os.path.basename(filename[:-4])
         contents: str = files.read(filename)
         return MsgFormat.from_string(package, name, contents)
