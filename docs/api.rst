@@ -30,10 +30,10 @@ ROS
 ---
 
 .. py:module:: roswire.proxy
-.. autoclass:: ROSProxy()
+.. autoclass:: ROSCore()
   :members:
 
-.. autoclass:: NodeManagerProxy()
+.. autoclass:: NodeManager()
   :show-inheritance:
   :members:
   :inherited-members:
@@ -43,10 +43,10 @@ ROS
   .. automethod:: __iter__
   .. automethod:: __len__
 
-.. autoclass:: NodeProxy()
+.. autoclass:: Node()
    :members:
 
-.. autoclass:: ServiceManagerProxy()
+.. autoclass:: ServiceManager()
   :show-inheritance:
   :members:
   :inherited-members:
@@ -56,7 +56,7 @@ ROS
   .. automethod:: __iter__
   .. automethod:: __len__
 
-.. autoclass:: ServiceProxy()
+.. autoclass:: Service()
    :members:
 
 
