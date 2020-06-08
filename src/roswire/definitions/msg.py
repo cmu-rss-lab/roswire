@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __all__ = ('Constant', 'ConstantValue', 'Field', 'MsgFormat', 'Message')
 
 from typing import (Optional, Any, Union, Tuple, List, Dict, ClassVar,
