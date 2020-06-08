@@ -33,6 +33,10 @@ ROS
 .. autoclass:: ROSCore()
   :members:
 
+
+Nodes
+-----
+
 .. autoclass:: NodeManager()
   :show-inheritance:
   :members:
@@ -45,6 +49,10 @@ ROS
 
 .. autoclass:: Node()
    :members:
+
+
+Services
+--------
 
 .. autoclass:: ServiceManager()
   :show-inheritance:
@@ -90,6 +98,12 @@ Messages
    :members:
 
 .. autoclass:: Constant()
+   :members:
+
+.. autoclass:: SrvFormat()
+   :members:
+
+.. autoclass:: ActionFormat()
    :members:
 
 
