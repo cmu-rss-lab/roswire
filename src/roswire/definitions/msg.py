@@ -30,7 +30,7 @@ ConstantValue = Union[str, int, float]
 
 @attr.s(frozen=True, slots=True, str=False, auto_attribs=True)
 class Constant:
-    """Provides a constant definition for an associated message format.
+    """Provides an immutable definition of a constant for a message format.
 
     Attributes
     ----------
@@ -60,7 +60,7 @@ class Constant:
 
 @attr.s(frozen=True, str=False, slots=True, auto_attribs=True)
 class Field:
-    """Provides a description of a message field.
+    """Provides an immutable description of a message field.
 
     Attributes
     ----------
@@ -115,7 +115,7 @@ class Field:
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
 class MsgFormat:
-    """Provides the definition for a given ROS message format.
+    """Provides an immutable definition of a given ROS message format.
 
     Attributes
     ----------
