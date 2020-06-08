@@ -34,6 +34,13 @@ ROS
   :members:
 
 
+ROS Launch
+----------
+
+.. autoclass:: ROSLaunchManager()
+   :members:
+
+
 Nodes
 -----
 
