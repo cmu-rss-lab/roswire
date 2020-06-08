@@ -4,6 +4,8 @@
   users to restrict bag recording to specific topics by supplying a regular
   expression in the same manner as the `rosbag` command line tool.
 * Improved documentation for ROSCore, its associated parts, and messages.
+* Added `state` property to `ROSCore` along with associated
+  `SystemState` and `SystemStateProbe` classes.
 
 
 # 1.3.0 (2020-06-02)

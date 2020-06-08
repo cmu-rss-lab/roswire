@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__ = ('Service', 'ServiceManager')
 
-from typing import Iterator, Mapping, Optional, Set, Sequence, Tuple
+from typing import AbstractSet, Iterator, Mapping, Optional
 from urllib.parse import urlparse
 import xmlrpc.client
 
@@ -9,6 +9,7 @@ import attr
 import dockerblade
 import yaml
 
+from .state import SystemStateProbe
 from .. import exceptions
 from ..definitions import Message, SrvFormat, MsgFormat
 from ..description import SystemDescription
@@ -79,20 +80,11 @@ class ServiceManager(Mapping[str, Service]):
         self.__host_ip_master = host_ip_master
         self.__api = api
         self.__shell = shell
+        self.__state_probe: SystemStateProbe = \
+            SystemStateProbe.via_xmlrpc_connection(self.__api)
 
-    def __get_service_names(self) -> Set[str]:
-        code: int
-        msg: str
-        state: Tuple[Tuple[str, Sequence[str]], Tuple[str, Sequence[str]], Tuple[str, Sequence[str]]]  # noqa
-        code, msg, state = \
-            self.__api.getSystemState('/.roswire')  # type: ignore
-        if code != 1:
-            m = "an unexpected error occurred when retrieving services"
-            m = f"{m}: {msg} (code: {code})"
-            raise exceptions.ROSWireException(m)
-        pubs, subs, services_and_providers = state
-        services: Set[str] = set(s[0] for s in services_and_providers)
-        return services
+    def __get_service_names(self) -> AbstractSet[str]:
+        return set(self.__state_probe().services.keys())
 
     def __len__(self) -> int:
         """The number of advertised services on this ROS graph."""

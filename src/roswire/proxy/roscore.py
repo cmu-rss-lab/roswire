@@ -16,6 +16,7 @@ from .node import NodeManager
 from .parameters import ParameterServer
 from .roslaunch import ROSLaunchManager
 from .service import ServiceManager
+from .state import SystemState, SystemStateProbe
 
 
 class ROSCore:
@@ -26,9 +27,11 @@ class ROSCore:
     uri: str
         The URI of the ROS Master.
     connection: xmlrpc.client.ServerProxy
-        The XML-RPC connection to the ROS master.
+        The XML-RPC connection to the ROS Master.
     nodes: NodeManager
         Provides access to the nodes running on this ROS Master.
+    state: SystemState
+        The instantaneous state of the ROS Master.
     roslaunch: ROSLaunchManager
         Provides access to roslaunch-related functionality.
     services: ServiceManager
@@ -67,6 +70,8 @@ class ROSCore:
                            self.__ip_address,
                            self.__connection,
                            self.__shell)
+        self.__state_probe: SystemStateProbe = \
+            SystemStateProbe.via_xmlrpc_connection(self.__connection)
         self.roslaunch: ROSLaunchManager = \
             ROSLaunchManager(self.__shell, self.__files)
 
@@ -85,6 +90,10 @@ class ROSCore:
     @property
     def connection(self) -> xmlrpc.client.ServerProxy:
         return self.__connection
+
+    @property
+    def state(self) -> SystemState:
+        return self.__state_probe()
 
     @property
     def topic_to_type(self) -> Dict[str, str]:

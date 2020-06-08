@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__ = ('NodeManager', 'Node')
 
-from typing import Iterator, Mapping, Optional, Set, Sequence, Tuple
+from typing import AbstractSet, Iterator, Mapping, Optional
 from urllib.parse import urlparse
 import xmlrpc.client
 
@@ -9,6 +9,7 @@ from loguru import logger
 import dockerblade
 import psutil
 
+from .state import SystemStateProbe
 from ..exceptions import ROSWireException, NodeNotFoundError
 
 
@@ -90,23 +91,12 @@ class NodeManager(Mapping[str, Node]):
         self.__host_ip_master: str = host_ip_master
         self.__api: xmlrpc.client.ServerProxy = api
         self.__shell: dockerblade.Shell = shell
+        self.__state_probe: SystemStateProbe = \
+            SystemStateProbe.via_xmlrpc_connection(self.__api)
 
-    @property
-    def api(self) -> xmlrpc.client.ServerProxy:
-        return self.__api
-
-    def __get_node_names(self) -> Set[str]:
+    def __get_node_names(self) -> AbstractSet[str]:
         """Fetches a list of the names of all active nodes."""
-        names: Set[str] = set()
-        code: int
-        status: str
-        state: Tuple[Tuple[str, Sequence[str]], Tuple[str, Sequence[str]], Tuple[str, Sequence[str]]]  # noqa
-        code, status, state = \
-            self.api.getSystemState('/.roswire')  # type: ignore
-        for s in state:
-            for t, l in s:
-                names.update(n for n in l)
-        return names
+        return self.__state_probe().nodes
 
     def __len__(self) -> int:
         """Returns a count of the number of active nodes."""
@@ -138,7 +128,7 @@ class NodeManager(Mapping[str, Node]):
         status: str
         uri_container: str
         code, status, uri_container = \
-            self.api.lookupNode('/.roswire', name)  # type: ignore
+            self.__api.lookupNode('/.roswire', name)  # type: ignore
         if code == -1:
             raise NodeNotFoundError(name)
         if code != 1:

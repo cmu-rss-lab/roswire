@@ -7,3 +7,4 @@ from .parameters import ParameterServer
 from .roscore import ROSCore
 from .service import Service, ServiceManager
 from .roslaunch import ROSLaunchManager
+from .state import SystemState
