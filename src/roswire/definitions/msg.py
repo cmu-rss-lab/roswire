@@ -93,11 +93,30 @@ class Field:
         return f"{self.typ} {self.name}"
 
 
-@attr.s(frozen=True)
+@attr.s(frozen=True, slots=True, auto_attribs=True)
 class MsgFormat:
-    package: str = attr.ib()
-    name: str = attr.ib()
-    definition: str = attr.ib()
+    """Provides the definition for a given ROS message format.
+
+    Attributes
+    ----------
+    package: str
+        The name of the package that defines this message format.
+    name: str
+        The unqualified name of the message format.
+    definition: str
+        The plaintext contents of the associated .msg file.
+    fields: Sequence[Field]
+        The fields that belong to this message format.
+    constants: Sequence[Constant]
+        The named constants that belong to this message format.
+
+    References
+    ----------
+    * http://wiki.ros.org/msg
+    """
+    package: str
+    name: str
+    definition: str
     fields: Tuple[Field, ...] = attr.ib(converter=tuple)
     constants: Tuple[Constant, ...] = attr.ib(converter=tuple)
 
@@ -119,32 +138,47 @@ class MsgFormat:
 
     @staticmethod
     def from_file(package: str,
-                  fn: str,
+                  filename: str,
                   files: dockerblade.FileSystem
                   ) -> 'MsgFormat':
-        """
-        Constructs a message format from a .msg file for a given package.
+        """Constructs a message format from a .msg file for a given package.
 
-        Parameters:
-            package: the name of the package that provides the file.
-            fn: the path to the .msg file.
-            files: a proxy for accessing the filesystem.
+        Parameters
+        ----------
+        package: str
+            The name of the package that provides the file.
+        filename: str
+            The absolute path to the .msg file inside the given filesystem.
+        files: dockerblade.FileSystem
+            An interface to the filesystem that hosts the .msg file.
 
-        Raises:
-            FileNotFoundError: if the given file cannot be found.
+        Raises
+        ------
+        FileNotFoundError
+            If the given file cannot be found.
         """
-        assert fn.endswith('.msg'), 'message format files must end in .msg'
-        name: str = os.path.basename(fn[:-4])
-        contents: str = files.read(fn)
+        assert filename.endswith('.msg'), 'message format files must end in .msg'
+        name: str = os.path.basename(filename[:-4])
+        contents: str = files.read(filename)
         return MsgFormat.from_string(package, name, contents)
 
     @staticmethod
     def from_string(package: str, name: str, text: str) -> 'MsgFormat':
-        """
-        Constructs a message format from its description.
+        """Constructs a message format from its description.
 
-        Raises:
-            ParsingError: if the description cannot be parsed.
+        Parameters
+        ----------
+        package: str
+            The name of the package that provides the file.
+        filename: str
+            The absolute path to the .msg file inside the given filesystem.
+        text: str
+            The message definition itself (e.g., the contents of a .msg file).
+
+        Raises
+        ------
+        ParsingError
+            If the description cannot be parsed.
         """
         typ: str
         name_const: str
@@ -217,6 +251,7 @@ class MsgFormat:
 
     @property
     def fullname(self) -> str:
+        """The fully qualified name of this message format."""
         return f"{self.package}/{self.name}"
 
     def flatten(self,
@@ -255,7 +290,13 @@ class MsgFormat:
 class Message:
     """Each ROS message type has its own class that is dynamically generated
     by ROSWire at runtime. This is the base class that is used by all of those
-    messages."""
+    messages.
+
+    Attributes
+    ----------------
+    format: MsgFormat
+        The format used by this message.
+    """
     format: ClassVar[MsgFormat]
 
     @staticmethod
