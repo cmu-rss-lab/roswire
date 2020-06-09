@@ -6,6 +6,8 @@
 * Improved documentation for ROSCore, its associated parts, and messages.
 * Added `state` property to `ROSCore` along with associated
   `SystemState` and `SystemStateProbe` classes.
+* Added `network_mode` parameter to `launch` method in `ROSWire`. Produces a
+  warning when users attempt to use the `bridge` network mode on OSX.
 
 
 # 1.3.0 (2020-06-02)
