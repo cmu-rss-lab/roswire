@@ -80,6 +80,10 @@ class ROSWire:
                network_mode: str = 'bridge'
                ) -> Iterator[System]:
         """Launches a ROS application using a provided Docker image.
+        If using OSX, :code:`network_mode` should be set to :code:`host`
+        (i.e., the application container will share the same network as the
+        host machine). This avoids limitations in Docker on OSX that prevent
+        per-container IP addressing.
 
         Parameters
         ----------
