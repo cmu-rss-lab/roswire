@@ -109,6 +109,7 @@ class ROSWire:
         with self.containers.launch(image,
                                     ports=ports,
                                     sources=sources,
+                                    network_mode=network_mode,
                                     environment=environment) as container:
             container = container
             yield System(container, description)
