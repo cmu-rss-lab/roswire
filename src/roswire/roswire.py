@@ -76,7 +76,8 @@ class ROSWire:
                description: Optional[SystemDescription] = None,
                *,
                ports: Optional[Dict[int, int]] = None,
-               environment: Optional[Mapping[str, str]] = None
+               environment: Optional[Mapping[str, str]] = None,
+               network_mode: str = 'bridge'
                ) -> Iterator[System]:
         """Launches a ROS application using a provided Docker image.
 
@@ -98,6 +99,10 @@ class ROSWire:
         environment: Mapping[str, str], optional
             an optional set of additional environment variables, indexed by
             name, that should be used by the system.
+        network_mode: str
+            The Docker network mode that should be used by the container. This
+            may be `bridge`, `host`, `none`, or `container:<name|id>`. Note
+            that OSX does not provide full support for `bridge` mode.
         """
         if not description:
             description = self.descriptions.load_or_build(image, sources)
