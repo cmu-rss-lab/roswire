@@ -5,7 +5,9 @@ from typing import Dict, Iterator, Mapping, Optional, Sequence, Union
 from uuid import UUID, uuid4
 import contextlib
 import shutil
+import sys
 import os
+import warnings
 
 import attr
 import dockerblade
@@ -16,6 +18,14 @@ from docker.models.containers import Container as DockerContainer
 from loguru import logger
 
 from ..exceptions import SourceNotFoundError
+
+_OSX_NETWORKING_WARNING = """
+'bridge' network mode is not fully supported on OSX due to inability to lack
+of per-containing IP addressing.
+See https://docs.docker.com/docker-for-mac/networking/#known-limitations-use-cases-and-workarounds
+for details. Use network_mode='host' when launching systems and containers on
+Mac OSX as a workaround.
+""".strip()  # noqa
 
 
 @attr.s(frozen=True)
@@ -145,9 +155,12 @@ class ContainerManager:
                    dir_host_shared: str,
                    uuid: UUID,
                    *,
-                   ports: Optional[Dict[int, int]] = None
+                   ports: Optional[Dict[int, int]] = None,
+                   network_mode: str = 'bridge'
                    ) -> Iterator[DockerContainer]:
         logger.debug(f"building docker container: {uuid}")
+        if sys.platform == 'darwin' and network_mode == 'bridge':
+            warnings.warn(_OSX_NETWORKING_WARNING)
         dockerc = self.docker_client.containers.create(
             image_or_name,
             '/bin/sh',
@@ -155,6 +168,7 @@ class ContainerManager:
             name=uuid,
             entrypoint='/bin/sh -c',
             volumes={dir_host_shared: {'bind': '/.roswire', 'mode': 'rw'}},
+            network_mode=network_mode,
             ports=ports,
             stdin_open=True,
             tty=False,
@@ -175,7 +189,8 @@ class ContainerManager:
                sources: Sequence[str],
                *,
                ports: Optional[Dict[int, int]] = None,
-               environment: Optional[Mapping[str, str]] = None
+               environment: Optional[Mapping[str, str]] = None,
+               network_mode: str = 'bridge'
                ) -> Iterator['Container']:
         """
         Launches a context-managed Docker container for a given image. Upon
@@ -197,6 +212,10 @@ class ContainerManager:
         environment: Mapping[str, str], optional
             An optional set of additional environment variables, indexed by
             name, that should be used by the container.
+        network_mode: str
+            The Docker network mode that should be used by the container. This
+            may be `bridge`, `host`, `none`, or `container:<name|id>`. Note
+            that OSX does not provide full support for `bridge` mode.
 
         Yields
         ------
