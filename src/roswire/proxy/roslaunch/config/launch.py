@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 __all__ = ('LaunchConfig',)
 
-from typing import AbstractSet, Any, Dict, FrozenSet, Mapping, Optional, Sequence
+from typing import (AbstractSet, Any, Dict, FrozenSet, Mapping, Optional,
+                    Sequence, Tuple)
 import xml.etree.ElementTree as ET
 
 from loguru import logger
@@ -53,6 +54,16 @@ class LaunchConfig:
 
         params[name] = param
         return attr.evolve(self, params=params, errors=errors)
+
+    def with_remappings(self,
+                        node_to_remappings: Mapping[str, Collection[Tuple[str, str]]]  # noqa
+                        ) -> 'LaunchConfig':
+        nodes: Set[NodeConfig] = set()
+        for node in self.nodes:
+            if node.name in node_to_remappings:
+                node = node.with_remappings(node_to_remappings[node.name])
+            nodes.add(node)
+        return attr.evolve(self, nodes=frozenset(nodes))
 
     def with_executable(self, executable: str) -> 'LaunchConfig':
         """Specify an executable that should be run at launch."""
