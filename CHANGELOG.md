@@ -9,6 +9,9 @@
 * Added `command` property to `Parameter`, responsible for recording the
   command, if any, that was used to obtain the concrete value for a given
   parameter.
+* Added ability to provide node-specific name remappings when using `roslaunch`
+  through the introduction of the `remappings` argument to the `launch`
+  method.
 
 
 # 1.3.0 (2020-06-02)
