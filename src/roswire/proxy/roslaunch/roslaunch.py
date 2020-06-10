@@ -183,6 +183,17 @@ class ROSLaunchManager:
             m = "individual launch prefixes are not yet implemented"
             raise NotImplementedError(m)
 
+        if remappings:
+            logger.debug('adding remappings to launch configuration: '
+                         f'{remappings}')
+            launch_config = self.read(filename, package=package)
+            launch_config = launch_config.with_remappings(remappings)
+            logger.debug('added remappings to launch configuration: '
+                         f'{launch_config')
+
+            m = "remappings are not yet implemented"
+            raise NotImplementedError(m)
+
         cmd = ['roslaunch', shlex.quote(filename)]
         launch_args: List[str] = [f'{arg}:={val}' for arg, val in args.items()]
         cmd += launch_args
