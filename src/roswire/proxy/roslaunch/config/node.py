@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__ = ('NodeConfig',)
 
-from typing import Optional, Sequence, Tuple
+from typing import Collection, Optional, Sequence, Tuple
 import xml.etree.ElementTree as ET
 
 import attr
@@ -15,7 +15,7 @@ class NodeConfig:
     name: str
     typ: str
     package: str
-    remappings: Sequence[Tuple[str, str]] = attr.ib(default=tuple())
+    remappings: Collection[Tuple[str, str]] = attr.ib(default=tuple())
     filename: Optional[str] = attr.ib(default=None)
     output: Optional[str] = attr.ib(default=None)
     required: bool = attr.ib(default=False)
@@ -29,6 +29,32 @@ class NodeConfig:
     @property
     def full_name(self) -> str:
         return namespace_join(self.namespace, self.name)
+
+    def with_remappings(self,
+                        remappings: Collection[Tuple[str, str]],
+                        *,
+                        overwrite: bool = False
+                        ) -> 'NodeConfig':
+        """Applies a set of remappings to this configuration.
+
+        Parameters
+        ----------
+        remappings: Collection[Tuple[str, str]]
+            A collection of name remappings, each given as a tuple of the
+            form :code:`(from, to)`.
+        overwrite: bool
+            If :code:`True`, any existing remappings will not appear in the
+            returned variant. Otherwise, the returned variant will contain
+            both the supplied and existing remappings.
+
+        Returns
+        -------
+        NodeConfig
+            A variant of this configuration with the given remappings.
+        """
+        if not overwrite:
+            remappings = tuple(self.remappings) + tuple(remappings)
+        return attr.evolve(self, remappings=remappings)
 
     def to_xml_element(self) -> ET.Element:
         element = ET.Element('node')
