@@ -189,7 +189,7 @@ class ROSLaunchManager:
             launch_config = self.read(filename, package=package)
             launch_config = launch_config.with_remappings(remappings)
             logger.debug('added remappings to launch configuration: '
-                         f'{launch_config')
+                         f'{launch_config}')
 
             m = "remappings are not yet implemented"
             raise NotImplementedError(m)
