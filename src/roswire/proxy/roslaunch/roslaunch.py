@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__ = ('ROSLaunchManager',)
 
-from typing import List, Mapping, Optional, Sequence, Union
+from typing import Collection, List, Mapping, Optional, Sequence, Tuple, Union
 import os
 import shlex
 import xml.etree.ElementTree as ET
@@ -135,7 +135,8 @@ class ROSLaunchManager:
                package: Optional[str] = None,
                args: Optional[Mapping[str, Union[int, str]]] = None,
                prefix: Optional[str] = None,
-               launch_prefixes: Optional[Mapping[str, str]] = None
+               launch_prefixes: Optional[Mapping[str, str]] = None,
+               remappings: Optional[Mapping[str, Collection[Tuple[str, str]]]] = None  # noqa
                ) -> ROSLaunchController:
         """Provides an interface to the roslaunch command.
 
@@ -153,6 +154,11 @@ class ROSLaunchManager:
         launch_prefixes: Mapping[str, str], optional
             An optional mapping from nodes, given by their names, to their
             individual launch prefix.
+        remappings: Mapping[str, Collection[Tuple[str, str]]], optional
+            A collection of name remappings for each node, represented as a
+            mapping from node names to a collection of remappings for that
+            node, where each remapping is a tuple of the
+            form :code:`(to, from)`.
 
         Returns
         -------
