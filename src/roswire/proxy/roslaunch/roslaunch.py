@@ -136,7 +136,7 @@ class ROSLaunchManager:
                args: Optional[Mapping[str, Union[int, str]]] = None,
                prefix: Optional[str] = None,
                launch_prefixes: Optional[Mapping[str, str]] = None,
-               remappings: Optional[Mapping[str, Collection[Tuple[str, str]]]] = None  # noqa
+               node_to_remappings: Optional[Mapping[str, Collection[Tuple[str, str]]]] = None  # noqa
                ) -> ROSLaunchController:
         """Provides an interface to the roslaunch command.
 
@@ -154,7 +154,7 @@ class ROSLaunchManager:
         launch_prefixes: Mapping[str, str], optional
             An optional mapping from nodes, given by their names, to their
             individual launch prefix.
-        remappings: Mapping[str, Collection[Tuple[str, str]]], optional
+        node_to_remappings: Mapping[str, Collection[Tuple[str, str]]], optional
             A collection of name remappings for each node, represented as a
             mapping from node names to a collection of remappings for that
             node, where each remapping is a tuple of the
@@ -179,20 +179,29 @@ class ROSLaunchManager:
             launch_prefixes = {}
         filename = self.locate(filename, package=package)
 
-        if launch_prefixes:
-            m = "individual launch prefixes are not yet implemented"
-            raise NotImplementedError(m)
-
-        if remappings:
-            logger.debug('adding remappings to launch configuration: '
-                         f'{remappings}')
+        if node_to_remappings or launch_prefixes:
             launch_config = self.read(filename, package=package)
-            launch_config = launch_config.with_remappings(remappings)
-            logger.debug('added remappings to launch configuration: '
-                         f'{launch_config}')
 
-            m = "remappings are not yet implemented"
-            raise NotImplementedError(m)
+            if launch_prefixes:
+                m = "individual launch prefixes are not yet implemented"
+                raise NotImplementedError(m)
+
+            if node_to_remappings:
+                logger.debug('adding remappings to launch configuration: '
+                             f'{node_to_remappings}')
+                launch_config = \
+                    launch_config.with_remappings(node_to_remappings)
+                logger.debug('added remappings to launch configuration: '
+                             f'{launch_config}')
+
+            # write the instrumented launch config to a temporary file inside
+            # the container and use that container with roslaunch
+            package = None
+            filename = self._files.mktemp(suffix='.launch')
+            xml = launch_config.to_xml_tree()
+            contents = ET.tostring(xml.getroot(), encoding='utf-8')
+            logger.debug(f'instrumented launch file [{filename}]:\n{contents}')
+            self._files.write(filename, contents)
 
         cmd = ['roslaunch', shlex.quote(filename)]
         launch_args: List[str] = [f'{arg}:={val}' for arg, val in args.items()]
