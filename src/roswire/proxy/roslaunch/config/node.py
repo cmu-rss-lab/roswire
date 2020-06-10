@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__ = ('NodeConfig',)
 
-from typing import Optional, Tuple
+from typing import Optional, Sequence, Tuple
 import xml.etree.ElementTree as ET
 
 import attr
@@ -15,13 +15,13 @@ class NodeConfig:
     name: str
     typ: str
     package: str
-    remappings: Tuple[Tuple[str, str], ...] = attr.ib(default=tuple())
+    remappings: Sequence[Tuple[str, str]] = attr.ib(default=tuple())
     filename: Optional[str] = attr.ib(default=None)
     output: Optional[str] = attr.ib(default=None)
     required: bool = attr.ib(default=False)
     respawn: bool = attr.ib(default=False)
     respawn_delay: float = attr.ib(default=0.0)
-    env_args: Tuple[Tuple[str, str], ...] = attr.ib(default=tuple())
+    env_args: Sequence[Tuple[str, str]] = attr.ib(default=tuple())
     cwd: Optional[str] = attr.ib(default=None)
     args: Optional[str] = attr.ib(default=None)
     launch_prefix: Optional[str] = attr.ib(default=None)
