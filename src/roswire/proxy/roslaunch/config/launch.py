@@ -11,7 +11,8 @@ import attr
 from .node import NodeConfig
 from .parameter import Parameter
 from ....exceptions import FailedToParseLaunchFile
-from ....name import canonical_name, name_is_global, namespaces_of
+from ....name import (canonical_name, name_is_global, namespace_join,
+                      namespaces_of)
 
 
 @attr.s(frozen=True, slots=True)
@@ -32,6 +33,22 @@ class LaunchConfig:
             return self
         clear_params = tuple(self.clear_params) + (ns,)
         return attr.evolve(self, clear_params=clear_params)
+
+    def with_rosparam(self,
+                      name: str,
+                      value: Any
+                      ) -> 'LaunchConfig':
+        # complex parameters
+        if isinstance(value, dict):
+            config: LaunchConfig = self
+            for child_name, child_value in value.items():
+                child_name = namespace_join(name, child_name)
+                config = config.with_rosparam(child_name, child_value)
+            return config
+
+        # primitive parameters
+        # FIXME better handling of types
+        return self.with_param(name, typ='auto', value=value)
 
     def with_param(self,
                    name: str,

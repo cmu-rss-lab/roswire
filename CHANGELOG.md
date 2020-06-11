@@ -12,6 +12,7 @@
 * Added ability to provide node-specific name remappings when using `roslaunch`
   through the introduction of the `remappings` argument to the `launch`
   method.
+* Fixed mishandling of complex parameters when reading rosparam tags.
 
 
 # 1.3.0 (2020-06-02)

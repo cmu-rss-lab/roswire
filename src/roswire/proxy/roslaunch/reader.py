@@ -246,7 +246,7 @@ class LaunchFileReader:
             if not isinstance(data, dict) and not param:
                 m = "<rosparam> requires 'param' for non-dictionary values"
                 raise FailedToParseLaunchFile(m)
-            cfg = cfg.with_param(name=full_param, typ='yaml', value=data)
+            cfg = cfg.with_rosparam(name=full_param, value=data)
 
         # handle dump command
         if cmd == 'dump':
