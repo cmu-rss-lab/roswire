@@ -199,8 +199,7 @@ class ROSLaunchManager:
             # the container and use that container with roslaunch
             package = None
             filename = self._files.mktemp(suffix='.launch')
-            xml = launch_config.to_xml_tree()
-            contents = ET.tostring(xml.getroot(), encoding='utf-8')
+            contents = launch_config.to_xml_string()
             logger.debug(f'instrumented launch file [{filename}]:\n{contents}')
             self._files.write(filename, contents)
 
