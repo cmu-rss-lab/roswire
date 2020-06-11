@@ -209,7 +209,7 @@ class ROSLaunchManager:
         if prefix:
             cmd = [prefix] + cmd
         cmd_str = ' '.join(cmd)
-        popen = shell.popen(cmd_str, stdout=False, stderr=False)
+        popen = shell.popen(cmd_str, stdout=True, stderr=True)
 
         return ROSLaunchController(filename=filename,
                                    popen=popen)
