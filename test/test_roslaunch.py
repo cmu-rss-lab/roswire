@@ -29,11 +29,10 @@ def test_remappings(sut):
     with sut.roscore() as ros:
         launch = ros.roslaunch('pickplace_playground.launch',
                                package='fetch_gazebo',
-                               node_to_remappings={'gazebo': [('model_states', '/funkybits')]})
+                               node_to_remappings={'gazebo': [('/gazebo/model_states', '/funkybits')]})
 
         time.sleep(30)
         state = ros.state
-        print(state)
         launch.terminate()
         time.sleep(5)
         print('\n'.join(launch.popen.stream))
@@ -45,5 +44,6 @@ def test_remappings(sut):
                           '/robot_state_publisher',
                           '/rosout'}
         assert state.nodes == expected_nodes
+        published_topics = set(state.publishers)
         assert '/gazebo/model_states' not in state.publishers
-        assert state.publishers['/funkybits'] == {'/gazebo'}
+        assert set(state.publishers['/funkybits']) == {'/gazebo'}
