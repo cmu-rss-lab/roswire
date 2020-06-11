@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__ = ('LaunchConfig',)
 
-from typing import Tuple, FrozenSet, Dict, Any
+from typing import Any, Dict, FrozenSet, Optional, Tuple
 import xml.etree.ElementTree as ET
 
 from loguru import logger
@@ -34,9 +34,14 @@ class LaunchConfig:
         clear_params = self.clear_params + (ns,)
         return attr.evolve(self, clear_params=clear_params)
 
-    def with_param(self, name: str, typ: str, value: Any) -> 'LaunchConfig':
+    def with_param(self,
+                   name: str,
+                   typ: str,
+                   value: Any,
+                   command: Optional[str] = None
+                   ) -> 'LaunchConfig':
         """Adds a parameter to this configuration."""
-        param = Parameter(name=name, typ=typ, value=value)
+        param = Parameter(name=name, typ=typ, value=value, command=command)
         params = self.params.copy()
         errors = self.errors
 

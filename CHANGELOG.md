@@ -6,6 +6,9 @@
 * Improved documentation for ROSCore, its associated parts, and messages.
 * Added `state` property to `ROSCore` along with associated
   `SystemState` and `SystemStateProbe` classes.
+* Added `command` property to `Parameter`, responsible for recording the
+  command, if any, that was used to obtain the concrete value for a given
+  parameter.
 
 
 # 1.3.0 (2020-06-02)

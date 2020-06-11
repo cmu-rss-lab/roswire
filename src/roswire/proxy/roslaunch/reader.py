@@ -196,7 +196,10 @@ class LaunchFileReader:
             fullname = namespace_join(ctx.namespace, name)
 
         # register the parameter
-        cfg = cfg.with_param(name=fullname, typ=typ, value=value)
+        cfg = cfg.with_param(name=fullname,
+                             typ=typ,
+                             value=value,
+                             command=command)
 
         return ctx, cfg
 
