@@ -9,6 +9,7 @@
 * Added `command` property to `Parameter`, responsible for recording the
   command, if any, that was used to obtain the concrete value for a given
   parameter.
+* Fixed mishandling of complex parameters when reading rosparam tags.
 
 
 # 1.3.0 (2020-06-02)
