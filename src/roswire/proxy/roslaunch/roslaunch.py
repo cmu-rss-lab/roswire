@@ -181,17 +181,18 @@ class ROSLaunchManager:
 
         if node_to_remappings or launch_prefixes:
             launch_config = self.read(filename, package=package)
+            logger.debug(f'instrumenting launch config: {launch_config}')
 
             if launch_prefixes:
                 m = "individual launch prefixes are not yet implemented"
                 raise NotImplementedError(m)
 
             if node_to_remappings:
-                logger.debug('adding remappings to launch configuration: '
+                logger.debug('adding remappings to launch config: '
                              f'{node_to_remappings}')
                 launch_config = \
                     launch_config.with_remappings(node_to_remappings)
-                logger.debug('added remappings to launch configuration: '
+                logger.debug('added remappings to launch config: '
                              f'{launch_config}')
 
             # write the instrumented launch config to a temporary file inside
