@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 __all__ = ('LaunchConfig',)
 
-from typing import (AbstractSet, Any, Dict, FrozenSet, Mapping, Optional,
-                    Sequence, Tuple)
+from typing import (AbstractSet, Any, Collection, Dict, Mapping, Optional,
+                    Set, Sequence, Tuple)
 import xml.etree.ElementTree as ET
 
 from loguru import logger
