@@ -2,6 +2,7 @@
 __all__ = ('LaunchConfig',)
 
 from typing import Any, Dict, FrozenSet, Optional, Tuple
+import xml.dom.minidom as minidom
 import xml.etree.ElementTree as ET
 
 from loguru import logger
@@ -99,3 +100,15 @@ class LaunchConfig:
         for node in self.nodes:
             root.append(node.to_xml_element())
         return ET.ElementTree(root)
+
+    def to_xml_string(self) -> str:
+        """Transforms this launch configuration to a launch XML file."""
+        xml = self.to_xml_tree()
+        contents = ET.tostring(xml.getroot())
+        return minidom.parseString(contents).toprettyxml(indent='  ')
+
+    def to_xml_file(self, filename: str) -> None:
+        """Saves this launch configuration to an equivalent launch XML file."""
+        contents = self.to_xml_string()
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write(contents)

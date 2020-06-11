@@ -10,6 +10,7 @@
   command, if any, that was used to obtain the concrete value for a given
   parameter.
 * Fixed mishandling of complex parameters when reading rosparam tags.
+* Added `to_xml_string` and `to_xml_file` to `LaunchConfig`.
 
 
 # 1.3.0 (2020-06-02)
