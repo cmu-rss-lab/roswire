@@ -30,6 +30,9 @@ class NodeConfig:
     def full_name(self) -> str:
         return namespace_join(self.namespace, self.name)
 
+    def with_launch_prefix(self, launch_prefix: str) -> 'NodeConfig':
+        return self.with_launch_prefix(launch_prefix)
+
     def with_remappings(self,
                         remappings: Collection[Tuple[str, str]],
                         *,
