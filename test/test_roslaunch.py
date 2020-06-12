@@ -8,6 +8,8 @@ import time
 def test_read(sut):
     with sut.roscore() as ros:
         config = ros.roslaunch.read('pickplace_playground.launch', package='fetch_gazebo')
+        assert '/ros_ws/src/fetch_gazebo/fetch_gazebo/models:' in config.envs['GAZEBO_MODEL_PATH'].value
+
         assert config.params['/arm_controller/follow_joint_trajectory/type'].value == 'robot_controllers/FollowJointTrajectoryController'
         assert config.params['/gazebo/bellows_joint/position/i_clamp'].value == 0.0
 
@@ -22,3 +24,25 @@ def test_read(sut):
                                'points_downsample',
                                'cmd_vel_mux'}
         assert actual_node_names == expected_node_names
+
+
+@pytest.mark.parametrize('sut', ['fetch'], indirect=True)
+def test_remappings(sut):
+    with sut.roscore() as ros:
+        launch = ros.roslaunch('pickplace_playground.launch',
+                               package='fetch_gazebo',
+                               node_to_remappings={'gazebo': [('/gazebo/model_states', '/funkybits')]})
+
+        time.sleep(30)
+        state = ros.state
+        expected_nodes = {'/cmd_vel_mux',
+                          '/gazebo',
+                          '/head_camera/crop_decimate',
+                          '/head_camera/depth_downsample/points_downsample',
+                          '/head_camera/head_camera_nodelet_manager',
+                          '/robot_state_publisher',
+                          '/rosout'}
+        assert state.nodes == expected_nodes
+        published_topics = set(state.publishers)
+        assert '/gazebo/model_states' not in state.publishers
+        assert set(state.publishers['/funkybits']) == {'/gazebo'}

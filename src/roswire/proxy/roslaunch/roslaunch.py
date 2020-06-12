@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__ = ('ROSLaunchManager',)
 
-from typing import List, Mapping, Optional, Sequence, Union
+from typing import Collection, List, Mapping, Optional, Sequence, Tuple, Union
 import os
 import shlex
 import xml.etree.ElementTree as ET
@@ -135,7 +135,8 @@ class ROSLaunchManager:
                package: Optional[str] = None,
                args: Optional[Mapping[str, Union[int, str]]] = None,
                prefix: Optional[str] = None,
-               launch_prefixes: Optional[Mapping[str, str]] = None
+               launch_prefixes: Optional[Mapping[str, str]] = None,
+               node_to_remappings: Optional[Mapping[str, Collection[Tuple[str, str]]]] = None  # noqa
                ) -> ROSLaunchController:
         """Provides an interface to the roslaunch command.
 
@@ -153,6 +154,11 @@ class ROSLaunchManager:
         launch_prefixes: Mapping[str, str], optional
             An optional mapping from nodes, given by their names, to their
             individual launch prefix.
+        node_to_remappings: Mapping[str, Collection[Tuple[str, str]]], optional
+            A collection of name remappings for each node, represented as a
+            mapping from node names to a collection of remappings for that
+            node, where each remapping is a tuple of the
+            form :code:`(to, from)`.
 
         Returns
         -------
@@ -173,9 +179,29 @@ class ROSLaunchManager:
             launch_prefixes = {}
         filename = self.locate(filename, package=package)
 
-        if launch_prefixes:
-            m = "individual launch prefixes are not yet implemented"
-            raise NotImplementedError(m)
+        if node_to_remappings or launch_prefixes:
+            launch_config = self.read(filename, package=package)
+            logger.debug(f'instrumenting launch config: {launch_config}')
+
+            if launch_prefixes:
+                m = "individual launch prefixes are not yet implemented"
+                raise NotImplementedError(m)
+
+            if node_to_remappings:
+                logger.debug('adding remappings to launch config: '
+                             f'{node_to_remappings}')
+                launch_config = \
+                    launch_config.with_remappings(node_to_remappings)
+                logger.debug('added remappings to launch config: '
+                             f'{launch_config}')
+
+            # write the instrumented launch config to a temporary file inside
+            # the container and use that container with roslaunch
+            package = None
+            filename = self._files.mktemp(suffix='.launch')
+            contents = launch_config.to_xml_string()
+            logger.debug(f'instrumented launch file [{filename}]:\n{contents}')
+            self._files.write(filename, contents)
 
         cmd = ['roslaunch', shlex.quote(filename)]
         launch_args: List[str] = [f'{arg}:={val}' for arg, val in args.items()]
@@ -183,7 +209,7 @@ class ROSLaunchManager:
         if prefix:
             cmd = [prefix] + cmd
         cmd_str = ' '.join(cmd)
-        popen = shell.popen(cmd_str, stdout=False, stderr=False)
+        popen = shell.popen(cmd_str, stdout=True, stderr=True)
 
         return ROSLaunchController(filename=filename,
                                    popen=popen)

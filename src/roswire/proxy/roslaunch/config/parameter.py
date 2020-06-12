@@ -7,11 +7,6 @@ import xml.etree.ElementTree as ET
 import attr
 import yaml
 
-try:
-    from yaml import Dumper as YamlDumper  # type: ignore
-except ImportError:
-    from yaml import CDumper as YamlDumper   # type: ignore
-
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
 class Parameter:
@@ -34,15 +29,24 @@ class Parameter:
     command: Optional[str] = attr.ib(default=None)
 
     def to_xml_element(self) -> ET.Element:
-        element = ET.Element('param')
-        element.attrib['name'] = self.name
-        element.attrib['type'] = self.typ
-        if self.command:
-            element.attrib['command'] = self.command
-        elif self.typ in ('int', 'double', 'bool', 'auto'):
-            element.attrib['value'] = str(self.value)
-        elif self.typ == 'yaml':
-            element.attrib['value'] = yaml.dump(self.value, Dumper=YamlDumper)
-        else:
-            element.attrib['value'] = self.value
+        # primitive parameters
+        if type(self.value) in (str, float, int, bool):
+            element = ET.Element('param')
+            element.attrib['name'] = self.name
+
+            if self.typ != 'auto':
+                element.attrib['type'] = self.typ
+
+            if self.command:
+                element.attrib['command'] = self.command
+            elif isinstance(self.value, bool):
+                element.attrib['value'] = 'true' if self.value else 'false'
+            else:
+                element.attrib['value'] = str(self.value)
+            return element
+
+        # complex parameters
+        element = ET.Element('rosparam')
+        element.text = yaml.safe_dump(self.value, default_flow_style=True)
+        element.attrib['param'] = self.name
         return element
