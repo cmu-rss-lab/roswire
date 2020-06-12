@@ -4,7 +4,6 @@ __all__ = ('Env',)
 import xml.etree.ElementTree as ET
 
 import attr
-import yaml
 
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
