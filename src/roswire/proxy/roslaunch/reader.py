@@ -345,7 +345,7 @@ class LaunchFileReader:
                       ) -> Tuple[LaunchContext, LaunchConfig]:
         name = self._read_required(tag, 'name', ctx)
         value = self._read_required(tag, 'value', ctx)
-        cfg = self.with_env(name, value)
+        cfg = cfg.with_env(name, value)
         ctx = ctx.with_env_arg(name, value)
         return ctx, cfg
 
