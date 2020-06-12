@@ -26,7 +26,7 @@ class LaunchConfig:
     params: Mapping[str, Any] = attr.ib(factory=dict)
     clear_params: Sequence[str] = attr.ib(default=tuple())
     errors: Sequence[str] = attr.ib(default=tuple())
-    env: Mapping[str, Env] = attr.ib(default=dict())
+    envs: Mapping[str, Env] = attr.ib(default=dict())
 
     def with_clear_param(self, ns: str) -> 'LaunchConfig':
         """Specifies a parameter that should be cleared before new parameters
@@ -42,9 +42,9 @@ class LaunchConfig:
                  value: str
                  ) -> 'LaunchConfig':
         """Adds an environment variable to this configuration."""
-        env: Dict[str, Env] = dict(self.env)
-        env[name] = Env(name=name, value=value)
-        return attr.evolve(self, env=env)
+        envs: Dict[str, Env] = dict(self.envs)
+        envs[name] = Env(name=name, value=value)
+        return attr.evolve(self, envs=envs)
 
     def with_rosparam(self,
                       name: str,
@@ -115,6 +115,8 @@ class LaunchConfig:
 
     def to_xml_tree(self) -> ET.ElementTree:
         root = ET.Element('launch')
+        for env in self.envs.values():
+            root.append(env.to_xml_element())
         for param in self.params.values():
             root.append(param.to_xml_element())
         for node in self.nodes:
