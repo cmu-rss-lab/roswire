@@ -184,7 +184,7 @@ class ROSLaunchManager:
             logger.debug(f'instrumenting launch config: {launch_config}')
 
             if launch_prefixes:
-                launch_prefixes = \
+                launch_config = \
                     launch_config.with_launch_prefixes(launch_prefixes)
 
             if node_to_remappings:

@@ -41,7 +41,7 @@ class LaunchConfig:
                              prefixes: Mapping[str, str]
                              ) -> 'LaunchConfig':
         nodes: Dict[str, NodeConfig] = {n.name: n for n in self.nodes}
-        for node_name, prefix in prefixes:
+        for node_name, prefix in prefixes.items():
             nodes[node_name] = nodes[node_name].with_launch_prefix(prefix)
         return attr.evolve(self, nodes=frozenset(nodes.values()))
 
