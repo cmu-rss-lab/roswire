@@ -10,6 +10,7 @@ from loguru import logger
 import attr
 
 from .node import NodeConfig
+from .env import Env
 from .parameter import Parameter
 from ....exceptions import FailedToParseLaunchFile
 from ....name import (canonical_name, name_is_global, namespace_join,
@@ -25,6 +26,7 @@ class LaunchConfig:
     params: Mapping[str, Any] = attr.ib(factory=dict)
     clear_params: Sequence[str] = attr.ib(default=tuple())
     errors: Sequence[str] = attr.ib(default=tuple())
+    env: Mapping[str, Env] = attr.ib(default=dict())
 
     def with_clear_param(self, ns: str) -> 'LaunchConfig':
         """Specifies a parameter that should be cleared before new parameters
@@ -34,6 +36,15 @@ class LaunchConfig:
             return self
         clear_params = tuple(self.clear_params) + (ns,)
         return attr.evolve(self, clear_params=clear_params)
+
+    def with_env(self,
+                 name: str,
+                 value: str
+                 ) -> 'LaunchConfig':
+        """Adds an environment variable to this configuration."""
+        env: Dict[str, Env] = dict(self.env)
+        env[name] = Env(name=name, value=value)
+        return attr.evolve(self, env=env)
 
     def with_rosparam(self,
                       name: str,
