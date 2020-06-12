@@ -8,6 +8,8 @@ import time
 def test_read(sut):
     with sut.roscore() as ros:
         config = ros.roslaunch.read('pickplace_playground.launch', package='fetch_gazebo')
+        assert '/ros_ws/src/fetch_gazebo/fetch_gazebo/models:' in config.envs['GAZEBO_MODEL_PATH'].value
+
         assert config.params['/arm_controller/follow_joint_trajectory/type'].value == 'robot_controllers/FollowJointTrajectoryController'
         assert config.params['/gazebo/bellows_joint/position/i_clamp'].value == 0.0
 
