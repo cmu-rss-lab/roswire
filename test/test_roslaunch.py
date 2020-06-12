@@ -35,9 +35,6 @@ def test_remappings(sut):
 
         time.sleep(30)
         state = ros.state
-        launch.terminate()
-        time.sleep(5)
-        print('\n'.join(launch.popen.stream))
         expected_nodes = {'/cmd_vel_mux',
                           '/gazebo',
                           '/head_camera/crop_decimate',
