@@ -15,6 +15,9 @@
 * Fixed mishandling of complex parameters when reading rosparam tags.
 * Added reading and writing of `env` tags for launch files.
 * Added `to_xml_string` and `to_xml_file` to `LaunchConfig`.
+* Updated handling of `command` attributes in `param` tags during parsing
+  of XML launch files: Only the output of `stdout` is recorded, and `stderr`
+  is now ignored.
 
 
 # 1.3.0 (2020-06-02)
