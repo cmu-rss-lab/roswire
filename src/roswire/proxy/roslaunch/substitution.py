@@ -153,11 +153,18 @@ class ArgumentResolver:
         resolved_path = self._find_package_path(package) + path_original
         return resolved_path
 
+    def _resolve_eval(self, attribute_string: str) -> str:
+        assert attribute_string.startswith('$(eval ')
+        assert attribute_string[-1] == ')'
+        eval_string = attribute_string[7:-1]
+        logger.debug(f'resolving eval: {eval_string}')
+        raise NotImplementedError
+
     def resolve(self, s: str) -> str:
         """Resolves a given argument string."""
-        # TODO $(eval ...)
         if s.startswith('$(eval ') and s[-1] == ')':
-            raise NotImplementedError
+            return self._resolve_eval(s)
+            # find, anon, arg, dirname
         s = R_ARG.sub(lambda m: self._resolve_arg(m.group(0)), s)
 
         def process_find_arg(match: Match[str]) -> str:
