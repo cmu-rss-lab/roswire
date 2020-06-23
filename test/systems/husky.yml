@@ -1,4 +1,4 @@
-image: therobotcooperative/fetch
+image: therobotcooperative/husky
 sources:
 - /opt/ros/melodic/setup.bash
 - /ros_ws/devel/setup.bash
