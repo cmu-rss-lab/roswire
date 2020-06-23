@@ -38,8 +38,6 @@ class ArgumentResolver:
         EnvNotFoundError
             if a given environment variable is not found.
         """
-        shell = self.shell
-        context = self.context
         logger.debug(f"resolving substitution argument: {s}")
         s = s[2:-1]
         logger.debug(f"stripped delimiters: {s}")
@@ -182,19 +180,20 @@ class ArgumentResolver:
                  "expression -- must not contain double underscores")
             raise SubstitutionError(m)
 
+        _builtins = {x: __builtins__[x]  # type: ignore
+                     for x in ('dict', 'float', 'int', 'list', 'map')}
         _locals = {
             'true': True,
             'True': True,
             'false': False,
             'False': False,
-            '__builtins__': {x: __builtins__[x]
-                for x in ('dict','float', 'int', 'list', 'map')},
-            'arg': self.__resolve_arg,
-            'anon': self.__resolve_anon,
-            'dirname': self.__resolve_dirname,
-            'env': self.__resolve_env,
-            'find': self.__resolve_find,
-            'optenv': self.__resolve_optenv
+            '__builtins__': _builtins,
+            'arg': self._resolve_arg,
+            'anon': self._resolve_anon,
+            'dirname': self._resolve_dirname,
+            'env': self._resolve_env,
+            'find': self._resolve_find,
+            'optenv': self._resolve_optenv
         }
 
         result = str(eval(eval_string, {}, _locals))
