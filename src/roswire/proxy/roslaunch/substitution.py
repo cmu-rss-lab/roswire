@@ -9,7 +9,7 @@ https://github.com/ros/ros_comm/tree/kinetic-devel/tools/roslaunch/src/roslaunch
 """
 __all__ = ('ArgumentResolver',)
 
-from typing import Any, Dict, Match
+from typing import Any, Dict, Match, Optional
 import os
 import re
 import shlex
