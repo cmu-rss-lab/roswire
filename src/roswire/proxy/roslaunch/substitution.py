@@ -31,7 +31,7 @@ class ArgumentResolver:
     files: dockerblade.FileSystem
     context: Dict[str, Any] = attr.ib(default=None)
 
-    def _resolve_arg(self, s: str) -> str:
+    def _resolve_substitution_arg(self, s: str) -> str:
         """
         Raises
         ------
@@ -195,7 +195,7 @@ class ArgumentResolver:
         """Resolves a given argument string."""
         if s.startswith('$(eval ') and s[-1] == ')':
             return self._resolve_eval(s)
-        s = R_ARG.sub(lambda m: self._resolve_arg(m.group(0)), s)
+        s = R_ARG.sub(lambda m: self._resolve_substitution_arg(m.group(0)), s)
 
         def process_find_arg(match: Match[str]) -> str:
             # split tag and optional trailing path
