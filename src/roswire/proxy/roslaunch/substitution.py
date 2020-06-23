@@ -141,7 +141,7 @@ class ArgumentResolver:
             raise SubstitutionError(m)
         return path_in_package
 
-    def _resolve_find(self, package: str, path: str) -> str:
+    def _resolve_find(self, package: str, path: Optional[str] = None) -> str:
         logger.debug(f'resolving find: {package}')
         path_original = path
 
