@@ -49,30 +49,48 @@ class ArgumentResolver:
         # we deal with find in a later stage
         if kind == 'find':
             return f'$({s})'
-        if kind == 'env':
-            return shell.environ(params[0])
-        if kind == 'optenv':
-            try:
-                return shell.environ(params[0])
-            except dockerblade.exceptions.EnvNotFoundError:
-                return ' '.join(params[1:])
-        if kind == 'dirname':
-            try:
-                dirname = os.path.dirname(context['filename'])
-            except KeyError:
-                m = 'filename is not provided by the launch context'
-                raise SubstitutionError(m)
-            dirname = os.path.normpath(dirname)
-            return dirname
-        if kind == 'arg':
+        elif kind == 'env':
+            var = params[0]
+            return self._resolve_env(var)
+        elif kind == 'optenv':
+            var = params[0]
+            default = ' '.join(params[1:])
+            return self._resolve_optenv(var, default)
+        elif kind == 'dirname':
+            return self._resolve_dirname()
+        elif kind == 'arg':
             arg_name = params[0]
-            if 'arg' not in context or arg_name not in context['arg']:
-                m = f'arg not supplied to launch context [{arg_name}]'
-                raise SubstitutionError(m)
-            return context['arg'][arg_name]
-
-        # TODO $(anon name)
+            return self._resolve_arg(arg_name)
+        elif kind == 'anon':
+            return self._resolve_anon(params[0])
         return s
+
+    def _resolve_dirname(self) -> str:
+        try:
+            dirname = os.path.dirname(self.context['filename'])
+        except KeyError:
+            m = 'filename is not provided by the launch context'
+            raise SubstitutionError(m)
+        return os.path.normpath(dirname)
+
+    def _resolve_anon(self, name: str) -> str:
+        raise NotImplementedError
+
+    def _resolve_env(self, var: str) -> str:
+        return self.shell.environ(var)
+
+    def _resolve_optenv(self, var: str, default: str) -> str:
+        try:
+            return self.shell.environ(var)
+        except dockerblade.exceptions.EnvNotFoundError:
+            return default
+
+    def _resolve_arg(self, arg_name: str) -> str:
+        context = self.context
+        if 'arg' not in context or arg_name not in context['arg']:
+            m = f'arg not supplied to launch context [{arg_name}]'
+            raise SubstitutionError(m)
+        return context['arg'][arg_name]
 
     def _find_package_path(self, package: str) -> str:
         cmd = f'rospack find {shlex.quote(package)}'
@@ -158,13 +176,25 @@ class ArgumentResolver:
         assert attribute_string[-1] == ')'
         eval_string = attribute_string[7:-1]
         logger.debug(f'resolving eval: {eval_string}')
+
+        # TODO support: find(pkg), anon(name), arg(name), dirname()
+        _eval_dict = {
+            'true': True,
+            'True': True,
+            'false': False,
+            'False': False,
+            '__builtins__': {x: __builtins__[x]
+                for x in ('dict','float', 'int', 'list', 'map')},
+            'env': self.__resolve_env,
+            'find': self.__resolve_find,
+            'optenv': self.__resolve_optenv
+        }
         raise NotImplementedError
 
     def resolve(self, s: str) -> str:
         """Resolves a given argument string."""
         if s.startswith('$(eval ') and s[-1] == ')':
             return self._resolve_eval(s)
-            # find, anon, arg, dirname
         s = R_ARG.sub(lambda m: self._resolve_arg(m.group(0)), s)
 
         def process_find_arg(match: Match[str]) -> str:
