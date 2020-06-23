@@ -198,7 +198,7 @@ class ArgumentResolver:
         }
 
         result = str(eval(eval_string, {}, _locals))
-        logger.debug(f'resolved eval [{attribute_string}]: {result}']
+        logger.debug(f'resolved eval [{attribute_string}]: {result}')
         return result
 
     def resolve(self, s: str) -> str:
