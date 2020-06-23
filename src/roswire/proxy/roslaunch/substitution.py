@@ -9,7 +9,7 @@ https://github.com/ros/ros_comm/tree/kinetic-devel/tools/roslaunch/src/roslaunch
 """
 __all__ = ('ArgumentResolver',)
 
-from typing import Any, Dict, Match, Optional
+from typing import Any, Dict, Match
 import os
 import re
 import shlex
@@ -141,7 +141,7 @@ class ArgumentResolver:
             raise SubstitutionError(m)
         return path_in_package
 
-    def _resolve_find(self, package: str, path: Optional[str] = None) -> str:
+    def _resolve_find(self, package: str, path: str = '') -> str:
         logger.debug(f'resolving find: {package}')
         path_original = path
 
