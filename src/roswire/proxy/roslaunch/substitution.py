@@ -172,24 +172,34 @@ class ArgumentResolver:
         return resolved_path
 
     def _resolve_eval(self, attribute_string: str) -> str:
+        logger.debug(f'resolving eval: {attribute_string}')
         assert attribute_string.startswith('$(eval ')
         assert attribute_string[-1] == ')'
         eval_string = attribute_string[7:-1]
-        logger.debug(f'resolving eval: {eval_string}')
 
-        # TODO support: find(pkg), anon(name), arg(name), dirname()
-        _eval_dict = {
+        if '__' in attribute_string:
+            m = ("$(eval ...): refusing to evaluate potentially dangerous "
+                 "expression -- must not contain double underscores")
+            raise SubstitutionError(m)
+
+        _locals = {
             'true': True,
             'True': True,
             'false': False,
             'False': False,
             '__builtins__': {x: __builtins__[x]
                 for x in ('dict','float', 'int', 'list', 'map')},
+            'arg': self.__resolve_arg,
+            'anon': self.__resolve_anon,
+            'dirname': self.__resolve_dirname,
             'env': self.__resolve_env,
             'find': self.__resolve_find,
             'optenv': self.__resolve_optenv
         }
-        raise NotImplementedError
+
+        result = str(eval(eval_string, {}, _locals))
+        logger.debug(f'resolved eval [{attribute_string}]: {result}']
+        return result
 
     def resolve(self, s: str) -> str:
         """Resolves a given argument string."""
