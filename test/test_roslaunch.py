@@ -26,6 +26,20 @@ def test_read(sut):
         assert actual_node_names == expected_node_names
 
 
+@pytest.mark.parametrize('sut', ['husky'], indirect=True)
+def test_eval_args_in_launch_file(sut):
+    with sut.roscore() as ros:
+        config = ros.roslaunch.read('spawn_husky.launch', package='husky_gazebo')
+        actual_node_names = {node.name for node in config.nodes}
+        expected_node_names = {'base_controller_spawner',
+                               'ekf_localization',
+                               'robot_state_publisher',
+                               'spawn_husky_model',
+                               'twist_marker_server',
+                               'twist_mux'}
+        assert actual_node_names == expected_node_names
+
+
 @pytest.mark.parametrize('sut', ['fetch'], indirect=True)
 def test_remappings(sut):
     with sut.roscore() as ros:

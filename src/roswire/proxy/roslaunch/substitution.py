@@ -31,15 +31,13 @@ class ArgumentResolver:
     files: dockerblade.FileSystem
     context: Dict[str, Any] = attr.ib(default=None)
 
-    def _resolve_arg(self, s: str) -> str:
+    def _resolve_substitution_arg(self, s: str) -> str:
         """
         Raises
         ------
         EnvNotFoundError
             if a given environment variable is not found.
         """
-        shell = self.shell
-        context = self.context
         logger.debug(f"resolving substitution argument: {s}")
         s = s[2:-1]
         logger.debug(f"stripped delimiters: {s}")
@@ -49,30 +47,48 @@ class ArgumentResolver:
         # we deal with find in a later stage
         if kind == 'find':
             return f'$({s})'
-        if kind == 'env':
-            return shell.environ(params[0])
-        if kind == 'optenv':
-            try:
-                return shell.environ(params[0])
-            except dockerblade.exceptions.EnvNotFoundError:
-                return ' '.join(params[1:])
-        if kind == 'dirname':
-            try:
-                dirname = os.path.dirname(context['filename'])
-            except KeyError:
-                m = 'filename is not provided by the launch context'
-                raise SubstitutionError(m)
-            dirname = os.path.normpath(dirname)
-            return dirname
-        if kind == 'arg':
+        elif kind == 'env':
+            var = params[0]
+            return self._resolve_env(var)
+        elif kind == 'optenv':
+            var = params[0]
+            default = ' '.join(params[1:])
+            return self._resolve_optenv(var, default)
+        elif kind == 'dirname':
+            return self._resolve_dirname()
+        elif kind == 'arg':
             arg_name = params[0]
-            if 'arg' not in context or arg_name not in context['arg']:
-                m = f'arg not supplied to launch context [{arg_name}]'
-                raise SubstitutionError(m)
-            return context['arg'][arg_name]
-
-        # TODO $(anon name)
+            return self._resolve_arg(arg_name)
+        elif kind == 'anon':
+            return self._resolve_anon(params[0])
         return s
+
+    def _resolve_dirname(self) -> str:
+        try:
+            dirname = os.path.dirname(self.context['filename'])
+        except KeyError:
+            m = 'filename is not provided by the launch context'
+            raise SubstitutionError(m)
+        return os.path.normpath(dirname)
+
+    def _resolve_anon(self, name: str) -> str:
+        raise NotImplementedError
+
+    def _resolve_env(self, var: str) -> str:
+        return self.shell.environ(var)
+
+    def _resolve_optenv(self, var: str, default: str) -> str:
+        try:
+            return self.shell.environ(var)
+        except dockerblade.exceptions.EnvNotFoundError:
+            return default
+
+    def _resolve_arg(self, arg_name: str) -> str:
+        context = self.context
+        if 'arg' not in context or arg_name not in context['arg']:
+            m = f'arg not supplied to launch context [{arg_name}]'
+            raise SubstitutionError(m)
+        return context['arg'][arg_name]
 
     def _find_package_path(self, package: str) -> str:
         cmd = f'rospack find {shlex.quote(package)}'
@@ -125,7 +141,7 @@ class ArgumentResolver:
             raise SubstitutionError(m)
         return path_in_package
 
-    def _resolve_find(self, package: str, path: str) -> str:
+    def _resolve_find(self, package: str, path: str = '') -> str:
         logger.debug(f'resolving find: {package}')
         path_original = path
 
@@ -153,12 +169,42 @@ class ArgumentResolver:
         resolved_path = self._find_package_path(package) + path_original
         return resolved_path
 
+    def _resolve_eval(self, attribute_string: str) -> str:
+        logger.debug(f'resolving eval: {attribute_string}')
+        assert attribute_string.startswith('$(eval ')
+        assert attribute_string[-1] == ')'
+        eval_string = attribute_string[7:-1]
+
+        if '__' in attribute_string:
+            m = ("$(eval ...): refusing to evaluate potentially dangerous "
+                 "expression -- must not contain double underscores")
+            raise SubstitutionError(m)
+
+        _builtins = {x: __builtins__[x]  # type: ignore
+                     for x in ('dict', 'float', 'int', 'list', 'map')}
+        _locals = {
+            'true': True,
+            'True': True,
+            'false': False,
+            'False': False,
+            '__builtins__': _builtins,
+            'arg': self._resolve_arg,
+            'anon': self._resolve_anon,
+            'dirname': self._resolve_dirname,
+            'env': self._resolve_env,
+            'find': self._resolve_find,
+            'optenv': self._resolve_optenv
+        }
+
+        result = str(eval(eval_string, {}, _locals))
+        logger.debug(f'resolved eval [{attribute_string}]: {result}')
+        return result
+
     def resolve(self, s: str) -> str:
         """Resolves a given argument string."""
-        # TODO $(eval ...)
         if s.startswith('$(eval ') and s[-1] == ')':
-            raise NotImplementedError
-        s = R_ARG.sub(lambda m: self._resolve_arg(m.group(0)), s)
+            return self._resolve_eval(s)
+        s = R_ARG.sub(lambda m: self._resolve_substitution_arg(m.group(0)), s)
 
         def process_find_arg(match: Match[str]) -> str:
             # split tag and optional trailing path
