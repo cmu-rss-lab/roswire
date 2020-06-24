@@ -1,4 +1,4 @@
-# 1.4.0 (XXXX-XX-XX)
+# 1.4.0 (2020-06-25)
 
 * Added `restrict_to_topics` argument to `record` method of `ROSCore`, allowing
   users to restrict bag recording to specific topics by supplying a regular
