@@ -1,3 +1,9 @@
+# 1.5.0 (XXXX-XX-XX)
+
+* Changed file structure in various places to improve comprehension and help
+  the move to add support for ROS2.
+
+
 # 1.4.0 (2020-06-25)
 
 * Added `restrict_to_topics` argument to `record` method of `ROSCore`, allowing
