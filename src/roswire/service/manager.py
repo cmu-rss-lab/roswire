@@ -3,20 +3,23 @@ __all__ = ('ServiceManager',)
 
 from typing import AbstractSet, Iterator, Mapping
 from urllib.parse import urlparse
+import typing
 import xmlrpc.client
 
 import dockerblade
 
 from .. import exceptions
 from .service import Service
-from ..description import SystemDescription
 from ..proxy.state import SystemStateProbe
+
+if typing.TYPE_CHECKING:
+    from ..app import AppDescription
 
 
 class ServiceManager(Mapping[str, Service]):
     """Provides access to the registered services on a ROS graph."""
     def __init__(self,
-                 description: SystemDescription,
+                 description: 'AppDescription',
                  host_ip_master: str,
                  api: xmlrpc.client.Server,
                  shell: dockerblade.Shell

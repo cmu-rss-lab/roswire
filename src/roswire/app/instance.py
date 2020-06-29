@@ -1,62 +1,70 @@
 # -*- coding: utf-8 -*-
-__all__ = ('System',)
+__all__ = ('AppInstance',)
 
-from typing import Iterator
-from uuid import UUID
+from types import TracebackType
+from typing import Iterator, Optional, Type
 import contextlib
+import os
+import shutil
+import typing
 
+from docker.models.images import Image as DockerImage
+from loguru import logger
 import attr
 import dockerblade
 
-from .description import SystemDescription
-from .definitions import TypeDatabase
-from .proxy import ROSCore, Container, CatkinInterface, CatkinTools, CatkinMake
+from ..definitions import TypeDatabase
+from ..proxy import ROSCore, CatkinInterface, CatkinTools, CatkinMake
+
+if typing.TYPE_CHECKING:
+    from .app import App
 
 
-@attr.s(frozen=True)
-class System:
-    """Provides access to a ROS application hosted by a Docker container.
+@attr.s(frozen=True, slots=True)
+class AppInstance:
+    """Provides access to an instance of a ROS application.
 
     Attributes
     ----------
-    uuid: UUID
-        A unique identifier for the underlying container.
-    description: SystemDescription
-        A static description of the associated ROS application.
+    app: App
+        The associated ROS application.
     messages: TypeDatabase
         A database of message types for the associated ROS application.
     shell: dockerblade.shell.Shell
         Provides access to a bash shell for this container.
     files: dockerblade.files.FileSystem
         Provides access to the filesystem for this container.
-    ws_host: str
+    _host_workspace: str
         The absolute path to the shared directory for this container's
         workspace on the host machine.
-    container: Container
+    _dockerblade: dockerblade.container.Container
         Provides access to the underlying Docker container.
     """
-    container: Container = attr.ib()
-    description: SystemDescription = attr.ib()
+    _dockerblade: dockerblade.container.Container = attr.ib()
+    _host_workspace: str = attr.ib(repr=False)
+    app: 'App' = attr.ib()
+    shell: dockerblade.shell.Shell = attr.ib(repr=False, init=False, eq=False)
+    files: dockerblade.files.FileSystem = \
+        attr.ib(repr=False, init=False, eq=False)
 
-    @property
-    def uuid(self) -> UUID:
-        return self.container.uuid
+    def __attrs_post_init__(self) -> None:
+        dockerblade = self._dockerblade
 
-    @property
-    def ws_host(self) -> str:
-        return self.container.ws_host
+        shell = dockerblade.shell('/bin/bash', sources=self.app.sources)
+        object.__setattr__(self, 'shell', shell)
+
+        files = dockerblade.filesystem()
+        object.__setattr__(self, 'files', files)
 
     @property
     def ip_address(self) -> str:
-        return self.container.ip_address
-
-    @property
-    def shell(self) -> dockerblade.shell.Shell:
-        return self.container.shell
+        ip_address = self._dockerblade.ip_address
+        assert ip_address
+        return ip_address
 
     @property
     def messages(self) -> TypeDatabase:
-        return self.description.types
+        return self.app.description.types
 
     def catkin(self, directory: str) -> CatkinInterface:
         """Returns an interface to a catkin workspace.
@@ -104,10 +112,6 @@ class System:
         """
         return CatkinMake(shell=self.shell, directory=directory)
 
-    @property
-    def files(self) -> dockerblade.files.FileSystem:
-        return self.container.files
-
     @contextlib.contextmanager
     def roscore(self, port: int = 11311) -> Iterator[ROSCore]:
         """
@@ -129,13 +133,53 @@ class System:
         command = f"roscore -p {port}"
         process = self.shell.popen(command)
         try:
-            yield ROSCore(description=self.description,
+            yield ROSCore(description=self.app.description,
                           shell=self.shell,
                           files=self.files,
-                          ws_host=self.ws_host,
+                          ws_host=self._host_workspace,
                           ip_address=self.ip_address,
                           port=port)
         finally:
             process.terminate()
             process.wait(2.0)
             process.kill()
+
+    def close(self) -> None:
+        """Closes this application instance and destroys all resources."""
+        self._dockerblade.remove()
+
+        workspace = self._host_workspace
+        if os.path.exists(workspace):
+            logger.debug(f"destroying app instance directory: {workspace}")
+            shutil.rmtree(workspace)
+            logger.debug(f"destroyed app instance directory: {workspace}")
+
+    def persist(self,
+                repo: Optional[str] = None,
+                tag: Optional[str] = None
+                ) -> DockerImage:
+        """Persists this application instance to a Docker image.
+
+        Parameters
+        ----------
+        repo: str, optional
+            The name of the repository to which the image should belong.
+        tag: str, optional
+            The tag that should be used for the image.
+
+        Returns
+        -------
+        DockerImage
+            A description of the persisted image.
+        """
+        return self._dockerblade.persist(repo, tag)
+
+    def __enter__(self) -> 'AppInstance':
+        return self
+
+    def __exit__(self,
+                 ex_type: Optional[Type[BaseException]],
+                 ex_val: Optional[BaseException],
+                 ex_tb: Optional[TracebackType]
+                 ) -> None:
+        self.close()

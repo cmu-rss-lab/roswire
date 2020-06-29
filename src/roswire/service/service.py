@@ -2,6 +2,7 @@
 __all__ = ('Service',)
 
 from typing import Optional
+import typing
 
 import attr
 import dockerblade
@@ -9,7 +10,9 @@ import yaml
 
 from .. import exceptions
 from ..definitions import Message, SrvFormat, MsgFormat
-from ..description import SystemDescription
+
+if typing.TYPE_CHECKING:
+    from ..app import AppDescription
 
 
 @attr.s(slots=True, auto_attribs=True)
@@ -28,7 +31,7 @@ class Service:
     name: str
     url: str
     format: SrvFormat
-    _description: SystemDescription
+    _description: 'AppDescription'
     _shell: dockerblade.Shell
 
     def call(self, message: Optional[Message] = None) -> Optional[Message]:

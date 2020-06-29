@@ -1,7 +1,14 @@
-# 1.5.0 (XXXX-XX-XX)
+# 2.0.0 (XXXX-XX-XX)
 
 * Changed file structure in various places to improve comprehension and help
   the move to add support for ROS2.
+* Removed `uuid` property from `System` class.
+* Simplified API for `SystemDescriptionManager` by dropping ability to pass
+  `DockerImage` objects; instead, images must now be exclusively given their
+  name (as a string).
+* Renamed `System` and `SystemDescription` to `AppInstance` and
+  `AppDescription`, respectively, and added an `Application` class for
+  specifying ROS applications.
 
 
 # 1.4.0 (2020-06-25)
