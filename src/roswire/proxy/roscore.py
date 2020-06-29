@@ -11,8 +11,8 @@ import dockerblade
 
 from ..description import SystemDescription
 from ..exceptions import ROSWireException
+from ..node import NodeManager
 from .bag import BagRecorder, BagPlayer
-from .node import NodeManager
 from .parameters import ParameterServer
 from .roslaunch import ROSLaunchManager
 from .service import ServiceManager
