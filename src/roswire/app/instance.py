@@ -15,6 +15,7 @@ import dockerblade
 
 from ..definitions import TypeDatabase
 from ..proxy import ROSCore, CatkinInterface, CatkinTools, CatkinMake
+from ..ros2 import ROS2
 
 if typing.TYPE_CHECKING:
     from .app import App
@@ -143,6 +144,11 @@ class AppInstance:
             process.terminate()
             process.wait(2.0)
             process.kill()
+
+    @property
+    def ros2(self) -> ROS2:
+        """Provides access to ROS2 inside this application instance."""
+        return ROS2.for_app_instance(self)
 
     def close(self) -> None:
         """Closes this application instance and destroys all resources."""
