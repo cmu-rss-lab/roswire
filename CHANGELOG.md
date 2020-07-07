@@ -9,6 +9,7 @@
 * Renamed `System` and `SystemDescription` to `AppInstance` and
   `AppDescription`, respectively, and added an `Application` class for
   specifying ROS applications.
+* Fixed bug that caused args to be incorrectly handled in eval tags (#378).
 
 
 # 1.4.0 (2020-06-25)
