@@ -78,7 +78,7 @@ class ROS2LaunchManager:
         """
     raise NotImplementedError("ROS2 might not be able to write")
 
-def locate(self, filename: str, *, package: Optional[str] = None, app: App) -> str:
+def locate(self, filename: str, *, app: App, package: Optional[str] = None) -> str:
         """Locates a given launch file.
 
         Parameters
@@ -165,7 +165,7 @@ def locate(self, filename: str, *, package: Optional[str] = None, app: App) -> s
             args = {}
         if not launch_prefixes:
             launch_prefixes = {}
-        filename = self.locate(filename, package=package, app=app)
+        filename = self.locate(filename, app, package=package)
 
         if node_to_remappings or launch_prefixes:
             m = "Requires self.read: not yet implemented"
