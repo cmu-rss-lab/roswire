@@ -79,6 +79,44 @@ class ROSCore:
     def nodes(self) -> NodeManager:
         return self.__nodes
 
+    def nodes_ros2(self) -> Optional[str]:
+        command = f"rosnode list"
+        try:
+            output = self.__shell.check_output(command, text=True)
+        except dockerblade.excpetions.CalledProcessError as error:
+            return None
+        tokens = output.split('\r\n')
+        output_dict= {}
+        for token in tokens:
+            info = f"rosnode info '{token}'"
+            mode = 'None'
+            try:
+                pub = []
+                sub = []
+                output = self.__shell.check_output(info, text=True)
+                output = output.replace('-', '')
+                output = output.replace(' * ', '')
+                lines = output.split('\r\n')
+                for line in lines:
+                    if "Publications:" in line:
+                        mode = 'pub'
+                    elif "Subscriptions:" in line: 
+                        mode = 'sub'
+                    elif "Services" in line: 
+                        mode = 'None'
+                    elif mode == 'pub':
+                        name, space, fmt  = line.partition(' ')
+                        if (name, fmt) != ('', ''):
+                            pub.append((name, fmt))
+                    elif mode == 'sub':
+                        name, space, fmt = line.partition(' ')
+                        if (name, fmt) != ('', ''):
+                            sub.append((name, fmt))
+                output_dict[token] = (pub, sub)
+            except dockerblade.exceptions.CalledProcessError as error:
+                return None
+        return output_dict
+
     @property
     def services(self) -> ServiceManager:
         return self.__services
