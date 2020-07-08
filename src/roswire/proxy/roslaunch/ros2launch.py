@@ -14,10 +14,9 @@ from .controller import ROSLaunchController
 from ... import exceptions as exc
 from .app.app import App
 
+
 @attr.s(eq=False)
 class ROS2LaunchManager:
-    
-
     """Provides access to `roslaunch <wiki.ros.org/roslaunch/>`_ for an
     associated ROS system. This interface is used to locate, read, and write
     `launch XML files <http://wiki.ros.org/roslaunch/XML>`_,
@@ -78,10 +77,10 @@ class ROS2LaunchManager:
         """
     raise NotImplementedError("ROS2 might not be able to write")
 
-    def locate(self, 
-               filename: str, 
-               *, 
-               app: App, 
+    def locate(self,
+               filename: str,
+               *,
+               app: App,
                package: Optional[str] = None
                ) -> str:
         """Locates a given launch file.
