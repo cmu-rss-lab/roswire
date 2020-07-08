@@ -78,7 +78,7 @@ class ROS2LaunchManager:
         """
     raise NotImplementedError("ROS2 might not be able to write")
 
-def locate(self, filename: str, *, app: App, package: Optional[str] = None) -> str:
+    def locate(self, filename: str, *, app: App, package: Optional[str] = None) -> str:
         """Locates a given launch file.
 
         Parameters
