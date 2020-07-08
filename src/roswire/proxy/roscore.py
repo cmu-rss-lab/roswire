@@ -9,13 +9,13 @@ import time
 from loguru import logger
 import dockerblade
 
-from ..description import SystemDescription
+from ..app.description import AppDescription
 from ..exceptions import ROSWireException
+from ..parameters import ParameterServer
+from ..node import NodeManager
+from ..service import ServiceManager
 from .bag import BagRecorder, BagPlayer
-from .node import NodeManager
-from .parameters import ParameterServer
 from .roslaunch import ROSLaunchManager
-from .service import ServiceManager
 from .state import SystemState, SystemStateProbe
 
 
@@ -42,7 +42,7 @@ class ROSCore:
         A mapping from topic names to the names of their message types.
     """
     def __init__(self,
-                 description: SystemDescription,
+                 description: AppDescription,
                  shell: dockerblade.Shell,
                  files: dockerblade.FileSystem,
                  ws_host: str,

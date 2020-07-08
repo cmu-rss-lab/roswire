@@ -1,38 +1,39 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from typing import Iterator, Sequence
+from typing import Iterator
 import contextlib
 import os
 
 from loguru import logger
 import dockerblade
 import roswire
-import yaml
 
 DIR_HERE = os.path.dirname(__file__)
 
 logger.enable('roswire')
 
 
-@contextlib.contextmanager
-def _sut(name: str) -> Iterator[roswire.System]:
-    config_filepath = os.path.join(DIR_HERE, 'systems', f'{name}.yml')
-    with open(config_filepath, 'r') as f:
-        config = yaml.load(f, Loader=yaml.SafeLoader)
-
-    image: str = config['image']
-    sources: Sequence[str] = config['sources']
-    # TODO load from file
-    # TODO we should cache these (immutable) descriptions
-    mock_description = roswire.SystemDescription(image, [], [], [], [])
+def _app(name: str) -> roswire.App:
     rsw = roswire.ROSWire()
-    with rsw.launch(image, sources=sources, description=mock_description) as system:
-        yield system
+    filepath = os.path.join(DIR_HERE, 'apps', f'{name}.yml')
+    return rsw.load(filepath)
+
+
+@contextlib.contextmanager
+def _sut(name: str) -> Iterator[roswire.AppInstance]:
+    app = _app(name)
+    with app.launch() as app_instance:
+        yield app_instance
+
+
+@pytest.fixture
+def app(request) -> Iterator[roswire.App]:
+    return _app(request.param)
 
 
 @pytest.yield_fixture
-def sut(request) -> Iterator[roswire.System]:
+def sut(request) -> Iterator[roswire.AppInstance]:
     with _sut(request.param) as sut:
         yield sut
 

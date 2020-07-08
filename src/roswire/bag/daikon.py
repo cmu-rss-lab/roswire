@@ -18,7 +18,7 @@ from functools import reduce
 import attr
 
 from .reader import BagReader
-from ..description import SystemDescription
+from ..description import AppDescription
 from ..definitions import Message, MsgFormat
 
 
@@ -131,7 +131,7 @@ class TraceWriter:
 
 def topic_to_ppt(topic_name: str,
                  topic_fmt: MsgFormat,
-                 sys_desc: SystemDescription
+                 sys_desc: AppDescription
                  ) -> GenericProgramPoint:
     """Creates a program point for a given ROS topic."""
     decls: Set[VarDecl] = set()
@@ -151,14 +151,14 @@ def topic_to_ppt(topic_name: str,
     return GenericProgramPoint(topic_name, decls)  # type: ignore
 
 
-def bag_to_decls(fn_bag: str, sys_desc: SystemDescription) -> Declarations:
+def bag_to_decls(fn_bag: str, sys_desc: AppDescription) -> Declarations:
     """Builds a .decls file for a given ROS bag.
 
     Parameters
     ----------
     fn_bag: str
         the path to the bag file.
-    sys_desc: SystemDescription
+    sys_desc: AppDescription
         a description of the system used to produce the bag.
 
     Returns
@@ -182,7 +182,7 @@ def bag_to_decls(fn_bag: str, sys_desc: SystemDescription) -> Declarations:
 def bag_to_daikon(fn_bag: str,
                   fn_dtrace: str,
                   fn_decls: str,
-                  sys_desc: SystemDescription
+                  sys_desc: AppDescription
                   ) -> None:
     """Transforms a ROS bag into a Daikon trace.
 
@@ -194,7 +194,7 @@ def bag_to_daikon(fn_bag: str,
         the path to the output Daikon trace file.
     fn_decls: str
         the path to the output Daikon decls file.
-    sys_desc: SystemDescription
+    sys_desc: AppDescription
         a description of the system used to produce the bag.
     """
     decls = bag_to_decls(fn_bag, sys_desc)

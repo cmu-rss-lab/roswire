@@ -196,6 +196,9 @@ class ArgumentResolver:
             'optenv': self._resolve_optenv
         }
 
+        for var, val in self.context['arg'].items():
+            _locals[var] = val
+
         result = str(eval(eval_string, {}, _locals))
         logger.debug(f'resolved eval [{attribute_string}]: {result}')
         return result

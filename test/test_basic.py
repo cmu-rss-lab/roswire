@@ -9,9 +9,8 @@ import pytest
 import roswire
 import roswire.exceptions
 from dockerblade import Shell, FileSystem
-from roswire import ROSWire, System, SystemDescription
-from roswire.proxy import ROSCore, Container
-from roswire.description import SystemDescription
+from roswire import AppInstance, ROSWire, AppDescription
+from roswire.proxy import ROSCore
 from roswire.definitions import TypeDatabase, FormatDatabase, PackageDatabase
 
 DIR_TEST = os.path.dirname(__file__)
@@ -31,12 +30,12 @@ def load_hello_world_type_db() -> TypeDatabase:
     return TypeDatabase.build(db_format)
 
 
-def load_hello_world_description() -> SystemDescription:
+def load_hello_world_description() -> AppDescription:
     fn_db_format = os.path.join(DIR_TEST,
                                 'format-databases/helloworld.formats.yml')
     db_format = FormatDatabase.load(fn_db_format)
     db_type = TypeDatabase.build(db_format)
-    desc = SystemDescription(sha256='foo',
+    desc = AppDescription(sha256='foo',
                              types=db_type,
                              formats=db_format,
                              packages=PackageDatabase([]))
@@ -44,7 +43,7 @@ def load_hello_world_description() -> SystemDescription:
 
 
 @contextlib.contextmanager
-def build_ardu() -> Iterator[Tuple[System, ROSCore]]:
+def build_ardu() -> Iterator[Tuple[AppInstance, ROSCore]]:
     rsw = ROSWire()
     with rsw.launch('brass') as sut:
         with sut.roscore() as ros:
@@ -53,7 +52,7 @@ def build_ardu() -> Iterator[Tuple[System, ROSCore]]:
 
 
 @contextlib.contextmanager
-def build_hello_world() -> Iterator[Tuple[System, ROSCore]]:
+def build_hello_world() -> Iterator[Tuple[AppInstance, ROSCore]]:
     rsw = ROSWire()
     image = 'roswire/helloworld:buggy'
     desc = load_hello_world_description()
@@ -67,7 +66,7 @@ def build_hello_world() -> Iterator[Tuple[System, ROSCore]]:
 def build_shell_proxy() -> Iterator[Shell]:
     rsw = ROSWire()
     image = 'brass'
-    desc = SystemDescription(image, [], [], [])
+    desc = AppDescription(image, [], [], [])
     with rsw.launch(image, desc) as sut:
         yield sut.shell
 
@@ -76,7 +75,7 @@ def build_shell_proxy() -> Iterator[Shell]:
 def build_file_proxy() -> Iterator[FileSystem]:
     rsw = ROSWire()
     image = 'brass'
-    desc = SystemDescription(image, [], [], [])
+    desc = AppDescription(image, [], [], [])
     with rsw.launch(image, desc) as sut:
         yield sut.files
 
@@ -85,7 +84,7 @@ def build_file_proxy() -> Iterator[FileSystem]:
 def build_file_and_shell_proxy() -> Iterator[Tuple[FileSystem, Shell]]:
     rsw = ROSWire()
     image = 'brass'
-    desc = SystemDescription(image, [], [], [])
+    desc = AppDescription(image, [], [], [])
     with rsw.launch(image, desc) as sut:
         yield sut.files, sut.shell
 

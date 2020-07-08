@@ -1,3 +1,18 @@
+# 2.0.0 (XXXX-XX-XX)
+
+* Added an experimental ROS2 API.
+* Changed file structure in various places to improve comprehension and help
+  the move to add support for ROS2.
+* Removed `uuid` property from `System` class.
+* Simplified API for `SystemDescriptionManager` by dropping ability to pass
+  `DockerImage` objects; instead, images must now be exclusively given their
+  name (as a string).
+* Renamed `System` and `SystemDescription` to `AppInstance` and
+  `AppDescription`, respectively, and added an `Application` class for
+  specifying ROS applications.
+* Fixed bug that caused args to be incorrectly handled in eval tags (#378).
+
+
 # 1.4.0 (2020-06-25)
 
 * Added `restrict_to_topics` argument to `record` method of `ROSCore`, allowing

@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 import attr as _attr
+import typing as _typing
+
+if _typing.TYPE_CHECKING:
+    from .app import App
 
 
 class ROSWireException(Exception):
@@ -13,6 +17,15 @@ class PackageNotFound(ValueError, ROSWireException):
 
     def __str__(self) -> str:
         return f"Could not find package with name: {self.package}"
+
+
+@_attr.s(frozen=True, auto_exc=True, auto_attribs=True, str=False)
+class ImageNotFound(ValueError, ROSWireException):
+    """No Docker image was found with a given name."""
+    image: str
+
+    def __str__(self) -> str:
+        return f"Could not find Docker image with name: {self.image}"
 
 
 @_attr.s(frozen=True, auto_exc=True, auto_attribs=True, str=False)
@@ -97,6 +110,15 @@ class RecorderAlreadyStopped(ROSWireException):
 
 class ParsingError(ROSWireException):
     """ROSWire failed to parse a given file/string."""
+
+
+@_attr.s(frozen=True, auto_exc=True, auto_attribs=True, str=False)
+class NoDescriptionError(RuntimeError, ROSWireException):
+    """No description has been generated for an application."""
+    app: 'App'
+
+    def __str__(self) -> str:
+        return f"no description for application: {self.app}"
 
 
 class NodeNotFoundError(KeyError, ROSWireException):

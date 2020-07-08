@@ -14,7 +14,7 @@ import os
 from loguru import logger
 import dockerblade
 
-from .node import NodeManager
+from ..node import NodeManager
 from .. import exceptions
 
 

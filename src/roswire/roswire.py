@@ -9,11 +9,11 @@ import os
 import contextlib
 
 from loguru import logger
+import dockerblade
+import yaml
 
+from .app import App, AppDescription, AppInstance
 from .exceptions import ROSWireException
-from .description import SystemDescription, SystemDescriptionManager
-from .system import System
-from .proxy import ContainerManager
 
 
 class ROSWire:
@@ -23,11 +23,6 @@ class ROSWire:
 
     Attributes
     ----------
-    containers: ContainerManager
-        A manager for building and connecting to Docker containers.
-    descriptions: SystemDescriptionManager
-        A manager for building, loading, and storing static descriptions of
-        ROS applications.
     workspace: str
         The absolute path of the workspace directory for this session. The
         workspace is used to store cache data and to store shared temporary
@@ -35,49 +30,62 @@ class ROSWire:
         applications.
     """
     def __init__(self,
-                 dir_workspace: Optional[str] = None
+                 *,
+                 workspace: Optional[str] = None,
+                 docker_url: str = 'unix://var/run/docker.sock'
                  ) -> None:
-        if not dir_workspace:
+        if not workspace:
             logger.debug("no workspace specified: using default workspace.")
             dir_home = os.path.expanduser("~")
-            dir_workspace = os.path.join(dir_home, ".roswire")
-            logger.debug(f"default workspace: {dir_workspace}")
-            if not os.path.exists(dir_workspace):
+            workspace = os.path.join(dir_home, ".roswire")
+            logger.debug(f"default workspace: {workspace}")
+            if not os.path.exists(workspace):
                 logger.debug("initialising default workspace")
-                os.mkdir(dir_workspace)
+                os.mkdir(workspace)
         else:
-            logger.debug(f"using specified workspace: {dir_workspace}")
-            if not os.path.exists(dir_workspace):
-                m = f"workspace not found: {dir_workspace}"
+            logger.debug(f"using specified workspace: {workspace}")
+            if not os.path.exists(workspace):
+                m = f"workspace not found: {workspace}"
                 raise ROSWireException(m)
 
-        self.__dir_workspace = os.path.abspath(dir_workspace)
-        self.__containers = ContainerManager(self.__dir_workspace)
-        dir_descriptions = os.path.join(dir_workspace, 'descriptions')
-        self.__descriptions = SystemDescriptionManager(self.__containers,
-                                                       dir_descriptions)
+        self.__workspace = os.path.abspath(workspace)
+        self._dockerblade = dockerblade.DockerDaemon(docker_url)
+
+    def __repr__(self) -> str:
+        return f"ROSWire(workspace='{self.workspace}')"
 
     @property
     def workspace(self) -> str:
-        return self.__dir_workspace
+        return self.__workspace
 
-    @property
-    def containers(self) -> ContainerManager:
-        return self.__containers
+    def app(self, image: str, sources: Sequence[str]) -> App:
+        """Constructs a ROS application."""
+        return App(image=image, sources=sources, roswire=self)
 
-    @property
-    def descriptions(self) -> SystemDescriptionManager:
-        return self.__descriptions
+    def load(self, filename: str) -> App:
+        """Loads a ROS application from a given file."""
+        with open(filename, 'r') as f:
+            contents = yaml.safe_load(f)
+        image: str = contents['image']
+        sources: Sequence[str] = contents['sources']
+        app = self.app(image=image, sources=sources)
+
+        if 'description' in contents:
+            description = \
+                AppDescription._from_dict_for_app(contents['description'], app)
+            object.__setattr__(app, '_description', description)
+
+        return app
 
     @contextlib.contextmanager
     def launch(self,
                image: str,
                sources: Sequence[str],
-               description: Optional[SystemDescription] = None,
+               description: Optional[AppDescription] = None,
                *,
                ports: Optional[Dict[int, int]] = None,
                environment: Optional[Mapping[str, str]] = None
-               ) -> Iterator[System]:
+               ) -> Iterator[AppInstance]:
         """Launches a ROS application using a provided Docker image.
 
         Parameters
@@ -87,7 +95,7 @@ class ROSWire:
         sources: Sequence[str]
             The sequence of setup files that should be used to load the ROS
             workspace.
-        description: Optional[SystemDescription]
+        description: Optional[AppDescription]
             an optional static description of the ROS application.
             If no description is provided, ROSWire will attempt to load one
             from the cache or else build one.
@@ -99,11 +107,10 @@ class ROSWire:
             an optional set of additional environment variables, indexed by
             name, that should be used by the system.
         """
-        if not description:
-            description = self.descriptions.load_or_build(image, sources)
-        with self.containers.launch(image,
-                                    ports=ports,
-                                    sources=sources,
-                                    environment=environment) as container:
-            container = container
-            yield System(container, description)
+        app: App
+        if description:
+            app = description.app
+        else:
+            app = self.app(image=image, sources=sources)
+        with app.launch(ports=ports, environment=environment) as app_instance:
+            yield app_instance
