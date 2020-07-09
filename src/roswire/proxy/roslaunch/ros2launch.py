@@ -7,23 +7,28 @@ import shlex
 
 from loguru import logger
 import attr
-import dockerblade
 
 from .config import LaunchConfig
 from .controller import ROSLaunchController
 from ... import exceptions as exc
-from .app.app import App
+from .app.instance import AppInstance
 
 
 @attr.s(eq=False)
 class ROS2LaunchManager:
-    """Provides access to `roslaunch <wiki.ros.org/roslaunch/>`_ for an
-    associated ROS system. This interface is used to locate, read, and write
-    `launch XML files <http://wiki.ros.org/roslaunch/XML>`_,
-    and to launch ROS nodes using those files.
+    """Provides access to `ros2 launch
+    <design.ros2.org/articles/roslaunch.html>`_ for an
+    associated ROS2 system. This interface is used to locate, read,
+    and write `launch python files and to launch ROS nodes using those
+    files.
     """
-    _shell: dockerblade.shell.Shell = attr.ib(repr=False)
-    _files: dockerblade.files.FileSystem = attr.ib(repr=False)
+    _app_instance: AppInstance = attr.ib()
+
+    @classmethod
+    def for_app_instance(cls,
+                         app_instance: 'AppInstance'
+                         ) -> 'ROS2LaunchManager':
+        return ROS2LaunchManager(app_instance=app_instance)
 
     def read(self,
              filename: str,
@@ -51,7 +56,7 @@ class ROS2LaunchManager:
         LaunchFileNotFound
             If the given launch file could not be found in the package.
         """
-    raise NotImplementedError("ROS2 might not be able to read")
+    raise NotImplementedError
 
     def write(self,
               config: LaunchConfig,
@@ -75,14 +80,9 @@ class ROS2LaunchManager:
         str
             The absolute path to the generated XML launch file.
         """
-    raise NotImplementedError("ROS2 might not be able to write")
+    raise NotImplementedError
 
-    def locate(self,
-               filename: str,
-               *,
-               app: App,
-               package: Optional[str] = None
-               ) -> str:
+    def locate(self, filename: str, *, package: Optional[str] = None) -> str:
         """Locates a given launch file.
 
         Parameters
@@ -110,10 +110,10 @@ class ROS2LaunchManager:
             return filename
 
         filename_original = filename
-        app_description = app.describe()
+        app_description = self._app_instance.app.describe()
         package_path = app_description.packages[package].path
         filename = os.path.join(package_path, 'launch', filename_original)
-        if not self._files.isfile(filename):
+        if not self._app_instance.files.isfile(filename):
             raise exc.LaunchFileNotFound(path=filename)
         logger.debug('determined location of launch file'
                      f' [{filename_original}] in package [{package}]: '
@@ -123,7 +123,6 @@ class ROS2LaunchManager:
     def launch(self,
                filename: str,
                *,
-               app: App,
                package: Optional[str] = None,
                args: Optional[Mapping[str, Union[int, str]]] = None,
                prefix: Optional[str] = None,
@@ -164,12 +163,12 @@ class ROS2LaunchManager:
         LaunchFileNotFound
             If the given launch file could not be found in the package.
         """
-        shell = self._shell
+        shell = self._app_instance.shell
         if not args:
             args = {}
         if not launch_prefixes:
             launch_prefixes = {}
-        filename = self.locate(filename, app, package=package)
+        filename = self.locate(filename, package=package)
 
         if node_to_remappings or launch_prefixes:
             m = "Requires self.read: not yet implemented"
