@@ -4,15 +4,17 @@ __all__ = ('ROS2LaunchManager',)
 from typing import Collection, List, Mapping, Optional, Sequence, Tuple, Union
 import os
 import shlex
+import typing
 
 from loguru import logger
 import attr
 
-from .proxy.roslaunch.config import LaunchConfig
+from ..proxy.roslaunch.config import LaunchConfig
 from ..proxy.roslaunch.controller import ROSLaunchController
 from .. import exceptions as exc
-from .app.instance import AppInstance
 
+if typing.TYPE_CHECKING:
+    from ..app import AppInstance
 
 @attr.s(eq=False)
 class ROS2LaunchManager:
@@ -22,7 +24,7 @@ class ROS2LaunchManager:
     and write `launch python files and to launch ROS nodes using those
     files.
     """
-    _app_instance: AppInstance = attr.ib()
+    _app_instance: 'AppInstance' = attr.ib()
 
     @classmethod
     def for_app_instance(cls,
@@ -56,7 +58,7 @@ class ROS2LaunchManager:
         LaunchFileNotFound
             If the given launch file could not be found in the package.
         """
-    raise NotImplementedError
+        raise NotImplementedError
 
     def write(self,
               config: LaunchConfig,
@@ -80,7 +82,7 @@ class ROS2LaunchManager:
         str
             The absolute path to the generated XML launch file.
         """
-    raise NotImplementedError
+        raise NotImplementedError
 
     def locate(self, filename: str, *, package: Optional[str] = None) -> str:
         """Locates a given launch file.
