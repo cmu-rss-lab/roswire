@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-__all__ = ('SystemState', 'ROS2SystemStateProbe')
+__all__ = ('ROS2SystemStateProbe')
 
 from typing import Dict, List
 
 import attr
 import dockerblade
+from loguru import logger
 
 from state import SystemState
 from .app.instance import AppInstance
@@ -24,37 +25,39 @@ class ROS2SystemStateProbe:
         command = "rosnode list"
         try:
             output = self._app_instance.shell.check_output(command, text=True)
-        except dockerblade.exceptions.CalledProcessError as error:
-            raise error
+        except dockerblade.exceptions.CalledProcessError:
+            logger.debug("Unable to retrieve rosnode list from command line")
         node_names = output.split('\r\n')
         for name in node_names:
             info = f"ros2 node info '{name}'"
             mode = 'None'
             try:
                 output = self._app_instance.shell.check_output(info, text=True)
-                output = output.replace(' ', '')
-                lines = output.split('\r\n')
-                for line in lines:
-                    if "Publications:" in line:
-                        mode = 'pub'
-                    elif "Subscriptions:" in line:
-                        mode = 'sub'
-                    elif "Services" in line:
-                        mode = 'serv'
-                    elif "Action Servers" in line:
-                        mode = 'None'
-                    elif mode != 'None':
-                        topic, space, fmt = line.partition(':')
-                        if topic in mode_dict[mode]:
-                            (mode_dict[mode])[topic].append(name)
-                        else:
-                            (mode_dict[mode])[topic] = [name]
-            except dockerblade.exceptions.CalledProcessError as error:
-                raise error
+            except dockerblade.exceptions.CalledProcessError:
+                logger.debug(f"Unable to retrieve {info}")
+            output = output.replace(' ', '')
+            lines = output.split('\r\n')
+            for line in lines:
+                if "Publications:" in line:
+                    mode = 'pub'
+                    continue
+                elif "Subscriptions:" in line:
+                    mode = 'sub'
+                    continue
+                elif "Services" in line:
+                    mode = 'serv'
+                    continue
+                elif "Action Servers" in line:
+                    break
 
-        state = SystemState(publishers=mode_dict['pub'],
-                            subscribers=mode_dict['sub'],
-                            services=mode_dict['serv'])
+                topic, space, fmt = line.partition(':')
+                if topic in mode_dict[mode]:
+                    (mode_dict[mode])[topic].append(name)
+                else:
+                    (mode_dict[mode])[topic] = [name]
+                state = SystemState(publishers=mode_dict['pub'],
+                                    subscribers=mode_dict['sub'],
+                                    services=mode_dict['serv'])
         return state
 
     __call__ = probe
