@@ -16,6 +16,7 @@ from .. import exceptions as exc
 if typing.TYPE_CHECKING:
     from ..app import AppInstance
 
+
 @attr.s(eq=False)
 class ROS2LaunchManager:
     """Provides access to `ros2 launch
