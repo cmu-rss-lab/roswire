@@ -8,9 +8,9 @@ import shlex
 from loguru import logger
 import attr
 
-from .config import LaunchConfig
-from .controller import ROSLaunchController
-from ... import exceptions as exc
+from .proxy.roslaunch.config import LaunchConfig
+from .proxy.roslaunch.controller import ROSLaunchController
+from .. import exceptions as exc
 from .app.instance import AppInstance
 
 
