@@ -6,7 +6,7 @@ from loguru import logger
 
 import attr
 import typing
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from ..proxy import SystemState
 
@@ -26,22 +26,24 @@ class ROS2StateProbe:
 
     def probe(self) -> SystemState:
         """Obtains the instantaneous state of the associated ROS system."""
-        mode_dict: Dict[str, Dict[str, List[str]]] = {'pub': {},
-                                                      'sub': {},
-                                                      'serv': {}}
+        node_to_state: Dict[Optional[str], Dict[str, List[str]]] = {'pub': {},
+                                                                    'sub': {},
+                                                                    'serv': {}}
         command = "rosnode list"
         try:
             output = self._app_instance.shell.check_output(command, text=True)
-        except dockerblade.exceptions.CalledProcessError:
+        except dockerblade.exceptions.CalledProcessError as error:
             logger.debug("Unable to retrieve rosnode list from command line")
+            raise error
         node_names = output.split('\r\n')
-        for name in node_names:
-            info = f"ros2 node info '{name}'"
-            mode = 'None'
+        for node_name in node_names:
+            info = f"ros2 node info '{node_name}'"
+            mode: Optional[str] = None
             try:
                 output = self._app_instance.shell.check_output(info, text=True)
-            except dockerblade.exceptions.CalledProcessError:
+            except dockerblade.exceptions.CalledProcessError as error:
                 logger.debug(f"Unable to retrieve {info}")
+                raise error
             output = output.replace(' ', '')
             lines = output.split('\r\n')
             for line in lines:
@@ -51,20 +53,20 @@ class ROS2StateProbe:
                 elif "Subscriptions:" in line:
                     mode = 'sub'
                     continue
-                elif "Services" in line:
+                elif "Services:" in line:
                     mode = 'serv'
                     continue
-                elif "Action Servers" in line:
+                elif "Action Servers:" in line:
                     break
 
-                topic, space, fmt = line.partition(':')
-                if topic in mode_dict[mode]:
-                    (mode_dict[mode])[topic].append(name)
+                name = line.partition(':')[0]
+                if name in node_to_state[mode]:
+                    node_to_state[mode][name].append(node_name)
                 else:
-                    (mode_dict[mode])[topic] = [name]
-                state = SystemState(publishers=mode_dict['pub'],
-                                    subscribers=mode_dict['sub'],
-                                    services=mode_dict['serv'])
+                    node_to_state[mode][name] = [node_name]
+                state = SystemState(publishers=node_to_state['pub'],
+                                    subscribers=node_to_state['sub'],
+                                    services=node_to_state['serv'])
         return state
 
     __call__ = probe
