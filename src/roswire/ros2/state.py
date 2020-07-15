@@ -59,14 +59,17 @@ class ROS2StateProbe:
                 elif "Action Servers:" in line:
                     break
 
-                name = line.partition(':')[0]
-                if name in node_to_state[mode]:
-                    node_to_state[mode][name].append(node_name)
-                else:
-                    node_to_state[mode][name] = [node_name]
-                state = SystemState(publishers=node_to_state['pub'],
-                                    subscribers=node_to_state['sub'],
-                                    services=node_to_state['serv'])
+                if mode:
+                    name = line.partition(':')[0]
+                    if name in node_to_state[mode]:
+                        node_to_state[mode][name].append(node_name)
+                    else:
+                        node_to_state[mode][name] = [node_name]
+
+
+        state = SystemState(publishers=node_to_state['pub'],
+                            subscribers=node_to_state['sub'],
+                            services=node_to_state['serv'])
         return state
 
     __call__ = probe
