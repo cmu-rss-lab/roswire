@@ -15,6 +15,8 @@ import yaml
 from .app import App, AppDescription, AppInstance
 from .exceptions import ROSWireException
 
+_DEFAULT_URL = os.environ.get('DOCKER_HOST', 'unix://var/run/docker.sock')
+
 
 class ROSWire:
     """
@@ -32,7 +34,7 @@ class ROSWire:
     def __init__(self,
                  *,
                  workspace: Optional[str] = None,
-                 docker_url: str = 'unix://var/run/docker.sock'
+                 docker_url: str = _DEFAULT_URL
                  ) -> None:
         if not workspace:
             logger.debug("no workspace specified: using default workspace.")
