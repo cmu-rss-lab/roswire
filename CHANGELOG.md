@@ -11,7 +11,8 @@
   `AppDescription`, respectively, and added an `Application` class for
   specifying ROS applications.
 * Fixed bug that caused args to be incorrectly handled in eval tags (#378).
-
+* Added a partial implementation of ROS2LaunchManager for launching ROS2 
+  applications (fixes #377)
 
 # 1.4.0 (2020-06-25)
 
