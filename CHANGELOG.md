@@ -13,6 +13,7 @@
 * Fixed bug that caused args to be incorrectly handled in eval tags (#378).
 * Added a partial implementation of ROS2LaunchManager for launching ROS2 
   applications (fixes #377)
+* Added a common interface for ROS1 and ROS2 nodes.
 
 # 1.4.0 (2020-06-25)
 

@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
-__all__ = ('NodeManager',)
+__all__ = ('ROS1NodeManager',)
 
-from typing import AbstractSet, Iterator, Mapping
+from typing import AbstractSet, Iterator
 from urllib.parse import urlparse
 import xmlrpc.client
 
 from loguru import logger
 import dockerblade
 
-from .node import Node
-from ..proxy.state import SystemStateProbe
+from .node import ROS1Node
 from ..exceptions import ROSWireException, NodeNotFoundError
+from ..interface import Node, NodeManager
+from ..proxy.state import SystemStateProbe
 
 
-class NodeManager(Mapping[str, Node]):
+class ROS1NodeManager(NodeManager):
     """Provides access to all nodes on a ROS graph."""
     def __init__(self,
                  host_ip_master: str,
@@ -70,7 +71,7 @@ class NodeManager(Mapping[str, Node]):
         # convert URI to host network
         port = urlparse(uri_container).port
         uri_host = f"http://{self.__host_ip_master}:{port}"
-        return Node(name, uri_host, self.__shell)
+        return ROS1Node(name, uri_host, self.__shell)
 
     def __delitem__(self, name: str) -> None:
         """Shutdown and deregister a given node.
