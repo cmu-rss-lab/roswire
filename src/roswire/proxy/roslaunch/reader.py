@@ -519,3 +519,62 @@ class LaunchFileReader:
         ctx, cfg = self._load_tags(ctx, cfg, list(launch))
         logger.debug(f"launch configuration: {cfg}")
         return cfg
+
+    def locate_node_binary(self,
+                           package: str,
+                           node: str) -> str:
+        """Attempts to locate the binary for a given node.
+
+        Returns
+        -------
+        str
+            The absolute path of the binary for that node.
+
+        Raises
+        ------
+        ValueError
+            If the given package could not be found.
+        ValueError
+            If no binary can be located for the given node.
+        """
+	path: Optional[str] = None
+        logger.debug(f'locating binary for node [{node}] '
+                     f'in package [{package}]')
+        shell = self._shell
+        files = self._files
+
+        # start by looking in libexec
+        command = ('catkin_find --first-only --libexec '
+                   f'{shlex.quote(package)} {shlex.quote(node)}')
+        try:
+            path = shell.check_output(command, stderr=False)
+        except subprocess.CalledProcessError as err:
+            pass
+
+	if not path:
+            # look in the scripts directory of the package's source directory
+            command = ('catkin locate --src '
+                       f'{shlex.quote(package)}')
+            try:
+                package_dir = shell.check_output(command, stderr=False)
+            except subprocess.CalledProcessError as err:
+                raise ValueError(f"package not found: {package}")
+
+            path_in_scripts_dir = os.path.join(package_dir, 'scripts', node)
+            path_in_nodes_dir = os.path.join(package_dir, 'nodes', node)
+            if files.isfile(path_in_scripts_dir) and 
+               files.access(path_in_scripts_dir, os.X_OK):
+                path = path_in_scripts_dir
+            elif files.isfile(path_in_nodes_dir) and
+                 files.access(path_in_nodes_dir, os.X_OK):
+                path = path_in_nodes_dir
+
+
+        if not path:
+            m = (f"unable to locate binary for node [{node}] "
+                 f"in package [{package}]")
+            raise ValueError(m)
+
+        logger.debug(f'located binary for node [{node}] '
+                     f'in package [{package}]: {path}')
+        return path
