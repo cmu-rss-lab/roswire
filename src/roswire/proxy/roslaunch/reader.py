@@ -564,7 +564,7 @@ class LaunchFileReader:
                    f'{shlex.quote(package)} {shlex.quote(node)}')
         try:
             path = shell.check_output(command, stderr=False, text=True)
-        except subprocess.CalledProcessError as err:
+        except subprocess.CalledProcessError:
             pass
 
         if not path:
@@ -573,7 +573,7 @@ class LaunchFileReader:
                        f'{shlex.quote(package)}')
             try:
                 package_dir = shell.check_output(command, stderr=False, text=True)
-            except subprocess.CalledProcessError as err:
+            except subprocess.CalledProcessError:
                 raise ValueError(f"package not found: {package}")
 
             path_in_scripts_dir = os.path.join(package_dir, 'scripts', node)
@@ -582,7 +582,7 @@ class LaunchFileReader:
                files.access(path_in_scripts_dir, os.X_OK):
                 path = path_in_scripts_dir
             elif files.isfile(path_in_nodes_dir) and \
-                 files.access(path_in_nodes_dir, os.X_OK):
+                    files.access(path_in_nodes_dir, os.X_OK):
                 path = path_in_nodes_dir
 
         if not path:
