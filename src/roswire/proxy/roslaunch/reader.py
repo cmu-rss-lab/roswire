@@ -13,7 +13,7 @@ import attr
 import dockerblade
 
 from .rosparam import load_from_yaml_string as load_rosparam_from_string
-from .config import LaunchConfig, NodeConfig
+from .config import LaunchConfig, NodeConfig, ExecutableType
 from .context import LaunchContext
 from .substitution import ArgumentResolver
 from ...name import (namespace_join, global_name, namespace, name_is_global,
@@ -306,9 +306,20 @@ class LaunchFileReader:
         nested_tags = [t for t in tag if t.tag in allowed]
         ctx_child, cfg = self._load_tags(ctx_child, cfg, nested_tags)
 
+        # locate node executable and determine the type
+# TODO handle cases where no path is found
+        executable_path = self.locate_node_binary(package, name)
+        first_line = self._files.read(executable_path).partition('\n')[0]
+        if 'python' in first_line:
+            executable_type = ExecutableType.PYTHON
+        else:
+            executable_type = ExecutableType.CPP
+
         node = NodeConfig(name=name,
                           namespace=namespace(ctx_child.namespace),
                           package=package,
+                          executable_path=executable_path,
+                          executable_type=executable_type,
                           cwd=cwd,
                           args=args,
                           required=required,
