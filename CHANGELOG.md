@@ -1,5 +1,6 @@
 # 2.0.0 (XXXX-XX-XX)
 
+* Bug fix: Fixed infinite recursion in app.describe().
 * Added an experimental ROS2 API.
 * Changed file structure in various places to improve comprehension and help
   the move to add support for ROS2.
