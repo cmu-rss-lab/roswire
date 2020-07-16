@@ -312,10 +312,13 @@ class LaunchFileReader:
         # locate node executable and determine the type
 # TODO handle cases where no path is found
         executable_path = self.locate_node_binary(package, name)
-        first_line = self._files.read(executable_path).partition('\n')[0]
-        if 'python' in first_line:
-            executable_type = ExecutableType.PYTHON
-        else:
+        try:
+            first_line = self._files.read(executable_path).partition('\n')[0]
+            if 'python' in first_line:
+                executable_type = ExecutableType.PYTHON
+            else:
+                executable_type = ExecutableType.CPP
+        except UnicodeDecodeError:
             executable_type = ExecutableType.CPP
 
         node = NodeConfig(name=name,
@@ -567,7 +570,7 @@ class LaunchFileReader:
 
         if not path:
             # look in the scripts directory of the package's source directory
-            command = ('catkin locate --src '
+            command = ('rospack find '
                        f'{shlex.quote(package)}')
             try:
                 package_dir = shell.check_output(command, stderr=False)
