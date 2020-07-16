@@ -11,6 +11,9 @@ import xml.etree.ElementTree as ET
 from loguru import logger
 import attr
 import dockerblade
+import os
+import shlex
+import subprocess
 
 from .rosparam import load_from_yaml_string as load_rosparam_from_string
 from .config import LaunchConfig, NodeConfig, ExecutableType
@@ -548,7 +551,7 @@ class LaunchFileReader:
         ValueError
             If no binary can be located for the given node.
         """
-	path: Optional[str] = None
+        path: Optional[str] = None
         logger.debug(f'locating binary for node [{node}] '
                      f'in package [{package}]')
         shell = self._shell
@@ -562,7 +565,7 @@ class LaunchFileReader:
         except subprocess.CalledProcessError as err:
             pass
 
-	if not path:
+        if not path:
             # look in the scripts directory of the package's source directory
             command = ('catkin locate --src '
                        f'{shlex.quote(package)}')
@@ -573,10 +576,10 @@ class LaunchFileReader:
 
             path_in_scripts_dir = os.path.join(package_dir, 'scripts', node)
             path_in_nodes_dir = os.path.join(package_dir, 'nodes', node)
-            if files.isfile(path_in_scripts_dir) and 
+            if files.isfile(path_in_scripts_dir) and \
                files.access(path_in_scripts_dir, os.X_OK):
                 path = path_in_scripts_dir
-            elif files.isfile(path_in_nodes_dir) and
+            elif files.isfile(path_in_nodes_dir) and \
                  files.access(path_in_nodes_dir, os.X_OK):
                 path = path_in_nodes_dir
 
