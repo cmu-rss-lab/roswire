@@ -1,5 +1,6 @@
 # 2.0.0 (XXXX-XX-XX)
 
+* Bug fix: Fixed infinite recursion in app.describe().
 * Added an experimental ROS2 API.
 * Changed file structure in various places to improve comprehension and help
   the move to add support for ROS2.
@@ -11,7 +12,9 @@
   `AppDescription`, respectively, and added an `Application` class for
   specifying ROS applications.
 * Fixed bug that caused args to be incorrectly handled in eval tags (#378).
-
+* Added a partial implementation of ROS2LaunchManager for launching ROS2 
+  applications (fixes #377)
+* Added a common interface for ROS1 and ROS2 nodes.
 
 # 1.4.0 (2020-06-25)
 

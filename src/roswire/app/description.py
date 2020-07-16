@@ -101,7 +101,7 @@ class AppDescription:
     @classmethod
     def for_app(cls, app: 'App') -> 'AppDescription':
         """Produces a description for a given application."""
-        with app.launch(require_description=True) as app_instance:
+        with app.launch(require_description=False) as app_instance:
             shell = app_instance.shell
             files = app_instance.files
             paths = PackageDatabase.paths(shell, files)

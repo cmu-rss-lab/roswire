@@ -37,7 +37,8 @@ with rsw.launch(image, sources, environment=environment) as system:
         # get topic types
         topic_to_type = ros.topic_to_type
         print(f"Topic to type: {topic_to_type}")
-
+        print("rosnodes:")
+        print(ros.nodes_ros2())
         # get service formats
         service_to_format = {}
         for service_name in state.services:
