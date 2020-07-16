@@ -310,7 +310,6 @@ class LaunchFileReader:
         ctx_child, cfg = self._load_tags(ctx_child, cfg, nested_tags)
 
         # locate node executable and determine the type
-# TODO handle cases where no path is found
         executable_path = self.locate_node_binary(package, name)
         try:
             first_line = self._files.read(executable_path).partition('\n')[0]
@@ -585,7 +584,6 @@ class LaunchFileReader:
             elif files.isfile(path_in_nodes_dir) and \
                  files.access(path_in_nodes_dir, os.X_OK):
                 path = path_in_nodes_dir
-
 
         if not path:
             m = (f"unable to locate binary for node [{node}] "
