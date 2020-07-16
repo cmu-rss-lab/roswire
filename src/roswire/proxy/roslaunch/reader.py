@@ -563,7 +563,7 @@ class LaunchFileReader:
         command = ('catkin_find --first-only --libexec '
                    f'{shlex.quote(package)} {shlex.quote(node)}')
         try:
-            path = shell.check_output(command, stderr=False)
+            path = shell.check_output(command, stderr=False, text=True)
         except subprocess.CalledProcessError as err:
             pass
 
@@ -572,7 +572,7 @@ class LaunchFileReader:
             command = ('rospack find '
                        f'{shlex.quote(package)}')
             try:
-                package_dir = shell.check_output(command, stderr=False)
+                package_dir = shell.check_output(command, stderr=False, text=True)
             except subprocess.CalledProcessError as err:
                 raise ValueError(f"package not found: {package}")
 
