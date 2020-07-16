@@ -26,31 +26,32 @@ class ROS2StateProbe:
 
     def probe(self) -> SystemState:
         """Obtains the instantaneous state of the associated ROS system."""
+        shell = self._app_instance.shell
         node_to_state: Dict[Optional[str], Dict[str, List[str]]] = {'pub': {},
                                                                     'sub': {},
                                                                     'serv': {}}
         command = "rosnode list"
         try:
-            output = self._app_instance.shell.check_output(command, text=True)
-        except dockerblade.exceptions.CalledProcessError as error:
+            output = shell.check_output(command, text=True)
+        except dockerblade.exceptions.CalledProcessError:
             logger.debug("Unable to retrieve rosnode list from command line")
-            raise error
+            raise
         node_names = output.split('\r\n')
         for node_name in node_names:
-            info = f"ros2 node info '{node_name}'"
+            command_info = f"ros2 node info '{node_name}'"
             mode: Optional[str] = None
             try:
-                output = self._app_instance.shell.check_output(info, text=True)
-            except dockerblade.exceptions.CalledProcessError as error:
-                logger.debug(f"Unable to retrieve {info}")
-                raise error
+                output = shell.check_output(command_info, text=True)
+            except dockerblade.exceptions.CalledProcessError:
+                logger.debug(f"Unable to retrieve {command_info}")
+                raise
             output = output.replace(' ', '')
             lines = output.split('\r\n')
             for line in lines:
-                if "Publications:" in line:
+                if "Publishers:" in line:
                     mode = 'pub'
                     continue
-                elif "Subscriptions:" in line:
+                elif "Subscribers:" in line:
                     mode = 'sub'
                     continue
                 elif "Services:" in line:
@@ -65,7 +66,6 @@ class ROS2StateProbe:
                         node_to_state[mode][name].append(node_name)
                     else:
                         node_to_state[mode][name] = [node_name]
-
 
         state = SystemState(publishers=node_to_state['pub'],
                             subscribers=node_to_state['sub'],
