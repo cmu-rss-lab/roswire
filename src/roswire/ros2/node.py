@@ -10,7 +10,7 @@ if typing.TYPE_CHECKING:
 
 
 @attr.s(frozen=True, auto_attribs=True, slots=True)
-class ROS2Node:
+class ROS2Node():
     """Provides an interface for interacting with a ROS2 node.
 
     Attributes

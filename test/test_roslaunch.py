@@ -60,3 +60,5 @@ def test_remappings(sut):
         published_topics = set(state.publishers)
         assert '/gazebo/model_states' not in state.publishers
         assert set(state.publishers['/funkybits']) == {'/gazebo'}
+
+
