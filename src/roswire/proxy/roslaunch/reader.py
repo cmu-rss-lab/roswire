@@ -333,17 +333,14 @@ class LaunchFileReader:
         return ctx, cfg
 
     def _get_executable_type(self, path: str) -> ExecutableType:
-
-        executable_type = None
         try:
             first_line = self._files.read(path).partition('\n')[0]
             if 'python' in first_line:
-                executable_type = ExecutableType.PYTHON
+                return ExecutableType.PYTHON
             else:
-                executable_type = ExecutableType.LIKELY_CPP
+                return ExecutableType.LIKELY_CPP
         except UnicodeDecodeError:
-            executable_type = ExecutableType.LIKELY_CPP
-        return executable_type
+            return ExecutableType.LIKELY_CPP
 
     @tag('arg', ['name', 'default', 'value', 'doc'])
     def _load_arg_tag(self,
