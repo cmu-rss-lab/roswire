@@ -12,7 +12,7 @@ from ....name import namespace_join
 
 class ExecutableType(Enum):
     PYTHON = 1
-    CPP = 2
+    LIKELY_CPP = 2
 
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
