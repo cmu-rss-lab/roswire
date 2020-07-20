@@ -1,23 +1,26 @@
 # -*- coding: utf-8 -*-
 __all__ = ('ROS2NodeManager',)
 
-from typing import Iterator, Mapping
+from typing import Iterator
 import typing
 
 from loguru import logger
 import attr
 
 from .node import ROS2Node
+from .state import ROS2StateProbe
 from .. import exceptions as exc
+from ..interface import NodeManager
 
 if typing.TYPE_CHECKING:
     from ..app import AppInstance
 
 
 @attr.s(frozen=True, auto_attribs=True, slots=True)
-class ROS2NodeManager(Mapping[str, ROS2Node]):
+class ROS2NodeManager(NodeManager):
     """Provides an interface for interacting with ROS2 nodes."""
-    app_instance: 'AppInstance'
+    app_instance: 'AppInstance' = attr.ib()
+    state: 'ROS2StateProbe' = ROS2StateProbe.for_app_instance(app_instance)
 
     @classmethod
     def for_app_instance(cls,
@@ -43,15 +46,15 @@ class ROS2NodeManager(Mapping[str, ROS2Node]):
         NodeNotFoundError
             If there is no node with the given name.
         """
-        raise NotImplementedError
+        return ROS2Node.for_app_instance_and_name(name, self.app_instance)
 
     def __len__(self) -> int:
         """Returns a count of the number of active nodes."""
-        raise NotImplementedError
+        return len(self.state.probe().nodes)
 
     def __iter__(self) -> Iterator[str]:
         """Returns an iterator over the names of all active nodes."""
-        raise NotImplementedError
+        yield from self.state.probe().nodes
 
     def __delitem__(self, name: str) -> None:
         """Shutdown and deregister a given node.
