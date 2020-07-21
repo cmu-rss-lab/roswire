@@ -3,9 +3,9 @@ __all__ = ('ROS2NodeManager',)
 
 from typing import Iterator
 import typing
+import attr
 
 from loguru import logger
-import attr
 
 from .node import ROS2Node
 from .state import ROS2StateProbe

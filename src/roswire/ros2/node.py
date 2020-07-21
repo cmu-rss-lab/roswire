@@ -2,13 +2,13 @@
 __all__ = ('ROS2Node',)
 
 import typing
-
 import attr
+
 import logger
+import dockerblade
 
 from ..interface import Node
 from .state import ROS2StateProbe
-import dockerblade
 
 if typing.TYPE_CHECKING:
     from ..app import AppInstance
