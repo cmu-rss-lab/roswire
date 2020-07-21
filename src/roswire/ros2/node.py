@@ -4,8 +4,11 @@ __all__ = ('ROS2Node',)
 import typing
 
 import attr
+import logger
 
 from ..interface import Node
+from .state import ROS2StateProbe
+import dockerblade
 
 if typing.TYPE_CHECKING:
     from ..app import AppInstance
@@ -22,6 +25,7 @@ class ROS2Node(Node):
     """
     app_instance: 'AppInstance' = attr.ib()
     node_name: str = attr.ib()
+    _state_probe: 'ROS2StateProbe' = attr.ib(init=False)
 
     @classmethod
     def for_app_instance_and_name(cls,
@@ -36,8 +40,14 @@ class ROS2Node(Node):
 
     def is_alive(self) -> bool:
         """Determines whether this node is alive."""
-        raise NotImplementedError
+        if self.node_name in self._state_probe.probe().nodes:
+            return True
+        return False
 
     def shutdown(self) -> None:
         """Instructs this node to shutdown."""
-        raise NotImplementedError
+        command = f"ros2 lifecycle set {self.node_name} shutdown"
+        try:
+            self.app_instance.shell.run(command)
+        except dockerblade.exceptions.CalledProcessError:
+            logger.debug(f"Unable to shutdown node {self.node_name}")
