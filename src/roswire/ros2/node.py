@@ -21,18 +21,18 @@ class ROS2Node(Node):
         The name of the node.
     """
     app_instance: 'AppInstance' = attr.ib()
-    __name: str
+    node_name: str = attr.ib()
 
     @classmethod
     def for_app_instance_and_name(cls,
-                                  name: str,
-                                  app_instance: 'AppInstance'
+                                  app_instance: 'AppInstance',
+                                  name: str
                                   ) -> 'ROS2Node':
-        return ROS2Node(name=name, app_instance=app_instance)
+        return ROS2Node(node_name=name, app_instance=app_instance)
 
     @property
     def name(self) -> str:
-        return self.__name
+        return self.node_name
 
     def is_alive(self) -> bool:
         """Determines whether this node is alive."""
