@@ -141,7 +141,27 @@ class CatkinMake(CatkinInterface):
               orphans: bool = False,
               context: Optional[str] = None
               ) -> None:
-        raise NotImplementedError
+        shell = self._shell
+        command = ['catkin_make', 'clean']
+        if orphans:
+            raise NotImplementedError
+        if packages:
+            command += ['--pkg']
+            command += [shlex.quote(p) for p in packages]
+        if not context:
+            context = self.directory
+
+        command_str = ' '.join(command)
+        logger.debug(f"cleaning via: {command_str}")
+        result = shell.run(command_str, cwd=context, text=True)
+        duration_mins = result.duration / 60
+        logger.debug("clean completed after %.2f minutes [retcode: %d]:\n%s",
+                     duration_mins, result.returncode, result.output)
+
+        if result.returncode != 0:
+            assert isinstance(result.output, str)
+            raise CatkinCleanFailed(result.returncode, result.output)
+
 
     def build(self,
               packages: Optional[List[str]] = None,
@@ -153,4 +173,33 @@ class CatkinMake(CatkinInterface):
               context: Optional[str] = None,
               time_limit: Optional[int] = None
               ) -> None:
-        raise NotImplementedError
+        command = ['catkin_make']
+        if packages:
+            command += ['--pkg']
+            command += [shlex.quote(p) for p in packages]
+        if no_deps:
+            raise NotImplementedError
+        if pre_clean:
+            raise NotImplementedError
+        if cmake_args:
+            command += cmake_args
+        if make_args:
+            command += ['--make-args']
+            command += make_args
+        if not context:
+            context = self.directory
+
+        command_str = ' '.join(command)
+        logger.debug(f"building via: {command_str}")
+        result = self._shell.run(command_str,
+                                 cwd=context,
+                                 time_limit=time_limit,
+                                 text=True)
+        duration_mins = result.duration / 60
+        logger.debug("build completed after %.2f minutes [retcode: %d]:\n%s",
+                     duration_mins, result.returncode, result.output)
+
+        if result.returncode != 0:
+            assert isinstance(result.output, str)
+            raise CatkinBuildFailed(result.returncode, result.output)
+
