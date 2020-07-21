@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 __all__ = ('ROS2StateProbe',)
 
-import dockerblade
-from loguru import logger
-
 import attr
 import typing
 from typing import Dict, List, Optional
+
+import dockerblade
+from loguru import logger
 
 from ..proxy import SystemState
 
