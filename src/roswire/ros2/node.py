@@ -24,7 +24,7 @@ class ROS2Node(Node):
         The name of the node.
     """
     app_instance: 'AppInstance' = attr.ib()
-    node_name: str = attr.ib()
+    name: str = attr.ib()
     _state_probe: 'ROS2StateProbe' = attr.ib(init=False)
 
     @classmethod
@@ -32,22 +32,18 @@ class ROS2Node(Node):
                                   app_instance: 'AppInstance',
                                   name: str
                                   ) -> 'ROS2Node':
-        return ROS2Node(node_name=name, app_instance=app_instance)
-
-    @property
-    def name(self) -> str:
-        return self.node_name
+        return ROS2Node(name=name, app_instance=app_instance)
 
     def is_alive(self) -> bool:
         """Determines whether this node is alive."""
-        if self.node_name in self._state_probe.probe().nodes:
+        if self.name in self._state_probe.probe().nodes:
             return True
         return False
 
     def shutdown(self) -> None:
         """Instructs this node to shutdown."""
-        command = f"ros2 lifecycle set {self.node_name} shutdown"
+        command = f"ros2 lifecycle set {self.name} shutdown"
         try:
             self.app_instance.shell.run(command)
         except dockerblade.exceptions.CalledProcessError:
-            logger.debug(f"Unable to shutdown node {self.node_name}")
+            logger.debug(f"Unable to shutdown node {self.name}")
