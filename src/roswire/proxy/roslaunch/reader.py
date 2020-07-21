@@ -310,7 +310,7 @@ class LaunchFileReader:
         ctx_child, cfg = self._load_tags(ctx_child, cfg, nested_tags)
 
         # locate node executable and determine the type
-        executable_path = self.locate_node_binary(package, name)
+        executable_path = self.locate_node_binary(package, name, node_type)
         executable_type = self._get_executable_type(executable_path)
 
         node = NodeConfig(name=name,
@@ -541,7 +541,8 @@ class LaunchFileReader:
 
     def locate_node_binary(self,
                            package: str,
-                           node: str) -> str:
+                           node: str,
+                           node_type: str) -> str:
         """Attempts to locate the binary for a given node.
 
         Returns
@@ -579,14 +580,17 @@ class LaunchFileReader:
             except subprocess.CalledProcessError:
                 raise ValueError(f"package not found: {package}")
 
-            path_in_scripts_dir = os.path.join(package_dir, 'scripts', node)
-            path_in_nodes_dir = os.path.join(package_dir, 'nodes', node)
-            if files.isfile(path_in_scripts_dir) and \
-               files.access(path_in_scripts_dir, os.X_OK):
-                path = path_in_scripts_dir
-            elif files.isfile(path_in_nodes_dir) and \
-                    files.access(path_in_nodes_dir, os.X_OK):
-                path = path_in_nodes_dir
+            for script_name in [node, node_type]:
+                path_in_scripts_dir = os.path.join(package_dir, 'scripts', script_name)
+                path_in_nodes_dir = os.path.join(package_dir, 'nodes', script_name)
+                if files.isfile(path_in_scripts_dir) and \
+                   files.access(path_in_scripts_dir, os.X_OK):
+                    path = path_in_scripts_dir
+                    break
+                elif files.isfile(path_in_nodes_dir) and \
+                        files.access(path_in_nodes_dir, os.X_OK):
+                    path = path_in_nodes_dir
+                    break
 
         if not path:
             m = (f"unable to locate binary for node [{node}] "
