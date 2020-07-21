@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
-__all__ = ('NodeConfig',)
+__all__ = ('NodeConfig', 'ExecutableType',)
 
 from typing import Collection, Optional, Sequence, Tuple
 import xml.etree.ElementTree as ET
+from enum import Enum
 
 import attr
 
 from ....name import namespace_join
+
+
+class ExecutableType(Enum):
+    PYTHON = 1
+    LIKELY_CPP = 2
 
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
@@ -15,6 +21,8 @@ class NodeConfig:
     name: str
     typ: str
     package: str
+    executable_path: str
+    executable_type: ExecutableType
     remappings: Collection[Tuple[str, str]] = attr.ib(default=tuple())
     filename: Optional[str] = attr.ib(default=None)
     output: Optional[str] = attr.ib(default=None)
