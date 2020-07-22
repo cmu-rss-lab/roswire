@@ -8,12 +8,14 @@ __all__ = ('CatkinInterface', 'CatkinTools', 'CatkinMake')
 from typing import Optional, List
 import abc
 import shlex
+import os
 
 from loguru import logger
 import attr
 import dockerblade
 
-from ..exceptions import CatkinBuildFailed, CatkinCleanFailed
+from ..exceptions import CatkinBuildFailed, CatkinCleanFailed, \
+    CatkinException
 
 
 class CatkinInterface(abc.ABC):
@@ -22,6 +24,18 @@ class CatkinInterface(abc.ABC):
     @abc.abstractmethod
     def directory(self) -> str:
         """The directory of this catkin workspace."""
+        ...
+
+    @property
+    @abc.abstractmethod
+    def _shell(self) -> dockerblade.shell.Shell:
+        """The shell on the docker container."""
+        ...
+
+    @property
+    @abc.abstractmethod
+    def _files(self) -> dockerblade.files.FileSystem:
+        """The filesystem of the docker container."""
         ...
 
     @abc.abstractmethod
@@ -59,12 +73,34 @@ class CatkinInterface(abc.ABC):
         """
         ...
 
+    def deep_clean(self) -> None:
+        """Removes the build, devel, and install from the workspace.
+
+        Raises
+        ------
+        CatkinException:
+            if removing directories fail.
+        """
+        files = self._files
+        for rm_directory in ['build', 'devel', 'install']:
+            path = os.path.join(self.directory, rm_directory)
+            if files.exists(path):
+                try:
+                    command = f'rm -r {path}'
+                    self._shell.check_output(command, text=True)
+                except dockerblade.exceptions.CalledProcessError as err:
+                    msg = f'Failed to remove directory "{rm_directory}" ' \
+                          f'due to {err}'
+                    logger.error(msg)
+                    raise CatkinException(msg)
+
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
 class CatkinTools(CatkinInterface):
     """Provides an interface to a catkin workspace created via catkin tools."""
     directory: str
     _shell: dockerblade.shell.Shell
+    _files: dockerblade.files.FileSystem
 
     def clean(self,
               packages: Optional[List[str]] = None,
@@ -135,6 +171,7 @@ class CatkinMake(CatkinInterface):
     """Provides an interface to a catkin workspace created via catkin_make."""
     directory: str
     _shell: dockerblade.shell.Shell
+    _files: dockerblade.files.FileSystem
 
     def clean(self,
               packages: Optional[List[str]] = None,
