@@ -15,6 +15,8 @@
 * Added a partial implementation of ROS2LaunchManager for launching ROS2 
   applications (fixes #377)
 * Added a common interface for ROS1 and ROS2 nodes.
+* Added implementation for `CatkinMake`, and added `deep_clean` to
+  `CatkinInterface`.
 
 # 1.4.0 (2020-06-25)
 
