@@ -310,7 +310,7 @@ class LaunchFileReader:
         ctx_child, cfg = self._load_tags(ctx_child, cfg, nested_tags)
 
         # locate node executable and determine the type
-        executable_path = self.locate_node_binary(package, name, node_type)
+        executable_path = self.locate_node_binary(package, node_type)
         executable_type = self._get_executable_type(executable_path)
 
         node = NodeConfig(name=name,
@@ -541,7 +541,6 @@ class LaunchFileReader:
 
     def locate_node_binary(self,
                            package: str,
-                           node: str,
                            node_type: str) -> str:
         """Attempts to locate the binary for a given node.
 
@@ -558,14 +557,14 @@ class LaunchFileReader:
             If no binary can be located for the given node.
         """
         path: Optional[str] = None
-        logger.debug(f'locating binary for node [{node}] '
+        logger.debug(f'locating binary for node_type [{node_type}] '
                      f'in package [{package}]')
         shell = self._shell
         files = self._files
 
         # start by looking in libexec
         command = ('catkin_find --first-only --libexec '
-                   f'{shlex.quote(package)} {shlex.quote(node)}')
+                   f'{shlex.quote(package)} {shlex.quote(node_type)}')
         try:
             path = shell.check_output(command, stderr=False, text=True)
         except subprocess.CalledProcessError:
@@ -580,23 +579,20 @@ class LaunchFileReader:
             except subprocess.CalledProcessError:
                 raise ValueError(f"package not found: {package}")
 
-            for script_name in [node, node_type]:
-                path_in_scripts_dir = os.path.join(package_dir, 'scripts', script_name)
-                path_in_nodes_dir = os.path.join(package_dir, 'nodes', script_name)
-                if files.isfile(path_in_scripts_dir) and \
-                   files.access(path_in_scripts_dir, os.X_OK):
-                    path = path_in_scripts_dir
-                    break
-                elif files.isfile(path_in_nodes_dir) and \
-                        files.access(path_in_nodes_dir, os.X_OK):
-                    path = path_in_nodes_dir
-                    break
+            path_in_scripts_dir = os.path.join(package_dir, 'scripts', node_type)
+            path_in_nodes_dir = os.path.join(package_dir, 'nodes', node_type)
+            if files.isfile(path_in_scripts_dir) and \
+               files.access(path_in_scripts_dir, os.X_OK):
+                path = path_in_scripts_dir
+            elif files.isfile(path_in_nodes_dir) and \
+                    files.access(path_in_nodes_dir, os.X_OK):
+                path = path_in_nodes_dir
 
         if not path:
-            m = (f"unable to locate binary for node [{node}] "
+            m = (f"unable to locate binary for node_type [{node_type}] "
                  f"in package [{package}]")
             raise ValueError(m)
 
-        logger.debug(f'located binary for node [{node}] '
+        logger.debug(f'located binary for node_type [{node_type}] '
                      f'in package [{package}]: {path}')
         return path
