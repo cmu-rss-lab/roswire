@@ -74,11 +74,11 @@ class CatkinInterface(abc.ABC):
         ...
 
     def deep_clean(self) -> None:
-        """Removes the build, devel, and install from the workspace.
+        """Removes the build, devel, and install direcotries from the workspace.
 
         Raises
         ------
-        CatkinException:
+        CatkinException
             if removing directories fail.
         """
         files = self._files
@@ -120,8 +120,8 @@ class CatkinTools(CatkinInterface):
         logger.debug(f"cleaning via: {command_str}")
         result = shell.run(command_str, cwd=context, text=True)
         duration_mins = result.duration / 60
-        logger.debug("clean completed after %.2f minutes [retcode: %d]:\n%s",
-                     duration_mins, result.returncode, result.output)
+        logger.debug(f"clean completed after {duration_mins:.2f} minutes "
+                     "[retcode: {result.returncode}]:\n{result.output}")
 
         if result.returncode != 0:
             assert isinstance(result.output, str)
@@ -158,8 +158,8 @@ class CatkinTools(CatkinInterface):
                                  time_limit=time_limit,
                                  text=True)
         duration_mins = result.duration / 60
-        logger.debug("build completed after %.2f minutes [retcode: %d]:\n%s",
-                     duration_mins, result.returncode, result.output)
+        logger.debug(f"build completed after {duration_mins:.2f} minutes"
+                     "[retcode: {result.returncode}]:\n{result.output}")
 
         if result.returncode != 0:
             assert isinstance(result.output, str)
@@ -192,8 +192,8 @@ class CatkinMake(CatkinInterface):
         logger.debug(f"cleaning via: {command_str}")
         result = shell.run(command_str, cwd=context, text=True)
         duration_mins = result.duration / 60
-        logger.debug("clean completed after %.2f minutes [retcode: %d]:\n%s",
-                     duration_mins, result.returncode, result.output)
+        logger.debug(f"clean completed after {duration_mins:.2f} minutes"
+                     "[retcode: {result.returncode}]:\n{result.output}")
 
         if result.returncode != 0:
             assert isinstance(result.output, str)
@@ -232,8 +232,8 @@ class CatkinMake(CatkinInterface):
                                  time_limit=time_limit,
                                  text=True)
         duration_mins = result.duration / 60
-        logger.debug("build completed after %.2f minutes [retcode: %d]:\n%s",
-                     duration_mins, result.returncode, result.output)
+        logger.debug(f"build completed after {duration_mins:.2f} minutes "
+                     "[retcode: {result.returncode}]:\n{result.output}")
 
         if result.returncode != 0:
             assert isinstance(result.output, str)
