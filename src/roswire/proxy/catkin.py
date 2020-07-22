@@ -162,7 +162,6 @@ class CatkinMake(CatkinInterface):
             assert isinstance(result.output, str)
             raise CatkinCleanFailed(result.returncode, result.output)
 
-
     def build(self,
               packages: Optional[List[str]] = None,
               no_deps: bool = False,
@@ -202,4 +201,3 @@ class CatkinMake(CatkinInterface):
         if result.returncode != 0:
             assert isinstance(result.output, str)
             raise CatkinBuildFailed(result.returncode, result.output)
-
