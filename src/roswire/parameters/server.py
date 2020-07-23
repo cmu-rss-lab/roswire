@@ -4,12 +4,11 @@ __all__ = ('ParameterServer',)
 from typing import Any, Iterator, Mapping, Sequence
 import xmlrpc.client
 
-
 from .. import exceptions
 
 
 class ParameterServer(Mapping[str, Any]):
-    """
+    """Provides access to the ROS parameter server.
     See: http://wiki.ros.org/ROS/Parameter%20Server%20API
     """
     def __init__(self, connection: xmlrpc.client.ServerProxy) -> None:

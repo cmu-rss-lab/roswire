@@ -1,4 +1,26 @@
-# 1.4.0 (XXXX-XX-XX)
+# 2.0.0 (XXXX-XX-XX)
+
+* Bug fix: Fixed infinite recursion in app.describe().
+* Added an experimental ROS2 API.
+* Changed file structure in various places to improve comprehension and help
+  the move to add support for ROS2.
+* Removed `uuid` property from `System` class.
+* Simplified API for `SystemDescriptionManager` by dropping ability to pass
+  `DockerImage` objects; instead, images must now be exclusively given their
+  name (as a string).
+* Renamed `System` and `SystemDescription` to `AppInstance` and
+  `AppDescription`, respectively, and added an `Application` class for
+  specifying ROS applications.
+* Fixed bug that caused args to be incorrectly handled in eval tags (#378).
+* Added a partial implementation of ROS2LaunchManager for launching ROS2 
+  applications (fixes #377)
+* Added a common interface for ROS1 and ROS2 nodes.
+* Added implementation for `CatkinMake`, and added `deep_clean` to
+  `CatkinInterface`.
+* Added binary location and assumed language to node descriptions in the
+  ROS1 launch file reader.
+
+# 1.4.0 (2020-06-25)
 
 * Added `restrict_to_topics` argument to `record` method of `ROSCore`, allowing
   users to restrict bag recording to specific topics by supplying a regular
@@ -17,6 +39,10 @@
 * Fixed mishandling of complex parameters when reading rosparam tags.
 * Added reading and writing of `env` tags for launch files.
 * Added `to_xml_string` and `to_xml_file` to `LaunchConfig`.
+* Updated handling of `command` attributes in `param` tags during parsing
+  of XML launch files: Only the output of `stdout` is recorded, and `stderr`
+  is now ignored.
+* Added handling of `$(eval ...)` tags in XML launch files.
 
 
 # 1.3.0 (2020-06-02)

@@ -11,9 +11,12 @@ import xml.etree.ElementTree as ET
 from loguru import logger
 import attr
 import dockerblade
+import os
+import shlex
+import subprocess
 
 from .rosparam import load_from_yaml_string as load_rosparam_from_string
-from .config import LaunchConfig, NodeConfig
+from .config import LaunchConfig, NodeConfig, ExecutableType
 from .context import LaunchContext
 from .substitution import ArgumentResolver
 from ...name import (namespace_join, global_name, namespace, name_is_global,
@@ -183,7 +186,9 @@ class LaunchFileReader:
         if binfile is not None:
             value = self._files.read(binfile, binary=True)
         if command is not None:
-            value = self._shell.check_output(command, text=True)
+            logger.debug(f'obtaining value for parameter [{name}] '
+                         f'via command:\n{command}')
+            value = self._shell.check_output(command, text=True, stderr=False)
 
         logger.debug(f"obtained value for parameter [{name}]: {value}")
 
@@ -304,9 +309,15 @@ class LaunchFileReader:
         nested_tags = [t for t in tag if t.tag in allowed]
         ctx_child, cfg = self._load_tags(ctx_child, cfg, nested_tags)
 
+        # locate node executable and determine the type
+        executable_path = self.locate_node_binary(package, node_type)
+        executable_type = self._get_executable_type(executable_path)
+
         node = NodeConfig(name=name,
                           namespace=namespace(ctx_child.namespace),
                           package=package,
+                          executable_path=executable_path,
+                          executable_type=executable_type,
                           cwd=cwd,
                           args=args,
                           required=required,
@@ -320,6 +331,16 @@ class LaunchFileReader:
                           typ=node_type)
         cfg = cfg.with_node(node)
         return ctx, cfg
+
+    def _get_executable_type(self, path: str) -> ExecutableType:
+        try:
+            first_line = self._files.read(path).partition('\n')[0]
+            if 'python' in first_line:
+                return ExecutableType.PYTHON
+            else:
+                return ExecutableType.LIKELY_CPP
+        except UnicodeDecodeError:
+            return ExecutableType.LIKELY_CPP
 
     @tag('arg', ['name', 'default', 'value', 'doc'])
     def _load_arg_tag(self,
@@ -517,3 +538,61 @@ class LaunchFileReader:
         ctx, cfg = self._load_tags(ctx, cfg, list(launch))
         logger.debug(f"launch configuration: {cfg}")
         return cfg
+
+    def locate_node_binary(self,
+                           package: str,
+                           node_type: str) -> str:
+        """Attempts to locate the binary for a given node.
+
+        Returns
+        -------
+        str
+            The absolute path of the binary for that node.
+
+        Raises
+        ------
+        ValueError
+            If the given package could not be found.
+        ValueError
+            If no binary can be located for the given node.
+        """
+        path: Optional[str] = None
+        logger.debug(f'locating binary for node_type [{node_type}] '
+                     f'in package [{package}]')
+        shell = self._shell
+        files = self._files
+
+        # start by looking in libexec
+        command = ('catkin_find --first-only --libexec '
+                   f'{shlex.quote(package)} {shlex.quote(node_type)}')
+        try:
+            path = shell.check_output(command, stderr=False, text=True)
+        except subprocess.CalledProcessError:
+            pass
+
+        if not path:
+            # look in the scripts directory of the package's source directory
+            command = ('rospack find '
+                       f'{shlex.quote(package)}')
+            try:
+                package_dir = shell.check_output(command, stderr=False, text=True)
+            except subprocess.CalledProcessError:
+                raise ValueError(f"package not found: {package}")
+
+            path_in_scripts_dir = os.path.join(package_dir, 'scripts', node_type)
+            path_in_nodes_dir = os.path.join(package_dir, 'nodes', node_type)
+            if files.isfile(path_in_scripts_dir) and \
+               files.access(path_in_scripts_dir, os.X_OK):
+                path = path_in_scripts_dir
+            elif files.isfile(path_in_nodes_dir) and \
+                    files.access(path_in_nodes_dir, os.X_OK):
+                path = path_in_nodes_dir
+
+        if not path:
+            m = (f"unable to locate binary for node_type [{node_type}] "
+                 f"in package [{package}]")
+            raise ValueError(m)
+
+        logger.debug(f'located binary for node_type [{node_type}] '
+                     f'in package [{package}]: {path}')
+        return path

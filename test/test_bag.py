@@ -5,9 +5,8 @@ import tempfile
 import yaml
 import pytest
 
-from roswire import ROSWire
+from roswire import ROSWire, AppDescription
 from roswire.bag import BagReader, BagWriter
-from roswire.description import SystemDescription
 from roswire.definitions import TypeDatabase, FormatDatabase, PackageDatabase
 from roswire.definitions import Time, Duration
 
@@ -25,12 +24,12 @@ def load_mavros_type_db() -> TypeDatabase:
     return TypeDatabase.build(db_format)
 
 
-def load_mavros_description() -> SystemDescription:
+def load_mavros_description() -> AppDescription:
     fn_db_format = os.path.join(DIR_TEST,
                                 'format-databases/mavros.formats.yml')
     db_format = FormatDatabase.load(fn_db_format)
     db_type = TypeDatabase.build(db_format)
-    desc = SystemDescription(sha256='foo',
+    desc = AppDescription(sha256='foo',
                          types=db_type,
                          formats=db_format,
                          packages=PackageDatabase([]))
