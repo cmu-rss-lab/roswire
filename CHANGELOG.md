@@ -17,6 +17,8 @@
 * Added a common interface for ROS1 and ROS2 nodes.
 * Added implementation for `CatkinMake`, and added `deep_clean` to
   `CatkinInterface`.
+* Added binary location and assumed language to node descriptions in the
+  ROS1 launch file reader.
 
 # 1.4.0 (2020-06-25)
 
