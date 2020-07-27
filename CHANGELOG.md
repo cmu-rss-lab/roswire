@@ -1,6 +1,5 @@
 # 2.0.0 (XXXX-XX-XX)
 
-* Bug fix: Fixed infinite recursion in app.describe().
 * Added an experimental ROS2 API.
 * Changed file structure in various places to improve comprehension and help
   the move to add support for ROS2.
@@ -19,6 +18,7 @@
   `CatkinInterface`.
 * Added binary location and assumed language to node descriptions in the
   ROS1 launch file reader.
+
 
 # 1.4.0 (2020-06-25)
 

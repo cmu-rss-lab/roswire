@@ -49,7 +49,7 @@ class App:
         try:
             image: DockerImage = docker_client.images.get(self.image)
         except docker.errors.ImageNotFound as err:
-            raise exc.ImageNotFound(image) from err
+            raise exc.ImageNotFound(self.image) from err
         sha256: str = image.id[7:]
         object.__setattr__(self, 'sha256', sha256)
 
