@@ -184,8 +184,8 @@ class ROSLaunchManager:
             logger.debug(f'instrumenting launch config: {launch_config}')
 
             if launch_prefixes:
-                m = "individual launch prefixes are not yet implemented"
-                raise NotImplementedError(m)
+                launch_config = \
+                    launch_config.with_launch_prefixes(launch_prefixes)
 
             if node_to_remappings:
                 logger.debug('adding remappings to launch config: '

@@ -34,6 +34,8 @@
 * Added ability to provide node-specific name remappings when using `roslaunch`
   through the introduction of the `remappings` argument to the `launch`
   method.
+* Added ability to specify per-node launch prefixes when using `roslaunch`
+  via the `launch_prefixes` argument in the `launch` method.
 * Fixed mishandling of complex parameters when reading rosparam tags.
 * Added reading and writing of `env` tags for launch files.
 * Added `to_xml_string` and `to_xml_file` to `LaunchConfig`.
