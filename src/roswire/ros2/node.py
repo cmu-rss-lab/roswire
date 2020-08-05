@@ -8,6 +8,7 @@ import logger
 import dockerblade
 
 from ..interface import Node
+from ..exceptions import NodeShutdownError
 from .state import ROS2StateProbe
 
 if typing.TYPE_CHECKING:
@@ -40,10 +41,12 @@ class ROS2Node(Node):
             return True
         return False
 
-    def shutdown(self) -> None:
+    def shutdown(self, ignore_errors: bool = False) -> None:
         """Instructs this node to shutdown."""
         command = f"ros2 lifecycle set {self.name} shutdown"
         try:
             self.app_instance.shell.run(command)
         except dockerblade.exceptions.CalledProcessError:
             logger.debug(f"Unable to shutdown node {self.name}")
+            if not ignore_errors:
+                raise NodeShutdownError(self.name)

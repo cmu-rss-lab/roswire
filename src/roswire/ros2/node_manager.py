@@ -23,6 +23,10 @@ class ROS2NodeManager(NodeManager):
     app_instance: 'AppInstance' = attr.ib()
     _state_probe: 'ROS2StateProbe' = attr.ib(init=False)
 
+    def __attrs_post_init__(self) -> None:
+        app_instance = self.app_instance
+        state_probe = self._state_probe
+
     @classmethod
     def for_app_instance(cls,
                          app_instance: 'AppInstance'
