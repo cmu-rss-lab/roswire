@@ -1,0 +1,9 @@
+============================= test session starts ==============================
+platform linux -- Python 3.8.2, pytest-5.4.3, py-1.9.0, pluggy-0.13.1 -- /root/.local/share/virtualenvs/root-BuDEOXnJ/bin/python
+cachedir: .pytest_cache
+rootdir: /root/roswire, inifile: setup.cfg
+collecting ... collected 1 item
+
+test/test_state.py::test_state_publishers[turtlebot3-ros2] PASSED        [100%]
+
+============================== 1 passed in 12.15s ==============================

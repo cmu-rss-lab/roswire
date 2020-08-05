@@ -30,14 +30,16 @@ class ROS2StateProbe:
         node_to_state: Dict[Optional[str], Dict[str, List[str]]] = {'pub': {},
                                                                     'sub': {},
                                                                     'serv': {}}
-        command = "rosnode list"
+        command = "ros2 node list"
         try:
-            output = shell.check_output(command, text=True)
+            output = shell.run(command, text=True).output
         except dockerblade.exceptions.CalledProcessError:
             logger.debug("Unable to retrieve rosnode list from command line")
             raise
         node_names = output.split('\r\n')
         for node_name in node_names:
+            if node_name == '':
+                continue
             command_info = f"ros2 node info '{node_name}'"
             mode: Optional[str] = None
             try:
