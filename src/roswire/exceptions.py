@@ -157,6 +157,6 @@ class SourceNotFoundError(ValueError, ROSWireException):
 
 class NodeShutdownError(ROSWireException):
     """ROS2 node could not be killed"""
-    def __init__(self, node: str):
+    def __init__(self, node: str) -> None:
         m = f"could not shut down node: {node}"
         super().__init__(m)

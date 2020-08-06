@@ -42,7 +42,13 @@ class ROS2Node(Node):
         return False
 
     def shutdown(self, ignore_errors: bool = False) -> None:
-        """Instructs this node to shutdown."""
+        """Instructs this node to shutdown.
+
+        Raises
+        ------
+        NodeShutdownError
+            If the node is unable to be killed and ignore_errors is False.
+        """
         command = f"ros2 lifecycle set {self.name} shutdown"
         try:
             self.app_instance.shell.run(command)

@@ -24,8 +24,8 @@ class ROS2NodeManager(NodeManager):
     _state_probe: 'ROS2StateProbe' = attr.ib(init=False)
 
     def __attrs_post_init__(self) -> None:
-        app_instance = self.app_instance
-        state_probe = self._state_probe
+        _state_probe = ROS2StateProbe.for_app_instance(self._state_probe)
+        object.__setattr__(self, 'state_probe', _state_probe)
 
     @classmethod
     def for_app_instance(cls,
