@@ -23,7 +23,7 @@ R_VAL = r".+"
 R_COMMENT = r"(#.*)?"
 R_FIELD = re.compile(f"^\s*({R_TYPE})\s+({R_NAME})\s*{R_COMMENT}$")
 R_STRING_CONSTANT = re.compile("^\s*string\s+(\w+)\s*=\s*(.+)\s*$")
-R_OTHER_CONSTANT = re.compile("^\s*(\w+)\s+(\w+)\s*=?\s*([^\s]+).*$")
+R_OTHER_CONSTANT = re.compile("^\s*(\w+)\s+(\w+)\s*=\s*([^\s]+).*$")
 R_BLANK = re.compile(f"^\s*{R_COMMENT}$")
 
 ConstantValue = Union[str, int, float]
@@ -208,7 +208,7 @@ class MsgFormat:
         name_const: str
         fields: List[Field] = []
         constants: List[Constant] = []
-        
+
         for line in text.split('\n'):
             m_blank = R_BLANK.match(line)
             m_string_constant = R_STRING_CONSTANT.match(line)
