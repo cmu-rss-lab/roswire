@@ -32,7 +32,7 @@ class ROS2StateProbe:
                                                                     'serv': {}}
         command = "ros2 node list"
         try:
-            output = shell.run(command, text=True).output
+            output = shell.check_output(command, text=True)
         except dockerblade.exceptions.CalledProcessError:
             logger.debug("Unable to retrieve rosnode list from command line")
             raise

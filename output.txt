@@ -1,0 +1,13 @@
+============================= test session starts ==============================
+platform linux -- Python 3.8.2, pytest-5.4.3, py-1.9.0, pluggy-0.13.1 -- /root/.local/share/virtualenvs/root-BuDEOXnJ/bin/python
+cachedir: .pytest_cache
+rootdir: /root/roswire, inifile: setup.cfg, testpaths: test
+collecting ... collected 52 items
+
+test/test_bag.py::test_from_file SKIPPED                                 [  1%]
+test/test_bag.py::test_bag_reader_time 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! KeyboardInterrupt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/root/.local/share/virtualenvs/root-BuDEOXnJ/lib/python3.8/site-packages/loguru/_logger.py:1875: KeyboardInterrupt
+(to show a full traceback on KeyboardInterrupt use --full-trace)
+============================== 1 skipped in 1.11s ==============================
