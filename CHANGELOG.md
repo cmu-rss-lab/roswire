@@ -11,6 +11,13 @@
   `AppDescription`, respectively, and added an `Application` class for
   specifying ROS applications.
 * Fixed bug that caused args to be incorrectly handled in eval tags (#378).
+* Added a partial implementation of ROS2LaunchManager for launching ROS2 
+  applications (fixes #377)
+* Added a common interface for ROS1 and ROS2 nodes.
+* Added implementation for `CatkinMake`, and added `deep_clean` to
+  `CatkinInterface`.
+* Added binary location and assumed language to node descriptions in the
+  ROS1 launch file reader.
 
 
 # 1.4.0 (2020-06-25)
@@ -27,6 +34,8 @@
 * Added ability to provide node-specific name remappings when using `roslaunch`
   through the introduction of the `remappings` argument to the `launch`
   method.
+* Added ability to specify per-node launch prefixes when using `roslaunch`
+  via the `launch_prefixes` argument in the `launch` method.
 * Fixed mishandling of complex parameters when reading rosparam tags.
 * Added reading and writing of `env` tags for launch files.
 * Added `to_xml_string` and `to_xml_file` to `LaunchConfig`.

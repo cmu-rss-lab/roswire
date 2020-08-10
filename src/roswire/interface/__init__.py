@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
-from .manager import NodeManager
 from .node import Node
+from .node_manager import NodeManager

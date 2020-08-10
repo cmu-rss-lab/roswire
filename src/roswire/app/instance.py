@@ -96,7 +96,9 @@ class AppInstance:
         CatkinTools
             An interface to the given workspace.
         """
-        return CatkinTools(shell=self.shell, directory=directory)
+        return CatkinTools(shell=self.shell,
+                           directory=directory,
+                           files=self.files)
 
     def catkin_make(self, directory: str) -> CatkinMake:
         """Returns an interface to a catkin_make workspace.
@@ -111,7 +113,9 @@ class AppInstance:
         CatkinMake
             An interface to the given workspace.
         """
-        return CatkinMake(shell=self.shell, directory=directory)
+        return CatkinMake(shell=self.shell,
+                          directory=directory,
+                          files=self.files)
 
     @contextlib.contextmanager
     def roscore(self, port: int = 11311) -> Iterator[ROSCore]:

@@ -11,8 +11,9 @@ import dockerblade
 
 from ..app.description import AppDescription
 from ..exceptions import ROSWireException
+from ..interface import NodeManager
 from ..parameters import ParameterServer
-from ..node import NodeManager
+from ..ros1 import ROS1NodeManager
 from ..service import ServiceManager
 from .bag import BagRecorder, BagPlayer
 from .roslaunch import ROSLaunchManager
@@ -62,9 +63,9 @@ class ROSCore:
         time.sleep(5)  # FIXME #1
         self.__parameters = ParameterServer(self.__connection)
         self.__nodes: NodeManager = \
-            NodeManager(self.__ip_address,
-                        self.__connection,
-                        self.__shell)
+            ROS1NodeManager(self.__ip_address,
+                            self.__connection,
+                            self.__shell)
         self.__services: ServiceManager = \
             ServiceManager(self.__description,
                            self.__ip_address,
