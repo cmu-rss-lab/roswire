@@ -116,8 +116,8 @@ class ROS2LaunchManager:
         app_description = self._app_instance.app.describe()
         package_path = app_description.packages[package].path
         filename = os.path.join(package_path, 'launch', filename_original)
-        #if not self._app_instance.files.isfile(filename):
-        #    raise exc.LaunchFileNotFound(path=filename)
+        if not self._app_instance.files.isfile(filename):
+            raise exc.LaunchFileNotFound(path=filename)
         logger.debug('determined location of launch file'
                      f' [{filename_original}] in package [{package}]: '
                      f'{filename}')
@@ -183,8 +183,7 @@ class ROS2LaunchManager:
         if prefix:
             cmd = [prefix] + cmd
         cmd_str = ' '.join(cmd)
-        #popen = shell.popen(cmd_str, stdout=True, stderr=True)
-        popen = shell.popen("ros2 launch turtlebot3_cartographer cartographer.launch.py", stdout=True, stderr=True)
+        popen = shell.popen(cmd_str, stdout=True, stderr=True)
         return ROSLaunchController(filename=filename,
                                    popen=popen)
 
