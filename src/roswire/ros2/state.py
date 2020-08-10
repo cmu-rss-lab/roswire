@@ -45,7 +45,7 @@ class ROS2StateProbe:
             try:
                 output = shell.check_output(command_info, text=True)
             except dockerblade.exceptions.CalledProcessError:
-                logger.debug(f"Unable to retrieve {command_info}")
+                logger.debug(f"Unable to retrieve '{command_info}'")
                 raise
             output = output.replace(' ', '')
             lines = output.split('\r\n')

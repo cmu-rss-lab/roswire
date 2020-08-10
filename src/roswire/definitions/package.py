@@ -109,7 +109,7 @@ class PackageDatabase(Mapping[str, Package]):
             package_dirs = []
             for p in all_packages:
                 if files.exists('/opt/ros/dashing/share/' + p):
-                    package_dirs.append('/opt/ros/dashing/share/' + p)
+                    package_dirs.append('/ros_ws/src' + p)
             paths.extend(package_dirs)
         else:
             path_str = shell.environ('ROS_PACKAGE_PATH')
