@@ -107,21 +107,19 @@ class ROS2LaunchManager:
             If the given package could not be found.
         LaunchFileNotFound
             If the given launch file could not be found in the package.
-        """
+       """
+        paths = self._app_instance.files.find('/ros_ws/src', filename)
         if not package:
-            assert os.path.isabs(filename)
-            return filename
-
-        filename_original = filename
-        app_description = self._app_instance.app.describe()
-        package_path = app_description.packages[package].path
-        filename = os.path.join(package_path, 'launch', filename_original)
-        if not self._app_instance.files.isfile(filename):
-            raise exc.LaunchFileNotFound(path=filename)
-        logger.debug('determined location of launch file'
-                     f' [{filename_original}] in package [{package}]: '
-                     f'{filename}')
-        return filename
+                assert os.path.isabs(filename)
+                return filename
+        else:
+            for path in paths:
+                if package in path:
+                    logger.debug('determined location of launch file'
+                                 f' [{filename}] in package [{package}]: '
+                                 f'{path}')
+                    return path
+        raise exc.LaunchFileNotFound(path=filename)
 
     def launch(self,
                filename: str,
@@ -184,7 +182,6 @@ class ROS2LaunchManager:
             cmd = [prefix] + cmd
         cmd_str = ' '.join(cmd)
         popen = shell.popen(cmd_str, stdout=True, stderr=True)
-
         return ROSLaunchController(filename=filename,
                                    popen=popen)
 

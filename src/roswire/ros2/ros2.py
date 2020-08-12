@@ -21,24 +21,23 @@ class ROS2:
     app_instance: 'AppInstance'
     nodes: ROS2NodeManager = attr.ib(init=False)
     services: ROS2ServiceManager = attr.ib(init=False)
-    _state_probe: ROS2StateProbe = attr.ib(init=False)
     launch: ROS2LaunchManager = attr.ib(init=False)
 
     def __attrs_post_init__(self) -> None:
         nodes = ROS2NodeManager.for_app_instance(self.app_instance)
         services = ROS2ServiceManager.for_app_instance(self.app_instance)
-        state_probe = ROS2StateProbe.for_app_instance(self.app_instance)
         launch = ROS2LaunchManager.for_app_instance(self.app_instance)
         object.__setattr__(self, 'nodes', nodes)
         object.__setattr__(self, 'services', services)
-        object.__setattr__(self, '_state_probe', state_probe)
         object.__setattr__(self, 'launch', launch)
 
     @classmethod
     def for_app_instance(cls, app_instance: 'AppInstance') -> 'ROS2':
         return ROS2(app_instance=app_instance)
 
-    # TODO add launch manager
+    @property
+    def launch(self) -> ROS2LaunchManager:
+        return self.launch
 
     @property
     def state(self) -> SystemState:

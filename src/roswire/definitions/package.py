@@ -100,18 +100,29 @@ class PackageDatabase(Mapping[str, Package]):
               files: dockerblade.FileSystem
               ) -> List[str]:
         """Parses :code:`ROS_PACKAGE_PATH` for a given shell."""
-        path_str = shell.environ('ROS_PACKAGE_PATH')
-        package_paths: List[str] = path_str.strip().split(':')
         paths: List[str] = []
-        for path in package_paths:
-            try:
-                all_packages = files.find(path, 'package.xml')
-            except dockerblade.exceptions.DockerBladeException:
-                logger.warning('unable to find directory in ROS_PACKAGE_PATH:'
-                               f' {path}')
-                continue
-            package_dirs = [os.path.dirname(p) for p in all_packages]
+        if files.exists('/opt/ros/dashing/'):
+            package_names = '/opt/ros/dashing/share/' \
+                            + 'ament_index/resource_index' \
+                            + '/packages'
+            all_packages = files.listdir(package_names)
+            package_dirs = []
+            for p in all_packages:
+                if files.exists('/opt/ros/dashing/share/' + p):
+                    package_dirs.append('/opt/ros/dashing/share/' + p)
             paths.extend(package_dirs)
+        else:
+            path_str = shell.environ('ROS_PACKAGE_PATH')
+            package_paths: List[str] = path_str.strip().split(':')
+            for path in package_paths:
+                try:
+                    all_packages = files.find(path, 'package.xml')
+                except dockerblade.exceptions.DockerBladeException:
+                    m = f'unable to find directory in ROS_PACKAGE_PATH: {path}'
+                    logger.warning(m)
+                    continue
+                package_dirs = [os.path.dirname(p) for p in all_packages]
+                paths.extend(package_dirs)
         return paths
 
     @staticmethod
