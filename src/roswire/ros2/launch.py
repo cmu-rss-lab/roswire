@@ -3,7 +3,6 @@ __all__ = ('ROS2LaunchManager',)
 
 from typing import Collection, List, Mapping, Optional, Sequence, Tuple, Union
 import os
-import shlex
 import typing
 
 from loguru import logger
@@ -110,8 +109,8 @@ class ROS2LaunchManager:
        """
         paths = self._app_instance.files.find('/ros_ws/src', filename)
         if not package:
-                assert os.path.isabs(filename)
-                return filename
+            assert os.path.isabs(filename)
+            return filename
         else:
             for path in paths:
                 if package in path:
@@ -169,13 +168,14 @@ class ROS2LaunchManager:
             args = {}
         if not launch_prefixes:
             launch_prefixes = {}
-        filename = self.locate(filename, package=package)
 
         if node_to_remappings or launch_prefixes:
             m = "Requires self.read: not yet implemented"
             raise NotImplementedError(m)
-
-        cmd = ['ros2 launch', shlex.quote(filename)]
+        if package:
+            cmd = ['ros2 launch', (package + ' ' + filename)]
+        else:
+            raise NotImplementedError("need package: not yet implemented")
         launch_args: List[str] = [f'{arg}:={val}' for arg, val in args.items()]
         cmd += launch_args
         if prefix:
