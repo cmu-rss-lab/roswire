@@ -65,7 +65,7 @@ class ROS2StateProbe:
                 if mode:
                     name = line.partition(':')[0]
                     if name in node_to_state[mode]:
-                        node_to_state[mode][name].append(node_name)
+                        node_to_state[mode][name].add(node_name)
                     else:
                         node_to_state[mode][name] = [node_name]
 

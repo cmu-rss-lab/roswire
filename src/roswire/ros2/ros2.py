@@ -39,9 +39,5 @@ class ROS2:
         return ROS2(app_instance=app_instance)
 
     @property
-    def launch_manager(self) -> ROS2LaunchManager:
-        return self.launch
-
-    @property
     def state(self) -> SystemState:
         return self._state_probe.probe()

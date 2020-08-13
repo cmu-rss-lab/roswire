@@ -7,9 +7,9 @@ import dockerblade
 
 @pytest.mark.parametrize('sut', ['turtlebot3-ros2'], indirect=True)
 def test_state_publishers(sut):
-    sut.ros2.launch_manager.launch('simple.launch.py', package='launch')
+    sut.ros2.launch.launch('simple.launch.py', package='launch')
     actual_state = sut.ros2.state
-    actual_publishers = {pub for pub in actual_state.publishers}
+    actual_publishers = set(actual_state.publishers)
     expected_publishers = set({'/constraint_list',
                                 '/map',
                                 '/parameter_events',
@@ -25,7 +25,7 @@ def test_state_publishers(sut):
 def test_state_subscribers(sut):
     sut.ros2.launch_manager.launch('simple.launch.py', package='launch')
     actual_state = sut.ros2.state
-    actual_subscribers = {sub for sub in actual_state.subscribers}
+    actual_subscribers = set(actual_state.subscribers)
     print(actual_subscribers)
     expected_subscribers = set({'/odom',
                                 '/scan',
@@ -39,7 +39,7 @@ def test_state_subscribers(sut):
 def test_state_services(sut):
     sut.ros2.launch_manager.launch('simple.launch.py', package='launch')
     actual_state = sut.ros2.state
-    actual_services = {serv for serv in actual_state.services}
+    actual_services = set(actual_state.services)
     print(actual_services)
     expected_services = set({'/cartographer_node/describe_parameters',
                              '/cartographer_node/get_parameter_types',
