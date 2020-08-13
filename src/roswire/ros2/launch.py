@@ -164,6 +164,7 @@ class ROS2LaunchManager:
             If the given launch file could not be found in the package.
         """
         shell = self._app_instance.shell
+        filename_without_path = os.path.basename(filename)
         if not args:
             args = {}
         if not launch_prefixes:
@@ -173,9 +174,10 @@ class ROS2LaunchManager:
             m = "Requires self.read: not yet implemented"
             raise NotImplementedError(m)
         if package:
-            cmd = ['ros2 launch', (package + ' ' + filename)]
+            cmd = ['ros2 launch', (package + ' ' + filename_without_path)]
         else:
-            raise NotImplementedError("need package: not yet implemented")
+            m = "Not yet implemented when package is None"
+            raise NotImplementedError(m)
         launch_args: List[str] = [f'{arg}:={val}' for arg, val in args.items()]
         cmd += launch_args
         if prefix:
