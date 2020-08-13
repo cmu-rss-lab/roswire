@@ -107,7 +107,7 @@ class ROS2LaunchManager:
         LaunchFileNotFound
             If the given launch file could not be found in the package.
        """
-        paths = self._app_instance.files.find('/ros_ws/src', filename)
+        paths = self._app_instance.files.find('/ros_ws/install/', filename)
         if not package:
             assert os.path.isabs(filename)
             return filename
