@@ -3,7 +3,7 @@ __all__ = ('ROS2StateProbe',)
 
 import attr
 import typing
-from typing import Dict, List, Optional
+from typing import Dict, Set, Optional
 
 import dockerblade
 from loguru import logger
@@ -27,9 +27,9 @@ class ROS2StateProbe:
     def probe(self) -> SystemState:
         """Obtains the instantaneous state of the associated ROS system."""
         shell = self._app_instance.shell
-        node_to_state: Dict[Optional[str], Dict[str, List[str]]] = {'pub': {},
-                                                                    'sub': {},
-                                                                    'serv': {}}
+        node_to_state: Dict[Optional[str], Dict[str, Set[str]]] = {'pub': {},
+                                                                   'sub': {},
+                                                                   'serv': {}}
         command = "ros2 node list"
         try:
             output = shell.check_output(command, text=True)
@@ -67,7 +67,7 @@ class ROS2StateProbe:
                     if name in node_to_state[mode]:
                         node_to_state[mode][name].add(node_name)
                     else:
-                        node_to_state[mode][name] = [node_name]
+                        node_to_state[mode][name] = {node_name}
 
         state = SystemState(publishers=node_to_state['pub'],
                             subscribers=node_to_state['sub'],
