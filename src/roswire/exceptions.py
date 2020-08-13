@@ -153,8 +153,3 @@ class SourceNotFoundError(ValueError, ROSWireException):
 
     def __str__(self) -> str:
         return f"source not found in container: {self.source}"
-
-class NodeShutdownError(ROSWireException):
-    """ROS2 node is unable to shut down"""
-    def __init__(self, name: str):
-        super().__init__(f"Unable to shutdown node {name}")

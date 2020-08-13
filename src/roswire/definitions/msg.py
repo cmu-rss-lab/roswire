@@ -208,7 +208,7 @@ class MsgFormat:
         name_const: str
         fields: List[Field] = []
         constants: List[Constant] = []
-        
+
         for line in text.split('\n'):
             m_blank = R_BLANK.match(line)
             m_string_constant = R_STRING_CONSTANT.match(line)
