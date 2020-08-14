@@ -3,6 +3,7 @@ __all__ = ('Package', 'PackageDatabase')
 
 from typing import Tuple, List, Dict, Any, Iterator, Collection, Mapping
 import os
+import shlex
 
 from loguru import logger
 import attr
@@ -120,23 +121,20 @@ class PackageDatabase(Mapping[str, Package]):
                     ) -> List[str]:
         """Returns paths of packages"""
         paths: List[str] = []
-        command = "ros2 pkg list"
         try:
-            package_str = shell.check_output(command, text=True)
+            package_str = shell.check_output("ros2 pkg list", text=True)
         except dockerblade.exceptions.CalledProcessError:
-            logger.debug(f'unable to find packages using {command}')
+            logger.debug(f'unable to find packages using ros2 pkg list')
             raise
         all_packages = package_str.split('\r\n')
-        package_dirs: List[str] = []
         for p in all_packages:
-            command = 'ros2 pkg prefix ' + p
+            command = 'ros2 pkg prefix ' + shlex.quote(p)
             try:
                 package_path = shell.check_output(command, text=True)
             except dockerblade.exceptions.CalledProcessError:
                 logger.debug(f'unable to find package {p}')
                 raise
-            package_dirs.append(package_path)
-        paths.extend(package_dirs)
+            paths.append(package_path)
         return paths
 
     @classmethod
