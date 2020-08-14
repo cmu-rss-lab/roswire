@@ -120,13 +120,11 @@ class PackageDatabase(Mapping[str, Package]):
                     ) -> List[str]:
         """Returns paths of packages"""
         paths: List[str] = []
-        distro = shell.environ('ROS_DISTRO')
-        package_names = '/opt/ros/' + distro + '/share' \
-                        '/ament_index/resource_index/packages'
-        all_packages = files.listdir(package_names)
+        package_str = shell.check_output('ros2 pkg list')
+        all_packages = package_str.split('\r\n')
         package_dirs = []
         for p in all_packages:
-            package_dirs.append('/opt/ros/' + distro + '/share/' + p)
+            package_dirs.append(shell.check_output('ros2 pkg prefix ' + p))
         paths.extend(package_dirs)
         return paths
 
