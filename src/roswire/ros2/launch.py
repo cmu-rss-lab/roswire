@@ -7,6 +7,7 @@ import typing
 
 from loguru import logger
 import attr
+import dockerblade
 
 from ..proxy.roslaunch.config import LaunchConfig
 from ..proxy.roslaunch.controller import ROSLaunchController
@@ -107,11 +108,19 @@ class ROS2LaunchManager:
         LaunchFileNotFound
             If the given launch file could not be found in the package.
        """
-        paths = self._app_instance.files.find('/ros_ws/src/', filename)
         if not package:
             assert os.path.isabs(filename)
             return filename
         else:
+            command = 'ros2 package prefix ' + package
+            try:
+                shell = self._app_instance.shell
+                package_location = shell.check_output(command, text=True)
+            except dockerblade.exceptions.CalledProcessError:
+                logger.debug('unable to find location of package'
+                             f'using {command}')
+                raise
+            paths = self._app_instance.files.find(package_location, filename)
             for path in paths:
                 if package in path:
                     logger.debug('determined location of launch file'
