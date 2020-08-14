@@ -120,11 +120,22 @@ class PackageDatabase(Mapping[str, Package]):
                     ) -> List[str]:
         """Returns paths of packages"""
         paths: List[str] = []
-        package_str = shell.check_output('ros2 pkg list')
+        command = "ros2 pkg list"
+        try:
+            package_str = shell.check_output(command, text=True)
+        except dockerblade.exceptions.CalledProcessError:
+            logger.debug(f'unable to find packages using {command}')
+            raise
         all_packages = package_str.split('\r\n')
-        package_dirs = []
+        package_dirs: List[str] = []
         for p in all_packages:
-            package_dirs.append(shell.check_output('ros2 pkg prefix ' + p))
+            command = 'ros2 pkg prefix ' + p
+            try:
+                package_path = shell.check_output(command, text=True)
+            except dockerblade.exceptions.CalledProcessError:
+                logger.debug(f'unable to find package {p}')
+                raise
+            package_dirs.append(package_path)
         paths.extend(package_dirs)
         return paths
 
