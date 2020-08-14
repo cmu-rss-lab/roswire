@@ -17,7 +17,7 @@ if typing.TYPE_CHECKING:
 @attr.s(frozen=True, auto_attribs=True, slots=True)
 class ROS2NodeManager(Mapping[str, ROS2Node]):
     """Provides an interface for interacting with ROS2 nodes."""
-    app_instance: 'AppInstance' = attr.ib()
+    app_instance: 'AppInstance'
 
     @classmethod
     def for_app_instance(cls,
