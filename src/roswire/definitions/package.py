@@ -124,7 +124,7 @@ class PackageDatabase(Mapping[str, Package]):
         try:
             package_str = shell.check_output("ros2 pkg list", text=True)
         except dockerblade.exceptions.CalledProcessError:
-            logger.debug(f'unable to find packages using ros2 pkg list')
+            logger.debug('unable to find packages using ros2 pkg list')
             raise
         all_packages = package_str.split('\r\n')
         for p in all_packages:
