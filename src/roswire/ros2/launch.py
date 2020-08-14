@@ -4,6 +4,7 @@ __all__ = ('ROS2LaunchManager',)
 from typing import Collection, List, Mapping, Optional, Sequence, Tuple, Union
 import os
 import typing
+import shlex
 
 from loguru import logger
 import attr
@@ -112,7 +113,7 @@ class ROS2LaunchManager:
             assert os.path.isabs(filename)
             return filename
         else:
-            command = 'ros2 package prefix ' + package
+            command = 'ros2 package prefix ' + shlex.quote(package)
             try:
                 shell = self._app_instance.shell
                 package_location = shell.check_output(command, text=True)
