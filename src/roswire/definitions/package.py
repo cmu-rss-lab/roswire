@@ -130,15 +130,17 @@ class PackageDatabase(Mapping[str, Package]):
         paths.extend(package_dirs)
         return paths
 
-    @staticmethod
-    def paths(shell: dockerblade.Shell,
+    @classmethod
+    def paths(cls,
+              shell: dockerblade.Shell,
               files: dockerblade.FileSystem
               ) -> List[str]:
         """Parses :code:`ROS_PACKAGE_PATH` for a given shell."""
         distro = shell.environ('ROS_DISTRO')
-        if distro == 'foxy' or distro == 'eloquent' or distro == 'dashing':
-            return PackageDatabase._paths_ros2(shell, files)
-        return PackageDatabase._paths_ros1(shell, files)
+        ROS2_DISTROS = {'dashing', 'eloquent', 'foxy'}
+        if distro in ROS2_DISTROS:
+            return cls._paths_ros2(shell, files)
+        return cls._paths_ros1(shell, files)
 
     @staticmethod
     def from_paths(files: dockerblade.FileSystem,
