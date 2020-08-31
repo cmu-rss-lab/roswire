@@ -7,6 +7,7 @@ import attr
 
 from .node_manager import ROS2NodeManager
 from .service_manager import ROS2ServiceManager
+from .state import ROS2StateProbe
 from .launch import ROS2LaunchManager
 
 if typing.TYPE_CHECKING:
@@ -24,9 +25,11 @@ class ROS2:
     def __attrs_post_init__(self) -> None:
         nodes = ROS2NodeManager.for_app_instance(self.app_instance)
         services = ROS2ServiceManager.for_app_instance(self.app_instance)
+        state_probe: ROS2StateProbe = attr.ib(init=False)
         launch = ROS2LaunchManager.for_app_instance(self.app_instance)
         object.__setattr__(self, 'nodes', nodes)
         object.__setattr__(self, 'services', services)
+        object.__setattr__(self, '_state_probe', state_probe)
         object.__setattr__(self, 'launch', launch)
 
     @classmethod
