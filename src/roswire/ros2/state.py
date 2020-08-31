@@ -49,7 +49,7 @@ class ROS2StateProbe:
                 raise
             output = output.replace(' ', '')
             lines = output.split('\r\n')
-            for line in lines:
+            for line in lines: #Uses mode to parse line and add info to appropriate set
                 if "Publishers:" in line:
                     mode = 'pub'
                     continue
