@@ -48,8 +48,9 @@ class ROS2StateProbe:
                 logger.debug(f"Unable to retrieve '{command_info}'")
                 raise
             output = output.replace(' ', '')
+            # Uses mode to parse line and add info to appropriate set
             lines = output.split('\r\n')
-            for line in lines: #Uses mode to parse line and add info to appropriate set
+            for line in lines:
                 if "Publishers:" in line:
                     mode = 'pub'
                     continue
