@@ -107,7 +107,7 @@ class ROS2LaunchManager:
             If the given package could not be found.
         LaunchFileNotFound
             If the given launch file could not be found in the package.
-        """
+       """
         if not package:
             assert os.path.isabs(filename)
             return filename
@@ -184,7 +184,6 @@ class ROS2LaunchManager:
             cmd = [prefix] + cmd
         cmd_str = ' '.join(cmd)
         popen = shell.popen(cmd_str, stdout=True, stderr=True)
-
         return ROSLaunchController(filename=filename,
                                    popen=popen)
 

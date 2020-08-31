@@ -38,8 +38,6 @@ class ROS2:
     def for_app_instance(cls, app_instance: 'AppInstance') -> 'ROS2':
         return ROS2(app_instance=app_instance)
 
-    # TODO add launch manager
-
     @property
     def state(self) -> SystemState:
         return self._state_probe.probe()
