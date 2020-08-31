@@ -3,6 +3,7 @@ __all__ = ('Package', 'PackageDatabase')
 
 from typing import Tuple, List, Dict, Any, Iterator, Collection, Mapping
 import os
+import shlex
 
 from loguru import logger
 import attr
@@ -96,13 +97,13 @@ class PackageDatabase(Mapping[str, Package]):
         and `db['foo'] = bar`).
     """
     @staticmethod
-    def paths(shell: dockerblade.Shell,
-              files: dockerblade.FileSystem
-              ) -> List[str]:
+    def _paths_ros1(shell: dockerblade.Shell,
+                    files: dockerblade.FileSystem
+                    ) -> List[str]:
         """Parses :code:`ROS_PACKAGE_PATH` for a given shell."""
+        paths: List[str] = []
         path_str = shell.environ('ROS_PACKAGE_PATH')
         package_paths: List[str] = path_str.strip().split(':')
-        paths: List[str] = []
         for path in package_paths:
             try:
                 all_packages = files.find(path, 'package.xml')
@@ -113,6 +114,40 @@ class PackageDatabase(Mapping[str, Package]):
             package_dirs = [os.path.dirname(p) for p in all_packages]
             paths.extend(package_dirs)
         return paths
+
+    @staticmethod
+    def _paths_ros2(shell: dockerblade.Shell,
+                    files: dockerblade.FileSystem
+                    ) -> List[str]:
+        """Returns paths of packages"""
+        paths: List[str] = []
+        try:
+            package_str = shell.check_output("ros2 pkg list", text=True)
+        except dockerblade.exceptions.CalledProcessError:
+            logger.debug('unable to find packages using ros2 pkg list')
+            raise
+        all_packages = package_str.split('\r\n')
+        for p in all_packages:
+            command = 'ros2 pkg prefix ' + shlex.quote(p)
+            try:
+                package_path = shell.check_output(command, text=True)
+            except dockerblade.exceptions.CalledProcessError:
+                logger.debug(f'unable to find package {p}')
+                raise
+            paths.append(package_path)
+        return paths
+
+    @classmethod
+    def paths(cls,
+              shell: dockerblade.Shell,
+              files: dockerblade.FileSystem
+              ) -> List[str]:
+        """Parses :code:`ROS_PACKAGE_PATH` for a given shell."""
+        distro = shell.environ('ROS_DISTRO')
+        ROS2_DISTROS = {'dashing', 'eloquent', 'foxy'}
+        if distro in ROS2_DISTROS:
+            return cls._paths_ros2(shell, files)
+        return cls._paths_ros1(shell, files)
 
     @staticmethod
     def from_paths(files: dockerblade.FileSystem,

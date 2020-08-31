@@ -1,6 +1,5 @@
 # 2.0.0 (XXXX-XX-XX)
 
-* Bug fix: Fixed infinite recursion in app.describe().
 * Added an experimental ROS2 API.
 * Changed file structure in various places to improve comprehension and help
   the move to add support for ROS2.
@@ -15,6 +14,11 @@
 * Added a partial implementation of ROS2LaunchManager for launching ROS2 
   applications (fixes #377)
 * Added a common interface for ROS1 and ROS2 nodes.
+* Added implementation for `CatkinMake`, and added `deep_clean` to
+  `CatkinInterface`.
+* Added binary location and assumed language to node descriptions in the
+  ROS1 launch file reader.
+
 
 # 1.4.0 (2020-06-25)
 
@@ -30,6 +34,8 @@
 * Added ability to provide node-specific name remappings when using `roslaunch`
   through the introduction of the `remappings` argument to the `launch`
   method.
+* Added ability to specify per-node launch prefixes when using `roslaunch`
+  via the `launch_prefixes` argument in the `launch` method.
 * Fixed mishandling of complex parameters when reading rosparam tags.
 * Added reading and writing of `env` tags for launch files.
 * Added `to_xml_string` and `to_xml_file` to `LaunchConfig`.

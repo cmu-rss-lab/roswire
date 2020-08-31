@@ -3,5 +3,5 @@
 This module provides data structures for representing roslaunch configurations.
 """
 from .launch import LaunchConfig
-from .node import NodeConfig
+from .node import NodeConfig, ExecutableType
 from .parameter import Parameter
