@@ -114,8 +114,8 @@ class ROS2LaunchManager:
             return filename
         else:
             command = 'ros2 package prefix ' + shlex.quote(package)
+            shell = self._app_instance.shell
             try:
-                shell = self._app_instance.shell
                 package_location = shell.check_output(command, text=True)
             except dockerblade.exceptions.CalledProcessError:
                 logger.debug('unable to find location of package'
