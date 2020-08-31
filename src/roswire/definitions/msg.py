@@ -17,13 +17,13 @@ from .base import is_builtin, Time, Duration
 from .decode import is_simple
 from .. import exceptions as exc
 
-R_TYPE = r"[a-zA-Z0-9_/]+(?:\[\d*\])?"
+R_TYPE = r"[a-zA-Z0-9_/]+(?:\[(?:<=)?\d*\])?"
 R_NAME = r"[a-zA-Z0-9_/]+"
 R_VAL = r".+"
 R_COMMENT = r"(#.*)?"
 R_FIELD = re.compile(f"^\s*({R_TYPE})\s+({R_NAME})\s*{R_COMMENT}$")
 R_STRING_CONSTANT = re.compile("^\s*string\s+(\w+)\s*=\s*(.+)\s*$")
-R_OTHER_CONSTANT = re.compile("^\s*(\w+)\s+(\w+)\s*=\s*([^\s]+).*$")
+R_OTHER_CONSTANT = re.compile("^\s*(\w+)\s+(\w+)\s*=?\s*([^\s]+).*$")
 R_BLANK = re.compile(f"^\s*{R_COMMENT}$")
 
 ConstantValue = Union[str, int, float]
@@ -88,6 +88,8 @@ class Field:
         sz = self.typ.partition('[')[2].partition(']')[0]
         if sz == '':
             return None
+        elif sz.startswith('<='):
+            sz = sz[2:]
         return int(sz)
 
     @property
