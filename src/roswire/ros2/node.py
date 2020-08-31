@@ -28,6 +28,10 @@ class ROS2Node(Node):
     name: str = attr.ib()
     _state_probe: 'ROS2StateProbe' = attr.ib(init=False)
 
+    def __attrs_post_init__(self) -> None:
+        state_probe = ROS2StateProbe.for_app_instance(self.app_instance)
+        object.__setattr__(self, '_state_probe', state_probe)
+
     @classmethod
     def for_app_instance_and_name(cls,
                                   app_instance: 'AppInstance',
