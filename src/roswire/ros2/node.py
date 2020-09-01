@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 __all__ = ('ROS2Node',)
 
-from loguru import logger
-
 import typing
 import attr
+
+from loguru import logger
 import dockerblade
 
 from ..interface import Node
