@@ -3,7 +3,6 @@ __all__ = ('ROS2LaunchManager',)
 
 from typing import Collection, List, Mapping, Optional, Sequence, Tuple, Union
 import os
-import typing
 import shlex
 
 from loguru import logger
