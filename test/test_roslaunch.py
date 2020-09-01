@@ -72,7 +72,7 @@ def test_locate_with_package_ros2(sut):
 @pytest.mark.parametrize('sut', ['turtlebot3-ros2'], indirect=True)
 def test_locate_without_package_ros2(sut):
     actual_path = sut.ros2.launch.locate('/ros_ws/src/turtlebot3/turtlebot3_cartographer/launch/cartographer.launch.py')
-    expected_path = expected_path = '/ros_ws/src/turtlebot3/turtlebot3_cartographer/launch/cartographer.launch.py'
+    expected_path = '/ros_ws/src/turtlebot3/turtlebot3_cartographer/launch/cartographer.launch.py'
     assert actual_path == expected_path
 
 
