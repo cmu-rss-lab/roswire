@@ -8,7 +8,6 @@ import shlex
 
 from loguru import logger
 import attr
-import dockerblade
 
 from ..proxy.roslaunch.config import LaunchConfig
 from ..proxy.roslaunch.controller import ROSLaunchController
@@ -113,14 +112,9 @@ class ROS2LaunchManager:
             assert os.path.isabs(filename)
             return filename
         else:
-            command = 'ros2 package prefix ' + shlex.quote(package)
-            shell = self._app_instance.shell
-            try:
-                package_location = shell.check_output(command, text=True)
-            except dockerblade.exceptions.CalledProcessError:
-                logger.debug('unable to find location of package'
-                             f'using {command}')
-                raise
+            app_description = self._app_instance.app.description
+            package_description = app_description.packages[package]
+            package_location = package_description.path
             paths = self._app_instance.files.find(package_location, filename)
             for path in paths:
                 if package in path:
