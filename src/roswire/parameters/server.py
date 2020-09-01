@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 __all__ = ('ParameterServer',)
 
-from typing import Any, Iterator, Mapping, Sequence
 import xmlrpc.client
+from typing import Any, Iterator, Mapping, Sequence
 
 from .. import exceptions
 

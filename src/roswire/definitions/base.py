@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 __all__ = ('Time', 'Duration', 'is_builtin', 'get_builtin')
 
-from typing import Dict, Any, Type
+from typing import Any, Dict, Type
 
 import attr
 

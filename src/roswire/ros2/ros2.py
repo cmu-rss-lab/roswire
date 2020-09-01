@@ -5,11 +5,11 @@ import typing
 
 import attr
 
+from .launch import ROS2LaunchManager
 from .node_manager import ROS2NodeManager
 from .service_manager import ROS2ServiceManager
 from .state import ROS2StateProbe
 from ..proxy import SystemState
-from .launch import ROS2LaunchManager
 
 if typing.TYPE_CHECKING:
     from ..app import AppInstance

@@ -1,28 +1,28 @@
 # -*- coding: utf-8 -*-
 __all__ = ('TypeDatabase',)
 
-from typing import (Collection, Type, Mapping, Iterator, Dict, Any, Callable,
-                    BinaryIO)
 from collections import OrderedDict
+from typing import (Any, BinaryIO, Callable, Collection, Dict, Iterator,
+                    Mapping, Type)
 
 import attr
 
-from .msg import MsgFormat, Field, Message
-from .format import FormatDatabase
-from .base import Time, get_builtin
-from .decode import (is_simple,
-                     read_time,
+from .base import get_builtin, Time
+from .decode import (complex_array_reader,
+                     is_simple,
                      read_duration,
+                     read_time,
+                     simple_array_reader,
                      simple_reader,
-                     string_reader,
-                     complex_array_reader,
-                     simple_array_reader)
-from .encode import (write_time,
-                     write_duration,
+                     string_reader)
+from .encode import (complex_array_writer,
+                     simple_array_writer,
                      simple_writer,
                      string_writer,
-                     complex_array_writer,
-                     simple_array_writer)
+                     write_duration,
+                     write_time)
+from .format import FormatDatabase
+from .msg import Field, Message, MsgFormat
 
 
 class TypeDatabase(Mapping[str, Type[Message]]):

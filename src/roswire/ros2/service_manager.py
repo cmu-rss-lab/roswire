@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 __all__ = ('ROS2ServiceManager',)
 
-from typing import Iterator, Mapping
 import typing
+from typing import Iterator, Mapping
 
 import attr
 

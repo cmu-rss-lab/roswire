@@ -5,17 +5,17 @@ and catkin_make build systems.
 """
 __all__ = ('CatkinInterface', 'CatkinTools', 'CatkinMake')
 
-from typing import Optional, List
 import abc
-import shlex
 import os
+import shlex
+from typing import List, Optional
 
-from loguru import logger
 import attr
 import dockerblade
+from loguru import logger
 
-from ..exceptions import CatkinBuildFailed, CatkinCleanFailed, \
-    CatkinException
+from ..exceptions import (CatkinBuildFailed, CatkinCleanFailed,
+                          CatkinException)
 
 
 class CatkinInterface(abc.ABC):

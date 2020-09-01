@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 __all__ = ('Parameter',)
 
-from typing import Any, Optional
 import xml.etree.ElementTree as ET
+from typing import Any, Optional
 
 import attr
 import yaml

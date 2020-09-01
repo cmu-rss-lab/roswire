@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 __all__ = ('SrvFormat',)
 
-from typing import Optional, List, Dict, Any
 import os
+from typing import Any, Dict, List, Optional
 
 import attr
 import dockerblade

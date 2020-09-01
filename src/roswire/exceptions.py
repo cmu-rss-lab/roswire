@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-import attr as _attr
 import typing as _typing
+
+import attr as _attr
 
 if _typing.TYPE_CHECKING:
     from .app import App
@@ -153,3 +154,10 @@ class SourceNotFoundError(ValueError, ROSWireException):
 
     def __str__(self) -> str:
         return f"source not found in container: {self.source}"
+
+
+class NodeShutdownError(ROSWireException):
+    """ROS2 node could not be killed"""
+    def __init__(self, node: str) -> None:
+        m = f"could not shut down node: {node}"
+        super().__init__(m)

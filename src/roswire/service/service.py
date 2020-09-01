@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 __all__ = ('Service',)
 
-from typing import Optional
 import typing
+from typing import Optional
 
 import attr
 import dockerblade
 import yaml
 
 from .. import exceptions
-from ..definitions import Message, SrvFormat, MsgFormat
+from ..definitions import Message, MsgFormat, SrvFormat
 
 if typing.TYPE_CHECKING:
     from ..app import AppDescription

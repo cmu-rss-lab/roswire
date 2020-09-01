@@ -4,14 +4,14 @@ This module provides data structures that represent ROS launch configurations.
 """
 __all__ = ('LaunchContext',)
 
-from typing import Tuple, Any, Optional, Sequence, Dict
 from copy import deepcopy
+from typing import Any, Dict, Optional, Sequence, Tuple
 
-from loguru import logger
 import attr
+from loguru import logger
 
-from ...name import canonical_name, name_is_legal, namespace_join
 from ...exceptions import FailedToParseLaunchFile
+from ...name import canonical_name, name_is_legal, namespace_join
 
 
 @attr.s(frozen=True, slots=True)

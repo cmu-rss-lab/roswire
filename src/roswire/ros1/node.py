@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 __all__ = ('ROS1Node',)
 
-from typing import Optional
 import xmlrpc.client
+from typing import Optional
 
 import dockerblade
 import psutil

@@ -9,8 +9,8 @@ __all__ = (
     'name_is_global',
     'name_is_legal')
 
-from typing import List
 import re
+from typing import List
 
 RE_NAME = re.compile(r'^[\~\/A-Za-z][\w\/]*$')
 

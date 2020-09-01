@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 __all__ = ('App',)
 
-from typing import Mapping, Optional, Sequence
+import os
 import tempfile
 import typing
+from typing import Mapping, Optional, Sequence
 
-from docker.models.images import Image as DockerImage
 import attr
 import docker
-import os
+from docker.models.images import Image as DockerImage
 
-from .. import exceptions as exc
-from .instance import AppInstance
 from .description import AppDescription
+from .instance import AppInstance
+from .. import exceptions as exc
 
 if typing.TYPE_CHECKING:
     from ..roswire import ROSWire

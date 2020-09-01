@@ -2,13 +2,13 @@
 __all__ = ('TCPROSHeader', 'TCPROSMessage')
 
 from io import BytesIO
-from typing import Dict, Optional, BinaryIO, Mapping, Type
+from typing import BinaryIO, Dict, Mapping, Optional, Type
 
 import attr
 
+from ..definitions.decode import read_string_dictionary, read_uint32
+from ..definitions.encode import write_encoded_header, write_uint32
 from ..definitions.msg import Message
-from ..definitions.encode import write_uint32, write_encoded_header
-from ..definitions.decode import read_uint32, read_string_dictionary
 
 _UTF8_ONE = '1'.encode('utf-8')
 

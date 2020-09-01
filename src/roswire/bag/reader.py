@@ -1,26 +1,28 @@
 # -*- coding: utf-8 -*-
 __all__ = ('BagReader',)
 
-from typing import (BinaryIO, Dict, Optional, Tuple, List, Type, Collection,
-                    Set, Iterator)
-from io import BytesIO
-from functools import reduce
-import os
 import heapq
+import os
+from functools import reduce
+from io import BytesIO
+from typing import (BinaryIO, Collection, Dict, Iterator, List, Optional,
+                    Set, Tuple, Type)
 
 from loguru import logger
 
-from .core import (OpCode, Compression, BagMessage, ChunkConnection, Chunk,
-                   ConnectionInfo, BagHeader, IndexEntry, Index)
-from ..definitions.base import Time, Duration
+from .core import (BagHeader, BagMessage, Chunk, ChunkConnection, Compression,
+                   ConnectionInfo, Index, IndexEntry, OpCode)
+from ..definitions.base import Duration, Time
+from ..definitions.decode import (decode_string,
+                                  decode_time,
+                                  decode_uint32,
+                                  decode_uint64,
+                                  read_encoded_header,
+                                  read_sized,
+                                  read_time,
+                                  read_uint32)
 from ..definitions.msg import Message
 from ..definitions.type_db import TypeDatabase
-from ..definitions.decode import (decode_uint32, read_uint32,
-                                  decode_uint64,
-                                  decode_string,
-                                  decode_time, read_time,
-                                  read_sized,
-                                  read_encoded_header)
 
 
 class BagReader:

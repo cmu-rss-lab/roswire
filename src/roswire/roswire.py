@@ -4,13 +4,13 @@ This module provides access to the ROSWire session.
 """
 __all__ = ('ROSWire',)
 
-from typing import Dict, Iterator, Mapping, Optional, Sequence
-import os
 import contextlib
+import os
+from typing import Dict, Iterator, Mapping, Optional, Sequence
 
-from loguru import logger
 import dockerblade
 import yaml
+from loguru import logger
 
 from .app import App, AppDescription, AppInstance
 from .exceptions import ROSWireException

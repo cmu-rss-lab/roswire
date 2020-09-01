@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 __all__ = ('NodeConfig', 'ExecutableType',)
 
-from typing import Collection, Optional, Sequence, Tuple
 import xml.etree.ElementTree as ET
 from enum import Enum
+from typing import Collection, Optional, Sequence, Tuple
 
 import attr
 
