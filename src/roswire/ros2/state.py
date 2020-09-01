@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 __all__ = ('ROS2StateProbe',)
 
-import attr
 import typing
-from typing import Dict, Set, Optional
+from typing import Dict, Optional, Set
 
+import attr
 import dockerblade
 from loguru import logger
 

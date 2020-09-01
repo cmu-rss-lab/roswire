@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
 __all__ = ('Constant', 'ConstantValue', 'Field', 'MsgFormat', 'Message')
 
-from typing import (Optional, Any, Union, Tuple, List, Dict, ClassVar,
-                    Collection, Set, Iterator, Mapping, BinaryIO)
-from io import BytesIO
 import hashlib
-import re
 import os
+import re
+from io import BytesIO
+from typing import (Any, BinaryIO, ClassVar, Collection, Dict, Iterator, List,
+                    Mapping, Optional, Set, Tuple, Union)
 
-from loguru import logger
-from toposort import toposort_flatten as toposort
 import attr
 import dockerblade
+from loguru import logger
+from toposort import toposort_flatten as toposort
 
-from .base import is_builtin, Time, Duration
+
+from .base import Duration, is_builtin, Time
 from .decode import is_simple
 from .. import exceptions as exc
 

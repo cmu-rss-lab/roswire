@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 __all__ = ('ROSLaunchManager',)
 
-from typing import Collection, List, Mapping, Optional, Sequence, Tuple, Union
 import os
 import shlex
 import xml.etree.ElementTree as ET
+from typing import Collection, List, Mapping, Optional, Sequence, Tuple, Union
 
-from loguru import logger
 import attr
 import dockerblade
+from loguru import logger
 
 from .config import LaunchConfig
 from .controller import ROSLaunchController

@@ -18,6 +18,7 @@
   `CatkinInterface`.
 * Added binary location and assumed language to node descriptions in the
   ROS1 launch file reader.
+* Added `flake8-import-order` to tox configuration.
 
 
 # 1.4.0 (2020-06-25)

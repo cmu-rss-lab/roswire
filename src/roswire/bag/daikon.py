@@ -11,15 +11,15 @@ https://plse.cs.washington.edu/daikon/download/doc/developer/File-formats.html#D
 """
 __all__ = ('bag_to_decls', 'bag_to_daikon')
 
-from typing import Set, FrozenSet, List, Iterator, Collection, Mapping, Any
 from collections import OrderedDict
 from functools import reduce
+from typing import Any, Collection, FrozenSet, Iterator, List, Mapping, Set
 
 import attr
 
 from .reader import BagReader
-from ..description import AppDescription
 from ..definitions import Message, MsgFormat
+from ..description import AppDescription
 
 
 TYPE_TO_DAIKON = {

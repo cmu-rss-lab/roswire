@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 __all__ = ('AppInstance',)
 
-from types import TracebackType
-from typing import Iterator, Optional, Type
 import contextlib
 import os
 import shutil
 import typing
+from types import TracebackType
+from typing import Iterator, Optional, Type
 
-from docker.models.images import Image as DockerImage
-from loguru import logger
 import attr
 import dockerblade
+from docker.models.images import Image as DockerImage
+from loguru import logger
 
 from ..definitions import TypeDatabase
-from ..proxy import ROSCore, CatkinInterface, CatkinTools, CatkinMake
+from ..proxy import CatkinInterface, CatkinMake, CatkinTools, ROSCore
 from ..ros2 import ROS2
 
 if typing.TYPE_CHECKING:

@@ -4,24 +4,24 @@ This file implements a proxy for parsing the contents of launch files.
 """
 __all__ = ('LaunchFileReader',)
 
-from typing import (Any, Callable, Collection, Optional, overload, Sequence,
-                    Tuple, Union)
-import xml.etree.ElementTree as ET
-
-from loguru import logger
-import attr
-import dockerblade
 import os
 import shlex
 import subprocess
+import xml.etree.ElementTree as ET
+from typing import (Any, Callable, Collection, Optional, overload, Sequence,
+                    Tuple, Union)
 
-from .rosparam import load_from_yaml_string as load_rosparam_from_string
-from .config import LaunchConfig, NodeConfig, ExecutableType
+import attr
+import dockerblade
+from loguru import logger
+
+from .config import ExecutableType, LaunchConfig, NodeConfig
 from .context import LaunchContext
+from .rosparam import load_from_yaml_string as load_rosparam_from_string
 from .substitution import ArgumentResolver
-from ...name import (namespace_join, global_name, namespace, name_is_global,
-                     name_is_private)
 from ...exceptions import FailedToParseLaunchFile
+from ...name import (global_name, name_is_global, name_is_private, namespace,
+                     namespace_join)
 
 _TAG_TO_LOADER = {}
 

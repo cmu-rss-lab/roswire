@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 __all__ = ('NodeManager',)
 
-from typing import Iterator, Mapping
 import abc
+from typing import Iterator, Mapping
 
 from .node import Node
 

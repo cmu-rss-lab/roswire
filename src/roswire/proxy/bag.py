@@ -2,20 +2,20 @@
 # http://wiki.ros.org/Bags/Format/2.0
 __all__ = ('BagRecorder', 'BagPlayer')
 
-from types import TracebackType
-from typing import Optional, Type
+import os
 import shlex
 import shutil
-import time
-import threading
 import subprocess
-import os
+import threading
+import time
+from types import TracebackType
+from typing import Optional, Type
 
-from loguru import logger
 import dockerblade
+from loguru import logger
 
-from ..interface import NodeManager
 from .. import exceptions
+from ..interface import NodeManager
 
 
 class BagPlayer:
