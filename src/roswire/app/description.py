@@ -4,16 +4,16 @@ This module is used to build and manage descriptions of ROS applications.
 """
 __all__ = ('AppDescription',)
 
-from typing import Any, Dict, Optional
-import typing
-
-from loguru import logger
-import attr
 import base64
 import os
-import yaml
+import typing
+from typing import Any, Dict, Optional
 
-from ..definitions import TypeDatabase, FormatDatabase, PackageDatabase
+import attr
+import yaml
+from loguru import logger
+
+from ..definitions import FormatDatabase, PackageDatabase, TypeDatabase
 
 if typing.TYPE_CHECKING:
     from .app import App

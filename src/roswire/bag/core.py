@@ -2,8 +2,8 @@
 __all__ = ('OpCode', 'Compression', 'BagMessage', 'ChunkConnection', 'Chunk',
            'ConnectionInfo', 'BagHeader', 'IndexEntry', 'Index')
 
-from typing import Dict, Optional, Tuple, List
 from enum import Enum
+from typing import Dict, List, Optional, Tuple
 
 import attr
 

@@ -4,9 +4,9 @@ This file provides utilities for interacting with rosparam.
 """
 __all__ = ('load_from_yaml_string',)
 
-from typing import Dict, Any
 import math
 import re
+from typing import Any, Dict
 
 import yaml
 

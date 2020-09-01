@@ -3,11 +3,11 @@
 This module provides code for encoding and serialising Python data structures
 into their corresponding ROS binary representations.
 """
-from typing import Optional, Callable, Any, TypeVar, BinaryIO, Sequence, Dict
 import functools
 import struct
+from typing import Any, BinaryIO, Callable, Dict, Optional, Sequence, TypeVar
 
-from .base import Time, Duration
+from .base import Duration, Time
 from .decode import get_pattern
 
 T = TypeVar('T')

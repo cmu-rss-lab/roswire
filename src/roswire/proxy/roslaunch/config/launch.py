@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 __all__ = ('LaunchConfig',)
 
-from typing import (AbstractSet, Any, Collection, Dict, Mapping, Optional,
-                    Set, Sequence, Tuple)
 import xml.dom.minidom as minidom
 import xml.etree.ElementTree as ET
+from typing import (AbstractSet, Any, Collection, Dict, Mapping, Optional,
+                    Sequence, Set, Tuple)
 
-from loguru import logger
 import attr
+from loguru import logger
 
-from .node import NodeConfig
 from .env import Env
+from .node import NodeConfig
 from .parameter import Parameter
 from ....exceptions import FailedToParseLaunchFile
 from ....name import (canonical_name, name_is_global, namespace_join,

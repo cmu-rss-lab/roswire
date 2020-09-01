@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 __all__ = ('ServiceManager',)
 
-from typing import AbstractSet, Iterator, Mapping
-from urllib.parse import urlparse
 import typing
 import xmlrpc.client
+from typing import AbstractSet, Iterator, Mapping
+from urllib.parse import urlparse
 
 import dockerblade
 
-from .. import exceptions
 from .service import Service
+from .. import exceptions
 from ..proxy.state import SystemStateProbe
 
 if typing.TYPE_CHECKING:

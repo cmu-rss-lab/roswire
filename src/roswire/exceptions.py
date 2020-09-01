@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-import attr as _attr
 import typing as _typing
+
+import attr as _attr
 
 if _typing.TYPE_CHECKING:
     from .app import App

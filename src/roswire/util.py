@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 __all__ = ('tuple_from_iterable', 'Stopwatch',)
 
-from typing import Tuple, Iterable, Any
-from timeit import default_timer as timer
 import warnings
+from timeit import default_timer as timer
+from typing import Any, Iterable, Tuple
 
 
 def tuple_from_iterable(val: Iterable[Any]) -> Tuple[Any, ...]:

@@ -9,15 +9,15 @@ https://github.com/ros/ros_comm/tree/kinetic-devel/tools/roslaunch/src/roslaunch
 """
 __all__ = ('ArgumentResolver',)
 
-from typing import Any, Dict, Match
 import os
 import re
 import shlex
 import subprocess
+from typing import Any, Dict, Match
 
-from loguru import logger
 import attr
 import dockerblade
+from loguru import logger
 
 from ...exceptions import SubstitutionError
 

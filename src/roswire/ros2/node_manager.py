@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 __all__ = ('ROS2NodeManager',)
 
-from typing import Iterator
 import typing
-import attr
+from typing import Iterator, Mapping
 
+import attr
 from loguru import logger
 
 from .node import ROS2Node

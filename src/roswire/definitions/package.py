@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 __all__ = ('Package', 'PackageDatabase')
 
-from typing import Tuple, List, Dict, Any, Iterator, Collection, Mapping
 import os
 import shlex
+from typing import Any, Collection, Dict, Iterator, List, Mapping, Tuple
 
-from loguru import logger
 import attr
 import dockerblade
+from loguru import logger
 
+from .action import ActionFormat
 from .msg import MsgFormat
 from .srv import SrvFormat
-from .action import ActionFormat
 from ..util import tuple_from_iterable
 
 

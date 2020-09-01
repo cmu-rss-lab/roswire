@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 __all__ = ('SystemState', 'SystemStateProbe')
 
-from typing import AbstractSet, Collection, Dict, Mapping, Set, Sequence, Tuple
 import xmlrpc
+from typing import AbstractSet, Collection, Dict, Mapping, Sequence, Set, Tuple
 
 import attr
 
