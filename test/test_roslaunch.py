@@ -62,3 +62,31 @@ def test_remappings(sut):
         assert set(state.publishers['/funkybits']) == {'/gazebo'}
 
 
+
+@pytest.mark.parametrize('sut', ['turtlebot3-ros2'], indirect=True)
+def test_locate_with_package_ros2(sut):
+    actual_path = sut.ros2.launch.locate('cartographer.launch.py', package='turtlebot3_cartographer')
+    expected_path = '/ros_ws/src/turtlebot3/turtlebot3_cartographer/launch/cartographer.launch.py'
+    assert actual_path == expected_path
+
+
+@pytest.mark.parametrize('sut', ['turtlebot3-ros2'], indirect=True)
+def test_locate_without_package_ros2(sut):
+    actual_path = sut.ros2.launch.locate('/ros_ws/src/turtlebot3/turtlebot3_cartographer/launch/cartographer.launch.py')
+    expected_path = '/ros_ws/src/turtlebot3/turtlebot3_cartographer/launch/cartographer.launch.py'
+    assert actual_path == expected_path
+
+
+@pytest.mark.parametrize('sut', ['turtlebot3-ros2'], indirect=True)
+def test_launch_ros2(sut):
+    actual_controller_command = sut.ros2.launch.launch('cartographer.launch.py', package='turtlebot3_cartographer').popen.args
+    expected_controller_command = 'ros2 launch turtlebot3_cartographer cartographer.launch.py'
+    assert actual_controller_command == expected_controller_command
+
+
+@pytest.mark.parametrize('sut', ['turtlebot3-ros2'], indirect=True)
+def test_launch_with_full_path(sut):
+    actual_controller_command = sut.ros2.launch.launch('/ros_ws/src/turtlebot3/turtlebot3_cartographer/launch/cartographer.launch.py', package='turtlebot3_cartographer').popen.args
+    expected_controller_command = 'ros2 launch turtlebot3_cartographer cartographer.launch.py'
+    assert actual_controller_command == expected_controller_command
+

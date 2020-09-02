@@ -111,17 +111,18 @@ class ROS2LaunchManager:
         if not package:
             assert os.path.isabs(filename)
             return filename
-
-        filename_original = filename
-        app_description = self._app_instance.app.describe()
-        package_path = app_description.packages[package].path
-        filename = os.path.join(package_path, 'launch', filename_original)
-        if not self._app_instance.files.isfile(filename):
-            raise exc.LaunchFileNotFound(path=filename)
-        logger.debug('determined location of launch file'
-                     f' [{filename_original}] in package [{package}]: '
-                     f'{filename}')
-        return filename
+        else:
+            app_description = self._app_instance.app.description
+            package_description = app_description.packages[package]
+            package_location = package_description.path
+            paths = self._app_instance.files.find(package_location, filename)
+            for path in paths:
+                if package in path:
+                    logger.debug('determined location of launch file'
+                                 f' [{filename}] in package [{package}]: '
+                                 f'{path}')
+                    return path
+        raise exc.LaunchFileNotFound(path=filename)
 
     def launch(self,
                filename: str,
@@ -171,13 +172,17 @@ class ROS2LaunchManager:
             args = {}
         if not launch_prefixes:
             launch_prefixes = {}
-        filename = self.locate(filename, package=package)
 
         if node_to_remappings or launch_prefixes:
             m = "Requires self.read: not yet implemented"
             raise NotImplementedError(m)
-
-        cmd = ['ros2 launch', shlex.quote(filename)]
+        if package:
+            filename_without_path = os.path.basename(filename)
+            cmd = ['ros2 launch', shlex.quote(package),
+                   shlex.quote(filename_without_path)]
+        else:
+            m = "Not yet implemented when package is None"
+            raise NotImplementedError(m)
         launch_args: List[str] = [f'{arg}:={val}' for arg, val in args.items()]
         cmd += launch_args
         if prefix:

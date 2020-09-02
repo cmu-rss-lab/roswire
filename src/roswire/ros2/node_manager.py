@@ -2,16 +2,16 @@
 __all__ = ('ROS2NodeManager',)
 
 import typing
-from typing import Iterator, Mapping
+from typing import Iterator
 
 import attr
 from loguru import logger
 
 from .node import ROS2Node
 from .state import ROS2StateProbe
-from ..proxy import SystemState
 from .. import exceptions as exc
 from ..interface import NodeManager
+from ..proxy import SystemState
 
 if typing.TYPE_CHECKING:
     from ..app import AppInstance

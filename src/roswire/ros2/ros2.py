@@ -21,8 +21,8 @@ class ROS2:
     app_instance: 'AppInstance'
     nodes: ROS2NodeManager = attr.ib(init=False)
     services: ROS2ServiceManager = attr.ib(init=False)
-    _state_probe: ROS2StateProbe = attr.ib(init=False)
     launch: ROS2LaunchManager = attr.ib(init=False)
+    _state_probe: ROS2StateProbe = attr.ib(init=False)
 
     def __attrs_post_init__(self) -> None:
         nodes = ROS2NodeManager.for_app_instance(self.app_instance)
