@@ -51,3 +51,17 @@ class ROSDistribution(enum.Enum):
                  ) -> None:
         self.ros = ROSVersion[ros]
         self.name = name
+
+    @classmethod
+    def with_name(cls, name: str) -> str:
+        """Retrieves the ROS distribution with a given name.
+
+        Raises
+        ------
+        ValueError
+            If no distribution is found with the given name.
+        """
+        name_uppercase = name.upper()
+        if name_uppercase not in cls:
+            raise ValueError(f"ROS distribution not found: {name}")
+        return cls[name_uppercase]
