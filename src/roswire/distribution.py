@@ -11,6 +11,8 @@ class ROSVersion(enum.IntEnum):
 
     @property
     def distributions(self) -> Sequence['ROSDistribution']:
+        """Returns a list of all distributions for this version of ROS,
+        ordered alphabetically, and therefore, also ordered by release date."""
         return sorted([d for d in ROSDistribution if d.ros == self],
                       key=lambda d: d.name)
 
