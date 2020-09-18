@@ -53,7 +53,7 @@ class ROSDistribution(enum.Enum):
         self.name = name
 
     @classmethod
-    def with_name(cls, name: str) -> str:
+    def with_name(cls, name: str) -> 'ROSDistribution':
         """Retrieves the ROS distribution with a given name.
 
         Raises
