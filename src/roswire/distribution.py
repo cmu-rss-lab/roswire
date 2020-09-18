@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 __all__ = ('ROSDistribution', 'ROSVersion')
 
-from typing import Sequence
 import enum
+from typing import Sequence
 
 
 class ROSVersion(enum.IntEnum):
