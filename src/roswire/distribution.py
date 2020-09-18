@@ -13,8 +13,7 @@ class ROSVersion(enum.IntEnum):
     def distributions(self) -> Sequence['ROSDistribution']:
         """Returns a list of all distributions for this version of ROS,
         ordered alphabetically, and therefore, also ordered by release date."""
-        return sorted([d for d in ROSDistribution if d.ros == self],
-                      key=lambda d: d.name)
+        return ROSDistribution.for_version(self)
 
 
 @enum.unique
@@ -67,3 +66,12 @@ class ROSDistribution(enum.Enum):
         if name_uppercase not in cls:
             raise ValueError(f"ROS distribution not found: {name}")
         return cls[name_uppercase]
+
+    @classmethod
+    def for_version(cls, version: ROSVersion) -> Sequence['ROSDistribution']:
+        """Returns a list of all distributions for a given version of ROS,
+        ordered alphabetically, and therefore, also ordered by release date."""
+        return sorted([d for d in cls if d.ros == version],
+                      key=lambda d: d.name)
+
+
