@@ -73,5 +73,3 @@ class ROSDistribution(enum.Enum):
         ordered alphabetically, and therefore, also ordered by release date."""
         return sorted([d for d in cls if d.ros == version],
                       key=lambda d: d.name)
-
-
