@@ -46,12 +46,9 @@ class ROSDistribution(enum.Enum):
     ELECTRIC = ('electric', 'ROS1')
     DIAMONDBACK = ('diamondback', 'ROS1')
 
-    def __init__(self,
-                 name: str,
-                 ros: str
-                 ) -> None:
+    def __init__(self, display_name: str, ros: str) -> None:
+        self.display_name = display_name
         self.ros = ROSVersion[ros]
-        self.name = name
 
     @classmethod
     def with_name(cls, name: str) -> 'ROSDistribution':
