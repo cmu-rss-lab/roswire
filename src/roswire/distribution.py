@@ -60,9 +60,10 @@ class ROSDistribution(enum.Enum):
             If no distribution is found with the given name.
         """
         name_uppercase = name.upper()
-        if name_uppercase not in cls:
+        try:
+            return cls[name_uppercase]
+        except KeyError:
             raise ValueError(f"ROS distribution not found: {name}")
-        return cls[name_uppercase]
 
     @classmethod
     def for_version(cls, version: ROSVersion) -> Sequence['ROSDistribution']:
