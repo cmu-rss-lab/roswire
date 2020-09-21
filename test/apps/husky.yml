@@ -1,4 +1,5 @@
 image: therobotcooperative/husky
+distribution: melodic
 sources:
 - /opt/ros/melodic/setup.bash
 - /ros_ws/devel/setup.bash
