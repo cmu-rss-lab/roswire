@@ -3,6 +3,7 @@ sources:
 - /opt/ros/dashing/setup.bash
 - /ros_ws/install/setup.bash
 description:
+  distribution: dashing
   packages:
   - actions: []
     messages:

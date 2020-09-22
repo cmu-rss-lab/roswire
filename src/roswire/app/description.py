@@ -14,6 +14,7 @@ import yaml
 from loguru import logger
 
 from ..definitions import FormatDatabase, PackageDatabase, TypeDatabase
+from ..distribution import ROSDistribution
 
 if typing.TYPE_CHECKING:
     from .app import App
@@ -30,6 +31,8 @@ class AppDescription:
     ----------
     app: App
         The associated application.
+    distribution: ROSDistribution
+        The ROS distribution used by this application.
     types: TypeDatabase
         A database of types for the application.
     formats: FormatDatabase
@@ -38,6 +41,7 @@ class AppDescription:
         A database of the packages contained within the application.
     """
     app: 'App'
+    distribution: ROSDistribution
     types: TypeDatabase
     formats: FormatDatabase
     packages: PackageDatabase
@@ -50,13 +54,16 @@ class AppDescription:
         packages = PackageDatabase.from_dict(d['packages'])
         formats = FormatDatabase.build(packages)
         types = TypeDatabase.build(formats)
+        distribution = ROSDistribution.with_name(d['distribution'])
         return AppDescription(app=app,
+                              distribution=distribution,
                               packages=packages,
                               formats=formats,
                               types=types)
 
     def _to_dict(self) -> Dict[str, Any]:
         return {'sha256': self.app.sha256,
+                'distribution': self.distribution.name,
                 'sources': list(self.app.sources),
                 'packages': self.packages.to_dict()}
 
@@ -106,9 +113,12 @@ class AppDescription:
             files = app_instance.files
             paths = PackageDatabase.paths(shell, files)
             db_package = PackageDatabase.from_paths(files, paths)
+            distribution_name = shell.environ('ROS_DISTRO')
+            distribution = ROSDistribution.with_name(distribution_name)
         db_format = FormatDatabase.build(db_package)
         db_type = TypeDatabase.build(db_format)
         return AppDescription(app=app,
+                              distribution=distribution,
                               packages=db_package,
                               formats=db_format,
                               types=db_type)

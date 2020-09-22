@@ -3,6 +3,7 @@ sources:
 - /opt/ros/melodic/setup.bash
 - /ros_ws/devel/setup.bash
 description:
+  distribution: melodic
   packages:
   - actions: []
     messages: []
