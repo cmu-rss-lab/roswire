@@ -20,6 +20,7 @@
   ROS1 launch file reader.
 * Added `flake8-import-order` to tox configuration.
 * Added recording of ROS distributions to application descriptions (fixes #398).
+* Added `description` property to `AppInstance`.
 
 
 # 1.4.0 (2020-06-25)
