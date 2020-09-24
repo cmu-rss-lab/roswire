@@ -19,6 +19,7 @@ from ..ros2 import ROS2
 
 if typing.TYPE_CHECKING:
     from .app import App
+    from .description import AppDescription
 
 
 @attr.s(frozen=True, slots=True)
@@ -29,6 +30,8 @@ class AppInstance:
     ----------
     app: App
         The associated ROS application.
+    description: AppDescription
+        A description of the associated ROS application.
     messages: TypeDatabase
         A database of message types for the associated ROS application.
     shell: dockerblade.shell.Shell
@@ -56,6 +59,10 @@ class AppInstance:
 
         files = dockerblade.filesystem()
         object.__setattr__(self, 'files', files)
+
+    @property
+    def description(self) -> 'AppDescription':
+        return self.app.description
 
     @property
     def ip_address(self) -> str:
