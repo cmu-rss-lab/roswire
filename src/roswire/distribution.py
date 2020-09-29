@@ -2,7 +2,8 @@
 __all__ = ('ROSDistribution', 'ROSVersion')
 
 import enum
-from typing import Sequence
+import functools
+from typing import Any, Sequence
 
 
 class ROSVersion(enum.IntEnum):
@@ -16,6 +17,7 @@ class ROSVersion(enum.IntEnum):
         return ROSDistribution.for_version(self)
 
 
+@functools.total_ordering
 @enum.unique
 class ROSDistribution(enum.Enum):
     """Describes a ROS distribution.
@@ -49,6 +51,18 @@ class ROSDistribution(enum.Enum):
     def __init__(self, display_name: str, ros: str) -> None:
         self.display_name = display_name
         self.ros = ROSVersion[ros]
+
+    def __ne__(self, other: Any) -> bool:
+        return not (self == other)
+
+    def __lt__(self, other: Any) -> int:
+        if not isinstance(other, ROSDistribution):
+            m = f'can only compare ROSDistribution objects'
+            raise ValueError(m)
+        if self.ros != other.ros:
+            m = f'can only compare ROSDistributions for same version'
+            raise ValueError(m)
+        return self.display_name < other.display_name
 
     @classmethod
     def with_name(cls, name: str) -> 'ROSDistribution':
