@@ -50,19 +50,17 @@ class ROSDistribution(enum.Enum):
         self.display_name = display_name
         self.ros = ROSVersion[ros]
 
-    def __cmp__(self, other: Any) -> int:
+    def __ne__(self, other: Any) -> bool:
+        return not (self == other)
+
+    def __lt__(self, other: Any) -> int:
         if not isinstance(other, ROSDistribution):
             m = f'can only compare ROSDistribution objects'
             raise ValueError(m)
         if self.ros != other.ros:
             m = f'can only compare ROSDistributions for same version'
             raise ValueError(m)
-        if self.display_name == other.display_name:
-            return 0
-        if self.display_name < other.display_name:
-            return -1
-        # self.display_name > other.display_name
-        return 1
+        return self.display_name < other.display_name:
 
     @classmethod
     def with_name(cls, name: str) -> 'ROSDistribution':
