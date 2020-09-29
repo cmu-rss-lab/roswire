@@ -2,7 +2,7 @@
 __all__ = ('ROSDistribution', 'ROSVersion')
 
 import enum
-from typing import Any, Sequence
+from typing import Sequence
 
 
 class ROSVersion(enum.IntEnum):
@@ -49,20 +49,6 @@ class ROSDistribution(enum.Enum):
     def __init__(self, display_name: str, ros: str) -> None:
         self.display_name = display_name
         self.ros = ROSVersion[ros]
-
-    def __cmp__(self, other: Any) -> int:
-        if not isinstance(other, ROSDistribution):
-            m = f'can only compare ROSDistribution objects'
-            raise ValueError(m)
-        if self.ros != other.ros:
-            m = f'can only compare ROSDistributions for same version'
-            raise ValueError(m)
-        if self.display_name == other.display_name:
-            return 0
-        if self.display_name < other.display_name:
-            return -1
-        # self.display_name > other.display_name
-        return 1
 
     @classmethod
     def with_name(cls, name: str) -> 'ROSDistribution':
