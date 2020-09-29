@@ -2,6 +2,7 @@
 __all__ = ('ROSDistribution', 'ROSVersion')
 
 import enum
+import functools
 from typing import Any, Sequence
 
 
@@ -16,6 +17,7 @@ class ROSVersion(enum.IntEnum):
         return ROSDistribution.for_version(self)
 
 
+@functools.total_ordering
 @enum.unique
 class ROSDistribution(enum.Enum):
     """Describes a ROS distribution.
