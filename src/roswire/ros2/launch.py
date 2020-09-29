@@ -3,6 +3,7 @@ __all__ = ('ROS2LaunchManager',)
 
 import os
 import shlex
+import tempfile
 import typing
 from typing import Collection, List, Mapping, Optional, Sequence, Tuple, Union
 
@@ -59,7 +60,33 @@ class ROS2LaunchManager:
         LaunchFileNotFound
             If the given launch file could not be found in the package.
         """
-        raise NotImplementedError
+
+        # Copy resources/launch_extractor._py as a python file into the container
+        logger.debug("Copying launch extraction script")
+        files = self._app_instance.files
+        files.copy_from_host('resources/launch_extractor.py',
+                             '/launch_extractor.py')
+
+        # Runs the script using app_instance.shell. This will create an arch.json
+        logger.debug("Running the script in the container")
+        cmd = f'python /launch_extractor.py {shlex.quote(filename)}'
+        # This will write the file to /arch.json
+        self._app_instance.shell.popen(cmd, stdout=True, stderr=True)
+        try:  # Need to cleanup the temp file created if there is an exception
+            filename = os.path.basename(filename)
+            filename += f'-{next(tempfile._get_candidate_names())}'  # noqa
+            filename += '.json'
+            to_copy_to = os.path.join(tempfile.gettempdir(), filename)
+            logger.debug(f"Copying arch.json on contaner to {to_copy_to}")
+            files.copy_to_host('/arch.yml', to_copy_to)
+        finally:
+            # TODO Clean up temp file
+            pass
+
+        # Convert json to a launch config
+        # TODO Implement launch config
+        return LaunchConfig()
+
 
     def write(self,
               config: LaunchConfig,
