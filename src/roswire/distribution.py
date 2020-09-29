@@ -60,7 +60,7 @@ class ROSDistribution(enum.Enum):
         if self.ros != other.ros:
             m = f'can only compare ROSDistributions for same version'
             raise ValueError(m)
-        return self.display_name < other.display_name:
+        return self.display_name < other.display_name
 
     @classmethod
     def with_name(cls, name: str) -> 'ROSDistribution':
