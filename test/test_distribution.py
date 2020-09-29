@@ -11,8 +11,8 @@ def test_ordering():
     # compare ROS2 versions
     assert ROSDistribution.FOXY > ROSDistribution.ELOQUENT
     assert ROSDistribution.FOXY >= ROSDistribution.ELOQUENT
-    assert ROSDistribution.ELOQUENT < ROSDistribution.ELOQUENT
-    assert ROSDistribution.ELOQUENT <= ROSDistribution.ELOQUENT
+    assert ROSDistribution.ELOQUENT < ROSDistribution.FOXY
+    assert ROSDistribution.ELOQUENT <= ROSDistribution.FOXY
 
     # compare ROS1 versions
     assert ROSDistribution.NOETIC > ROSDistribution.KINETIC
@@ -32,6 +32,6 @@ def test_ordering():
         ROSDistribution.MELODIC]
 
     expected_ascending = ['INDIGO', 'JADE', 'KINETIC', 'MELODIC']
-    expected_descending = reversed(expected_ascending)
-    assert [d.name for name in sorted(distributions)] == expected_ascending
-    assert [d.name for name in sorted(distributions, reverse=True)] == expected_ascending
+    expected_descending = list(reversed(expected_ascending))
+    assert [d.name for d in sorted(distributions)] == expected_ascending
+    assert [d.name for d in sorted(distributions, reverse=True)] == expected_descending
