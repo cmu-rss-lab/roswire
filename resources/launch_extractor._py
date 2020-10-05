@@ -1,68 +1,102 @@
-from typing import Any, Dict, List
 import argparse
 import json
-from launch import LaunchDescription, LaunchDescriptionEntity
-from launch.launch_context import LaunchContext
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.actions import IncludeLaunchDescription
+import os
+from typing import Dict, Union, List, cast
+
+from launch.actions import ExecuteProcess
 from launch_ros.actions import Node
-NodeDescription = Dict[str, Any]
+from ros2launch.api import launch_a_launch_file
+
+started_by_launch = []
 
 
-class NodeDescriptionExtractor:
-    def __init__(self) -> None:
-        self.__unnamed_nodes = 0
+def get_executable_type(path: str) -> str:
+    try:
+        with open(path) as f:
+            first_line = f.read().partition('\n')[0]
+            if 'python' in first_line:
+                return 'PYTHON'
+            else:
+                return 'LIKELY_CPP'
+    except UnicodeDecodeError:
+        return 'LIKELY_CPP'
 
-    def _node_to_description(self, node: Node) -> NodeDescription:
-        # Note: The code directly accesses variables since there are no getters for
-        # these specific variables in launch.
-        # This code might break with changed implementations of launch
-        output: NodeDescription = {}
-        if node._Node__node_name:
-            name_entry = node._Node__node_name
-            output['name'] = node._Node__node_name
-        else:
-            name_entry = f'unknown{self.__unnamed_nodes}'
-            self.__unnamed_nodes += 1
-            output['name'] = name_entry
-        if node._Node__node_namespace:
-            output['namespace'] = node._Node__node_namespace
-        if node._Node__node_executable:
-            output['executable'] = node._Node__node_executable
-        if node._Node__package:
-            output['package'] = node._Node__package
-        return output
 
-    def _extract_descriptions(self,
-                              entity: LaunchDescriptionEntity,
-                              context: LaunchContext
-                              ) -> List[NodeDescription]:
-        descriptions: List[NodeDescription] = []
-        if isinstance(entity, LaunchDescription) or isinstance(entity, IncludeLaunchDescription):  # noqa
-            for sub_entity in entity.visit(context):
-                descriptions += self._extract_descriptions(sub_entity, context)
-        elif isinstance(entity, Node):
-            descriptions = [self._node_to_description(entity)]
-        else:
-            print(f'UNKNOWN ENTITY: {type(entity)}')
-        return descriptions
+def executeprocess_execute(self, context):
+    self._ExecuteProcess__expand_substitutions(context)
+    processed = self._ExecuteProcess__process_event_args
+    dict = {}
+    dict['cmd'] = processed['cmd']
+    dict['name'] = self._ExecuteProcess__name
+    if processed['cwd'] is not None:
+        dict['cwd'] = processed['cwd']
+    if processed['env'] is not None:
+        dict['env'] = processed['env']
+    dict['output'] = self._ExecuteProcess__output
+    if type(self) == ExecuteProcess:
+        dict['__TYPE__'] = 'ExecuteProcess'
+        started_by_launch.append(dict)
 
-    def extract(self, filename: str) -> List[NodeDescription]:
-        context = LaunchContext()
-        launch_description_source = \
-            PythonLaunchDescriptionSource(args.launchfile)
-        launch_description = LaunchDescription([
-            IncludeLaunchDescription(launch_description_source)
-        ])
-        return self._extract_descriptions(launch_description, context)
 
+def node_execute(self, context):
+    self._perform_substitutions(context)
+    ros_specific_arguments: Dict[str, Union[str, List[str]]] = {}
+    if self._Node__node_name is not None:
+        ros_specific_arguments['name'] = '__node:={}'.format(self._Node__expanded_node_name)
+    if self._Node__expanded_node_namespace != '':
+        ros_specific_arguments['ns'] = '__ns:={}'.format(self._Node__expanded_node_namespace)
+    if self._Node__expanded_parameter_files is not None:
+        ros_specific_arguments['params'] = self._Node__expanded_parameter_files
+    if self._Node__expanded_remappings is not None:
+        ros_specific_arguments['remaps'] = []
+        for remapping_from, remapping_to in self._Node__expanded_remappings:
+            remap_arguments = cast(List[str], ros_specific_arguments['remaps'])
+            remap_arguments.append(
+                '{}:={}'.format(remapping_from, remapping_to)
+            )
+    context.extend_locals({'ros_specific_arguments': ros_specific_arguments})
+    super(type(self), self).execute(context)
+    # self._ExecuteProcess__expand_substitutions(context)
+    processed = self._ExecuteProcess__process_event_args
+    dict = {}
+    dict['name'] = self._Node__node_name
+    dict['namespace'] = self._Node__node_namespace
+    dict['package'] = self._Node__package
+    dict['executable'] = self._Node__node_executable
+    dict['cmd'] = processed['cmd']
+    dict['executable_type'] = get_executable_type(dict['cmd'][0])
+
+    if processed['cmd'] is not None:
+        dict['cwd'] = processed['cwd']
+    if processed['env'] is not None:
+        dict['env_args'] = self._Node__env_args
+    dict['output'] = self._ExecuteProcess__output
+    if self._Node__arguments is not None:
+        dict['args'] = self._Node__arguments
+    if self._Node__remappings is not None:
+        dict['remappings'] = self._Node__remappings
+    if type(self) == Node:
+        dict['__TYPE__'] = 'Node'
+        started_by_launch.append(dict)
+
+
+setattr(ExecuteProcess, 'execute', executeprocess_execute)
+setattr(Node, 'execute', node_execute)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Find nodes')
     parser.add_argument('launchfile', type=str)
-    parser.add_argument('--output', type=str, default='arch.json')
+    arg = parser.add_argument(
+        'launch_arguments',
+        nargs='*',
+        help="Arguments to the launch file; '<name>:=<value>' (for duplicates, last one wins)")
+    parser.add_argument('--output', type=str)
     args = parser.parse_args()
-    extractor = NodeDescriptionExtractor()
-    output = extractor.extract(args.launchfile)
+    if args.output is None:
+        args.output = f'{os.path.basename(args.launchfile).split(".")[0]}-description.json'
+    launch_a_launch_file(launch_file_path=args.launchfile,
+                         launch_file_arguments=args.launch_arguments,
+                         debug=True)
+
     with open(args.output, 'w') as f:
-        f.write(json.dumps(output, indent=2))
+        f.write(json.dumps(started_by_launch, indent=2))
