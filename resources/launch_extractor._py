@@ -4,6 +4,7 @@ import os
 from typing import Dict, Union, List, cast
 
 from launch.actions import ExecuteProcess
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from ros2launch.api import launch_a_launch_file
 
@@ -22,6 +23,13 @@ def get_executable_type(path: str) -> str:
         return 'LIKELY_CPP'
 
 
+def perform_substitutions(sub, context):
+    if isinstance(sub, LaunchConfiguration):
+        return sub.perform(context)
+    else:
+        return sub
+
+
 def executeprocess_execute(self, context):
     self._ExecuteProcess__expand_substitutions(context)
     processed = self._ExecuteProcess__process_event_args
@@ -33,6 +41,8 @@ def executeprocess_execute(self, context):
     if processed['env'] is not None:
         dict['env'] = processed['env']
     dict['output'] = self._ExecuteProcess__output
+    dict['launch_file'] = context.locals.current_launch_file_path
+
     if type(self) == ExecuteProcess:
         dict['__TYPE__'] = 'ExecuteProcess'
         started_by_launch.append(dict)
@@ -59,20 +69,21 @@ def node_execute(self, context):
     # self._ExecuteProcess__expand_substitutions(context)
     processed = self._ExecuteProcess__process_event_args
     dict = {}
-    dict['name'] = self._Node__node_name
-    dict['namespace'] = self._Node__node_namespace
-    dict['package'] = self._Node__package
-    dict['executable'] = self._Node__node_executable
+    dict['name'] = perform_substitutions(self._Node__node_name, context)
+    dict['namespace'] = perform_substitutions(self._Node__node_namespace, context)
+    dict['package'] = perform_substitutions(self._Node__package, context)
+    dict['executable'] = perform_substitutions(self._Node__node_executable, context)
     dict['cmd'] = processed['cmd']
     dict['executable_type'] = get_executable_type(dict['cmd'][0])
+    dict['launch_file'] = context.locals.current_launch_file_path
 
     if processed['cmd'] is not None:
         dict['cwd'] = processed['cwd']
     if processed['env'] is not None:
-        dict['env_args'] = self._Node__env_args
+        dict['env_args'] = perform_substitutions(self._Node__env_args, context)
     dict['output'] = self._ExecuteProcess__output
     if self._Node__arguments is not None:
-        dict['args'] = self._Node__arguments
+        dict['args'] = processed['cmd'][1:]
     if self._Node__remappings is not None:
         dict['remappings'] = self._Node__remappings
     if type(self) == Node:
@@ -96,7 +107,7 @@ if __name__ == '__main__':
         args.output = f'{os.path.basename(args.launchfile).split(".")[0]}-description.json'
     launch_a_launch_file(launch_file_path=args.launchfile,
                          launch_file_arguments=args.launch_arguments,
-                         debug=True)
+                         debug=False)
 
     with open(args.output, 'w') as f:
         f.write(json.dumps(started_by_launch, indent=2))
