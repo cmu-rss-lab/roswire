@@ -3,15 +3,17 @@ __all__ = ('ROS2LaunchManager',)
 
 import os
 import shlex
-import tempfile
+import json
 import typing
-from typing import Collection, List, Mapping, Optional, Sequence, Tuple, Union
+from typing import Collection, List, Mapping, Optional, Sequence, Tuple, Union, Dict
 
 import attr
+import yaml
 from loguru import logger
 
 from .. import exceptions as exc
-from ..proxy.roslaunch.config import LaunchConfig
+from ..proxy.roslaunch.config import LaunchConfig, NodeConfig
+from ..proxy.roslaunch.context import LaunchContext
 from ..proxy.roslaunch.controller import ROSLaunchController
 
 if typing.TYPE_CHECKING:
@@ -33,6 +35,35 @@ class ROS2LaunchManager:
                          app_instance: 'AppInstance'
                          ) -> 'ROS2LaunchManager':
         return ROS2LaunchManager(app_instance=app_instance)
+
+    def _load_launch_objects(self, ctx: LaunchContext,
+                             cfg: LaunchConfig,
+                             node_list: Sequence[Sequence[Dict]]):
+        for nodes in node_list:
+            for node in nodes:
+                if node['__TYPE__'] == 'Node':
+                    remappings =  self._get_remappings_from_json(node.get('remappings'))
+                    nc = NodeConfig(
+                        name=node['name'],
+                        namespace=node['namespace'],
+                        package=node['package'],
+                        executable_path=node['executable_path'],
+                        executable_type=None,
+                        remappings=remappings,
+                        filename=node.get('filename'),
+                        output=node.get('output'),
+                        required=self._get_bool(node.get('required'), False),
+                        respawn=self._get_bool(node.get('respawn'), False),
+                        respawn_delay=self._get_float(node.get('respawn_delay'), 0.0),
+                        env_args=node.get('env_args'),
+                        cwd=node.get('cwd'),
+                        args=node.get('args'),
+                        launch_prefix=node.get('launch_prefix')
+
+                    )
+
+    def _get_bool(self, v: str, _default: bool):
+        return bool(str) if str is not None else _default
 
     def read(self,
              filename: str,
@@ -72,21 +103,20 @@ class ROS2LaunchManager:
         cmd = f'python /launch_extractor.py {shlex.quote(filename)}'
         # This will write the file to /arch.json
         self._app_instance.shell.popen(cmd, stdout=True, stderr=True)
-        try:  # Need to cleanup the temp file created if there is an exception
-            filename = os.path.basename(filename)
-            filename += f'-{next(tempfile._get_candidate_names())}'  # noqa
-            filename += '.json'
-            to_copy_to = os.path.join(tempfile.gettempdir(), filename)
-            logger.debug(f"Copying arch.json on contaner to {to_copy_to}")
-            files.copy_to_host('/arch.yml', to_copy_to)
-        finally:
-            # TODO Clean up temp file
-            pass
+        logger.debug(f"Reading arch.json on container")
+        config_json = files.read('/arch.yml')
+        config_nodes = json.loads(config_json)
 
         # Convert json to a launch config
         # TODO Implement launch config
-        return LaunchConfig()
+        lc = LaunchConfig()
+        ctx = LaunchContext(namespace='/', filename=filename)
+        if argv:
+            ctx = ctx.with_argv(argv)
 
+        ctx, cfg = self._load_launch_objects(ctx, lc, list(config_nodes))
+        logger.debug(f'launch configuration: {cfg}')
+        return lc
 
     def write(self,
               config: LaunchConfig,
@@ -158,7 +188,8 @@ class ROS2LaunchManager:
                args: Optional[Mapping[str, Union[int, str]]] = None,
                prefix: Optional[str] = None,
                launch_prefixes: Optional[Mapping[str, str]] = None,
-               node_to_remappings: Optional[Mapping[str, Collection[Tuple[str, str]]]] = None  # noqa
+               node_to_remappings: Optional[Mapping[str, Collection[Tuple[str, str]]]] = None
+               # noqa
                ) -> ROSLaunchController:
         """Provides an interface to the roslaunch command.
 
