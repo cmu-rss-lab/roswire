@@ -59,8 +59,15 @@ class ROS2LaunchManager:
                         cwd=node.get('cwd'),
                         args=node.get('args'),
                         launch_prefix=node.get('launch_prefix')
-
                     )
+                    cfg.with_node(nc)
+                elif node['__TYPE__'] == 'ExecuteProcess' and node['cmd'][0] == 'gazebo':
+                    nc = NodeConfig(
+                        name='gazebo',
+                        args=node['cmd'][1:],
+                    )
+                    cfg.with_node(nc)
+        return ctx, cfg
 
     def _get_bool(self, v: str, _default: bool):
         return bool(str) if str is not None else _default
@@ -100,11 +107,12 @@ class ROS2LaunchManager:
 
         # Runs the script using app_instance.shell. This will create an arch.json
         logger.debug("Running the script in the container")
-        cmd = f'python /launch_extractor.py {shlex.quote(filename)}'
+        output = shlex.quote(os.path.basename(filename) + '.json')
+        cmd = f'python /launch_extractor.py --output {output} {shlex.quote(filename)}'
         # This will write the file to /arch.json
         self._app_instance.shell.popen(cmd, stdout=True, stderr=True)
         logger.debug(f"Reading arch.json on container")
-        config_json = files.read('/arch.yml')
+        config_json = files.read(output)
         config_nodes = json.loads(config_json)
 
         # Convert json to a launch config
