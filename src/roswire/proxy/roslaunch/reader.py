@@ -2,8 +2,9 @@
 """
 This file implements a proxy for parsing the contents of launch files.
 """
-__all__ = ('LaunchFileReader',)
+__all__ = ('ROS1LaunchFileReader',)
 
+import abc
 import os
 import shlex
 import subprocess
@@ -22,6 +23,35 @@ from .substitution import ArgumentResolver
 from ...exceptions import FailedToParseLaunchFile
 from ...name import (global_name, name_is_global, name_is_private, namespace,
                      namespace_join)
+from ...ros2.reader import ROS2LaunchFileReader
+
+
+@abc.abstract
+class LaunchFileReader:
+
+    @classmethod
+    def for_app_instance(cls, app_instance: 'AppInstance'):
+        from ... import ROSVersion
+
+        if app_instance.description.distribution.ros == ROSVersion.ROS1:
+            return ROS1LaunchFileReader()
+        elif app_instance.description.distribution.ros == ROSVersion.ROS2:
+            return ROS2LaunchFileReader()
+
+    @abc.abstractmethod
+    def read(self,
+             fn: str,
+             argv: Optional[Sequence[str]] = None
+             ) -> LaunchConfig:
+        pass
+
+    @abc.abstractmethod
+    def locate_node_binary(self,
+                           package: str,
+                           node_type: str) -> str:
+        pass
+
+
 
 _TAG_TO_LOADER = {}
 
@@ -93,7 +123,7 @@ def tag(name: str,
     legal_attributes = frozenset(list(legal_attributes) + ['if', 'unless'])
 
     def wrap(loader: Loader) -> Loader:
-        def wrapped(self: 'LaunchFileReader',
+        def wrapped(self: 'ROS1LaunchFileReader',
                     ctx: LaunchContext,
                     cfg: LaunchConfig,
                     elem: ET.Element
@@ -116,7 +146,7 @@ def tag(name: str,
 
 
 @attr.s(auto_attribs=True)
-class LaunchFileReader:
+class ROS1LaunchFileReader:
     _shell: dockerblade.Shell
     _files: dockerblade.FileSystem
 
