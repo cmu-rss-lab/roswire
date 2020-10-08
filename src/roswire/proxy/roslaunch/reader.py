@@ -23,20 +23,12 @@ from .substitution import ArgumentResolver
 from ...exceptions import FailedToParseLaunchFile
 from ...name import (global_name, name_is_global, name_is_private, namespace,
                      namespace_join)
-from ...ros2.reader import ROS2LaunchFileReader
 
 
-@abc.abstract
+@attr.s(auto_attribs=True)
 class LaunchFileReader:
 
-    @classmethod
-    def for_app_instance(cls, app_instance: 'AppInstance'):
-        from ... import ROSVersion
-
-        if app_instance.description.distribution.ros == ROSVersion.ROS1:
-            return ROS1LaunchFileReader()
-        elif app_instance.description.distribution.ros == ROSVersion.ROS2:
-            return ROS2LaunchFileReader()
+    app_instance: 'AppInstance'
 
     @abc.abstractmethod
     def read(self,
@@ -50,7 +42,6 @@ class LaunchFileReader:
                            package: str,
                            node_type: str) -> str:
         pass
-
 
 
 _TAG_TO_LOADER = {}
@@ -146,9 +137,12 @@ def tag(name: str,
 
 
 @attr.s(auto_attribs=True)
-class ROS1LaunchFileReader:
+class ROS1LaunchFileReader(LaunchFileReader):
+
     _shell: dockerblade.Shell
     _files: dockerblade.FileSystem
+
+    app_instance: 'AppInstance'
 
     def _parse_file(self, fn: str) -> ET.Element:
         """Parses a given XML launch file to a root XML element."""
