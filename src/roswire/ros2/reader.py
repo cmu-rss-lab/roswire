@@ -1,6 +1,7 @@
 import json
 import os
 import shlex
+import typing
 from typing import Any, Dict, Optional, Sequence, Tuple
 
 import attr
@@ -10,6 +11,9 @@ from loguru import logger
 from ..proxy.roslaunch.config import ExecutableType, LaunchConfig, NodeConfig
 from ..proxy.roslaunch.context import LaunchContext
 from ..proxy.roslaunch.reader import LaunchFileReader
+
+if typing.TYPE_CHECKING:
+    from ..app import AppInstance
 
 
 @attr.s(eq=False)
@@ -92,9 +96,6 @@ class ROS2LaunchFileReader(LaunchFileReader):
                     if isinstance(args, list):
                         args = ' '.join(args)
                     print(args)
-                    # env_args = node.get('env_args', [])
-                    # if isinstance(env_args, list):
-                    #     env_args = list([(key, val) for key, val in env_args])
                     remappings = node.get('remappings', [])
                     if remappings is not None:
                         remappings = tuple(remappings)

@@ -8,6 +8,7 @@ import abc
 import os
 import shlex
 import subprocess
+import typing
 import xml.etree.ElementTree as ET
 from typing import (Any, Callable, Collection, Optional, overload, Sequence,
                     Tuple, Union)
@@ -23,6 +24,9 @@ from .substitution import ArgumentResolver
 from ...exceptions import FailedToParseLaunchFile
 from ...name import (global_name, name_is_global, name_is_private, namespace,
                      namespace_join)
+
+if typing.TYPE_CHECKING:
+    from ...app import AppInstance
 
 
 @attr.s(auto_attribs=True)
