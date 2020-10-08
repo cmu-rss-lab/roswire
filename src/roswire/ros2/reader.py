@@ -61,12 +61,11 @@ class ROS2LaunchFileReader(LaunchFileReader):
         cmd = f'python3 /launch_extractor.py --output' \
               f' {output} {shlex.quote(filename)}'
         logger.debug(f"Running the script in the container: {cmd}")
-        self.app_instance.shell.check_call(cmd)
-
+        result = self.app_instance.shell.check_call(cmd)
+        logger.debug(f"Call resulted in {result}")
         logger.debug(f"Reading {output} on container")
         config_json = files.read(output)
         config_nodes = json.loads(config_json)
-
         # Convert json to a launch config
         # TODO Implement launch config
         lc = LaunchConfig()
@@ -98,8 +97,7 @@ class ROS2LaunchFileReader(LaunchFileReader):
                     #     env_args = list([(key, val) for key, val in env_args])
                     remappings = node.get('remappings', [])
                     if remappings is not None:
-                        remappings = list(remappings)
-
+                        remappings = tuple(remappings)
                     nc = NodeConfig(
                         name=node['name'],
                         namespace=node['namespace'],
