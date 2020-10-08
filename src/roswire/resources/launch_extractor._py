@@ -22,7 +22,6 @@ def get_executable_type(path: str) -> str:
     except UnicodeDecodeError:
         return 'LIKELY_CPP'
 
-
 def perform_substitutions(sub, context):
     if isinstance(sub, LaunchConfiguration):
         return sub.perform(context)
@@ -36,6 +35,11 @@ def executeprocess_execute(self, context):
     dict = {}
     dict['cmd'] = processed['cmd']
     dict['name'] = self._ExecuteProcess__name
+    dict['namespace'] = ''
+    dict['typ'] = ''
+    dict['package'] = ''
+    dict['executable_path'] = processed['cmd'][0]
+    dict['executable_type'] = ''
     if processed['cwd'] is not None:
         dict['cwd'] = processed['cwd']
     if processed['env'] is not None:
@@ -75,12 +79,13 @@ def node_execute(self, context):
     dict['executable'] = perform_substitutions(self._Node__node_executable, context)
     dict['cmd'] = processed['cmd']
     dict['executable_type'] = get_executable_type(dict['cmd'][0])
+    dict['executable_path'] = dict['cmd'][0]
     dict['launch_file'] = context.locals.current_launch_file_path
 
     if processed['cmd'] is not None:
         dict['cwd'] = processed['cwd']
-    if processed['env'] is not None:
-        dict['env_args'] = perform_substitutions(self._Node__env_args, context)
+    if  processed['env'] is not None:
+        dict['env_args'] = perform_substitutions(processed['env'], context)
     dict['output'] = self._ExecuteProcess__output
     if self._Node__arguments is not None:
         dict['args'] = processed['cmd'][1:]

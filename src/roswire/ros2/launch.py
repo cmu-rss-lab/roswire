@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 __all__ = ('ROS2LaunchManager',)
 
-import json
 import os
 import shlex
 import typing
-from typing import Collection, List, Mapping, Optional, Sequence, Tuple, Union, Dict
+from typing import Collection, List, Mapping, Optional, Sequence, Tuple, Union
 
 import attr
 from loguru import logger
@@ -34,7 +33,10 @@ class ROS2LaunchManager:
                          ) -> 'ROS2LaunchManager':
         return ROS2LaunchManager(app_instance=app_instance)
 
-    def read(self, filename: str, argv: Optional[Sequence[str]] = None) -> LaunchConfig:
+    def read(self, filename: str,
+             argv: Optional[Sequence[str]] = None
+             ) -> LaunchConfig:
+        # TODO Implement this by constructing a launch file reader
         pass
 
     def write(self,
@@ -107,7 +109,9 @@ class ROS2LaunchManager:
                args: Optional[Mapping[str, Union[int, str]]] = None,
                prefix: Optional[str] = None,
                launch_prefixes: Optional[Mapping[str, str]] = None,
-               node_to_remappings: Optional[Mapping[str, Collection[Tuple[str, str]]]] = None
+               node_to_remappings: Optional[
+                   Mapping[str, Collection[Tuple[str, str]]]
+               ] = None
                # noqa
                ) -> ROSLaunchController:
         """Provides an interface to the roslaunch command.
