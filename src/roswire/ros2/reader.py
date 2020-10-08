@@ -65,8 +65,7 @@ class ROS2LaunchFileReader(LaunchFileReader):
         cmd = f'python3 /launch_extractor.py --output' \
               f' {output} {shlex.quote(filename)}'
         logger.debug(f"Running the script in the container: {cmd}")
-        result = self.app_instance.shell.check_call(cmd)
-        logger.debug(f"Call resulted in {result}")
+        self.app_instance.shell.check_call(cmd)
         logger.debug(f"Reading {output} on container")
         config_json = files.read(output)
         config_nodes = json.loads(config_json)

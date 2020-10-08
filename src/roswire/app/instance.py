@@ -168,7 +168,8 @@ class AppInstance:
     def reader(self) -> LaunchFileReader:
         from ..distribution import ROSVersion
         if self.description.distribution.ros == ROSVersion.ROS1:
-            return ROS1LaunchFileReader(shell=self.shell,
+            return ROS1LaunchFileReader(app_instance=None,
+                                        shell=self.shell,
                                         files=self.files)
         else:
             return ROS2LaunchFileReader(app_instance=self)

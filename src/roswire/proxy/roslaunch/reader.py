@@ -32,7 +32,7 @@ if typing.TYPE_CHECKING:
 @attr.s(auto_attribs=True)
 class LaunchFileReader:
 
-    app_instance: 'AppInstance'
+    app_instance: Optional[AppInstance]
 
     @abc.abstractmethod
     def read(self,
@@ -51,7 +51,7 @@ class LaunchFileReader:
 _TAG_TO_LOADER = {}
 
 Loader = \
-    Callable[['LaunchFileReader', LaunchContext, LaunchConfig, ET.Element],
+    Callable[['ROS1LaunchFileReader', LaunchContext, LaunchConfig, ET.Element],
              Tuple[LaunchContext, LaunchConfig]]
 
 
@@ -145,8 +145,6 @@ class ROS1LaunchFileReader(LaunchFileReader):
 
     _shell: dockerblade.Shell
     _files: dockerblade.FileSystem
-
-    app_instance: 'AppInstance'
 
     def _parse_file(self, fn: str) -> ET.Element:
         """Parses a given XML launch file to a root XML element."""
