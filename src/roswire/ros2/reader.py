@@ -1,23 +1,29 @@
 import json
 import os
 import shlex
-from typing import Optional, Sequence, Dict
+from typing import Any, Dict, Optional, Sequence, Tuple
 
 import attr
+import pkg_resources
 from loguru import logger
 
-from src.roswire.proxy.roslaunch.config import LaunchConfig, NodeConfig
-from src.roswire.proxy.roslaunch.context import LaunchContext
-from src.roswire.proxy.roslaunch.reader import LaunchFileReader
+from ..proxy.roslaunch.config import ExecutableType, LaunchConfig, NodeConfig
+from ..proxy.roslaunch.context import LaunchContext
+from ..proxy.roslaunch.reader import LaunchFileReader
 
 
 @attr.s(eq=False)
 class ROS2LaunchFileReader(LaunchFileReader):
 
+    app_instance: 'AppInstance'
+
     def locate_node_binary(self, package: str, node_type: str) -> str:
         pass
 
-    def read(self, filename: str, argv: Optional[Sequence[str]] = None) -> LaunchConfig:
+    def read(self,
+             filename: str,
+             argv: Optional[Sequence[str]] = None
+             ) -> LaunchConfig:
         """Produces a summary of the effects of a launch file.
 
            Parameters
@@ -39,19 +45,25 @@ class ROS2LaunchFileReader(LaunchFileReader):
                If the given launch file could not be found in the package.
            """
 
-        # Copy resources/launch_extractor._py as a python file into the container
+        # Copy resources/launch_extractor._py as a python
+        # file into the container
         logger.debug("Copying launch extraction script")
-        files = self._app_instance.files
-        files.copy_from_host('resources/launch_extractor.py',
+        files = self.app_instance.files
+        host_script = pkg_resources. \
+            resource_filename('roswire',
+                              'resources/launch_extractor._py')
+        logger.debug(f'Resource is {host_script}')
+        files.copy_from_host(host_script,
                              '/launch_extractor.py')
 
-        # Runs the script using app_instance.shell. This will create an arch.json
-        logger.debug("Running the script in the container")
+        # Runs the script using app_instance.shell.
         output = shlex.quote(os.path.basename(filename) + '.json')
-        cmd = f'python /launch_extractor.py --output {output} {shlex.quote(filename)}'
-        # This will write the file to /arch.json
-        self._app_instance.shell.popen(cmd, stdout=True, stderr=True)
-        logger.debug(f"Reading arch.json on container")
+        cmd = f'python3 /launch_extractor.py --output' \
+              f' {output} {shlex.quote(filename)}'
+        logger.debug(f"Running the script in the container: {cmd}")
+        self.app_instance.shell.check_call(cmd)
+
+        logger.debug(f"Reading {output} on container")
         config_json = files.read(output)
         config_nodes = json.loads(config_json)
 
@@ -62,42 +74,70 @@ class ROS2LaunchFileReader(LaunchFileReader):
         if argv:
             ctx = ctx.with_argv(argv)
 
-        ctx, cfg = self._load_launch_objects(ctx, lc, list(config_nodes))
+        ctx, cfg = self._load_launch_objects(ctx, lc,
+                                             [list(config_nodes)])
         logger.debug(f'launch configuration: {cfg}')
         return lc
 
     def _load_launch_objects(self, ctx: LaunchContext,
                              cfg: LaunchConfig,
-                             node_list: Sequence[Sequence[Dict]]):
+                             node_list: Sequence[Sequence[Dict]]
+                             ) -> Tuple[LaunchContext, LaunchConfig]:
         for nodes in node_list:
             for node in nodes:
                 if node['__TYPE__'] == 'Node':
-                    remappings = self._get_remappings_from_json(node.get('remappings'))
+                    print(f'processing: {node}')
+                    # remappings = self.\
+                    #     _get_remappings_from_json(node.get('remappings'))
+                    args: Optional[Any] = node.get('args', [])
+                    if isinstance(args, list):
+                        args = ' '.join(args)
+                    print(args)
+                    # env_args = node.get('env_args', [])
+                    # if isinstance(env_args, list):
+                    #     env_args = list([(key, val) for key, val in env_args])
+                    remappings = node.get('remappings', [])
+                    if remappings is not None:
+                        remappings = list(remappings)
+
                     nc = NodeConfig(
                         name=node['name'],
                         namespace=node['namespace'],
                         package=node['package'],
                         executable_path=node['executable_path'],
-                        executable_type=None,
-                        remappings=remappings,
+                        executable_type=ExecutableType[
+                            node['executable_type']
+                        ],
+                        remappings=remappings, # noqa
                         filename=node.get('filename'),
                         output=node.get('output'),
                         required=self._get_bool(node.get('required'), False),
                         respawn=self._get_bool(node.get('respawn'), False),
-                        respawn_delay=self._get_float(node.get('respawn_delay'), 0.0),
-                        env_args=node.get('env_args'),
+                        respawn_delay=self._get_float(
+                            node.get('respawn_delay'), 0.0),
+                        env_args=tuple(node.get('env_args', [])), # noqa
                         cwd=node.get('cwd'),
-                        args=node.get('args'),
-                        launch_prefix=node.get('launch_prefix')
+                        args=args,
+                        launch_prefix=node.get('launch_prefix'),
+                        typ=''
                     )
                     cfg.with_node(nc)
-                elif node['__TYPE__'] == 'ExecuteProcess' and node['cmd'][0] == 'gazebo':
+                elif node['__TYPE__'] == 'ExecuteProcess' \
+                        and node['cmd'][0] == 'gazebo':
                     nc = NodeConfig(
                         name='gazebo',
-                        args=node['cmd'][1:],
+                        namespace='',
+                        typ='',
+                        package='',
+                        executable_path=node['cmd'][0],
+                        executable_type=ExecutableType.LIKELY_CPP,
+                        args=' '.join(node['cmd'][1:]),
                     )
                     cfg.with_node(nc)
-            return ctx, cfg
+        return ctx, cfg
 
-        def _get_bool(self, v: str, _default: bool):
-            return bool(str) if str is not None else _default
+    def _get_bool(self, v: Optional[Any], _default: bool) -> bool:
+        return bool(v) if v is not None else _default
+
+    def _get_float(self, v: Optional[Any], _default: float) -> float:
+        return float(v) if v is not None else _default
