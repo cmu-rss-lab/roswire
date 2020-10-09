@@ -20,9 +20,9 @@ class NodeConfig:
     namespace: str
     name: str
     typ: str
-    package: str
     executable_path: str
     executable_type: ExecutableType
+    package: Optional[str] = attr.ib(default=None)
     remappings: Collection[Tuple[str, str]] = attr.ib(default=tuple())
     filename: Optional[str] = attr.ib(default=None)
     output: Optional[str] = attr.ib(default=None)
@@ -69,7 +69,8 @@ class NodeConfig:
 
     def to_xml_element(self) -> ET.Element:
         element = ET.Element('node')
-        element.attrib['pkg'] = self.package
+        if self.package:
+            element.attrib['pkg'] = self.package
         element.attrib['type'] = self.typ
         element.attrib['name'] = self.name
         element.attrib['ns'] = self.namespace

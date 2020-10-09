@@ -2,16 +2,15 @@
 """
 This file implements a proxy for parsing the contents of launch files.
 """
-__all__ = ('ROS1LaunchFileReader',)
+__all__ = ('ROS1LaunchFileReader',
+           'LaunchFileReader')
 
 import abc
 import os
 import shlex
 import subprocess
-import typing
 import xml.etree.ElementTree as ET
-from typing import (Any, Callable, Collection, Optional, overload, Sequence,
-                    Tuple, Union)
+from typing import (Any, Callable, Collection, Optional, overload, Sequence, Tuple, Union)
 
 import attr
 import dockerblade
@@ -25,27 +24,22 @@ from ...exceptions import FailedToParseLaunchFile
 from ...name import (global_name, name_is_global, name_is_private, namespace,
                      namespace_join)
 
-if typing.TYPE_CHECKING:
-    from ...app import AppInstance
-
 
 @attr.s(auto_attribs=True)
 class LaunchFileReader:
-
-    app_instance: Optional[AppInstance]
 
     @abc.abstractmethod
     def read(self,
              fn: str,
              argv: Optional[Sequence[str]] = None
              ) -> LaunchConfig:
-        pass
+        ...
 
     @abc.abstractmethod
     def locate_node_binary(self,
                            package: str,
                            node_type: str) -> str:
-        pass
+        ...
 
 
 _TAG_TO_LOADER = {}

@@ -37,7 +37,7 @@ class ROS2LaunchManager:
              argv: Optional[Sequence[str]] = None
              ) -> LaunchConfig:
         # TODO Implement this by constructing a launch file reader
-        pass
+        raise NotImplementedError
 
     def write(self,
               config: LaunchConfig,
@@ -112,7 +112,6 @@ class ROS2LaunchManager:
                node_to_remappings: Optional[
                    Mapping[str, Collection[Tuple[str, str]]]
                ] = None
-               # noqa
                ) -> ROSLaunchController:
         """Provides an interface to the roslaunch command.
 

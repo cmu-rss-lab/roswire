@@ -53,8 +53,7 @@ class ROSLaunchManager:
             If the given launch file could not be found in the package.
         """
         filename = self.locate(filename, package=package)
-        reader = ROS1LaunchFileReader(app_instance=None,
-                                      shell=self._shell,
+        reader = ROS1LaunchFileReader(shell=self._shell,
                                       files=self._files)
         return reader.read(filename, argv)
 
