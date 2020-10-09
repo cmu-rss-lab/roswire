@@ -1,12 +1,17 @@
 import argparse
 import json
 import os
+import sys
 from typing import Dict, Union, List, cast
 
 from launch.actions import ExecuteProcess
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from ros2launch.api import launch_a_launch_file
+
+VALID_EXECUTE_PROCESS = {
+    'gazebo': {'package' : 'gazebo'}
+}
 
 started_by_launch = []
 
@@ -22,6 +27,7 @@ def get_executable_type(path: str) -> str:
     except UnicodeDecodeError:
         return 'LIKELY_CPP'
 
+
 def perform_substitutions(sub, context):
     if isinstance(sub, LaunchConfiguration):
         return sub.perform(context)
@@ -29,17 +35,53 @@ def perform_substitutions(sub, context):
         return sub
 
 
+def find_executable(executable, path=None):
+    """Find if 'executable' can be run. Looks for it in 'path'
+    (string that lists directories separated by 'os.pathsep';
+    defaults to os.environ['PATH']). Checks for all executable
+    extensions. Returns full path or None if no command is found.
+    """
+    if path is None:
+        path = os.environ['PATH']
+    paths = path.split(os.pathsep)
+    extlist = ['']
+    if os.name == 'os2':
+        (base, ext) = os.path.splitext(executable)
+        # executable files on OS/2 can have an arbitrary extension, but
+        # .exe is automatically appended if no dot is present in the name
+        if not ext:
+            executable = executable + ".exe"
+    elif sys.platform == 'win32':
+        pathext = os.environ['PATHEXT'].lower().split(os.pathsep)
+        (base, ext) = os.path.splitext(executable)
+        if ext.lower() not in pathext:
+            extlist = pathext
+    for ext in extlist:
+        execname = executable + ext
+        if os.path.isfile(execname):
+            return execname
+        else:
+            for p in paths:
+                f = os.path.join(p, execname)
+                if os.path.isfile(f):
+                    return f
+    else:
+        return None
+
+
 def executeprocess_execute(self, context):
+    global VALID_EXECUTE_PROCESS
     self._ExecuteProcess__expand_substitutions(context)
     processed = self._ExecuteProcess__process_event_args
+    path = find_executable(processed['cmd'][0])
     dict = {}
     dict['cmd'] = processed['cmd']
     dict['name'] = self._ExecuteProcess__name
     dict['namespace'] = ''
     dict['typ'] = ''
     dict['package'] = ''
-    dict['executable_path'] = processed['cmd'][0]
-    dict['executable_type'] = ''
+    dict['executable_path'] = path
+    dict['executable_type'] = get_executable_type(path)
     if processed['cwd'] is not None:
         dict['cwd'] = processed['cwd']
     if processed['env'] is not None:
@@ -47,8 +89,9 @@ def executeprocess_execute(self, context):
     dict['output'] = self._ExecuteProcess__output
     dict['launch_file'] = context.locals.current_launch_file_path
 
-    if type(self) == ExecuteProcess:
-        dict['__TYPE__'] = 'ExecuteProcess'
+    if type(self) == ExecuteProcess and dict['cmd'][0] in VALID_EXECUTE_PROCESS.keys():
+        # Ignore executableProcess we don't know about
+        dict['__TYPE__'] = 'Node'
         started_by_launch.append(dict)
 
 
