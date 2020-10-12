@@ -15,9 +15,7 @@ from loguru import logger
 
 from ..definitions import TypeDatabase
 from ..proxy import CatkinInterface, CatkinMake, CatkinTools, ROSCore
-from ..proxy.roslaunch.reader import LaunchFileReader, ROS1LaunchFileReader
 from ..ros2 import ROS2
-from ..ros2.reader import ROS2LaunchFileReader
 
 if typing.TYPE_CHECKING:
     from .app import App
@@ -163,15 +161,6 @@ class AppInstance:
     def ros2(self) -> ROS2:
         """Provides access to ROS2 inside this application instance."""
         return ROS2.for_app_instance(self)
-
-    @property
-    def reader(self) -> LaunchFileReader:
-        from ..distribution import ROSVersion
-        if self.description.distribution.ros == ROSVersion.ROS1:
-            return ROS1LaunchFileReader(shell=self.shell,
-                                        files=self.files)
-        else:
-            return ROS2LaunchFileReader(app_instance=self)
 
     def close(self) -> None:
         """Closes this application instance and destroys all resources."""
