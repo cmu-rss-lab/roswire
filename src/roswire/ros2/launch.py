@@ -33,7 +33,10 @@ class ROS2LaunchManager:
                          ) -> 'ROS2LaunchManager':
         return ROS2LaunchManager(app_instance=app_instance)
 
-    def read(self, filename: str,
+    def read(self,
+             filename: str,
+             *,
+             package: Optional[str] = None,
              argv: Optional[Sequence[str]] = None
              ) -> LaunchConfig:
         # TODO Implement this by constructing a launch file reader
