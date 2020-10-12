@@ -21,12 +21,18 @@ from .config import ExecutableType, LaunchConfig, NodeConfig
 from .context import LaunchContext
 from .rosparam import load_from_yaml_string as load_rosparam_from_string
 from .substitution import ArgumentResolver
+from ... import AppInstance
 from ...exceptions import FailedToParseLaunchFile
 from ...name import (global_name, name_is_global, name_is_private, namespace,
                      namespace_join)
 
 
 class LaunchFileReader(abc.ABC):
+
+    @abc.abstractmethod
+    @classmethod
+    def for_app_instance(cls, app_instance: AppInstance) -> 'LaunchFileReader':
+        ...
 
     @abc.abstractmethod
     def read(self,
@@ -139,6 +145,11 @@ class ROS1LaunchFileReader(LaunchFileReader):
 
     _shell: dockerblade.Shell
     _files: dockerblade.FileSystem
+
+    @classmethod
+    def for_app_instance(cls, app_instance: AppInstance) -> LaunchFileReader:
+        return ROS1LaunchFileReader(shell=app_instance.shell,
+                                    files=app_instance.files)
 
     def _parse_file(self, fn: str) -> ET.Element:
         """Parses a given XML launch file to a root XML element."""

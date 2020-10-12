@@ -20,6 +20,10 @@ if typing.TYPE_CHECKING:
 @attr.s(auto_attribs=True)
 class ROS2LaunchFileReader(LaunchFileReader):
 
+    @classmethod
+    def for_app_instance(cls, app_instance: AppInstance) -> 'LaunchFileReader':
+        return ROS2LaunchFileReader(app_instance)
+
     _app_instance: 'AppInstance'
 
     def locate_node_binary(self, package: str, node_type: str) -> str:
