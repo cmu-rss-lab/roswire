@@ -3,14 +3,13 @@ import json
 import os
 import shlex
 import typing
-from typing import Any, Dict, Optional, Sequence, Tuple
+from typing import Any, Dict, Optional, Sequence
 
 import attr
 import pkg_resources
 from loguru import logger
 
 from ..proxy.roslaunch.config import ExecutableType, LaunchConfig, NodeConfig
-from ..proxy.roslaunch.context import LaunchContext
 from ..proxy.roslaunch.reader import LaunchFileReader
 
 if typing.TYPE_CHECKING:
@@ -50,8 +49,6 @@ class ROS2LaunchFileReader(LaunchFileReader):
         LaunchFileNotFound
             If the given launch file could not be found in the package.
         """
-        if self._app_instance is None:
-            raise ValueError('ROS2 version requires and AppInstance object')
         logger.debug("Copying launch extraction script")
         files = self._app_instance.files
         host_script = pkg_resources.resource_filename(
@@ -61,20 +58,15 @@ class ROS2LaunchFileReader(LaunchFileReader):
                              '/launch_extractor.py')
 
         config_nodes = self._process_launch_on_app_instance(fn, files)
-        lc = self._read_launch_config_from_dict(fn, config_nodes, argv)
+        lc = self._read_launch_config_from_dict(config_nodes)
         return lc
 
     def _read_launch_config_from_dict(self,
-                                      fn: str,
                                       config_nodes: Sequence[Dict[str, Any]],
-                                      argv: Optional[Sequence[str]] = None
                                       ) -> LaunchConfig:
-        lc = LaunchConfig()
-        ctx = LaunchContext(namespace='/', filename=fn)
-        if argv:
-            ctx = ctx.with_argv(argv)
-        ctx, cfg = self._load_launch_objects(ctx, lc,
-                                             [list(config_nodes)])
+        cfg = LaunchConfig()
+        cfg = self._load_launch_objects(cfg,
+                                        [list(config_nodes)])
         logger.debug(f'launch configuration: {cfg}')
         return cfg
 
@@ -94,10 +86,9 @@ class ROS2LaunchFileReader(LaunchFileReader):
         return config_nodes
 
     def _load_launch_objects(self,
-                             ctx: LaunchContext,
                              cfg: LaunchConfig,
                              node_list: Sequence[Sequence[Dict[str, Any]]]
-                             ) -> Tuple[LaunchContext, LaunchConfig]:
+                             ) -> LaunchConfig:
         for nodes in node_list:
             for node in nodes:
                 if node['__TYPE__'] == 'Node':
@@ -106,7 +97,7 @@ class ROS2LaunchFileReader(LaunchFileReader):
                 else:
                     # The __TYPE__ isn't known (this is for futureproofing)
                     raise NotImplementedError
-        return ctx, cfg
+        return cfg
 
     def _read_node_from_dict(self, node: Dict[str, Any]) -> NodeConfig:
         args = ' '.join(node.get('args', []))
