@@ -20,9 +20,9 @@ class NodeConfig:
     namespace: str
     name: str
     typ: str
+    package: str
     executable_path: str
     executable_type: ExecutableType
-    package: Optional[str] = attr.ib(default=None)
     remappings: Collection[Tuple[str, str]] = attr.ib(default=tuple())
     filename: Optional[str] = attr.ib(default=None)
     output: Optional[str] = attr.ib(default=None)
