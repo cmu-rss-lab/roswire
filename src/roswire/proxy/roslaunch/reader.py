@@ -2,8 +2,9 @@
 """
 This file implements a proxy for parsing the contents of launch files.
 """
-__all__ = ('ROS1LaunchFileReader',
-           'LaunchFileReader')
+__all__ = ('LaunchFileReader',
+           'ROS1LaunchFileReader',
+           )
 
 import abc
 import os
@@ -25,8 +26,7 @@ from ...name import (global_name, name_is_global, name_is_private, namespace,
                      namespace_join)
 
 
-@attr.s(auto_attribs=True)
-class LaunchFileReader:
+class LaunchFileReader(abc.ABC):
 
     @abc.abstractmethod
     def read(self,
