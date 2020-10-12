@@ -20,7 +20,9 @@ if typing.TYPE_CHECKING:
 class ROS2LaunchFileReader(LaunchFileReader):
 
     @classmethod
-    def for_app_instance(cls, app_instance: AppInstance) -> 'LaunchFileReader':
+    def for_app_instance(cls,
+                         app_instance: 'AppInstance'
+                         ) -> 'LaunchFileReader':
         return ROS2LaunchFileReader(app_instance)
 
     _app_instance: 'AppInstance'

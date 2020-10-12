@@ -10,6 +10,7 @@ import abc
 import os
 import shlex
 import subprocess
+import typing
 import xml.etree.ElementTree as ET
 from typing import (Any, Callable, Collection, Optional, overload, Sequence, Tuple, Union)
 
@@ -21,17 +22,19 @@ from .config import ExecutableType, LaunchConfig, NodeConfig
 from .context import LaunchContext
 from .rosparam import load_from_yaml_string as load_rosparam_from_string
 from .substitution import ArgumentResolver
-from ... import AppInstance
 from ...exceptions import FailedToParseLaunchFile
 from ...name import (global_name, name_is_global, name_is_private, namespace,
                      namespace_join)
 
+if typing.TYPE_CHECKING:
+    from ... import AppInstance
+
 
 class LaunchFileReader(abc.ABC):
 
-    @abc.abstractmethod
     @classmethod
-    def for_app_instance(cls, app_instance: AppInstance) -> 'LaunchFileReader':
+    @abc.abstractmethod
+    def for_app_instance(cls, app_instance: 'AppInstance') -> 'LaunchFileReader':
         ...
 
     @abc.abstractmethod
@@ -142,12 +145,11 @@ def tag(name: str,
 
 @attr.s(auto_attribs=True)
 class ROS1LaunchFileReader(LaunchFileReader):
-
     _shell: dockerblade.Shell
     _files: dockerblade.FileSystem
 
     @classmethod
-    def for_app_instance(cls, app_instance: AppInstance) -> LaunchFileReader:
+    def for_app_instance(cls, app_instance: 'AppInstance') -> LaunchFileReader:
         return ROS1LaunchFileReader(shell=app_instance.shell,
                                     files=app_instance.files)
 
@@ -456,7 +458,8 @@ class ROS1LaunchFileReader(LaunchFileReader):
                             attrib: str,
                             ctx: LaunchContext,
                             default: None
-                            ) -> Optional[bool]: ...
+                            ) -> Optional[bool]:
+        ...
 
     @overload
     def _read_optional_bool(self,
@@ -464,7 +467,8 @@ class ROS1LaunchFileReader(LaunchFileReader):
                             attrib: str,
                             ctx: LaunchContext,
                             default: bool
-                            ) -> bool: ...
+                            ) -> bool:
+        ...
 
     def _read_optional_bool(self,
                             elem: ET.Element,
@@ -483,7 +487,8 @@ class ROS1LaunchFileReader(LaunchFileReader):
                              attrib: str,
                              ctx: LaunchContext,
                              default: None
-                             ) -> Optional[float]: ...
+                             ) -> Optional[float]:
+        ...
 
     @overload
     def _read_optional_float(self,
@@ -491,7 +496,8 @@ class ROS1LaunchFileReader(LaunchFileReader):
                              attrib: str,
                              ctx: LaunchContext,
                              default: float
-                             ) -> float: ...
+                             ) -> float:
+        ...
 
     def _read_optional_float(self,
                              elem: ET.Element,
@@ -613,7 +619,7 @@ class ROS1LaunchFileReader(LaunchFileReader):
             path_in_scripts_dir = os.path.join(package_dir, 'scripts', node_type)
             path_in_nodes_dir = os.path.join(package_dir, 'nodes', node_type)
             if files.isfile(path_in_scripts_dir) and \
-               files.access(path_in_scripts_dir, os.X_OK):
+                    files.access(path_in_scripts_dir, os.X_OK):
                 path = path_in_scripts_dir
             elif files.isfile(path_in_nodes_dir) and \
                     files.access(path_in_nodes_dir, os.X_OK):
