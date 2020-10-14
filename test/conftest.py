@@ -6,8 +6,10 @@ import contextlib
 import os
 
 from loguru import logger
+import docker
 import dockerblade
 import roswire
+import yaml
 
 DIR_HERE = os.path.dirname(__file__)
 
@@ -17,6 +19,18 @@ logger.enable('roswire')
 def _app(name: str) -> roswire.App:
     rsw = roswire.ROSWire()
     filepath = os.path.join(DIR_HERE, 'apps', f'{name}.yml')
+
+    # ensure that the image for the app has been downloaded
+    with open(filepath, 'r') as f:
+        contents = yaml.safe_load(f)
+    image: str = contents['image']
+    try:
+        docker.get(image)
+    except docker.errors.ImageNotFound:
+        logger.debug(f"downloading Docker image for testing: {image}")
+        docker.pull(image)
+        logger.debug(f"downloaded Docker image for testing: {image}")
+
     return rsw.load(filepath)
 
 
