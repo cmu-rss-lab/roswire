@@ -1,19 +1,25 @@
-__all__=(ROS1LaunchFileReader,)
+__all__ = (ROS1LaunchFileReader,)
 
+import os
 import shlex
 import subprocess
-from typing import Any, Callable, Collection, Optional, overload, Tuple
-
 import xml.etree.ElementTree as ET
+from typing import Any, Callable, Collection, Optional, overload, \
+    Sequence, Tuple, Union
 
+import attr
 import dockerblade
 from loguru import logger
 
+from .. import AppInstance
 from ..exceptions import FailedToParseLaunchFile
-from ..name import name_is_global, name_is_private, namespace_join
-from ..proxy.roslaunch.config import ExecutableType, LaunchConfig
-from ..proxy.roslaunch.reader import LaunchFileReader
+from ..name import global_name, name_is_global, name_is_private, \
+    namespace, namespace_join
+from ..proxy.roslaunch.config import ExecutableType, LaunchConfig, NodeConfig
 from ..proxy.roslaunch.context import LaunchContext
+from ..proxy.roslaunch.reader import LaunchFileReader
+from ..proxy.roslaunch.rosparam import load_from_yaml_string as \
+    load_rosparam_from_string
 
 _TAG_TO_LOADER = {}
 
@@ -422,8 +428,7 @@ class ROS1LaunchFileReader(LaunchFileReader):
                             attrib: str,
                             ctx: LaunchContext,
                             default: None
-                            ) -> Optional[bool]:
-        ...
+                            ) -> Optional[bool]: ...
 
     @overload
     def _read_optional_bool(self,
@@ -431,8 +436,7 @@ class ROS1LaunchFileReader(LaunchFileReader):
                             attrib: str,
                             ctx: LaunchContext,
                             default: bool
-                            ) -> bool:
-        ...
+                            ) -> bool: ...
 
     def _read_optional_bool(self,
                             elem: ET.Element,
@@ -451,8 +455,7 @@ class ROS1LaunchFileReader(LaunchFileReader):
                              attrib: str,
                              ctx: LaunchContext,
                              default: None
-                             ) -> Optional[float]:
-        ...
+                             ) -> Optional[float]: ...
 
     @overload
     def _read_optional_float(self,
@@ -460,8 +463,7 @@ class ROS1LaunchFileReader(LaunchFileReader):
                              attrib: str,
                              ctx: LaunchContext,
                              default: float
-                             ) -> float:
-        ...
+                             ) -> float: ...
 
     def _read_optional_float(self,
                              elem: ET.Element,
