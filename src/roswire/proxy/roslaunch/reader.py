@@ -19,7 +19,9 @@ class LaunchFileReader(abc.ABC):
 
     @classmethod
     @abc.abstractmethod
-    def for_app_instance(cls, app_instance: 'AppInstance') -> 'LaunchFileReader':
+    def for_app_instance(cls,
+                         app_instance: 'AppInstance'
+                         ) -> 'LaunchFileReader':
         ...
 
     @abc.abstractmethod
@@ -34,6 +36,3 @@ class LaunchFileReader(abc.ABC):
                            package: str,
                            node_type: str) -> str:
         ...
-
-
-
