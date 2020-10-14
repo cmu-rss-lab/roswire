@@ -14,7 +14,7 @@ from ..proxy.roslaunch.config import LaunchConfig
 from ..proxy.roslaunch.controller import ROSLaunchController
 from ..proxy.roslaunch.roslaunch import ROSLaunchManager
 from ..ros1.reader import ROS1LaunchFileReader
-from ...roswire import exceptions as exc
+from .. import exceptions as exc
 
 
 @attr.s(eq=False)
