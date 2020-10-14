@@ -9,6 +9,7 @@ from typing import Collection, List, Mapping, Optional, Sequence, Tuple, Union
 import attr
 from loguru import logger
 
+from .reader import ROS2LaunchFileReader
 from .. import exceptions as exc
 from ..proxy.roslaunch.config import LaunchConfig
 from ..proxy.roslaunch.controller import ROSLaunchController
@@ -39,8 +40,29 @@ class ROS2LaunchManager:
              package: Optional[str] = None,
              argv: Optional[Sequence[str]] = None
              ) -> LaunchConfig:
-        # TODO Implement this by constructing a launch file reader
-        raise NotImplementedError
+        """Produces a summary of the effects of a launch file.
+
+        Parameters
+        ----------
+        filename: str
+            The name of the launch file, or an absolute path to the launch
+            file inside the container.
+        package: str, optional
+            The name of the package to which the launch file belongs.
+        argv: Sequence[str], optional
+            An optional sequence of command-line arguments that should be
+            supplied to :code:`roslaunch`.
+
+        Raises
+        ------
+        PackageNotFound
+            If the given package could not be found.
+        LaunchFileNotFound
+            If the given launch file could not be found in the package.
+        """
+        filename = self.locate(filename, package=package)
+        reader = ROS2LaunchFileReader(self._app_instance)
+        return reader.read(filename, argv)
 
     def write(self,
               config: LaunchConfig,
