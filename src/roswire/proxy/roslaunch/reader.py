@@ -618,11 +618,9 @@ class ROS1LaunchFileReader(LaunchFileReader):
 
             path_in_scripts_dir = os.path.join(package_dir, 'scripts', node_type)
             path_in_nodes_dir = os.path.join(package_dir, 'nodes', node_type)
-            if files.isfile(path_in_scripts_dir) and \
-                    files.access(path_in_scripts_dir, os.X_OK):
+            if files.isfile(path_in_scripts_dir) and files.access(path_in_scripts_dir, os.X_OK):  # noqa: E501
                 path = path_in_scripts_dir
-            elif files.isfile(path_in_nodes_dir) and \
-                    files.access(path_in_nodes_dir, os.X_OK):
+            elif files.isfile(path_in_nodes_dir) and files.access(path_in_nodes_dir, os.X_OK):  # noqa: E501
                 path = path_in_nodes_dir
 
         if not path:
