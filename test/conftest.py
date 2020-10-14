@@ -21,14 +21,15 @@ def _app(name: str) -> roswire.App:
     filepath = os.path.join(DIR_HERE, 'apps', f'{name}.yml')
 
     # ensure that the image for the app has been downloaded
+    docker_client = docker.from_env()
     with open(filepath, 'r') as f:
         contents = yaml.safe_load(f)
     image: str = contents['image']
     try:
-        docker.get(image)
+        docker_client.images.get(image)
     except docker.errors.ImageNotFound:
         logger.debug(f"downloading Docker image for testing: {image}")
-        docker.pull(image)
+        docker_client.images.pull(image)
         logger.debug(f"downloaded Docker image for testing: {image}")
 
     return rsw.load(filepath)
