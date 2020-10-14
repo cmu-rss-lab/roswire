@@ -10,12 +10,13 @@ import dockerblade
 from loguru import logger
 
 from .bag import BagPlayer, BagRecorder
+from .roslaunch import ROSLaunchManager
 from .state import SystemState, SystemStateProbe
 from ..app.description import AppDescription
 from ..exceptions import ROSWireException
 from ..interface import NodeManager
 from ..parameters import ParameterServer
-from ..ros1 import ROS1LaunchManager, ROS1NodeManager
+from ..ros1 import ROS1NodeManager
 from ..service import ServiceManager
 
 
@@ -72,8 +73,8 @@ class ROSCore:
                            self.__shell)
         self.__state_probe: SystemStateProbe = \
             SystemStateProbe.via_xmlrpc_connection(self.__connection)
-        self.roslaunch: ROS1LaunchManager = \
-            ROS1LaunchManager(self.__shell, self.__files)
+        self.roslaunch: ROSLaunchManager = \
+            ROSLaunchManager(self.__shell, self.__files)
 
     @property
     def nodes(self) -> NodeManager:
