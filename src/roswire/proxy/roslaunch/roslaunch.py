@@ -1,7 +1,7 @@
 __all__ = ('ROSLaunchManager',)
 
 import abc
-from typing import Mapping, Optional, Sequence, Union
+from typing import Collection, Mapping, Optional, Sequence, Tuple, Union
 
 import attr
 
@@ -109,7 +109,7 @@ class ROSLaunchManager(abc.ABC):
                args: Optional[Mapping[str, Union[int, str]]] = None,
                prefix: Optional[str] = None,
                launch_prefixes: Optional[Mapping[str, str]] = None,
-               node_to_remappings: Optional[Mapping[str, Collection[Tuple[str, str]]]] = None  # noqa
+               node_to_remappings: Optional[Mapping[str, Collection[Tuple[str, str]]]] = None # noqa
                ) -> ROSLaunchController:
         """Provides an interface to the roslaunch command.
 

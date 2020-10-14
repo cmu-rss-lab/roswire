@@ -12,8 +12,8 @@ from loguru import logger
 
 from ..proxy.roslaunch.config import LaunchConfig
 from ..proxy.roslaunch.controller import ROSLaunchController
-from ..ros1.reader import ROS1LaunchFileReader
 from ..proxy.roslaunch.roslaunch import ROSLaunchManager
+from ..ros1.reader import ROS1LaunchFileReader
 from ...roswire import exceptions as exc
 
 
@@ -138,7 +138,10 @@ class ROS1LaunchManager(ROSLaunchManager):
                args: Optional[Mapping[str, Union[int, str]]] = None,
                prefix: Optional[str] = None,
                launch_prefixes: Optional[Mapping[str, str]] = None,
-               node_to_remappings: Optional[Mapping[str, Collection[Tuple[str, str]]]] = None  # noqa
+               node_to_remappings: Optional[
+                   Mapping[str,
+                           Collection[Tuple[str, str]]]
+               ] = None
                ) -> ROSLaunchController:
         """Provides an interface to the roslaunch command.
 
