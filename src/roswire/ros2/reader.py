@@ -109,9 +109,7 @@ class ROS2LaunchFileReader(LaunchFileReader):
             namespace=node['namespace'],
             package=node['package'],
             executable_path=node['executable_path'],
-            executable_type=ExecutableType[
-                node['executable_type']
-            ],
+            executable_type=ExecutableType[node['executable_type']],
             remappings=remappings,
             filename=node.get('filename'),
             output=node.get('output'),
