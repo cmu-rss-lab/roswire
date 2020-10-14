@@ -125,7 +125,6 @@ class AppInstance:
                           files=self.files)
 
     @contextlib.contextmanager
-    # TODO: Make this ros1
     def roscore(self, port: int = 11311) -> Iterator[ROSCore]:
         """
         Launches a context-managed roscore inside the container.
