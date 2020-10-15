@@ -43,7 +43,7 @@ def _sut(name: str) -> Iterator[roswire.AppInstance]:
 
 
 @pytest.fixture
-def app(request) -> Iterator[roswire.App]:
+def app(request) -> roswire.App:
     return _app(request.param)
 
 
