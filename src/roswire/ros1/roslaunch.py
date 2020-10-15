@@ -10,11 +10,11 @@ import attr
 import dockerblade
 from loguru import logger
 
+from .. import exceptions as exc
 from ..proxy.roslaunch.config import LaunchConfig
 from ..proxy.roslaunch.controller import ROSLaunchController
 from ..proxy.roslaunch.roslaunch import ROSLaunchManager
 from ..ros1.reader import ROS1LaunchFileReader
-from .. import exceptions as exc
 
 
 @attr.s(eq=False)

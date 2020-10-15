@@ -10,6 +10,7 @@ import dockerblade
 from loguru import logger
 
 from .bag import BagPlayer, BagRecorder
+from .roslaunch import ROSLaunchManager
 from .state import SystemState, SystemStateProbe
 from ..app.description import AppDescription
 from ..exceptions import ROSWireException
@@ -72,7 +73,7 @@ class ROSCore:
                            self.__shell)
         self.__state_probe: SystemStateProbe = \
             SystemStateProbe.via_xmlrpc_connection(self.__connection)
-        self.roslaunch: ROS1LaunchManager = \
+        self.roslaunch: ROSLaunchManager = \
             ROS1LaunchManager(self.__shell, self.__files)
 
     @property
