@@ -3,13 +3,12 @@ __all__ = ('Package', 'PackageDatabase')
 
 import json
 import os
-import shlex
 from typing import Any, Collection, Dict, Iterator, List, Mapping, Tuple
-from typing_extensions import Final
 
 import attr
 import dockerblade
 from loguru import logger
+from typing_extensions import Final
 
 from .action import ActionFormat
 from .msg import MsgFormat
@@ -17,11 +16,11 @@ from .srv import SrvFormat
 from ..util import tuple_from_iterable
 
 _COMMAND_ROS2_PKG_PREFIXES: Final[str] = (
-        "python -c '"
-        "import json; "
-        "import ament_index_python; "
-        "print(json.dumps(ament_index_python.get_packages_with_prefixes()))"
-        "'")
+    "python -c '"
+    "import json; "
+    "import ament_index_python; "
+    "print(json.dumps(ament_index_python.get_packages_with_prefixes()))"
+    "'")
 
 
 @attr.s(frozen=True, auto_attribs=True, slots=True)
