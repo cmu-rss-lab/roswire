@@ -43,14 +43,14 @@ class BagReader:
 
         # obtain a list of all connections in the bag
         connections: List[ConnectionInfo] = []
-        for i in range(self.__header.conn_count):
+        for _ in range(self.__header.conn_count):
             conn = self._read_connection_record()
             connections.append(conn)
         self.__connections: Tuple[ConnectionInfo, ...] = tuple(connections)
 
         # obtain a summary of each chunk
         chunks: List[Chunk] = []
-        for i in range(self.__header.chunk_count):
+        for _ in range(self.__header.chunk_count):
             info = self._read_chunk_info_record()
             chunks.append(info)
         self.__chunks: Tuple[Chunk, ...] = tuple(chunks)
@@ -179,7 +179,7 @@ class BagReader:
         # represented in this chunk
         connections: List[ChunkConnection] = []
         contents: bytes = read_sized(self.__fp)
-        for i in range(num_connections):
+        for _ in range(num_connections):
             uid = decode_uint32(contents[0:4])
             count = decode_uint32(contents[4:8])
             connections.append(ChunkConnection(uid, count))
@@ -222,7 +222,7 @@ class BagReader:
             pos = chunk.pos_record
             self._seek(pos)
             self._skip_record()
-            for i in range(len(chunk.connections)):
+            for _ in range(len(chunk.connections)):
                 self._read_index_record(pos, index)
         logger.debug("read index")
 
@@ -241,7 +241,7 @@ class BagReader:
         assert ver == 1
 
         read_uint32(self.__fp)  # skip size
-        for i in range(count):
+        for _ in range(count):
             time = read_time(self.__fp)
             offset = read_uint32(self.__fp)
             entry = IndexEntry(time=time, pos=pos_chunk, offset=offset)

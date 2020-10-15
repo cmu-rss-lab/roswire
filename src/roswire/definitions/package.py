@@ -144,8 +144,7 @@ class PackageDatabase(Mapping[str, Package]):
               ) -> List[str]:
         """Parses :code:`ROS_PACKAGE_PATH` for a given shell."""
         distro = shell.environ('ROS_DISTRO')
-        ROS2_DISTROS = {'dashing', 'eloquent', 'foxy'}
-        if distro in ROS2_DISTROS:
+        if distro in {'dashing', 'eloquent', 'foxy'}:
             return cls._paths_ros2(shell, files)
         return cls._paths_ros1(shell, files)
 
