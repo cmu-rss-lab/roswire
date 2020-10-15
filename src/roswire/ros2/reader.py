@@ -78,8 +78,8 @@ class ROS2LaunchFileReader(LaunchFileReader):
                                         ) -> Sequence[Dict[str, Any]]:
         assert self._app_instance is not None
         output = shlex.quote(os.path.basename(filename) + '.json')
-        cmd = f'python3 /launch_extractor.py --output' \
-              f' {output} {shlex.quote(filename)}'
+        cmd = (f'python3 /launch_extractor.py --output',
+              f' {output} {shlex.quote(filename)}')
         logger.debug(f"Running the script in the container: {cmd}")
         self._app_instance.shell.check_call(cmd)
         logger.debug(f"Reading {output} on container")
