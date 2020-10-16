@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 
+import os
 import time
 
 
@@ -40,6 +41,7 @@ def test_eval_args_in_launch_file(sut):
         assert actual_node_names == expected_node_names
 
 
+@pytest.mark.skipif(os.environ.get('TRAVIS') == 'true', reason="Skipping test on Travis CI.")
 @pytest.mark.parametrize('sut', ['fetch'], indirect=True)
 def test_remappings(sut):
     with sut.ros1() as ros:
@@ -47,7 +49,11 @@ def test_remappings(sut):
                                package='fetch_gazebo',
                                node_to_remappings={'gazebo': [('/gazebo/model_states', '/funkybits')]})
 
-        time.sleep(30)
+        if os.environ.get('TRAVIS'):
+            sleep_time = 60
+        else:
+            sleep_time = 30
+        time.sleep(sleep_time)
         state = ros.state
         expected_nodes = {'/cmd_vel_mux',
                           '/gazebo',
