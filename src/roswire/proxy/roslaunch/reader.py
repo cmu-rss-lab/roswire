@@ -29,9 +29,14 @@ from ...name import (global_name, name_is_global, name_is_private, namespace,
 if typing.TYPE_CHECKING:
     from ... import AppInstance
 
+_TAG_TO_LOADER = {}
+
+Loader = \
+    Callable[['ROS1LaunchFileReader', LaunchContext, LaunchConfig, ET.Element],
+             Tuple[LaunchContext, LaunchConfig]]
+
 
 class LaunchFileReader(abc.ABC):
-
     @classmethod
     @abc.abstractmethod
     def for_app_instance(cls, app_instance: 'AppInstance') -> 'LaunchFileReader':
@@ -49,13 +54,6 @@ class LaunchFileReader(abc.ABC):
                            package: str,
                            node_type: str) -> str:
         ...
-
-
-_TAG_TO_LOADER = {}
-
-Loader = \
-    Callable[['ROS1LaunchFileReader', LaunchContext, LaunchConfig, ET.Element],
-             Tuple[LaunchContext, LaunchConfig]]
 
 
 def _read_contents(tag: ET.Element) -> str:
