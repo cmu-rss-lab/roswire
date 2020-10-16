@@ -30,3 +30,20 @@ def test_to_and_from_dict(app: roswire.App):
             'y': position.y,
             'z': position.z
         }}
+
+
+def test_message_with_optional_default_values():
+    package = 'rcl_interfaces'
+    name = 'ParameterDescriptor'
+
+    test_dir = os.path.dirname(__file__)
+    msg_filename = os.path.join(test_dir, 'msg/ParameterDescriptor.msg')
+    with open(msg_filename, 'r') as f:
+        definition = f.read()
+
+    msg_format = MsgFormat.from_string(package, name, definition)
+    assert msg_format.package == package
+    assert msg_format.name == name
+    assert msg_format.text == definition
+    assert not msg_format.constants
+    assert len(msg_format.fields) == 7
