@@ -9,6 +9,7 @@ from typing import Collection, List, Mapping, Optional, Sequence, Tuple, Union
 import attr
 from loguru import logger
 
+from .reader import ROS2LaunchFileReader
 from .. import exceptions as exc
 from ..proxy.roslaunch.config import LaunchConfig
 from ..proxy.roslaunch.controller import ROSLaunchController
@@ -59,7 +60,9 @@ class ROS2LaunchManager:
         LaunchFileNotFound
             If the given launch file could not be found in the package.
         """
-        raise NotImplementedError
+        filename = self.locate(filename, package=package)
+        reader = ROS2LaunchFileReader(self._app_instance)
+        return reader.read(filename, argv)
 
     def write(self,
               config: LaunchConfig,
@@ -131,7 +134,9 @@ class ROS2LaunchManager:
                args: Optional[Mapping[str, Union[int, str]]] = None,
                prefix: Optional[str] = None,
                launch_prefixes: Optional[Mapping[str, str]] = None,
-               node_to_remappings: Optional[Mapping[str, Collection[Tuple[str, str]]]] = None  # noqa
+               node_to_remappings: Optional[
+                   Mapping[str, Collection[Tuple[str, str]]]
+               ] = None
                ) -> ROSLaunchController:
         """Provides an interface to the roslaunch command.
 

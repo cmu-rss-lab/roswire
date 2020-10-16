@@ -2,14 +2,17 @@
 """
 This file implements a proxy for parsing the contents of launch files.
 """
-__all__ = ('LaunchFileReader',)
+__all__ = ('LaunchFileReader',
+           'ROS1LaunchFileReader',
+           )
 
+import abc
 import os
 import shlex
 import subprocess
+import typing
 import xml.etree.ElementTree as ET
-from typing import (Any, Callable, Collection, Optional, overload, Sequence,
-                    Tuple, Union)
+from typing import (Any, Callable, Collection, Optional, overload, Sequence, Tuple, Union)
 
 import attr
 import dockerblade
@@ -23,11 +26,34 @@ from ...exceptions import FailedToParseLaunchFile
 from ...name import (global_name, name_is_global, name_is_private, namespace,
                      namespace_join)
 
+if typing.TYPE_CHECKING:
+    from ... import AppInstance
+
 _TAG_TO_LOADER = {}
 
 Loader = \
-    Callable[['LaunchFileReader', LaunchContext, LaunchConfig, ET.Element],
+    Callable[['ROS1LaunchFileReader', LaunchContext, LaunchConfig, ET.Element],
              Tuple[LaunchContext, LaunchConfig]]
+
+
+class LaunchFileReader(abc.ABC):
+    @classmethod
+    @abc.abstractmethod
+    def for_app_instance(cls, app_instance: 'AppInstance') -> 'LaunchFileReader':
+        ...
+
+    @abc.abstractmethod
+    def read(self,
+             fn: str,
+             argv: Optional[Sequence[str]] = None
+             ) -> LaunchConfig:
+        ...
+
+    @abc.abstractmethod
+    def locate_node_binary(self,
+                           package: str,
+                           node_type: str) -> str:
+        ...
 
 
 def _read_contents(tag: ET.Element) -> str:
@@ -93,7 +119,7 @@ def tag(name: str,
     legal_attributes = frozenset(list(legal_attributes) + ['if', 'unless'])
 
     def wrap(loader: Loader) -> Loader:
-        def wrapped(self: 'LaunchFileReader',
+        def wrapped(self: 'ROS1LaunchFileReader',
                     ctx: LaunchContext,
                     cfg: LaunchConfig,
                     elem: ET.Element
@@ -116,9 +142,14 @@ def tag(name: str,
 
 
 @attr.s(auto_attribs=True)
-class LaunchFileReader:
+class ROS1LaunchFileReader(LaunchFileReader):
     _shell: dockerblade.Shell
     _files: dockerblade.FileSystem
+
+    @classmethod
+    def for_app_instance(cls, app_instance: 'AppInstance') -> LaunchFileReader:
+        return ROS1LaunchFileReader(shell=app_instance.shell,
+                                    files=app_instance.files)
 
     def _parse_file(self, fn: str) -> ET.Element:
         """Parses a given XML launch file to a root XML element."""
@@ -425,7 +456,8 @@ class LaunchFileReader:
                             attrib: str,
                             ctx: LaunchContext,
                             default: None
-                            ) -> Optional[bool]: ...
+                            ) -> Optional[bool]:
+        ...
 
     @overload
     def _read_optional_bool(self,
@@ -433,7 +465,8 @@ class LaunchFileReader:
                             attrib: str,
                             ctx: LaunchContext,
                             default: bool
-                            ) -> bool: ...
+                            ) -> bool:
+        ...
 
     def _read_optional_bool(self,
                             elem: ET.Element,
@@ -452,7 +485,8 @@ class LaunchFileReader:
                              attrib: str,
                              ctx: LaunchContext,
                              default: None
-                             ) -> Optional[float]: ...
+                             ) -> Optional[float]:
+        ...
 
     @overload
     def _read_optional_float(self,
@@ -460,7 +494,8 @@ class LaunchFileReader:
                              attrib: str,
                              ctx: LaunchContext,
                              default: float
-                             ) -> float: ...
+                             ) -> float:
+        ...
 
     def _read_optional_float(self,
                              elem: ET.Element,
@@ -581,11 +616,9 @@ class LaunchFileReader:
 
             path_in_scripts_dir = os.path.join(package_dir, 'scripts', node_type)
             path_in_nodes_dir = os.path.join(package_dir, 'nodes', node_type)
-            if files.isfile(path_in_scripts_dir) and \
-               files.access(path_in_scripts_dir, os.X_OK):
+            if files.isfile(path_in_scripts_dir) and files.access(path_in_scripts_dir, os.X_OK):  # noqa: E501
                 path = path_in_scripts_dir
-            elif files.isfile(path_in_nodes_dir) and \
-                    files.access(path_in_nodes_dir, os.X_OK):
+            elif files.isfile(path_in_nodes_dir) and files.access(path_in_nodes_dir, os.X_OK):  # noqa: E501
                 path = path_in_nodes_dir
 
         if not path:

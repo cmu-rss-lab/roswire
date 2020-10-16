@@ -1,0 +1,161 @@
+import argparse
+import json
+import os
+import sys
+from typing import Dict, Union, List, cast
+
+from launch.actions import ExecuteProcess
+from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node
+from ros2launch.api import launch_a_launch_file
+
+VALID_EXECUTE_PROCESS = {
+    'gazebo': {'package' : 'gazebo'}
+}
+
+started_by_launch = []
+
+
+def get_executable_type(path: str) -> str:
+    try:
+        with open(path) as f:
+            first_line = f.read().partition('\n')[0]
+            if 'python' in first_line:
+                return 'PYTHON'
+            else:
+                return 'LIKELY_CPP'
+    except UnicodeDecodeError:
+        return 'LIKELY_CPP'
+
+
+def perform_substitutions(sub, context):
+    if isinstance(sub, LaunchConfiguration):
+        return sub.perform(context)
+    else:
+        return sub
+
+
+def find_executable(executable, path=None):
+    """Find if 'executable' can be run. Looks for it in 'path'
+    (string that lists directories separated by 'os.pathsep';
+    defaults to os.environ['PATH']). Checks for all executable
+    extensions. Returns full path or None if no command is found.
+    """
+    if path is None:
+        path = os.environ['PATH']
+    paths = path.split(os.pathsep)
+    extlist = ['']
+    if os.name == 'os2':
+        (base, ext) = os.path.splitext(executable)
+        # executable files on OS/2 can have an arbitrary extension, but
+        # .exe is automatically appended if no dot is present in the name
+        if not ext:
+            executable = executable + ".exe"
+    elif sys.platform == 'win32':
+        pathext = os.environ['PATHEXT'].lower().split(os.pathsep)
+        (base, ext) = os.path.splitext(executable)
+        if ext.lower() not in pathext:
+            extlist = pathext
+    for ext in extlist:
+        execname = executable + ext
+        if os.path.isfile(execname):
+            return execname
+        else:
+            for p in paths:
+                f = os.path.join(p, execname)
+                if os.path.isfile(f):
+                    return f
+    else:
+        return None
+
+
+def executeprocess_execute(self, context):
+    global VALID_EXECUTE_PROCESS
+    self._ExecuteProcess__expand_substitutions(context)
+    processed = self._ExecuteProcess__process_event_args
+    path = find_executable(processed['cmd'][0])
+    dict = {}
+    dict['cmd'] = processed['cmd']
+    dict['name'] = self._ExecuteProcess__name
+    dict['namespace'] = ''
+    dict['typ'] = ''
+    dict['package'] = ''
+    dict['executable_path'] = path
+    dict['executable_type'] = get_executable_type(path)
+    if processed['cwd'] is not None:
+        dict['cwd'] = processed['cwd']
+    if processed['env'] is not None:
+        dict['env'] = processed['env']
+    dict['output'] = self._ExecuteProcess__output
+    dict['launch_file'] = context.locals.current_launch_file_path
+
+    if type(self) == ExecuteProcess and dict['cmd'][0] in VALID_EXECUTE_PROCESS.keys():
+        # Ignore executableProcess we don't know about
+        dict['__TYPE__'] = 'Node'
+        started_by_launch.append(dict)
+
+
+def node_execute(self, context):
+    self._perform_substitutions(context)
+    ros_specific_arguments: Dict[str, Union[str, List[str]]] = {}
+    if self._Node__node_name is not None:
+        ros_specific_arguments['name'] = '__node:={}'.format(self._Node__expanded_node_name)
+    if self._Node__expanded_node_namespace != '':
+        ros_specific_arguments['ns'] = '__ns:={}'.format(self._Node__expanded_node_namespace)
+    if self._Node__expanded_parameter_files is not None:
+        ros_specific_arguments['params'] = self._Node__expanded_parameter_files
+    if self._Node__expanded_remappings is not None:
+        ros_specific_arguments['remaps'] = []
+        for remapping_from, remapping_to in self._Node__expanded_remappings:
+            remap_arguments = cast(List[str], ros_specific_arguments['remaps'])
+            remap_arguments.append(
+                '{}:={}'.format(remapping_from, remapping_to)
+            )
+    context.extend_locals({'ros_specific_arguments': ros_specific_arguments})
+    super(type(self), self).execute(context)
+    # self._ExecuteProcess__expand_substitutions(context)
+    processed = self._ExecuteProcess__process_event_args
+    dict = {}
+    dict['name'] = perform_substitutions(self._Node__node_name, context)
+    dict['namespace'] = perform_substitutions(self._Node__node_namespace, context)
+    dict['package'] = perform_substitutions(self._Node__package, context)
+    dict['executable'] = perform_substitutions(self._Node__node_executable, context)
+    dict['cmd'] = processed['cmd']
+    dict['executable_type'] = get_executable_type(dict['cmd'][0])
+    dict['executable_path'] = dict['cmd'][0]
+    dict['launch_file'] = context.locals.current_launch_file_path
+
+    if processed['cmd'] is not None:
+        dict['cwd'] = processed['cwd']
+    if  processed['env'] is not None:
+        dict['env_args'] = perform_substitutions(processed['env'], context)
+    dict['output'] = self._ExecuteProcess__output
+    if self._Node__arguments is not None:
+        dict['args'] = processed['cmd'][1:]
+    if self._Node__remappings is not None:
+        dict['remappings'] = self._Node__remappings
+    if type(self) == Node:
+        dict['__TYPE__'] = 'Node'
+        started_by_launch.append(dict)
+
+
+setattr(ExecuteProcess, 'execute', executeprocess_execute)
+setattr(Node, 'execute', node_execute)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Find nodes')
+    parser.add_argument('launchfile', type=str)
+    arg = parser.add_argument(
+        'launch_arguments',
+        nargs='*',
+        help="Arguments to the launch file; '<name>:=<value>' (for duplicates, last one wins)")
+    parser.add_argument('--output', type=str)
+    args = parser.parse_args()
+    if args.output is None:
+        args.output = f'{os.path.basename(args.launchfile).split(".")[0]}-description.json'
+    launch_a_launch_file(launch_file_path=args.launchfile,
+                         launch_file_arguments=args.launch_arguments,
+                         debug=False)
+
+    with open(args.output, 'w') as f:
+        f.write(json.dumps(started_by_launch, indent=2))

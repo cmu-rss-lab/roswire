@@ -12,7 +12,7 @@ from loguru import logger
 
 from .config import LaunchConfig
 from .controller import ROSLaunchController
-from .reader import LaunchFileReader
+from .reader import ROS1LaunchFileReader
 from ... import exceptions as exc
 
 
@@ -53,7 +53,8 @@ class ROSLaunchManager:
             If the given launch file could not be found in the package.
         """
         filename = self.locate(filename, package=package)
-        reader = LaunchFileReader(shell=self._shell, files=self._files)
+        reader = ROS1LaunchFileReader(shell=self._shell,
+                                      files=self._files)
         return reader.read(filename, argv)
 
     def write(self,
