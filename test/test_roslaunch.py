@@ -6,7 +6,7 @@ import time
 
 @pytest.mark.parametrize('sut', ['fetch'], indirect=True)
 def test_read(sut):
-    with sut.roscore() as ros:
+    with sut.ros1() as ros:
         config = ros.roslaunch.read('pickplace_playground.launch', package='fetch_gazebo')
         assert '/ros_ws/src/fetch_gazebo/fetch_gazebo/models:' in config.envs['GAZEBO_MODEL_PATH'].value
 
@@ -28,7 +28,7 @@ def test_read(sut):
 
 @pytest.mark.parametrize('sut', ['husky'], indirect=True)
 def test_eval_args_in_launch_file(sut):
-    with sut.roscore() as ros:
+    with sut.ros1() as ros:
         config = ros.roslaunch.read('spawn_husky.launch', package='husky_gazebo')
         actual_node_names = {node.name for node in config.nodes}
         expected_node_names = {'base_controller_spawner',
@@ -42,7 +42,7 @@ def test_eval_args_in_launch_file(sut):
 
 @pytest.mark.parametrize('sut', ['fetch'], indirect=True)
 def test_remappings(sut):
-    with sut.roscore() as ros:
+    with sut.ros1() as ros:
         launch = ros.roslaunch('pickplace_playground.launch',
                                package='fetch_gazebo',
                                node_to_remappings={'gazebo': [('/gazebo/model_states', '/funkybits')]})

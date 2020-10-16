@@ -6,7 +6,7 @@ from roswire.proxy import SystemState
 
 @pytest.mark.parametrize('sut', ['fetch'], indirect=True)
 def test_state(sut):
-    with sut.roscore() as ros:
+    with sut.ros1() as ros:
         expected_pubs = {
             '/rosout_agg': ['/rosout']
         }

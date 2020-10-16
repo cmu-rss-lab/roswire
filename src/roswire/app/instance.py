@@ -14,7 +14,7 @@ from docker.models.images import Image as DockerImage
 from loguru import logger
 
 from ..definitions import TypeDatabase
-from ..proxy import CatkinInterface, CatkinMake, CatkinTools, ROSCore
+from ..proxy import CatkinInterface, CatkinMake, CatkinTools, ROS1
 from ..ros2 import ROS2
 
 if typing.TYPE_CHECKING:
@@ -125,7 +125,7 @@ class AppInstance:
                           files=self.files)
 
     @contextlib.contextmanager
-    def roscore(self, port: int = 11311) -> Iterator[ROSCore]:
+    def ros1(self, port: int = 11311) -> Iterator[ROS1]:
         """
         Launches a context-managed roscore inside the container.
         Upon exiting the context, the ROS master (and its associated resources)
@@ -138,19 +138,19 @@ class AppInstance:
 
         Yields
         ------
-        ROSCore
+        ROS1
             An interface to the launched ROS Master.
         """
         assert port > 1023
         command = f"roscore -p {port}"
         process = self.shell.popen(command)
         try:
-            yield ROSCore(description=self.app.description,
-                          shell=self.shell,
-                          files=self.files,
-                          ws_host=self._host_workspace,
-                          ip_address=self.ip_address,
-                          port=port)
+            yield ROS1(description=self.app.description,
+                       shell=self.shell,
+                       files=self.files,
+                       ws_host=self._host_workspace,
+                       ip_address=self.ip_address,
+                       port=port)
         finally:
             process.terminate()
             process.wait(2.0)

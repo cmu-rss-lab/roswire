@@ -10,7 +10,7 @@ import roswire
 import roswire.exceptions
 from dockerblade import Shell, FileSystem
 from roswire import AppInstance, ROSWire, AppDescription
-from roswire.proxy import ROSCore
+from roswire.proxy import ROS1
 from roswire.definitions import TypeDatabase, FormatDatabase, PackageDatabase
 
 DIR_TEST = os.path.dirname(__file__)
@@ -43,21 +43,21 @@ def load_hello_world_description() -> AppDescription:
 
 
 @contextlib.contextmanager
-def build_ardu() -> Iterator[Tuple[AppInstance, ROSCore]]:
+def build_ardu() -> Iterator[Tuple[AppInstance, ROS1]]:
     rsw = ROSWire()
     with rsw.launch('brass') as sut:
-        with sut.roscore() as ros:
+        with sut.ros1() as ros:
             time.sleep(5)
             yield (sut, ros)
 
 
 @contextlib.contextmanager
-def build_hello_world() -> Iterator[Tuple[AppInstance, ROSCore]]:
+def build_hello_world() -> Iterator[Tuple[AppInstance, ROS1]]:
     rsw = ROSWire()
     image = 'roswire/helloworld:buggy'
     desc = load_hello_world_description()
     with rsw.launch(image, desc) as sut:
-        with sut.roscore() as ros:
+        with sut.ros1() as ros:
             time.sleep(5)
             yield (sut, ros)
 
@@ -92,7 +92,7 @@ def build_file_and_shell_proxy() -> Iterator[Tuple[FileSystem, Shell]]:
 @skip_if_on_travis
 @pytest.mark.parametrize('sut', ['fetch'], indirect=True)
 def test_parameters(sut):
-    with sut.roscore() as ros:
+    with sut.ros1() as ros:
         assert ros.topic_to_type == {'/rosout': 'rosgraph_msgs/Log',
                                      '/rosout_agg': 'rosgraph_msgs/Log'}
 

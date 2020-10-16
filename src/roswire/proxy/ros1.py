@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('ROSCore',)
+__all__ = ('ROS1',)
 
 import os
 import time
@@ -19,7 +19,7 @@ from ..ros1 import ParameterServer, ROS1LaunchManager, ROS1NodeManager
 from ..service import ServiceManager
 
 
-class ROSCore:
+class ROS1:
     """Provides access to a remote ROS master via XML-RPC.
 
     Attributes
