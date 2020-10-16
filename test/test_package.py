@@ -255,6 +255,7 @@ def test_database_from_paths(filesystem):
     assert set(db) == {'angles', 'tf2', 'tf2_msgs', 'tf2_py', 'tf2_ros'}
 
 
+@pytest.mark.skip(reason='ROS2 is not fully supported')
 @pytest.mark.parametrize('sut', ['turtlebot3-ros2'], indirect=True)
 def test_package_location_ros2(sut):
     expected_paths = {'/ros_ws/install/pcl_conversions',
@@ -340,7 +341,7 @@ def test_package_location_ros2(sut):
                       '/ros_ws/install/action_msgs',
                       '/ros_ws/install/cartographer_ros_msgs',
                       '/ros_ws/install/message_filters',
-                      '/ros_ws/install/turtlebot3_cartographer', 
+                      '/ros_ws/install/turtlebot3_cartographer',
                       '/ros_ws/install/ament_flake8',
                       '/ros_ws/install/dwb_controller',
                       '/ros_ws/install/nav2_dwb_controller',

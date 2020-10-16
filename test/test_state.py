@@ -5,6 +5,7 @@ import time
 
 import dockerblade
 
+@pytest.mark.skip(reason="skipping ROS2 tests")
 @pytest.mark.parametrize('sut', ['turtlebot3-ros2'], indirect=True)
 def test_state_publishers(sut):
     sut.ros2.launch('simple.launch.py', package='launch')
@@ -21,6 +22,8 @@ def test_state_publishers(sut):
                                 '/landmark_poses_list'})
     assert actual_publishers == expected_publishers
 
+
+@pytest.mark.skip(reason="skipping ROS2 tests")
 @pytest.mark.parametrize('sut', ['turtlebot3-ros2'], indirect=True)
 def test_state_subscribers(sut):
     sut.ros2.launch('simple.launch.py', package='launch')
@@ -35,6 +38,8 @@ def test_state_subscribers(sut):
                                 ''})
     assert actual_subscribers == expected_subscribers
 
+
+@pytest.mark.skip(reason="skipping ROS2 tests")
 @pytest.mark.parametrize('sut', ['turtlebot3-ros2'], indirect=True)
 def test_state_services(sut):
     sut.ros2.launch('simple.launch.py', package='launch')
