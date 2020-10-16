@@ -134,7 +134,8 @@ class PackageDatabase(Mapping[str, Package]):
             logger.error('failed to obtain ROS2 package prefixes')
             raise
         package_to_prefix: Mapping[str, str] = json.loads(jsn)
-        paths = list(package_to_prefix.values())
+        paths: List[str] = [os.path.join(prefix, f'share/{package}')
+                            for (package, prefix) in package_to_prefix.items()]
         return paths
 
     @classmethod
