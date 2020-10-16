@@ -7,8 +7,8 @@ from typing import Optional
 import dockerblade
 import psutil
 
+from ..common import Node
 from ..exceptions import ROSWireException
-from ..interface import Node
 
 
 class ROS1Node(Node):

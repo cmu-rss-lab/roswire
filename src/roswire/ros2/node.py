@@ -8,8 +8,8 @@ import dockerblade
 from loguru import logger
 
 from .state import ROS2StateProbe
+from ..common import Node
 from ..exceptions import NodeShutdownError
-from ..interface import Node
 
 if typing.TYPE_CHECKING:
     from ..app import AppInstance

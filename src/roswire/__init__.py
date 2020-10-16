@@ -4,8 +4,8 @@ _logger.disable('roswire')
 
 from . import name
 from .app import App, AppDescription, AppInstance
+from .common import Node, NodeManager
 from .distribution import ROSDistribution, ROSVersion
-from .interface import Node, NodeManager
 from .roswire import ROSWire
 from .version import __version__
 

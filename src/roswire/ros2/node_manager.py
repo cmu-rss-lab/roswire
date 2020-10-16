@@ -10,7 +10,7 @@ from loguru import logger
 from .node import ROS2Node
 from .state import ROS2StateProbe
 from .. import exceptions as exc
-from ..interface import NodeManager
+from ..common import NodeManager
 from ..proxy import SystemState
 
 if typing.TYPE_CHECKING:

@@ -15,7 +15,7 @@ import dockerblade
 from loguru import logger
 
 from .. import exceptions
-from ..interface import NodeManager
+from ..common import NodeManager
 
 
 class BagPlayer:
