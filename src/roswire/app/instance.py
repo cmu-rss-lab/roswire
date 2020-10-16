@@ -13,8 +13,9 @@ import dockerblade
 from docker.models.images import Image as DockerImage
 from loguru import logger
 
+from ..common.catkin import CatkinInterface, CatkinMake, CatkinTools
 from ..definitions import TypeDatabase
-from ..proxy import CatkinInterface, CatkinMake, CatkinTools, ROS1
+from ..proxy.ros1 import ROS1
 from ..ros2 import ROS2
 
 if typing.TYPE_CHECKING:
