@@ -9,7 +9,7 @@ from .node_manager import ROS2NodeManager
 from .roslaunch.launch import ROS2LaunchManager
 from .service_manager import ROS2ServiceManager
 from .state import ROS2StateProbe
-from ..proxy import SystemState
+from ..common import SystemState
 
 if typing.TYPE_CHECKING:
     from .. import AppInstance

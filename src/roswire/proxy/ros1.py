@@ -10,12 +10,11 @@ import dockerblade
 from loguru import logger
 
 from .roslaunch import ROSLaunchManager
-from .state import SystemState, SystemStateProbe
 from ..app.description import AppDescription
-from ..common import NodeManager
+from ..common import NodeManager, SystemState
 from ..exceptions import ROSWireException
 from ..ros1 import (ParameterServer, ROS1LaunchManager, ROS1NodeManager,
-                    ServiceManager)
+                    ServiceManager, SystemStateProbe)
 from ..ros1.bag import BagPlayer, BagRecorder
 
 

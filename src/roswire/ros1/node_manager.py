@@ -9,9 +9,9 @@ import dockerblade
 from loguru import logger
 
 from .node import ROS1Node
+from .state import SystemStateProbe
 from ..common import Node, NodeManager
 from ..exceptions import NodeNotFoundError, ROSWireException
-from ..proxy.state import SystemStateProbe
 
 
 class ROS1NodeManager(NodeManager):

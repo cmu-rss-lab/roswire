@@ -8,7 +8,7 @@ import attr
 import dockerblade
 from loguru import logger
 
-from ..proxy import SystemState
+from ..common import SystemState
 
 if typing.TYPE_CHECKING:
     from ..app import AppInstance
