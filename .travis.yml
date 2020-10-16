@@ -9,6 +9,11 @@ python:
 install:
 - pip install -r requirements.dev.txt
 - pip install -e .
+# for now, we have to manually install any images needed for testing
+- docker pull therobotcooperative/fetch
+- docker pull therobotcooperative/husky
+- docker pull therobotcooperative/turtlebot3-ros2
+- docker pull therobotcooperative/turtlebot3
 # see #337: flag potential twine issues before attempting to upload to PyPI
 - python setup.py sdist
 - python setup.py bdist_wheel
