@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
+import pytest
+
 import re
 
-from roswire.proxy.tcpros import TCPROSHeader, TCPROSMessage
-
-from test_basic import load_hello_world_type_db
+import roswire
+from roswire.ros1.tcpros import TCPROSHeader, TCPROSMessage
 
 
 def _hex2bytes(s: str) -> bytes:
@@ -45,9 +47,10 @@ b0 00 00 00
     assert TCPROSHeader.decode(header.encode()) == header
 
 
-def test_encode_and_decode_message():
+@pytest.mark.parametrize('app', ['fetch'], indirect=True)
+def test_encode_and_decode_message(app: roswire.App):
     # source: http://wiki.ros.org/ROS/Connection%20Header
-    types = load_hello_world_type_db()
+    types = app.description.types
     String = types['std_msgs/String']
     b = _hex2bytes("""
 b0 00 00 00
