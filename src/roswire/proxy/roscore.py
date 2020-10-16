@@ -15,8 +15,7 @@ from .state import SystemState, SystemStateProbe
 from ..app.description import AppDescription
 from ..common import NodeManager
 from ..exceptions import ROSWireException
-from ..parameters import ParameterServer
-from ..ros1 import ROS1LaunchManager, ROS1NodeManager
+from ..ros1 import ParameterServer, ROS1LaunchManager, ROS1NodeManager
 from ..service import ServiceManager
 
 
