@@ -15,13 +15,13 @@ from loguru import logger
 
 from .core import (BagMessage, Chunk, ChunkConnection, Compression,
                    ConnectionInfo, Index, IndexEntry, OpCode)
-from ..definitions import Message
-from ..definitions.encode import (encode_time,
-                                  encode_uint32,
-                                  encode_uint64,
-                                  write_encoded_header,
-                                  write_time,
-                                  write_uint32,)
+from ...definitions import Message
+from ...definitions.encode import (encode_time,
+                                   encode_uint32,
+                                   encode_uint64,
+                                   write_encoded_header,
+                                   write_time,
+                                   write_uint32)
 
 BIN_CHUNK_INFO_VERSION = encode_uint32(1)
 BIN_INDEX_VERSION = encode_uint32(1)

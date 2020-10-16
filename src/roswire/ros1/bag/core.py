@@ -7,9 +7,9 @@ from typing import Dict, List, Optional, Tuple
 
 import attr
 
-from ..definitions.base import Time
-from ..definitions.msg import Message
-from ..util import tuple_from_iterable
+from ...definitions.base import Time
+from ...definitions.msg import Message
+from ...util import tuple_from_iterable
 
 
 class OpCode(Enum):
