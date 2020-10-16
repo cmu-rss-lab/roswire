@@ -5,22 +5,23 @@ import shlex
 import subprocess
 import typing
 import xml.etree.ElementTree as ET
-from typing import Any, Callable, Collection, Optional, overload, Sequence, Tuple, Union
+from typing import (Any, Callable, Collection, Optional,
+                    overload, Sequence, Tuple, Union)
 
 import attr
 import dockerblade
 from loguru import logger
 
-from ..exceptions import FailedToParseLaunchFile
-from ..name import global_name, name_is_global, name_is_private, namespace, namespace_join
-from ..proxy.roslaunch.config import ExecutableType, LaunchConfig, NodeConfig
-from ..proxy.roslaunch.context import LaunchContext
-from ..proxy.roslaunch.reader import LaunchFileReader
-from ..proxy.roslaunch.rosparam import load_from_yaml_string as load_rosparam_from_string
-from ..proxy.roslaunch.substitution import ArgumentResolver
+from ...exceptions import FailedToParseLaunchFile
+from ...name import global_name, name_is_global, name_is_private, namespace, namespace_join
+from ...proxy.roslaunch.config import ExecutableType, LaunchConfig, NodeConfig
+from ...proxy.roslaunch.context import LaunchContext
+from ...proxy.roslaunch.reader import LaunchFileReader
+from ...proxy.roslaunch.rosparam import load_from_yaml_string as load_rosparam_from_string
+from ...proxy.roslaunch.substitution import ArgumentResolver
 
 if typing.TYPE_CHECKING:
-    from .. import AppInstance
+    from roswire import AppInstance
 
 _TAG_TO_LOADER = {}
 

@@ -1,38 +1,31 @@
 # -*- coding: utf-8 -*-
-__all__ = ('ROS2LaunchManager',)
+__all__ = ('ROS1LaunchManager',)
 
 import os
 import shlex
-import typing
+import xml.etree.ElementTree as ET
 from typing import Collection, List, Mapping, Optional, Sequence, Tuple, Union
 
 import attr
+import dockerblade
 from loguru import logger
 
-from .reader import ROS2LaunchFileReader
-from .. import exceptions as exc
-from ..proxy.roslaunch.config import LaunchConfig
-from ..proxy.roslaunch.controller import ROSLaunchController
-
-if typing.TYPE_CHECKING:
-    from ..app import AppInstance
+from ... import exceptions as exc
+from ...proxy.roslaunch.config import LaunchConfig
+from ...proxy.roslaunch.controller import ROSLaunchController
+from ...proxy.roslaunch.roslaunch import ROSLaunchManager
+from ...ros1.roslaunch.reader import ROS1LaunchFileReader
 
 
 @attr.s(eq=False)
-class ROS2LaunchManager:
-    """Provides access to `ros2 launch
-    <design.ros2.org/articles/roslaunch.html>`_ for an
-    associated ROS2 system. This interface is used to locate, read,
-    and write `launch python files and to launch ROS nodes using those
-    files.
+class ROS1LaunchManager(ROSLaunchManager):
+    """Provides access to `roslaunch <wiki.ros.org/roslaunch/>`_ for an
+    associated ROS system. This interface is used to locate, read, and write
+    `launch XML files <http://wiki.ros.org/roslaunch/XML>`_,
+    and to launch ROS nodes using those files.
     """
-    _app_instance: 'AppInstance' = attr.ib()
-
-    @classmethod
-    def for_app_instance(cls,
-                         app_instance: 'AppInstance'
-                         ) -> 'ROS2LaunchManager':
-        return ROS2LaunchManager(app_instance=app_instance)
+    _shell: dockerblade.shell.Shell = attr.ib(repr=False)
+    _files: dockerblade.files.FileSystem = attr.ib(repr=False)
 
     def read(self,
              filename: str,
@@ -61,7 +54,8 @@ class ROS2LaunchManager:
             If the given launch file could not be found in the package.
         """
         filename = self.locate(filename, package=package)
-        reader = ROS2LaunchFileReader(self._app_instance)
+        reader = ROS1LaunchFileReader(shell=self._shell,
+                                      files=self._files)
         return reader.read(filename, argv)
 
     def write(self,
@@ -86,7 +80,11 @@ class ROS2LaunchManager:
         str
             The absolute path to the generated XML launch file.
         """
-        raise NotImplementedError
+        if not filename:
+            filename = self._files.mktemp(suffix='.xml.launch')
+        contents = ET.tostring(config.to_xml_tree().getroot())
+        self._files.write(filename, contents)
+        return filename  # type: ignore
 
     def locate(self, filename: str, *, package: Optional[str] = None) -> str:
         """Locates a given launch file.
@@ -110,22 +108,28 @@ class ROS2LaunchManager:
             If the given package could not be found.
         LaunchFileNotFound
             If the given launch file could not be found in the package.
-       """
+        """
         if not package:
             assert os.path.isabs(filename)
             return filename
-        else:
-            app_description = self._app_instance.app.description
-            package_description = app_description.packages[package]
-            package_location = package_description.path
-            paths = self._app_instance.files.find(package_location, filename)
-            for path in paths:
-                if package in path:
-                    logger.debug('determined location of launch file'
-                                 f' [{filename}] in package [{package}]: '
-                                 f'{path}')
-                    return path
-        raise exc.LaunchFileNotFound(path=filename)
+
+        filename_original = filename
+        logger.debug(f'determing location of launch file [{filename}]'
+                     f' in package [{package}]')
+        command = f'rospack find {shlex.quote(package)}'
+        try:
+            package_path = self._shell.check_output(command,
+                                                    stderr=False,
+                                                    text=True)
+        except dockerblade.CalledProcessError as err:
+            raise exc.PackageNotFound(package) from err
+        filename = os.path.join(package_path, 'launch', filename_original)
+        if not self._files.isfile(filename):
+            raise exc.LaunchFileNotFound(path=filename)
+        logger.debug('determined location of launch file'
+                     f' [{filename_original}] in package [{package}]: '
+                     f'{filename}')
+        return filename
 
     def launch(self,
                filename: str,
@@ -135,7 +139,8 @@ class ROS2LaunchManager:
                prefix: Optional[str] = None,
                launch_prefixes: Optional[Mapping[str, str]] = None,
                node_to_remappings: Optional[
-                   Mapping[str, Collection[Tuple[str, str]]]
+                   Mapping[str,
+                           Collection[Tuple[str, str]]]
                ] = None
                ) -> ROSLaunchController:
         """Provides an interface to the roslaunch command.
@@ -172,28 +177,45 @@ class ROS2LaunchManager:
         LaunchFileNotFound
             If the given launch file could not be found in the package.
         """
-        shell = self._app_instance.shell
+        shell = self._shell
         if not args:
             args = {}
         if not launch_prefixes:
             launch_prefixes = {}
+        filename = self.locate(filename, package=package)
 
         if node_to_remappings or launch_prefixes:
-            m = "Requires self.read: not yet implemented"
-            raise NotImplementedError(m)
-        if package:
-            filename_without_path = os.path.basename(filename)
-            cmd = ['ros2 launch', shlex.quote(package),
-                   shlex.quote(filename_without_path)]
-        else:
-            m = "Not yet implemented when package is None"
-            raise NotImplementedError(m)
+            launch_config = self.read(filename, package=package)
+            logger.debug(f'instrumenting launch config: {launch_config}')
+
+            if launch_prefixes:
+                launch_config = \
+                    launch_config.with_launch_prefixes(launch_prefixes)
+
+            if node_to_remappings:
+                logger.debug('adding remappings to launch config: '
+                             f'{node_to_remappings}')
+                launch_config = \
+                    launch_config.with_remappings(node_to_remappings)
+                logger.debug('added remappings to launch config: '
+                             f'{launch_config}')
+
+            # write the instrumented launch config to a temporary file inside
+            # the container and use that container with roslaunch
+            package = None
+            filename = self._files.mktemp(suffix='.launch')
+            contents = launch_config.to_xml_string()
+            logger.debug(f'instrumented launch file [{filename}]:\n{contents}')
+            self._files.write(filename, contents)
+
+        cmd = ['roslaunch', shlex.quote(filename)]
         launch_args: List[str] = [f'{arg}:={val}' for arg, val in args.items()]
         cmd += launch_args
         if prefix:
             cmd = [prefix] + cmd
         cmd_str = ' '.join(cmd)
         popen = shell.popen(cmd_str, stdout=True, stderr=True)
+
         return ROSLaunchController(filename=filename,
                                    popen=popen)
 
