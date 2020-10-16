@@ -9,11 +9,11 @@ from urllib.parse import urlparse
 import dockerblade
 
 from .service import Service
-from .. import exceptions
-from ..proxy.state import SystemStateProbe
+from ... import exceptions
+from ...proxy.state import SystemStateProbe
 
 if typing.TYPE_CHECKING:
-    from ..app import AppDescription
+    from ...app import AppDescription
 
 
 class ServiceManager(Mapping[str, Service]):

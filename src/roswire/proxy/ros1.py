@@ -14,9 +14,9 @@ from .state import SystemState, SystemStateProbe
 from ..app.description import AppDescription
 from ..common import NodeManager
 from ..exceptions import ROSWireException
-from ..ros1 import ParameterServer, ROS1LaunchManager, ROS1NodeManager
+from ..ros1 import (ParameterServer, ROS1LaunchManager, ROS1NodeManager,
+                    ServiceManager)
 from ..ros1.bag import BagPlayer, BagRecorder
-from ..service import ServiceManager
 
 
 class ROS1:
