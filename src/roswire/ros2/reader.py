@@ -91,15 +91,16 @@ class ROS2LaunchFileReader(LaunchFileReader):
                              cfg: LaunchConfig,
                              node_list: Sequence[Sequence[Dict[str, Any]]]
                              ) -> LaunchConfig:
+        cfg_with_nodes_added = cfg
         for nodes in node_list:
             for node in nodes:
                 if node['__TYPE__'] == 'Node':
                     nc = self._read_node_from_dict(node)
-                    cfg = cfg.with_node(nc)
+                    cfg_with_nodes_added = cfg_with_nodes_added.with_node(nc)
                 else:
                     # The __TYPE__ isn't known (this is for futureproofing)
                     raise NotImplementedError
-        return cfg
+        return cfg_with_nodes_added
 
     def _read_node_from_dict(self, node: Dict[str, Any]) -> NodeConfig:
         args = ' '.join(node.get('args', []))
