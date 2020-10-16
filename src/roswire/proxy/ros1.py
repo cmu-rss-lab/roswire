@@ -9,13 +9,13 @@ from typing import Dict, Optional, Sequence, Tuple
 import dockerblade
 from loguru import logger
 
-from .bag import BagPlayer, BagRecorder
 from .roslaunch import ROSLaunchManager
 from .state import SystemState, SystemStateProbe
 from ..app.description import AppDescription
 from ..common import NodeManager
 from ..exceptions import ROSWireException
 from ..ros1 import ParameterServer, ROS1LaunchManager, ROS1NodeManager
+from ..ros1.bag import BagPlayer, BagRecorder
 from ..service import ServiceManager
 
 
