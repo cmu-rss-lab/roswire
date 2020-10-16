@@ -13,7 +13,7 @@ from ...proxy.roslaunch.config import ExecutableType, LaunchConfig, NodeConfig
 from ...proxy.roslaunch.reader import LaunchFileReader
 
 if typing.TYPE_CHECKING:
-    from roswire import AppInstance
+    from .. import AppInstance
 
 
 @attr.s(auto_attribs=True)

@@ -15,7 +15,7 @@ from ...proxy.roslaunch.config import LaunchConfig
 from ...proxy.roslaunch.controller import ROSLaunchController
 
 if typing.TYPE_CHECKING:
-    from roswire.app import AppInstance
+    from ..app import AppInstance
 
 
 @attr.s(eq=False)
