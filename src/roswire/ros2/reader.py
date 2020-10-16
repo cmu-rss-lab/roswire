@@ -78,8 +78,8 @@ class ROS2LaunchFileReader(LaunchFileReader):
                                         ) -> Sequence[Dict[str, Any]]:
         assert self._app_instance is not None
         output = shlex.quote(os.path.basename(filename) + '.json')
-        cmd = f'python3 /launch_extractor.py --output' \
-              f' {output} {shlex.quote(filename)}'
+        cmd = (f'python3 /launch_extractor.py --output',
+              f' {output} {shlex.quote(filename)}')
         logger.debug(f"Running the script in the container: {cmd}")
         self._app_instance.shell.check_call(cmd)
         logger.debug(f"Reading {output} on container")
@@ -91,15 +91,16 @@ class ROS2LaunchFileReader(LaunchFileReader):
                              cfg: LaunchConfig,
                              node_list: Sequence[Sequence[Dict[str, Any]]]
                              ) -> LaunchConfig:
+        cfg_with_nodes_added = cfg
         for nodes in node_list:
             for node in nodes:
                 if node['__TYPE__'] == 'Node':
                     nc = self._read_node_from_dict(node)
-                    cfg = cfg.with_node(nc)
+                    cfg_with_nodes_added = cfg_with_nodes_added.with_node(nc)
                 else:
                     # The __TYPE__ isn't known (this is for futureproofing)
                     raise NotImplementedError
-        return cfg
+        return cfg_with_nodes_added
 
     def _read_node_from_dict(self, node: Dict[str, Any]) -> NodeConfig:
         args = ' '.join(node.get('args', []))
