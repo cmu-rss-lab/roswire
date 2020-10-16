@@ -3,7 +3,7 @@ import json
 import os
 import shlex
 import typing
-from typing import Any, Dict, Optional, Sequence
+from typing import Any, Dict, Mapping, Optional, Sequence
 
 import attr
 import pkg_resources
@@ -18,7 +18,6 @@ if typing.TYPE_CHECKING:
 
 @attr.s(auto_attribs=True)
 class ROS2LaunchFileReader(LaunchFileReader):
-
     _app_instance: 'AppInstance'
 
     @classmethod
@@ -102,7 +101,7 @@ class ROS2LaunchFileReader(LaunchFileReader):
                     raise NotImplementedError
         return cfg_with_nodes_added
 
-    def _read_node_from_dict(self, node: Dict[str, Any]) -> NodeConfig:
+    def _read_node_from_dict(self, node: Mapping[str, Any]) -> NodeConfig:
         args = ' '.join(node.get('args', []))
         remappings = tuple(node.get('remappings', []))
         nc = NodeConfig(

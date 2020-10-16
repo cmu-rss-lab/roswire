@@ -1,18 +1,26 @@
 # -*- coding: utf-8 -*-
 __all__ = ('Package', 'PackageDatabase')
 
+import json
 import os
-import shlex
 from typing import Any, Collection, Dict, Iterator, List, Mapping, Tuple
 
 import attr
 import dockerblade
 from loguru import logger
+from typing_extensions import Final
 
 from .action import ActionFormat
 from .msg import MsgFormat
 from .srv import SrvFormat
 from ..util import tuple_from_iterable
+
+_COMMAND_ROS2_PKG_PREFIXES: Final[str] = (
+    "python -c '"
+    "import json; "
+    "import ament_index_python; "
+    "print(json.dumps(ament_index_python.get_packages_with_prefixes()))"
+    "'")
 
 
 @attr.s(frozen=True, auto_attribs=True, slots=True)
@@ -119,22 +127,15 @@ class PackageDatabase(Mapping[str, Package]):
     def _paths_ros2(shell: dockerblade.Shell,
                     files: dockerblade.FileSystem
                     ) -> List[str]:
-        """Returns paths of packages"""
-        paths: List[str] = []
+        """Returns a list of paths for all ROS2 packages in an application."""
         try:
-            package_str = shell.check_output("ros2 pkg list", text=True)
+            jsn = shell.check_output(_COMMAND_ROS2_PKG_PREFIXES, text=True)
         except dockerblade.exceptions.CalledProcessError:
-            logger.debug('unable to find packages using ros2 pkg list')
+            logger.error('failed to obtain ROS2 package prefixes')
             raise
-        all_packages = package_str.split('\r\n')
-        for p in all_packages:
-            command = 'ros2 pkg prefix ' + shlex.quote(p)
-            try:
-                package_path = shell.check_output(command, text=True)
-            except dockerblade.exceptions.CalledProcessError:
-                logger.debug(f'unable to find package {p}')
-                raise
-            paths.append(package_path)
+        package_to_prefix: Mapping[str, str] = json.loads(jsn)
+        paths: List[str] = [os.path.join(prefix, f'share/{package}')
+                            for (package, prefix) in package_to_prefix.items()]
         return paths
 
     @classmethod
@@ -144,8 +145,7 @@ class PackageDatabase(Mapping[str, Package]):
               ) -> List[str]:
         """Parses :code:`ROS_PACKAGE_PATH` for a given shell."""
         distro = shell.environ('ROS_DISTRO')
-        ROS2_DISTROS = {'dashing', 'eloquent', 'foxy'}
-        if distro in ROS2_DISTROS:
+        if distro in {'dashing', 'eloquent', 'foxy'}:
             return cls._paths_ros2(shell, files)
         return cls._paths_ros1(shell, files)
 

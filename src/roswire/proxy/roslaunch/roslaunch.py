@@ -1,22 +1,20 @@
+# -*- coding: utf-8 -*-
 __all__ = ('ROSLaunchManager',)
 
 import abc
 from typing import Collection, Mapping, Optional, Sequence, Tuple, Union
 
-import attr
-
 from ...proxy.roslaunch.config import LaunchConfig
 from ...proxy.roslaunch.controller import ROSLaunchController
 
 
-@attr.s(eq=False)
 class ROSLaunchManager(abc.ABC):
     """Provides access to `roslaunch <wiki.ros.org/roslaunch/>`_ for an
     associated ROS system. This interface is used to locate, read, and write
     `launch XML files <http://wiki.ros.org/roslaunch/XML>`_,
     and to launch ROS nodes using those files.
 
-    This is the abstract base class. There will be implementations for each
+    This is an interface. There will be implementations for each
     version of ROS
     """
 
@@ -33,7 +31,7 @@ class ROSLaunchManager(abc.ABC):
         ----------
         filename: str
             The name of the launch file, or an absolute path to the launch
-            file inside teh container.
+            file inside the container.
         package: str, optional
             The name of the package to which the launch file belongs.
         argv: Sequence[str], optional
@@ -44,7 +42,7 @@ class ROSLaunchManager(abc.ABC):
         ------
         PackageNotFound
             If the given package could not be found.
-        LaunchFileNotFound:
+        LaunchFileNotFound
             If the given launch file could not be found in the package.
         """
         ...
@@ -66,7 +64,7 @@ class ROSLaunchManager(abc.ABC):
             The name of the file to which the configuration should be written.
             If no filename is given, a temporary file will be created. It is
             the responsibility of the caller to ensure that the temporary file
-             is appropriately destroyed.
+            is appropriately destroyed.
 
         Returns
         -------
@@ -109,7 +107,7 @@ class ROSLaunchManager(abc.ABC):
                args: Optional[Mapping[str, Union[int, str]]] = None,
                prefix: Optional[str] = None,
                launch_prefixes: Optional[Mapping[str, str]] = None,
-               node_to_remappings: Optional[Mapping[str, Collection[Tuple[str, str]]]] = None # noqa
+               node_to_remappings: Optional[Mapping[str, Collection[Tuple[str, str]]]] = None  # noqa
                ) -> ROSLaunchController:
         """Provides an interface to the roslaunch command.
 
@@ -145,3 +143,6 @@ class ROSLaunchManager(abc.ABC):
         LaunchFileNotFound
             If the given launch file could not be found in the package.
         """
+        ...
+
+    __call__ = launch
