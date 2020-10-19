@@ -21,7 +21,7 @@ from ...proxy.roslaunch.rosparam import load_from_yaml_string as load_rosparam_f
 from ...proxy.roslaunch.substitution import ArgumentResolver
 
 if typing.TYPE_CHECKING:
-    from roswire import AppInstance
+    from ... import AppInstance
 
 _TAG_TO_LOADER = {}
 
