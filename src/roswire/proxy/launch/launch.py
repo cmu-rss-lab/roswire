@@ -1,39 +1,24 @@
 # -*- coding: utf-8 -*-
-__all__ = ('ROS2LaunchManager',)
+__all__ = ('ROSLaunchManager',)
 
-import os
-import shlex
-import typing
-from typing import Collection, List, Mapping, Optional, Sequence, Tuple, Union
+import abc
+from typing import Collection, Mapping, Optional, Sequence, Tuple, Union
 
-import attr
-from loguru import logger
-
-from .reader import ROS2LaunchFileReader
-from ... import exceptions as exc
-from ...proxy.roslaunch.config import LaunchConfig
-from ...proxy.roslaunch.controller import ROSLaunchController
-
-if typing.TYPE_CHECKING:
-    from ..app import AppInstance
+from ...proxy.launch.config import LaunchConfig
+from ...proxy.launch.controller import ROSLaunchController
 
 
-@attr.s(eq=False)
-class ROS2LaunchManager:
-    """Provides access to `ros2 launch
-    <design.ros2.org/articles/roslaunch.html>`_ for an
-    associated ROS2 system. This interface is used to locate, read,
-    and write `launch python files and to launch ROS nodes using those
-    files.
+class ROSLaunchManager(abc.ABC):
+    """Provides access to `launch <wiki.ros.org/launch/>`_ for an
+    associated ROS system. This interface is used to locate, read, and write
+    `launch XML files <http://wiki.ros.org/roslaunch/XML>`_,
+    and to launch ROS nodes using those files.
+
+    This is an interface. There will be implementations for each
+    version of ROS
     """
-    _app_instance: 'AppInstance' = attr.ib()
 
-    @classmethod
-    def for_app_instance(cls,
-                         app_instance: 'AppInstance'
-                         ) -> 'ROS2LaunchManager':
-        return ROS2LaunchManager(app_instance=app_instance)
-
+    @abc.abstractmethod
     def read(self,
              filename: str,
              *,
@@ -51,7 +36,7 @@ class ROS2LaunchManager:
             The name of the package to which the launch file belongs.
         argv: Sequence[str], optional
             An optional sequence of command-line arguments that should be
-            supplied to :code:`roslaunch`.
+            supplied to the launch command.
 
         Raises
         ------
@@ -60,10 +45,10 @@ class ROS2LaunchManager:
         LaunchFileNotFound
             If the given launch file could not be found in the package.
         """
-        filename = self.locate(filename, package=package)
-        reader = ROS2LaunchFileReader(self._app_instance)
-        return reader.read(filename, argv)
+        ...
 
+    # TODO: Should this be included in both versions?
+    @abc.abstractmethod
     def write(self,
               config: LaunchConfig,
               *,
@@ -86,8 +71,9 @@ class ROS2LaunchManager:
         str
             The absolute path to the generated XML launch file.
         """
-        raise NotImplementedError
+        ...
 
+    @abc.abstractmethod
     def locate(self, filename: str, *, package: Optional[str] = None) -> str:
         """Locates a given launch file.
 
@@ -110,23 +96,10 @@ class ROS2LaunchManager:
             If the given package could not be found.
         LaunchFileNotFound
             If the given launch file could not be found in the package.
-       """
-        if not package:
-            assert os.path.isabs(filename)
-            return filename
-        else:
-            app_description = self._app_instance.app.description
-            package_description = app_description.packages[package]
-            package_location = package_description.path
-            paths = self._app_instance.files.find(package_location, filename)
-            for path in paths:
-                if package in path:
-                    logger.debug('determined location of launch file'
-                                 f' [{filename}] in package [{package}]: '
-                                 f'{path}')
-                    return path
-        raise exc.LaunchFileNotFound(path=filename)
+        """
+        ...
 
+    @abc.abstractmethod
     def launch(self,
                filename: str,
                *,
@@ -134,11 +107,9 @@ class ROS2LaunchManager:
                args: Optional[Mapping[str, Union[int, str]]] = None,
                prefix: Optional[str] = None,
                launch_prefixes: Optional[Mapping[str, str]] = None,
-               node_to_remappings: Optional[
-                   Mapping[str, Collection[Tuple[str, str]]]
-               ] = None
+               node_to_remappings: Optional[Mapping[str, Collection[Tuple[str, str]]]] = None  # noqa
                ) -> ROSLaunchController:
-        """Provides an interface to the roslaunch command.
+        """Provides an interface to the launch command.
 
         Parameters
         ----------
@@ -148,9 +119,9 @@ class ROS2LaunchManager:
         package: str, optional
             The name of the package to which the launch file belongs.
         args: Dict[str, Union[int, str]], optional
-            Keyword arguments that should be supplied to roslaunch.
+            Keyword arguments that should be supplied to launch.
         prefix: str, optional
-            An optional prefix to add before the roslaunch command.
+            An optional prefix to add before the launch command.
         launch_prefixes: Mapping[str, str], optional
             An optional mapping from nodes, given by their names, to their
             individual launch prefix.
@@ -172,29 +143,6 @@ class ROS2LaunchManager:
         LaunchFileNotFound
             If the given launch file could not be found in the package.
         """
-        shell = self._app_instance.shell
-        if not args:
-            args = {}
-        if not launch_prefixes:
-            launch_prefixes = {}
-
-        if node_to_remappings or launch_prefixes:
-            m = "Requires self.read: not yet implemented"
-            raise NotImplementedError(m)
-        if package:
-            filename_without_path = os.path.basename(filename)
-            cmd = ['ros2 launch', shlex.quote(package),
-                   shlex.quote(filename_without_path)]
-        else:
-            m = "Not yet implemented when package is None"
-            raise NotImplementedError(m)
-        launch_args: List[str] = [f'{arg}:={val}' for arg, val in args.items()]
-        cmd += launch_args
-        if prefix:
-            cmd = [prefix] + cmd
-        cmd_str = ' '.join(cmd)
-        popen = shell.popen(cmd_str, stdout=True, stderr=True)
-        return ROSLaunchController(filename=filename,
-                                   popen=popen)
+        ...
 
     __call__ = launch

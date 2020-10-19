@@ -14,11 +14,11 @@ from loguru import logger
 
 from ...exceptions import FailedToParseLaunchFile
 from ...name import global_name, name_is_global, name_is_private, namespace, namespace_join
-from ...proxy.roslaunch.config import ExecutableType, LaunchConfig, NodeConfig
-from ...proxy.roslaunch.context import LaunchContext
-from ...proxy.roslaunch.reader import LaunchFileReader
-from ...proxy.roslaunch.rosparam import load_from_yaml_string as load_rosparam_from_string
-from ...proxy.roslaunch.substitution import ArgumentResolver
+from ...proxy.launch.config import ExecutableType, LaunchConfig, NodeConfig
+from ...proxy.launch.context import LaunchContext
+from ...proxy.launch.reader import LaunchFileReader
+from ...proxy.launch.rosparam import load_from_yaml_string as load_rosparam_from_string
+from ...proxy.launch.substitution import ArgumentResolver
 
 if typing.TYPE_CHECKING:
     from roswire import AppInstance

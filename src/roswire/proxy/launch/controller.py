@@ -10,7 +10,7 @@ import dockerblade
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
 class ROSLaunchController:
-    """Provides an interface to a roslaunch process.
+    """Provides an interface to a launch process.
 
     Attributes
     ----------
@@ -19,7 +19,7 @@ class ROSLaunchController:
     command: str
         The command string that was used by this process.
     popen: dockerblade.popen.Popen
-        An interface to the underlying exec process for this roslaunch process.
+        An interface to the underlying exec process for this launch process.
     pid: Optional[int]
         The PID of the launch process inside the container, if known.
     """
@@ -42,13 +42,13 @@ class ROSLaunchController:
 
     @property
     def running(self) -> bool:
-        """Checks whether or not this roslaunch process is still running."""
+        """Checks whether or not this launch process is still running."""
         return not self.popen.finished
 
     def terminate(self) -> None:
-        """Terminates this roslaunch process."""
+        """Terminates this launch process."""
         self.popen.terminate()
 
     def close(self) -> None:
-        """Terminates this roslaunch process."""
+        """Terminates this launch process."""
         self.terminate()

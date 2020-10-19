@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-This module provides data structures for representing roslaunch configurations.
+This module provides data structures for representing launch configurations.
 """
 from .launch import LaunchConfig
 from .node import ExecutableType, NodeConfig

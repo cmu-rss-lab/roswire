@@ -12,7 +12,7 @@ from loguru import logger
 from .. import AppDescription
 from ..common import NodeManager, SystemState
 from ..exceptions import ROSWireException
-from ..proxy.roslaunch import ROSLaunchManager
+from ..proxy.launch import ROSLaunchManager
 from ..ros1 import (ParameterServer, ROS1LaunchManager, ROS1NodeManager,
                     ServiceManager, SystemStateProbe)
 from ..ros1.bag import BagPlayer, BagRecorder
@@ -32,7 +32,7 @@ class ROS1:
     state: SystemState
         The instantaneous state of the ROS Master.
     roslaunch: ROSLaunchManager
-        Provides access to roslaunch-related functionality.
+        Provides access to launch-related functionality.
     services: ServiceManager
         Provides access to the services advertised on this ROS Master.
     parameters: ParameterServer
