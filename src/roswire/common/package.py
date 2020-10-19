@@ -104,7 +104,6 @@ class PackageDatabase(Mapping[str, Package]):
         :class:`dict` operations are provided (e.g., :code:`del db['foo'])`
         and `db['foo'] = bar`).
     """
-
     @staticmethod
     def _paths_ros1(shell: dockerblade.Shell,
                     files: dockerblade.FileSystem
