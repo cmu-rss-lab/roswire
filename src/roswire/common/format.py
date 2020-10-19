@@ -29,6 +29,7 @@ class FormatDatabase:
     actions: Mapping[str, ActionFormat]
         An immutable mapping from action name to definition.
     """
+
     @staticmethod
     def build(db: PackageDatabase) -> 'FormatDatabase':
         """Constructs a format database from a given package database."""

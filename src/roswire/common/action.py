@@ -7,8 +7,8 @@ from typing import Any, Dict, List, Optional
 import attr
 import dockerblade
 
-from .msg import MsgFormat
 from .. import exceptions
+from ..common.msg import MsgFormat
 
 
 @attr.s(frozen=True, auto_attribs=True, slots=True)

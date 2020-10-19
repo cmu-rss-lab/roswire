@@ -7,8 +7,8 @@ from typing import Dict, List, Optional, Tuple
 
 import attr
 
-from ...definitions.base import Time
-from ...definitions.msg import Message
+from ...common.base import Time
+from ...common.msg import Message
 from ...util import tuple_from_iterable
 
 
