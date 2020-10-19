@@ -35,7 +35,6 @@ class TypeDatabase(Mapping[str, Type[Message]]):
     Implements the set of non-destructive :class:`dict` operations as
     :class:`PackageDatabase`.
     """
-
     @classmethod
     def build(cls, db_format: FormatDatabase) -> 'TypeDatabase':
         formats = list(db_format.messages.values())
@@ -67,7 +66,6 @@ class TypeDatabase(Mapping[str, Type[Message]]):
                     fmt: MsgFormat
                     ) -> Callable[[Type[Message], BinaryIO], Message]:
         """Builds a reader for a given message format."""
-
         def get_factory(field: Field) -> Callable[[BinaryIO], Any]:
             if field.is_simple:
                 return simple_reader(field.typ)
@@ -118,7 +116,6 @@ class TypeDatabase(Mapping[str, Type[Message]]):
                      fmt: MsgFormat
                      ) -> Callable[[Any, BinaryIO], None]:
         """Builds a write for a given message format."""
-
         def get_field_writer(field: Field) -> Callable[[Any, BinaryIO], None]:
             if field.is_simple:
                 return simple_writer(field.typ)
