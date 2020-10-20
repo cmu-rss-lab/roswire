@@ -9,8 +9,7 @@ import pytest
 import roswire
 import roswire.exceptions
 from dockerblade import Shell, FileSystem
-from roswire import AppInstance, ROSWire, AppDescription
-from roswire.ros1 import ROS1
+from roswire import AppInstance, ROSWire, AppDescription, ROS1
 from roswire.common import TypeDatabase, FormatDatabase, PackageDatabase
 
 DIR_TEST = os.path.dirname(__file__)
