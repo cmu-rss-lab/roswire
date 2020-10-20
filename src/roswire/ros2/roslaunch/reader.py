@@ -9,8 +9,8 @@ import attr
 import pkg_resources
 from loguru import logger
 
-from ...proxy.roslaunch.config import ExecutableType, LaunchConfig, NodeConfig
-from ...proxy.roslaunch.reader import LaunchFileReader
+from ...common.roslaunch.config import ExecutableType, LaunchConfig, NodeConfig
+from ...common.roslaunch.reader import LaunchFileReader
 
 if typing.TYPE_CHECKING:
     from ... import AppInstance

@@ -9,9 +9,9 @@ from typing import Dict, Optional, Sequence, Tuple
 import dockerblade
 from loguru import logger
 
-from .roslaunch import ROSLaunchManager
-from ..app.description import AppDescription
+from .. import AppDescription
 from ..common import NodeManager, SystemState
+from ..common.roslaunch import ROSLaunchManager
 from ..exceptions import ROSWireException
 from ..ros1 import (ParameterServer, ROS1LaunchManager, ROS1NodeManager,
                     ServiceManager, SystemStateProbe)
@@ -40,6 +40,7 @@ class ROS1:
     topic_to_type: Dict[str, str]
         A mapping from topic names to the names of their message types.
     """
+
     def __init__(self,
                  description: AppDescription,
                  shell: dockerblade.Shell,
