@@ -19,7 +19,7 @@ from ...ros1.launch.reader import ROS1LaunchFileReader
 
 @attr.s(eq=False)
 class ROS1LaunchManager(ROSLaunchManager):
-    """Provides access to `launch <wiki.ros.org/launch/>`_ for an
+    """Provides access to `launch <wiki.ros.org/roslaunch/>`_ for an
     associated ROS system. This interface is used to locate, read, and write
     `launch XML files <http://wiki.ros.org/roslaunch/XML>`_,
     and to launch ROS nodes using those files.
@@ -44,7 +44,7 @@ class ROS1LaunchManager(ROSLaunchManager):
             The name of the package to which the launch file belongs.
         argv: Sequence[str], optional
             An optional sequence of command-line arguments that should be
-            supplied to :code:`launch`.
+            supplied to :code:`roslaunch`.
 
         Raises
         ------
@@ -143,7 +143,7 @@ class ROS1LaunchManager(ROSLaunchManager):
                            Collection[Tuple[str, str]]]
                ] = None
                ) -> ROSLaunchController:
-        """Provides an interface to the launch command.
+        """Provides an interface to the roslaunch command.
 
         Parameters
         ----------
@@ -168,7 +168,7 @@ class ROS1LaunchManager(ROSLaunchManager):
         Returns
         -------
         ROSLaunchController
-            An interface for inspecting and managing the launch process.
+            An interface for inspecting and managing the roslaunch process.
 
         Raises
         ------
