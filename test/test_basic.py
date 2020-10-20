@@ -10,7 +10,7 @@ import roswire
 import roswire.exceptions
 from dockerblade import Shell, FileSystem
 from roswire import AppInstance, ROSWire, AppDescription
-from roswire.proxy import ROS1
+from roswire.ros1.ros1 import ROS1
 from roswire.common import TypeDatabase, FormatDatabase, PackageDatabase
 
 DIR_TEST = os.path.dirname(__file__)

@@ -3,19 +3,22 @@ __all__ = ('ROS1',)
 
 import os
 import time
+import typing
 import xmlrpc.client
 from typing import Dict, Optional, Sequence, Tuple
 
 import dockerblade
 from loguru import logger
 
-from .. import AppDescription
 from ..common import NodeManager, SystemState
 from ..exceptions import ROSWireException
 from ..proxy.roslaunch import ROSLaunchManager
 from ..ros1 import (ParameterServer, ROS1LaunchManager, ROS1NodeManager,
                     ServiceManager, SystemStateProbe)
 from ..ros1.bag import BagPlayer, BagRecorder
+
+if typing.TYPE_CHECKING:
+    from .. import AppDescription
 
 
 class ROS1:
@@ -42,7 +45,7 @@ class ROS1:
     """
 
     def __init__(self,
-                 description: AppDescription,
+                 description: 'AppDescription',
                  shell: dockerblade.Shell,
                  files: dockerblade.FileSystem,
                  ws_host: str,
