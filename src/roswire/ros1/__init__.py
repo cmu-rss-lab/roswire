@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from .node import ROS1Node
 from .node_manager import ROS1NodeManager
 from .parameter import ParameterServer
 from .ros1 import ROS1
