@@ -11,15 +11,15 @@ import dockerblade
 from loguru import logger
 
 from ... import exceptions as exc
-from ...common.roslaunch.config import LaunchConfig
-from ...common.roslaunch.controller import ROSLaunchController
-from ...common.roslaunch.roslaunch import ROSLaunchManager
-from ...ros1.roslaunch.reader import ROS1LaunchFileReader
+from ...common.launch.config import LaunchConfig
+from ...common.launch.controller import ROSLaunchController
+from ...common.launch.launch import ROSLaunchManager
+from ...ros1.launch.reader import ROS1LaunchFileReader
 
 
 @attr.s(eq=False)
 class ROS1LaunchManager(ROSLaunchManager):
-    """Provides access to `roslaunch <wiki.ros.org/roslaunch/>`_ for an
+    """Provides access to `launch <wiki.ros.org/launch/>`_ for an
     associated ROS system. This interface is used to locate, read, and write
     `launch XML files <http://wiki.ros.org/roslaunch/XML>`_,
     and to launch ROS nodes using those files.
@@ -44,7 +44,7 @@ class ROS1LaunchManager(ROSLaunchManager):
             The name of the package to which the launch file belongs.
         argv: Sequence[str], optional
             An optional sequence of command-line arguments that should be
-            supplied to :code:`roslaunch`.
+            supplied to :code:`launch`.
 
         Raises
         ------
@@ -143,7 +143,7 @@ class ROS1LaunchManager(ROSLaunchManager):
                            Collection[Tuple[str, str]]]
                ] = None
                ) -> ROSLaunchController:
-        """Provides an interface to the roslaunch command.
+        """Provides an interface to the launch command.
 
         Parameters
         ----------
@@ -153,9 +153,9 @@ class ROS1LaunchManager(ROSLaunchManager):
         package: str, optional
             The name of the package to which the launch file belongs.
         args: Dict[str, Union[int, str]], optional
-            Keyword arguments that should be supplied to roslaunch.
+            Keyword arguments that should be supplied to launch.
         prefix: str, optional
-            An optional prefix to add before the roslaunch command.
+            An optional prefix to add before the launch command.
         launch_prefixes: Mapping[str, str], optional
             An optional mapping from nodes, given by their names, to their
             individual launch prefix.
@@ -201,14 +201,14 @@ class ROS1LaunchManager(ROSLaunchManager):
                              f'{launch_config}')
 
             # write the instrumented launch config to a temporary file inside
-            # the container and use that container with roslaunch
+            # the container and use that container with launch
             package = None
             filename = self._files.mktemp(suffix='.launch')
             contents = launch_config.to_xml_string()
             logger.debug(f'instrumented launch file [{filename}]:\n{contents}')
             self._files.write(filename, contents)
 
-        cmd = ['roslaunch', shlex.quote(filename)]
+        cmd = ['launch', shlex.quote(filename)]
         launch_args: List[str] = [f'{arg}:={val}' for arg, val in args.items()]
         cmd += launch_args
         if prefix:
