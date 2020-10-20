@@ -20,11 +20,11 @@ class LaunchContext:
     resolve_dict: Dict[str, Any] = attr.ib(factory=dict)
     parent: Optional['LaunchContext'] = attr.ib(default=None)
     namespace: str = attr.ib(default='/')
-    arg_names: Tuple[str, ...] = attr.ib(default=tuple())
-    env_args: Tuple[Tuple[str, str], ...] = attr.ib(default=tuple())
+    arg_names: Tuple[str, ...] = attr.ib(default=())
+    env_args: Tuple[Tuple[str, str], ...] = attr.ib(default=())
     pass_all_args: bool = attr.ib(default=False)
     include_resolve_dict: Optional[Dict[str, Any]] = attr.ib(default=None)
-    remappings: Tuple[Tuple[str, str], ...] = attr.ib(default=tuple())
+    remappings: Tuple[Tuple[str, str], ...] = attr.ib(default=())
     node_name: Optional[str] = attr.ib(default=None)
 
     @property
@@ -39,7 +39,7 @@ class LaunchContext:
         ctx = self.child(ns)
         ctx = attr.evolve(ctx,
                           filename=filename,
-                          arg_names=tuple(),
+                          arg_names=(),
                           include_resolve_dict={})
         return ctx
 
@@ -92,7 +92,7 @@ class LaunchContext:
 
     def process_include_args(self) -> 'LaunchContext':
         if self.include_resolve_dict is None:
-            return attr.evolve(self, arg_names=tuple())
+            return attr.evolve(self, arg_names=())
 
         arg_dict = self.include_resolve_dict.get('arg', {})
         for arg in self.arg_names:
@@ -101,7 +101,7 @@ class LaunchContext:
                 raise FailedToParseLaunchFile(m)
 
         return attr.evolve(self,
-                           arg_names=tuple(),
+                           arg_names=(),
                            resolve_dict=deepcopy(self.include_resolve_dict),
                            include_resolve_dict=None)
 

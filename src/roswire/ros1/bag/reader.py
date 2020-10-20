@@ -100,7 +100,7 @@ class BagReader:
     @property
     def topics(self) -> Set[str]:
         """The names of all topics represented in this bag."""
-        return set(c.topic for c in self.connections)
+        return {c.topic for c in self.connections}
 
     @property
     def topics_to_types(self) -> Dict[str, Type[Message]]:

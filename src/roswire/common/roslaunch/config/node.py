@@ -23,13 +23,13 @@ class NodeConfig:
     package: str
     executable_path: str
     executable_type: ExecutableType
-    remappings: Collection[Tuple[str, str]] = attr.ib(default=tuple())
+    remappings: Collection[Tuple[str, str]] = attr.ib(default=())
     filename: Optional[str] = attr.ib(default=None)
     output: Optional[str] = attr.ib(default=None)
     required: bool = attr.ib(default=False)
     respawn: bool = attr.ib(default=False)
     respawn_delay: float = attr.ib(default=0.0)
-    env_args: Sequence[Tuple[str, str]] = attr.ib(default=tuple())
+    env_args: Sequence[Tuple[str, str]] = attr.ib(default=())
     cwd: Optional[str] = attr.ib(default=None)
     args: Optional[str] = attr.ib(default=None)
     launch_prefix: Optional[str] = attr.ib(default=None)

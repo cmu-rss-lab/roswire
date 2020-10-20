@@ -280,7 +280,7 @@ class MsgFormat:
 
     def flatten(self,
                 name_to_format: Mapping[str, 'MsgFormat'],
-                ctx: Tuple[str, ...] = tuple()
+                ctx: Tuple[str, ...] = ()
                 ) -> Iterator[Tuple[Tuple[str, ...], Field]]:
         for field in self.fields:
             if field.is_array or is_builtin(field.typ):

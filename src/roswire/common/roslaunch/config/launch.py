@@ -21,12 +21,12 @@ from ....name import (canonical_name, name_is_global, namespace_join,
 class LaunchConfig:
     nodes: AbstractSet[NodeConfig] = attr.ib(default=frozenset(),
                                              converter=frozenset)
-    executables: Sequence[str] = attr.ib(default=tuple())
-    roslaunch_files: Sequence[str] = attr.ib(default=tuple())
+    executables: Sequence[str] = attr.ib(default=())
+    roslaunch_files: Sequence[str] = attr.ib(default=())
     params: Mapping[str, Any] = attr.ib(factory=dict)
-    clear_params: Sequence[str] = attr.ib(default=tuple())
-    errors: Sequence[str] = attr.ib(default=tuple())
-    envs: Mapping[str, Env] = attr.ib(default=dict())
+    clear_params: Sequence[str] = attr.ib(default=())
+    errors: Sequence[str] = attr.ib(default=())
+    envs: Mapping[str, Env] = attr.ib(factory=dict)
 
     def with_clear_param(self, ns: str) -> 'LaunchConfig':
         """Specifies a parameter that should be cleared before new parameters

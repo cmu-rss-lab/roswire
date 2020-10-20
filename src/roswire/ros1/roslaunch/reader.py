@@ -88,7 +88,7 @@ def convert_str_to_type(s: str, typ: str) -> Union[bool, int, str, float]:
 
 
 def tag(name: str,
-        legal_attributes: Collection[str] = tuple()
+        legal_attributes: Collection[str] = ()
         ) -> Callable[[Loader], Loader]:
     legal_attributes = frozenset(list(legal_attributes) + ['if', 'unless'])
 
@@ -156,7 +156,7 @@ class ROS1LaunchFileReader(LaunchFileReader):
         ctx_child = ctx.child(ns)
 
         # handle nested tags
-        nested_tags = [t for t in tag]
+        nested_tags = list(tag)
         ctx_child, cfg = self._load_tags(ctx_child, cfg, nested_tags)
 
         return ctx, cfg

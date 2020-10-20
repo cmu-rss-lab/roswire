@@ -83,5 +83,5 @@ class ROSDistribution(enum.Enum):
     def for_version(cls, version: ROSVersion) -> Sequence['ROSDistribution']:
         """Returns a list of all distributions for a given version of ROS,
         ordered alphabetically, and therefore, also ordered by release date."""
-        return sorted([d for d in cls if d.ros == version],
+        return sorted((d for d in cls if d.ros == version),
                       key=lambda d: d.name)
