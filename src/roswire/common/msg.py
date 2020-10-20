@@ -13,7 +13,6 @@ import dockerblade
 from loguru import logger
 from toposort import toposort_flatten as toposort
 
-
 from .base import Duration, is_builtin, Time
 from .decode import is_simple
 from .. import exceptions as exc

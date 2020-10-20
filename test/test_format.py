@@ -4,7 +4,7 @@ import pytest
 from typing import List
 import os
 
-from roswire.definitions import (Constant, Field, MsgFormat, SrvFormat,
+from roswire.common import (Constant, Field, MsgFormat, SrvFormat,
                                  ActionFormat, Time, Package, PackageDatabase,
                                  FormatDatabase)
 import dockerblade

@@ -2,7 +2,7 @@ from typing import Type
 
 import pytest
 
-from roswire.definitions.base import Time, Duration
+from roswire.common.base import Time, Duration
 
 
 def test_duration_between():

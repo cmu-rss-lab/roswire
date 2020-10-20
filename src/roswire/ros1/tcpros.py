@@ -6,9 +6,9 @@ from typing import BinaryIO, Dict, Mapping, Optional, Type
 
 import attr
 
-from ..definitions.decode import read_string_dictionary, read_uint32
-from ..definitions.encode import write_encoded_header, write_uint32
-from ..definitions.msg import Message
+from ..common.decode import read_string_dictionary, read_uint32
+from ..common.encode import write_encoded_header, write_uint32
+from ..common.msg import Message
 
 _UTF8_ONE = '1'.encode('utf-8')
 

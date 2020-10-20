@@ -9,7 +9,7 @@ import dockerblade
 import yaml
 
 from ... import exceptions
-from ...definitions import Message, MsgFormat, SrvFormat
+from ...common import Message, MsgFormat, SrvFormat
 
 if typing.TYPE_CHECKING:
     from ...app import AppDescription

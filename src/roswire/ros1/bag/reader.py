@@ -12,17 +12,17 @@ from loguru import logger
 
 from .core import (BagHeader, BagMessage, Chunk, ChunkConnection, Compression,
                    ConnectionInfo, Index, IndexEntry, OpCode)
-from ...definitions.base import Duration, Time
-from ...definitions.decode import (decode_string,
-                                   decode_time,
-                                   decode_uint32,
-                                   decode_uint64,
-                                   read_encoded_header,
-                                   read_sized,
-                                   read_time,
-                                   read_uint32)
-from ...definitions.msg import Message
-from ...definitions.type_db import TypeDatabase
+from ...common.base import Duration, Time
+from ...common.decode import (decode_string,
+                              decode_time,
+                              decode_uint32,
+                              decode_uint64,
+                              read_encoded_header,
+                              read_sized,
+                              read_time,
+                              read_uint32)
+from ...common.msg import Message
+from ...common.type_db import TypeDatabase
 
 
 class BagReader:
