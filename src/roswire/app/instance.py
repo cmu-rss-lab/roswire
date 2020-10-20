@@ -15,7 +15,7 @@ from loguru import logger
 
 from ..common import TypeDatabase
 from ..common.catkin import CatkinInterface, CatkinMake, CatkinTools
-from ..proxy.ros1 import ROS1
+from ..ros1 import ROS1
 from ..ros2 import ROS2
 
 if typing.TYPE_CHECKING:
