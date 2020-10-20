@@ -59,7 +59,7 @@ class Package:
                        for f in files.listdir(dir_action, absolute=True)
                        if f.endswith('.action')]
 
-        return Package(name,  # type: ignore
+        return Package(name,
                        path,
                        messages,
                        services,
@@ -74,7 +74,7 @@ class Package:
                                      for dd in d.get('services', [])]
         actions: List[ActionFormat] = [ActionFormat.from_dict(dd, package=name)
                                        for dd in d.get('actions', [])]
-        return Package(d['name'],  # type: ignore
+        return Package(d['name'],
                        d['path'],
                        messages,
                        services,

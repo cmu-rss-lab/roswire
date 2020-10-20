@@ -158,7 +158,7 @@ class BagWriter:
         # build a description of the chunk
         conns = [ChunkConnection(conn, len(entries))
                  for conn, entries in index.items()]
-        chunk = Chunk(pos_record=pos_header,  # type: ignore
+        chunk = Chunk(pos_record=pos_header,
                       pos_data=pos_data,
                       time_start=time_start,
                       time_end=time_end,

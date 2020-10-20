@@ -87,7 +87,7 @@ class SrvFormat:
         if s_res:
             res = MsgFormat.from_string(package, name_res, s_res)
 
-        return SrvFormat(package, name, s, req, res)  # type: ignore
+        return SrvFormat(package, name, s, req, res)
 
     @staticmethod
     def from_dict(d: Dict[str, Any],

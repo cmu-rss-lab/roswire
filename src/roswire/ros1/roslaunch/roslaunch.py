@@ -84,7 +84,7 @@ class ROS1LaunchManager(ROSLaunchManager):
             filename = self._files.mktemp(suffix='.xml.launch')
         contents = ET.tostring(config.to_xml_tree().getroot())
         self._files.write(filename, contents)
-        return filename  # type: ignore
+        return filename
 
     def locate(self, filename: str, *, package: Optional[str] = None) -> str:
         """Locates a given launch file.
