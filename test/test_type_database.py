@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 import pytest
-
 import roswire
-from roswire.definitions import (PackageDatabase, FormatDatabase, TypeDatabase,
-                                 MsgFormat, Time)
+from roswire.common import (FormatDatabase, MsgFormat, PackageDatabase,
+                            Time, TypeDatabase)
 
 
 @pytest.mark.parametrize('filesystem', ['fetch'], indirect=True)

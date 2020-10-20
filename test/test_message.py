@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 import roswire
-from roswire.definitions import Time
+from roswire.common import Time
 
 
 @pytest.mark.parametrize('app', ['fetch'], indirect=True)
