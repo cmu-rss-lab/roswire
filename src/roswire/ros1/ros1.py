@@ -77,7 +77,7 @@ class ROS1:
                            self.__shell)
         self.__state_probe: SystemStateProbe = \
             SystemStateProbe.via_xmlrpc_connection(self.__connection)
-        self.roslaunch: 'ROSLaunchManager' = \
+        self.roslaunch: ROSLaunchManager = \
             ROS1LaunchManager(self.__shell, self.__files)
 
     @property
