@@ -13,7 +13,7 @@ import attr
 import yaml
 from loguru import logger
 
-from ..definitions import FormatDatabase, PackageDatabase, TypeDatabase
+from ..common import FormatDatabase, PackageDatabase, TypeDatabase
 from ..distribution import ROSDistribution
 
 if typing.TYPE_CHECKING:

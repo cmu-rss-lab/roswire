@@ -9,7 +9,7 @@ import attr
 from .service import ROS2Service
 
 if typing.TYPE_CHECKING:
-    from ..app import AppInstance
+    from .. import AppInstance
 
 
 @attr.s(frozen=True, auto_attribs=True, slots=True)

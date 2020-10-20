@@ -4,7 +4,7 @@ import typing as _typing
 import attr as _attr
 
 if _typing.TYPE_CHECKING:
-    from .app import App
+    from . import App
 
 
 class ROSWireException(Exception):
