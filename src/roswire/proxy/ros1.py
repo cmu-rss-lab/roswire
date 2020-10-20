@@ -10,8 +10,7 @@ from typing import Dict, Optional, Sequence, Tuple
 import dockerblade
 from loguru import logger
 
-from ..common import NodeManager, SystemState
-from ..common.roslaunch import ROSLaunchManager
+from ..common import NodeManager, ROSLaunchManager, SystemState
 from ..exceptions import ROSWireException
 from ..ros1 import (ParameterServer, ROS1LaunchManager, ROS1NodeManager,
                     ServiceManager, SystemStateProbe)
