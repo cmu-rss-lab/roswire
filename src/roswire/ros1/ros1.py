@@ -11,9 +11,9 @@ import dockerblade
 from loguru import logger
 
 from .bag import BagPlayer, BagRecorder
+from .launch import ROS1LaunchManager
 from .node_manager import ROS1NodeManager
 from .parameter import ParameterServer
-from .roslaunch import ROS1LaunchManager
 from .service import ServiceManager
 from .state import SystemStateProbe
 from ..common import NodeManager, ROSLaunchManager, SystemState
@@ -37,7 +37,7 @@ class ROS1:
     state: SystemState
         The instantaneous state of the ROS Master.
     roslaunch: ROSLaunchManager
-        Provides access to roslaunch-related functionality.
+        Provides access to launch-related functionality.
     services: ServiceManager
         Provides access to the services advertised on this ROS Master.
     parameters: ParameterServer

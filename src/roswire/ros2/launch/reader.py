@@ -9,8 +9,8 @@ import attr
 import pkg_resources
 from loguru import logger
 
-from ...common.roslaunch.config import ExecutableType, LaunchConfig, NodeConfig
-from ...common.roslaunch.reader import LaunchFileReader
+from ...common.launch.config import ExecutableType, LaunchConfig, NodeConfig
+from ...common.launch.reader import LaunchFileReader
 
 if typing.TYPE_CHECKING:
     from ... import AppInstance
@@ -43,7 +43,7 @@ class ROS2LaunchFileReader(LaunchFileReader):
             file inside the container.
         argv: Sequence[str], optional
             An optional sequence of command-line arguments that should be
-            supplied to :code:`roslaunch`.
+            supplied to :code:`ros2 launch`.
 
         Raises
         ------

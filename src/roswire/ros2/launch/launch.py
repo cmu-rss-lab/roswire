@@ -11,8 +11,8 @@ from loguru import logger
 
 from .reader import ROS2LaunchFileReader
 from ... import exceptions as exc
-from ...common.roslaunch.config import LaunchConfig
-from ...common.roslaunch.controller import ROSLaunchController
+from ...common.launch.config import LaunchConfig
+from ...common.launch.controller import ROSLaunchController
 
 if typing.TYPE_CHECKING:
     from ... import AppInstance

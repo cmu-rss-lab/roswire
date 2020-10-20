@@ -12,11 +12,11 @@ import attr
 import dockerblade
 from loguru import logger
 
-from ...common.roslaunch.config import ExecutableType, LaunchConfig, NodeConfig
-from ...common.roslaunch.context import LaunchContext
-from ...common.roslaunch.reader import LaunchFileReader
-from ...common.roslaunch.rosparam import load_from_yaml_string as load_rosparam_from_string
-from ...common.roslaunch.substitution import ArgumentResolver
+from ...common.launch.config import ExecutableType, LaunchConfig, NodeConfig
+from ...common.launch.context import LaunchContext
+from ...common.launch.reader import LaunchFileReader
+from ...common.launch.rosparam import load_from_yaml_string as load_rosparam_from_string
+from ...common.launch.substitution import ArgumentResolver
 from ...exceptions import FailedToParseLaunchFile
 from ...name import global_name, name_is_global, name_is_private, namespace, namespace_join
 
