@@ -15,7 +15,7 @@ from .instance import AppInstance
 from .. import exceptions as exc
 
 if typing.TYPE_CHECKING:
-    from ..roswire import ROSWire
+    from .. import ROSWire
 
 
 @attr.s(frozen=True, auto_attribs=True, slots=True)

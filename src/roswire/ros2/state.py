@@ -11,7 +11,7 @@ from loguru import logger
 from ..common import SystemState
 
 if typing.TYPE_CHECKING:
-    from ..app import AppInstance
+    from .. import AppInstance
 
 
 @attr.s(frozen=True, auto_attribs=True)

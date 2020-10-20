@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from roswire.definitions import MsgFormat, SrvFormat, Package, PackageDatabase
+from roswire.common import MsgFormat, SrvFormat, Package, PackageDatabase
 
 
 def test_to_and_from_dict():

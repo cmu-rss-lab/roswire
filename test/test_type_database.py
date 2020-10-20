@@ -2,7 +2,7 @@
 import pytest
 
 import roswire
-from roswire.definitions import (PackageDatabase, FormatDatabase, TypeDatabase,
+from roswire.common import (PackageDatabase, FormatDatabase, TypeDatabase,
                                  MsgFormat, Time)
 
 
