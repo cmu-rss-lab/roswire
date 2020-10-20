@@ -43,7 +43,7 @@ class ROS2LaunchFileReader(LaunchFileReader):
             file inside the container.
         argv: Sequence[str], optional
             An optional sequence of command-line arguments that should be
-            supplied to :code:`launch`.
+            supplied to :code:`ros2 launch`.
 
         Raises
         ------

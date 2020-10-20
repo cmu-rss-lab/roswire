@@ -5,7 +5,7 @@ import typing
 
 import attr
 
-from .launch.launch import ROS2LaunchManager
+from .launch import ROS2LaunchManager
 from .node_manager import ROS2NodeManager
 from .service_manager import ROS2ServiceManager
 from .state import ROS2StateProbe
