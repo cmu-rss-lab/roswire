@@ -13,9 +13,9 @@ from loguru import logger
 from ..common import NodeManager, SystemState
 from ..exceptions import ROSWireException
 from ..proxy.roslaunch import ROSLaunchManager
-from ..ros1 import (ParameterServer, ROS1LaunchManager, ROS1NodeManager,
+from . import (ParameterServer, ROS1LaunchManager, ROS1NodeManager,
                     ServiceManager, SystemStateProbe)
-from ..ros1.bag import BagPlayer, BagRecorder
+from .bag import BagPlayer, BagRecorder
 
 if typing.TYPE_CHECKING:
     from .. import AppDescription
