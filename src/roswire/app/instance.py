@@ -15,7 +15,6 @@ from loguru import logger
 
 from ..common import TypeDatabase
 from ..common.catkin import CatkinInterface, CatkinMake, CatkinTools
-from ..common.type_db import TypeDatabase
 from ..ros1.ros1 import ROS1
 from ..ros2 import ROS2
 
