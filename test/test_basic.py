@@ -11,7 +11,7 @@ import roswire.exceptions
 from dockerblade import Shell, FileSystem
 from roswire import AppInstance, ROSWire, AppDescription
 from roswire.proxy import ROS1
-from roswire.definitions import TypeDatabase, FormatDatabase, PackageDatabase
+from roswire.common import TypeDatabase, FormatDatabase, PackageDatabase
 
 DIR_TEST = os.path.dirname(__file__)
 
