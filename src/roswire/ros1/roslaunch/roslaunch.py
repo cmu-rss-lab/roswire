@@ -11,9 +11,9 @@ import dockerblade
 from loguru import logger
 
 from ... import exceptions as exc
-from ...proxy.roslaunch.config import LaunchConfig
-from ...proxy.roslaunch.controller import ROSLaunchController
-from ...proxy.roslaunch.roslaunch import ROSLaunchManager
+from ...common.roslaunch.config import LaunchConfig
+from ...common.roslaunch.controller import ROSLaunchController
+from ...common.roslaunch.roslaunch import ROSLaunchManager
 from ...ros1.roslaunch.reader import ROS1LaunchFileReader
 
 

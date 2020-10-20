@@ -10,12 +10,14 @@ from typing import Dict, Optional, Sequence, Tuple
 import dockerblade
 from loguru import logger
 
-from ..common import NodeManager, SystemState
-from ..exceptions import ROSWireException
-from ..proxy.roslaunch import ROSLaunchManager
-from . import (ParameterServer, ROS1LaunchManager, ROS1NodeManager,
-                    ServiceManager, SystemStateProbe)
 from .bag import BagPlayer, BagRecorder
+from .node_manager import ROS1NodeManager
+from .parameter import ParameterServer
+from .roslaunch import ROS1LaunchManager
+from .service import ServiceManager
+from .state import SystemStateProbe
+from ..common import NodeManager, ROSLaunchManager, SystemState
+from ..exceptions import ROSWireException
 
 if typing.TYPE_CHECKING:
     from .. import AppDescription
@@ -75,7 +77,7 @@ class ROS1:
                            self.__shell)
         self.__state_probe: SystemStateProbe = \
             SystemStateProbe.via_xmlrpc_connection(self.__connection)
-        self.roslaunch: ROSLaunchManager = \
+        self.roslaunch: 'ROSLaunchManager' = \
             ROS1LaunchManager(self.__shell, self.__files)
 
     @property
