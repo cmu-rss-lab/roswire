@@ -109,11 +109,9 @@ class AppDescription:
     def for_app(cls, app: 'App') -> 'AppDescription':
         """Produces a description for a given application."""
         with app.launch(require_description=False) as app_instance:
-            shell = app_instance.shell
-            files = app_instance.files
-            paths = PackageDatabase.paths(shell, files)
-            db_package = PackageDatabase.from_paths(files, paths)
-            distribution_name = shell.environ('ROS_DISTRO')
+            paths = PackageDatabase.paths(app_instance)
+            db_package = PackageDatabase.from_paths(app_instance, paths)
+            distribution_name = app_instance.shell.environ('ROS_DISTRO')
             distribution = ROSDistribution.with_name(distribution_name)
         db_format = FormatDatabase.build(db_package)
         db_type = TypeDatabase.build(db_format)
