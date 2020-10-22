@@ -149,7 +149,8 @@ class PackageDatabase(Mapping[str, Package]):
         Parameters
         ----------
         app_instance: AppInstance
-            An instanceof of the application for which the lsit of paths should be obtained
+            An instanceof of the application for which the
+            list of paths should be obtained
         """
         if app_instance.description.distribution.ros == ROSVersion.ROS1:
             return cls._paths_ros2(app_instance)
@@ -167,7 +168,8 @@ class PackageDatabase(Mapping[str, Package]):
         Parameters
         ----------
         app_instance: AppInstance
-            an instance fo an application from which to get the package database
+            an instance fo an application from which to get
+            the package database
         paths: List[str]
             a list of the absolute paths of the packages.
         ignore_bad_paths: bool
