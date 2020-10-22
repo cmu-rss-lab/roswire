@@ -109,7 +109,6 @@ class PackageDatabase(Mapping[str, Package]):
         :class:`dict` operations are provided (e.g., :code:`del db['foo'])`
         and `db['foo'] = bar`).
     """
-
     @staticmethod
     def _paths_ros1(app_instance: 'AppInstance') -> List[str]:
         """Parses :code:`ROS_PACKAGE_PATH` for a given shell."""
@@ -149,7 +148,8 @@ class PackageDatabase(Mapping[str, Package]):
 
         Parameters
         ----------
-        app_instance; The App instance for the image
+        app_instance: AppInstance
+            An instanceof of the application for which the lsit of paths should be obtained
         """
         if app_instance.description.distribution.ros == ROSVersion.ROS1:
             return cls._paths_ros2(app_instance)
@@ -167,7 +167,7 @@ class PackageDatabase(Mapping[str, Package]):
         Parameters
         ----------
         app_instance: AppInstance
-            access to the filesystem.
+            an instance fo an application from which to get the package database
         paths: List[str]
             a list of the absolute paths of the packages.
         ignore_bad_paths: bool

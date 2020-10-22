@@ -48,7 +48,7 @@ def test_build(sut):
                             'name': 'dot_graph'}]}}
         ]
     })
-    actual = Package.build(path, sut.files)
+    actual = Package.build(path, sut)
     assert actual == expected
 
 
@@ -431,7 +431,7 @@ def test_package_location_ros2(sut):
                       '/ros_ws/install/launch',
                       '/ros_ws/install/ament_cmake_export_link_flags'
                       }
-    actual_paths = set(PackageDatabase.paths(undefined_variable))
+    actual_paths = set(PackageDatabase.paths(sut))
     assert actual_paths == expected_paths
 
 
