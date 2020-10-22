@@ -241,8 +241,8 @@ def test_database_paths(sut):
     assert actual == expected
 
 
-@pytest.mark.parametrize('filesystem', ['fetch'], indirect=True)
-def test_database_from_paths(filesystem):
+@pytest.mark.parametrize('sut', ['fetch'], indirect=True)
+def test_database_from_paths(sut):
     paths = [
         '/opt/ros/melodic/share/angles',
         '/opt/ros/melodic/share/tf2',
@@ -250,7 +250,7 @@ def test_database_from_paths(filesystem):
         '/opt/ros/melodic/share/tf2_py',
         '/opt/ros/melodic/share/tf2_ros'
     ]
-    db = PackageDatabase.from_paths(filesystem, paths)
+    db = PackageDatabase.from_paths(sut, paths)
     assert len(db) == len(paths)
     assert set(db) == {'angles', 'tf2', 'tf2_msgs', 'tf2_py', 'tf2_ros'}
 
