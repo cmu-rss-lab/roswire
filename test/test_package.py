@@ -251,7 +251,7 @@ def test_database_from_paths(sut):
         '/opt/ros/melodic/share/tf2_py',
         '/opt/ros/melodic/share/tf2_ros'
     ]
-    db = PackageDatabase.build(sut, paths)
+    db = PackageDatabase.from_paths(sut, paths)
     assert len(db) == len(paths)
     assert set(db) == {'angles', 'tf2', 'tf2_msgs', 'tf2_py', 'tf2_ros'}
 
@@ -432,8 +432,7 @@ def test_package_location_ros2(sut):
                       '/ros_ws/install/launch',
                       '/ros_ws/install/ament_cmake_export_link_flags'
                       }
-    pd = PackageDatabase.build(sut)
-    actual_paths = set(pd.paths)
+    actual_paths = set(PackageDatabase.paths(sut))
     assert actual_paths == expected_paths
 
 
