@@ -1,0 +1,38 @@
+# -*- coding: utf-8 -*-
+__all__ = ('ROS2PackageDatabase',)
+import json
+import os
+import typing
+from typing import Final, List, Mapping
+
+import dockerblade
+from loguru import logger
+
+from ..common import PackageDatabase
+
+if typing.TYPE_CHECKING:
+    from .. import AppInstance
+
+_COMMAND_ROS2_PKG_PREFIXES: Final[str] = (
+    "python -c '"
+    "import json; "
+    "import ament_index_python; "
+    "print(json.dumps(ament_index_python.get_packages_with_prefixes()))"
+    "'")
+
+
+class ROS2PackageDatabase(PackageDatabase):
+
+    @classmethod
+    def _determine_paths(cls, app_instance: 'AppInstance') -> List[str]:
+        """Returns a list of paths for all ROS2 packages in an application."""
+        try:
+            shell = app_instance.shell
+            jsn = shell.check_output(_COMMAND_ROS2_PKG_PREFIXES, text=True)
+        except dockerblade.exceptions.CalledProcessError:
+            logger.error('failed to obtain ROS2 package prefixes')
+            raise
+        package_to_prefix: Mapping[str, str] = json.loads(jsn)
+        paths: List[str] = [os.path.join(prefix, f'share/{package}')
+                            for (package, prefix) in package_to_prefix.items()]
+        return paths

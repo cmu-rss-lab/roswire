@@ -2,6 +2,7 @@
 import pytest
 
 from roswire.common import MsgFormat, SrvFormat, Package, PackageDatabase
+from roswire.ros1 import ROS1PackageDatabase
 
 
 def test_to_and_from_dict():
@@ -237,7 +238,7 @@ def test_database_paths(sut):
         '/opt/ros/melodic/share/xacro',
         '/opt/ros/melodic/share/xmlrpcpp'
     }
-    pdb = PackageDatabase.build(sut)
+    pdb = ROS1PackageDatabase.build(sut)
     actual = set(pdb.paths)
     assert actual == expected
 

@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 __all__ = ('Package', 'PackageDatabase')
 
-import json
 import os
 import typing
+from abc import ABC, abstractmethod
 from typing import (Any, Collection, Dict, Iterator, List,
                     Mapping, Optional, Tuple)
 
 import attr
-import dockerblade
 from loguru import logger
-from typing_extensions import Final
 
 from .action import ActionFormat
 from .msg import MsgFormat
@@ -18,14 +16,7 @@ from .srv import SrvFormat
 from ..util import tuple_from_iterable
 
 if typing.TYPE_CHECKING:
-    from .. import AppInstance, ROSVersion
-
-_COMMAND_ROS2_PKG_PREFIXES: Final[str] = (
-    "python -c '"
-    "import json; "
-    "import ament_index_python; "
-    "print(json.dumps(ament_index_python.get_packages_with_prefixes()))"
-    "'")
+    from .. import AppInstance
 
 
 @attr.s(frozen=True, auto_attribs=True, slots=True)
@@ -95,7 +86,7 @@ class Package:
         return d
 
 
-class PackageDatabase(Mapping[str, Package]):
+class PackageDatabase(ABC, Mapping[str, Package]):
     """
     An immutable database of packages, represented as :class:`Package`
     instances, indexed by their names, given as :class:`str`.
@@ -110,6 +101,7 @@ class PackageDatabase(Mapping[str, Package]):
         :class:`dict` operations are provided (e.g., :code:`del db['foo'])`
         and `db['foo'] = bar`).
     """
+
     @classmethod
     def build(cls,
               app_instance: 'AppInstance',
@@ -121,41 +113,9 @@ class PackageDatabase(Mapping[str, Package]):
         return db_package
 
     @classmethod
-    def _paths_ros1(cls, app_instance: 'AppInstance') -> List[str]:
-        """Parses :code:`ROS_PACKAGE_PATH` for a given shell."""
-        paths: List[str] = []
-        shell = app_instance.shell
-        files = app_instance.files
-        path_str = shell.environ('ROS_PACKAGE_PATH')
-        package_paths: List[str] = path_str.strip().split(':')
-        for path in package_paths:
-            try:
-                all_packages = files.find(path, 'package.xml')
-            except dockerblade.exceptions.DockerBladeException:
-                logger.warning('unable to find directory in ROS_PACKAGE_PATH:'
-                               f' {path}')
-                continue
-            package_dirs = [os.path.dirname(p) for p in all_packages]
-            paths.extend(package_dirs)
-        return paths
-
-    @classmethod
-    def _paths_ros2(cls, app_instance: 'AppInstance') -> List[str]:
-        """Returns a list of paths for all ROS2 packages in an application."""
-        try:
-            shell = app_instance.shell
-            jsn = shell.check_output(_COMMAND_ROS2_PKG_PREFIXES, text=True)
-        except dockerblade.exceptions.CalledProcessError:
-            logger.error('failed to obtain ROS2 package prefixes')
-            raise
-        package_to_prefix: Mapping[str, str] = json.loads(jsn)
-        paths: List[str] = [os.path.join(prefix, f'share/{package}')
-                            for (package, prefix) in package_to_prefix.items()]
-        return paths
-
-    @classmethod
+    @abstractmethod
     def _determine_paths(cls, app_instance: 'AppInstance') -> List[str]:
-        """Parses :code:`ROS_PACKAGE_PATH` for a given shell.
+        """Parses the package paths for a given shell.
 
         Parameters
         ----------
@@ -163,9 +123,7 @@ class PackageDatabase(Mapping[str, Package]):
             An instanceof of the application for which the
             list of paths should be obtained
         """
-        if app_instance.description.distribution.ros == ROSVersion.ROS2:
-            return cls._paths_ros2(app_instance)
-        return cls._paths_ros1(app_instance)
+        ...
 
     @classmethod
     def _from_paths(cls,
@@ -203,7 +161,7 @@ class PackageDatabase(Mapping[str, Package]):
                     raise
             else:
                 packages.append(package)
-        return PackageDatabase(packages, paths)
+        return cls(packages, paths)
 
     def __init__(self,
                  packages: Collection[Package],
@@ -236,9 +194,9 @@ class PackageDatabase(Mapping[str, Package]):
         """
         yield from self.__contents
 
-    @staticmethod
-    def from_dict(d: List[Dict[str, Any]]) -> 'PackageDatabase':
-        return PackageDatabase([Package.from_dict(dd) for dd in d], [])
+    @classmethod
+    def from_dict(cls, d: List[Dict[str, Any]]) -> 'PackageDatabase':
+        return cls([Package.from_dict(dd) for dd in d], [])
 
     def to_dict(self) -> List[Dict[str, Any]]:
         return [p.to_dict() for p in self.values()]
