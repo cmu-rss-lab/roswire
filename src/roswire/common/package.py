@@ -4,7 +4,8 @@ __all__ = ('Package', 'PackageDatabase')
 import json
 import os
 import typing
-from typing import Any, Collection, Dict, Iterator, List, Mapping, Tuple
+from typing import (Any, Collection, Dict, Iterator, List,
+                    Mapping, Optional, Tuple)
 
 import attr
 import dockerblade
@@ -109,8 +110,18 @@ class PackageDatabase(Mapping[str, Package]):
         :class:`dict` operations are provided (e.g., :code:`del db['foo'])`
         and `db['foo'] = bar`).
     """
-    @staticmethod
-    def _paths_ros1(app_instance: 'AppInstance') -> List[str]:
+    @classmethod
+    def build(cls,
+              app_instance: 'AppInstance',
+              paths: Optional[List[str]] = None
+              ) -> 'PackageDatabase':
+        if paths is None:
+            paths = cls._determine_paths(app_instance)
+        db_package = cls._from_paths(app_instance, paths)
+        return db_package
+
+    @classmethod
+    def _paths_ros1(cls, app_instance: 'AppInstance') -> List[str]:
         """Parses :code:`ROS_PACKAGE_PATH` for a given shell."""
         paths: List[str] = []
         shell = app_instance.shell
@@ -128,8 +139,8 @@ class PackageDatabase(Mapping[str, Package]):
             paths.extend(package_dirs)
         return paths
 
-    @staticmethod
-    def _paths_ros2(app_instance: 'AppInstance') -> List[str]:
+    @classmethod
+    def _paths_ros2(cls, app_instance: 'AppInstance') -> List[str]:
         """Returns a list of paths for all ROS2 packages in an application."""
         try:
             shell = app_instance.shell
@@ -143,7 +154,7 @@ class PackageDatabase(Mapping[str, Package]):
         return paths
 
     @classmethod
-    def paths(cls, app_instance: 'AppInstance') -> List[str]:
+    def _determine_paths(cls, app_instance: 'AppInstance') -> List[str]:
         """Parses :code:`ROS_PACKAGE_PATH` for a given shell.
 
         Parameters
@@ -156,11 +167,12 @@ class PackageDatabase(Mapping[str, Package]):
             return cls._paths_ros2(app_instance)
         return cls._paths_ros1(app_instance)
 
-    @staticmethod
-    def from_paths(app_instance: 'AppInstance',
-                   paths: List[str],
-                   ignore_bad_paths: bool = True
-                   ) -> 'PackageDatabase':
+    @classmethod
+    def _from_paths(cls,
+                    app_instance: 'AppInstance',
+                    paths: List[str],
+                    ignore_bad_paths: bool = True
+                    ) -> 'PackageDatabase':
         """
         Constructs a package database from a list of the paths of the packages
         belonging to the database.
@@ -191,10 +203,17 @@ class PackageDatabase(Mapping[str, Package]):
                     raise
             else:
                 packages.append(package)
-        return PackageDatabase(packages)
+        return PackageDatabase(packages, paths)
 
-    def __init__(self, packages: Collection[Package]) -> None:
+    def __init__(self,
+                 packages: Collection[Package],
+                 paths: List[str]) -> None:
         self.__contents = {p.name: p for p in packages}
+        self._paths_in_package = paths
+
+    @property
+    def paths(self) -> List[str]:
+        return self._paths_in_package
 
     def __len__(self) -> int:
         """Returns the number of packages within this database."""
@@ -219,7 +238,7 @@ class PackageDatabase(Mapping[str, Package]):
 
     @staticmethod
     def from_dict(d: List[Dict[str, Any]]) -> 'PackageDatabase':
-        return PackageDatabase([Package.from_dict(dd) for dd in d])
+        return PackageDatabase([Package.from_dict(dd) for dd in d], [])
 
     def to_dict(self) -> List[Dict[str, Any]]:
         return [p.to_dict() for p in self.values()]
