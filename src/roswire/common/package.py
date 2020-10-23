@@ -152,7 +152,7 @@ class PackageDatabase(Mapping[str, Package]):
             An instanceof of the application for which the
             list of paths should be obtained
         """
-        if app_instance.description.distribution.ros == ROSVersion.ROS1:
+        if app_instance.description.distribution.ros == ROSVersion.ROS2:
             return cls._paths_ros2(app_instance)
         return cls._paths_ros1(app_instance)
 

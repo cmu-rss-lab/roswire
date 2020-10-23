@@ -237,7 +237,7 @@ def test_database_paths(sut):
         '/opt/ros/melodic/share/xacro',
         '/opt/ros/melodic/share/xmlrpcpp'
     }
-    actual = set(PackageDatabase.paths(undefined_variable))
+    actual = set(PackageDatabase.paths(sut))
     assert actual == expected
 
 
