@@ -238,7 +238,7 @@ def test_database_paths(sut):
         '/opt/ros/melodic/share/xacro',
         '/opt/ros/melodic/share/xmlrpcpp'
     }
-    actual = set(ROS1PackageDatabase._determine_paths(sut))
+    actual = ROS1PackageDatabase._determine_paths(sut)
     assert actual == expected
 
 

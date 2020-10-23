@@ -86,7 +86,7 @@ class Package:
         return d
 
 
-class PackageDatabase(Mapping[str, Package]):
+class PackageDatabase(ABC, Mapping[str, Package]):
     """
     An immutable database of packages, represented as :class:`Package`
     instances, indexed by their names, given as :class:`str`.
@@ -101,7 +101,6 @@ class PackageDatabase(Mapping[str, Package]):
         :class:`dict` operations are provided (e.g., :code:`del db['foo'])`
         and `db['foo'] = bar`).
     """
-
     @classmethod
     def build(cls,
               app_instance: 'AppInstance',
