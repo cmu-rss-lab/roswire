@@ -3,7 +3,7 @@ __all__ = ('ROS1PackageDatabase',)
 
 import os
 import typing
-from typing import List
+from typing import Any, Dict, List
 
 import dockerblade
 from loguru import logger
