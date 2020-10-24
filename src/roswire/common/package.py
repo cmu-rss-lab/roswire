@@ -195,8 +195,13 @@ class PackageDatabase(ABC, Mapping[str, Package]):
         yield from self.__contents
 
     @classmethod
-    def from_dict(cls, d: List[Dict[str, Any]]) -> 'PackageDatabase':
+    def _from_dict_internal(cls, d: List[Dict[str, Any]]) -> 'PackageDatabase':
         return cls([Package.from_dict(dd) for dd in d], [])
+
+    @classmethod
+    @abstractmethod
+    def from_dict(cls, d: List[Dict[str, Any]]) -> 'PackageDatabase':
+        ...
 
     def to_dict(self) -> List[Dict[str, Any]]:
         return [p.to_dict() for p in self.values()]

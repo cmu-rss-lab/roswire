@@ -3,10 +3,11 @@ __all__ = ('ROS2PackageDatabase',)
 import json
 import os
 import typing
-from typing import Final, List, Mapping
+from typing import Any, Dict, List, Mapping
 
 import dockerblade
 from loguru import logger
+from typing_extensions import Final
 
 from ..common import PackageDatabase
 
@@ -22,6 +23,10 @@ _COMMAND_ROS2_PKG_PREFIXES: Final[str] = (
 
 
 class ROS2PackageDatabase(PackageDatabase):
+
+    @classmethod
+    def from_dict(cls, d: List[Dict[str, Any]]) -> 'PackageDatabase':
+        return cls._from_dict_internal(d)
 
     @classmethod
     def _determine_paths(cls, app_instance: 'AppInstance') -> List[str]:

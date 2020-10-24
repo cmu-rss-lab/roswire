@@ -3,7 +3,7 @@ __all__ = ('ROS1PackageDatabase',)
 
 import os
 import typing
-from typing import List
+from typing import Any, Dict, List
 
 import dockerblade
 from loguru import logger
@@ -15,6 +15,10 @@ if typing.TYPE_CHECKING:
 
 
 class ROS1PackageDatabase(PackageDatabase):
+
+    @classmethod
+    def from_dict(cls, d: List[Dict[str, Any]]) -> 'PackageDatabase':
+        return cls._from_dict_internal(d)
 
     @classmethod
     def _determine_paths(cls, app_instance: 'AppInstance') -> List[str]:
