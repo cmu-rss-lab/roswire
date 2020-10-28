@@ -14,10 +14,11 @@ from typing_extensions import Final
 from .action import ActionFormat
 from .msg import MsgFormat
 from .srv import SrvFormat
+from .. import ROSVersion
 from ..util import tuple_from_iterable
 
 if typing.TYPE_CHECKING:
-    from .. import AppInstance, ROSVersion
+    from .. import AppInstance
 
 _COMMAND_ROS2_PKG_PREFIXES: Final[str] = (
     "python -c '"
@@ -109,6 +110,7 @@ class PackageDatabase(Mapping[str, Package]):
         :class:`dict` operations are provided (e.g., :code:`del db['foo'])`
         and `db['foo'] = bar`).
     """
+
     @staticmethod
     def _paths_ros1(app_instance: 'AppInstance') -> List[str]:
         """Parses :code:`ROS_PACKAGE_PATH` for a given shell."""
