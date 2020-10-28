@@ -86,7 +86,7 @@ class Package:
         return d
 
 
-class PackageDatabase(ABC, Mapping[str, Package]):
+class PackageDatabase(Mapping[str, Package]):
     """
     An immutable database of packages, represented as :class:`Package`
     instances, indexed by their names, given as :class:`str`.
@@ -138,7 +138,7 @@ class PackageDatabase(ABC, Mapping[str, Package]):
         Parameters
         ----------
         app_instance: AppInstance
-            an instance fo an application from which to get
+            an instance of an application from which to get
             the package database
         paths: List[str]
             a list of the absolute paths of the packages.
