@@ -6,8 +6,8 @@ from roswire.common import (PackageDatabase, FormatDatabase, TypeDatabase,
                                  MsgFormat, Time)
 
 
-@pytest.mark.parametrize('filesystem', ['fetch'], indirect=True)
-def test_build(filesystem):
+@pytest.mark.parametrize('sut', ['fetch'], indirect=True)
+def test_build(sut):
     paths = [
         '/opt/ros/melodic/share/actionlib_msgs',
         '/opt/ros/melodic/share/tf2_msgs',
@@ -15,7 +15,7 @@ def test_build(filesystem):
         '/opt/ros/melodic/share/geometry_msgs',
         '/opt/ros/melodic/share/std_msgs'
     ]
-    db_package = PackageDatabase.from_paths(filesystem, paths)
+    db_package = PackageDatabase.from_paths(sut, paths)
     db_format = FormatDatabase.build(db_package)
     db_type = TypeDatabase.build(db_format)
     assert set(db_type) == {

@@ -27,8 +27,8 @@ def test_to_and_from_dict():
     assert p == Package.from_dict(p.to_dict())
 
 
-@pytest.mark.parametrize('filesystem', ['fetch'], indirect=True)
-def test_build(filesystem):
+@pytest.mark.parametrize('sut', ['fetch'], indirect=True)
+def test_build(sut):
     path = '/opt/ros/melodic/share/tf'
     expected = Package.from_dict({
         'path': path,
@@ -48,7 +48,7 @@ def test_build(filesystem):
                             'name': 'dot_graph'}]}}
         ]
     })
-    actual = Package.build(path, filesystem)
+    actual = Package.build(path, sut)
     assert actual == expected
 
 
@@ -237,12 +237,12 @@ def test_database_paths(sut):
         '/opt/ros/melodic/share/xacro',
         '/opt/ros/melodic/share/xmlrpcpp'
     }
-    actual = set(PackageDatabase.paths(sut.shell, sut.files))
+    actual = set(PackageDatabase.paths(sut))
     assert actual == expected
 
 
-@pytest.mark.parametrize('filesystem', ['fetch'], indirect=True)
-def test_database_from_paths(filesystem):
+@pytest.mark.parametrize('sut', ['fetch'], indirect=True)
+def test_database_from_paths(sut):
     paths = [
         '/opt/ros/melodic/share/angles',
         '/opt/ros/melodic/share/tf2',
@@ -250,7 +250,7 @@ def test_database_from_paths(filesystem):
         '/opt/ros/melodic/share/tf2_py',
         '/opt/ros/melodic/share/tf2_ros'
     ]
-    db = PackageDatabase.from_paths(filesystem, paths)
+    db = PackageDatabase.from_paths(sut, paths)
     assert len(db) == len(paths)
     assert set(db) == {'angles', 'tf2', 'tf2_msgs', 'tf2_py', 'tf2_ros'}
 
@@ -431,7 +431,7 @@ def test_package_location_ros2(sut):
                       '/ros_ws/install/launch',
                       '/ros_ws/install/ament_cmake_export_link_flags'
                       }
-    actual_paths = set(PackageDatabase.paths(sut.shell, sut.files))
+    actual_paths = set(PackageDatabase.paths(sut))
     assert actual_paths == expected_paths
 
 

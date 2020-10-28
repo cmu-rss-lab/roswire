@@ -3,6 +3,7 @@ __all__ = ('Package', 'PackageDatabase')
 
 import json
 import os
+import typing
 from typing import Any, Collection, Dict, Iterator, List, Mapping, Tuple
 
 import attr
@@ -13,7 +14,11 @@ from typing_extensions import Final
 from .action import ActionFormat
 from .msg import MsgFormat
 from .srv import SrvFormat
+from ..distribution import ROSVersion
 from ..util import tuple_from_iterable
+
+if typing.TYPE_CHECKING:
+    from .. import AppInstance
 
 _COMMAND_ROS2_PKG_PREFIXES: Final[str] = (
     "python -c '"
@@ -32,12 +37,13 @@ class Package:
     actions: Tuple[ActionFormat, ...] = attr.ib(converter=tuple_from_iterable)
 
     @staticmethod
-    def build(path: str, files: dockerblade.FileSystem) -> 'Package':
+    def build(path: str, app_instance: 'AppInstance') -> 'Package':
         """Constructs a description of a package at a given path."""
         name: str = os.path.basename(path)
         messages: List[MsgFormat] = []
         services: List[SrvFormat] = []
         actions: List[ActionFormat] = []
+        files = app_instance.files
 
         if not files.isdir(path):
             raise FileNotFoundError(f"directory does not exist: {path}")
@@ -104,12 +110,13 @@ class PackageDatabase(Mapping[str, Package]):
         :class:`dict` operations are provided (e.g., :code:`del db['foo'])`
         and `db['foo'] = bar`).
     """
+
     @staticmethod
-    def _paths_ros1(shell: dockerblade.Shell,
-                    files: dockerblade.FileSystem
-                    ) -> List[str]:
+    def _paths_ros1(app_instance: 'AppInstance') -> List[str]:
         """Parses :code:`ROS_PACKAGE_PATH` for a given shell."""
         paths: List[str] = []
+        shell = app_instance.shell
+        files = app_instance.files
         path_str = shell.environ('ROS_PACKAGE_PATH')
         package_paths: List[str] = path_str.strip().split(':')
         for path in package_paths:
@@ -124,11 +131,10 @@ class PackageDatabase(Mapping[str, Package]):
         return paths
 
     @staticmethod
-    def _paths_ros2(shell: dockerblade.Shell,
-                    files: dockerblade.FileSystem
-                    ) -> List[str]:
+    def _paths_ros2(app_instance: 'AppInstance') -> List[str]:
         """Returns a list of paths for all ROS2 packages in an application."""
         try:
+            shell = app_instance.shell
             jsn = shell.check_output(_COMMAND_ROS2_PKG_PREFIXES, text=True)
         except dockerblade.exceptions.CalledProcessError:
             logger.error('failed to obtain ROS2 package prefixes')
@@ -139,18 +145,21 @@ class PackageDatabase(Mapping[str, Package]):
         return paths
 
     @classmethod
-    def paths(cls,
-              shell: dockerblade.Shell,
-              files: dockerblade.FileSystem
-              ) -> List[str]:
-        """Parses :code:`ROS_PACKAGE_PATH` for a given shell."""
-        distro = shell.environ('ROS_DISTRO')
-        if distro in {'dashing', 'eloquent', 'foxy'}:
-            return cls._paths_ros2(shell, files)
-        return cls._paths_ros1(shell, files)
+    def paths(cls, app_instance: 'AppInstance') -> List[str]:
+        """Parses :code:`ROS_PACKAGE_PATH` for a given shell.
+
+        Parameters
+        ----------
+        app_instance: AppInstance
+            An instanceof of the application for which the
+            list of paths should be obtained
+        """
+        if app_instance.description.distribution.ros == ROSVersion.ROS2:
+            return cls._paths_ros2(app_instance)
+        return cls._paths_ros1(app_instance)
 
     @staticmethod
-    def from_paths(files: dockerblade.FileSystem,
+    def from_paths(app_instance: 'AppInstance',
                    paths: List[str],
                    ignore_bad_paths: bool = True
                    ) -> 'PackageDatabase':
@@ -160,8 +169,9 @@ class PackageDatabase(Mapping[str, Package]):
 
         Parameters
         ----------
-        files: dockerblade.FileSystem
-            access to the filesystem.
+        app_instance: AppInstance
+            an instance fo an application from which to get
+            the package database
         paths: List[str]
             a list of the absolute paths of the packages.
         ignore_bad_paths: bool
@@ -176,7 +186,7 @@ class PackageDatabase(Mapping[str, Package]):
         packages: List[Package] = []
         for p in paths:
             try:
-                package = Package.build(p, files)
+                package = Package.build(p, app_instance)
             except FileNotFoundError:
                 logger.exception(f"unable to build package: {p}")
                 if not ignore_bad_paths:
