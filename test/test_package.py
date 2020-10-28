@@ -251,7 +251,7 @@ def test_database_from_paths(sut):
         '/opt/ros/melodic/share/tf2_py',
         '/opt/ros/melodic/share/tf2_ros'
     ]
-    db = PackageDatabase.from_paths(sut, paths)
+    db = PackageDatabase.build(sut, paths)
     assert len(db) == len(paths)
     assert set(db) == {'angles', 'tf2', 'tf2_msgs', 'tf2_py', 'tf2_ros'}
 
