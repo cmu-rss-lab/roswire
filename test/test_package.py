@@ -432,7 +432,7 @@ def test_package_location_ros2(sut):
                       '/ros_ws/install/launch',
                       '/ros_ws/install/ament_cmake_export_link_flags'
                       }
-    actual_paths = set(PackageDatabase.paths(sut))
+    actual_paths = set(PackageDatabase._determine_paths(sut))
     assert actual_paths == expected_paths
 
 

@@ -15,10 +15,11 @@ from typing_extensions import Final
 from .action import ActionFormat
 from .msg import MsgFormat
 from .srv import SrvFormat
+from ..distribution import ROSVersion
 from ..util import tuple_from_iterable
 
 if typing.TYPE_CHECKING:
-    from .. import AppInstance, ROSVersion
+    from .. import AppInstance
 
 _COMMAND_ROS2_PKG_PREFIXES: Final[str] = (
     "python -c '"
@@ -160,7 +161,7 @@ class PackageDatabase(Mapping[str, Package]):
         Parameters
         ----------
         app_instance: AppInstance
-            An instanceof of the application for which the
+            An instance of the application for which the
             list of paths should be obtained
         """
         if app_instance.description.distribution.ros == ROSVersion.ROS2:
@@ -180,7 +181,7 @@ class PackageDatabase(Mapping[str, Package]):
         Parameters
         ----------
         app_instance: AppInstance
-            an instance fo an application from which to get
+            an instance of an application from which to get
             the package database
         paths: List[str]
             a list of the absolute paths of the packages.
@@ -209,7 +210,7 @@ class PackageDatabase(Mapping[str, Package]):
                  packages: Collection[Package],
                  paths: List[str]) -> None:
         self.__contents = {p.name: p for p in packages}
-        self._paths_in_package = paths
+        self._paths_in_package = list(paths)
 
     @property
     def paths(self) -> List[str]:

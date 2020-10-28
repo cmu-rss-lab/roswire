@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from typing import List
+from typing import Dict, List, Set
 import os
 
 from roswire.common import (Constant, Field, MsgFormat, SrvFormat,
-                                 ActionFormat, Time, Package, PackageDatabase,
-                                 FormatDatabase)
+                            ActionFormat, PackageDatabase,
+                            FormatDatabase)
 import dockerblade
 
 
