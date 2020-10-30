@@ -4,7 +4,7 @@ __all__ = ('Package', 'PackageDatabase')
 import json
 import os
 import typing
-from typing import (Any, Collection, Dict, Iterator, List,
+from typing import (Any, Dict, Iterable, Iterator, List,
                     Mapping, Optional, Tuple)
 
 import attr
@@ -207,8 +207,8 @@ class PackageDatabase(Mapping[str, Package]):
         return PackageDatabase(packages, paths)
 
     def __init__(self,
-                 packages: Collection[Package],
-                 paths: List[str]) -> None:
+                 packages: Iterable[Package],
+                 paths: Iterable[str]) -> None:
         self.__contents = {p.name: p for p in packages}
         self._paths_in_package = list(paths)
 
@@ -239,7 +239,7 @@ class PackageDatabase(Mapping[str, Package]):
 
     @staticmethod
     def from_dict(d: List[Dict[str, Any]]) -> 'PackageDatabase':
-        return PackageDatabase([Package.from_dict(dd) for dd in d], [])
+        return PackageDatabase((Package.from_dict(dd) for dd in d), [])
 
     def to_dict(self) -> List[Dict[str, Any]]:
         return [p.to_dict() for p in self.values()]
