@@ -15,7 +15,7 @@ def test_build(sut):
         '/opt/ros/melodic/share/geometry_msgs',
         '/opt/ros/melodic/share/std_msgs'
     ]
-    db_package = PackageDatabase.from_paths(sut, paths)
+    db_package = PackageDatabase.build(sut, paths)
     db_format = FormatDatabase.build(db_package)
     db_type = TypeDatabase.build(db_format)
     assert set(db_type) == {

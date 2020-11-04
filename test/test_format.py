@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from typing import List
+from typing import Dict, List, Set
 import os
 
 from roswire.common import (Constant, Field, MsgFormat, SrvFormat,
-                                 ActionFormat, Time, Package, PackageDatabase,
-                                 FormatDatabase)
+                            ActionFormat, PackageDatabase,
+                            FormatDatabase)
 import dockerblade
 
 
@@ -373,7 +373,7 @@ def test_build_format_database(sut):
         '/opt/ros/melodic/share/tf2_msgs',
         '/opt/ros/melodic/share/tf'
     ]
-    db_package = PackageDatabase.from_paths(sut, paths)
+    db_package = PackageDatabase.build(sut, paths)
     db_format = FormatDatabase.build(db_package)
     name_messages: Set[str] = set(db_format.messages)
     name_services: Set[str] = set(db_format.services)
@@ -407,7 +407,7 @@ def test_msg_toposort(sut):
         '/ros_ws/src/common_msgs/geometry_msgs',
         '/ros_ws/src/std_msgs'
     ]
-    db_package = PackageDatabase.from_paths(sut, paths)
+    db_package = PackageDatabase.build(sut, paths)
     db_format = FormatDatabase.build(db_package)
 
     msgs = db_format.messages.values()
