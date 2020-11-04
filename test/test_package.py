@@ -238,8 +238,7 @@ def test_database_paths(sut):
         '/opt/ros/melodic/share/xacro',
         '/opt/ros/melodic/share/xmlrpcpp'
     }
-    pdb = ROS1PackageDatabase.build(sut, expected)
-    actual = set(pdb.paths)
+    actual = set(ROS1PackageDatabase._determine_paths(sut))
     assert actual == expected
 
 
@@ -433,7 +432,8 @@ def test_package_location_ros2(sut):
                       '/ros_ws/install/launch',
                       '/ros_ws/install/ament_cmake_export_link_flags'
                       }
-    actual_paths = set(PackageDatabase.paths(sut))
+    db = PackageDatabase.build(sut)
+    actual_paths = set(db.paths)
     assert actual_paths == expected_paths
 
 

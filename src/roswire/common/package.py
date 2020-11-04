@@ -4,7 +4,7 @@ __all__ = ('Package', 'PackageDatabase')
 import os
 import typing
 from abc import ABC, abstractmethod
-from typing import (Any, Collection, Dict, Iterator, List,
+from typing import (Any, Dict, Iterable, Iterator, List,
                     Mapping, Optional, Tuple)
 
 import attr
@@ -120,7 +120,7 @@ class PackageDatabase(Mapping[str, Package]):
         Parameters
         ----------
         app_instance: AppInstance
-            An instanceof of the application for which the
+            An instance of the application for which the
             list of paths should be obtained
         """
         ...
@@ -164,10 +164,10 @@ class PackageDatabase(Mapping[str, Package]):
         return cls(packages, paths)
 
     def __init__(self,
-                 packages: Collection[Package],
-                 paths: List[str]) -> None:
+                 packages: Iterable[Package],
+                 paths: Iterable[str]) -> None:
         self.__contents = {p.name: p for p in packages}
-        self._paths_in_package = paths
+        self._paths_in_package = list(paths)
 
     @property
     def paths(self) -> List[str]:
