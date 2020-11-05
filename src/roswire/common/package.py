@@ -116,6 +116,7 @@ class PackageDatabase(ABC, Mapping[str, Package]):
     def _determine_paths(cls, app_instance: 'AppInstance') -> List[str]:
         """
         Parses the package paths for a given shell.
+
         Parameters
         ----------
         app_instance: AppInstance
@@ -139,10 +140,6 @@ class PackageDatabase(ABC, Mapping[str, Package]):
             A collection of the packages to be included in the databse
         paths: Iterable[str]
             A collection of paths
-
-        Returns
-        -------
-        A Package database
         """
         ...
 
