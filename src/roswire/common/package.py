@@ -4,6 +4,7 @@ __all__ = ('Package', 'PackageDatabase')
 import os
 import typing
 from abc import ABC, abstractmethod
+
 from typing import (Any, Dict, Iterable, Iterator, List,
                     Mapping, Optional, Tuple)
 
@@ -13,6 +14,7 @@ from loguru import logger
 from .action import ActionFormat
 from .msg import MsgFormat
 from .srv import SrvFormat
+from ..distribution import ROSVersion
 from ..util import tuple_from_iterable
 
 if typing.TYPE_CHECKING:
@@ -115,7 +117,6 @@ class PackageDatabase(ABC, Mapping[str, Package]):
     @abstractmethod
     def _determine_paths(cls, app_instance: 'AppInstance') -> List[str]:
         """Parses the package paths for a given shell.
-
         Parameters
         ----------
         app_instance: AppInstance

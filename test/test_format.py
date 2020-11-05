@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from typing import List
+from typing import Dict, List, Set
 import os
 
 from roswire.common import (Constant, Field, MsgFormat, SrvFormat,
@@ -409,6 +409,7 @@ def test_msg_toposort(sut):
         '/ros_ws/src/common_msgs/geometry_msgs',
         '/ros_ws/src/std_msgs'
     ]
+
     db_package = ROS1PackageDatabase.build(sut, paths)
     db_format = FormatDatabase.build(db_package)
 
