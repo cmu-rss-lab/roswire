@@ -156,7 +156,8 @@ class PackageDatabase(Mapping[str, Package]):
 
     @classmethod
     def _determine_paths(cls, app_instance: 'AppInstance') -> List[str]:
-        """Parses :code:`ROS_PACKAGE_PATH` for a given shell.
+        """
+        Parses :code:`ROS_PACKAGE_PATH` for a given shell.
 
         Parameters
         ----------
