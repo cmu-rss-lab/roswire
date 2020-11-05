@@ -114,8 +114,7 @@ class PackageDatabase(ABC, Mapping[str, Package]):
     @classmethod
     @abstractmethod
     def _determine_paths(cls, app_instance: 'AppInstance') -> List[str]:
-        """
-        Parses the package paths for a given shell.
+        """Parses the package paths for a given shell.
 
         Parameters
         ----------
