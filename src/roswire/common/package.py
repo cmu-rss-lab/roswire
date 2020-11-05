@@ -4,7 +4,6 @@ __all__ = ('Package', 'PackageDatabase')
 import os
 import typing
 from abc import ABC, abstractmethod
-
 from typing import (Any, Dict, Iterable, Iterator, List,
                     Mapping, Optional, Tuple)
 
@@ -14,7 +13,6 @@ from loguru import logger
 from .action import ActionFormat
 from .msg import MsgFormat
 from .srv import SrvFormat
-from ..distribution import ROSVersion
 from ..util import tuple_from_iterable
 
 if typing.TYPE_CHECKING:
