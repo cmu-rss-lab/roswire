@@ -25,8 +25,8 @@ _COMMAND_ROS2_PKG_PREFIXES: Final[str] = (
 
 class ROS2PackageDatabase(PackageDatabase):
     @classmethod
-    def _from_pacakages_and_paths(cls, packages: Iterable[Package],
-                                  paths: Iterable[str]) -> 'PackageDatabase':
+    def _from_packages_and_paths(cls, packages: Iterable[Package],
+                                 paths: Iterable[str]) -> 'PackageDatabase':
         return ROS2PackageDatabase(packages, paths)
 
     @classmethod

@@ -126,9 +126,9 @@ class PackageDatabase(ABC, Mapping[str, Package]):
 
     @classmethod
     @abstractmethod
-    def _from_pacakages_and_paths(cls,
-                                  packages: Iterable[Package],
-                                  paths: Iterable[str]) -> 'PackageDatabase':
+    def _from_packages_and_paths(cls,
+                                 packages: Iterable[Package],
+                                 paths: Iterable[str]) -> 'PackageDatabase':
         """
         Constructs a packaged database from a packages
         and paths in the container
@@ -182,7 +182,7 @@ class PackageDatabase(ABC, Mapping[str, Package]):
                     raise
             else:
                 packages.append(package)
-        return cls._from_pacakages_and_paths(packages, paths)
+        return cls._from_packages_and_paths(packages, paths)
 
     def __init__(self,
                  packages: Iterable[Package],

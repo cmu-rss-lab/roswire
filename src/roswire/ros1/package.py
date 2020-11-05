@@ -16,8 +16,8 @@ if typing.TYPE_CHECKING:
 
 class ROS1PackageDatabase(PackageDatabase):
     @classmethod
-    def _from_pacakages_and_paths(cls, packages: Iterable[Package],
-                                  paths: Iterable[str]) -> 'PackageDatabase':
+    def _from_packages_and_paths(cls, packages: Iterable[Package],
+                                 paths: Iterable[str]) -> 'PackageDatabase':
         return ROS1PackageDatabase(packages, paths)
 
     @classmethod
