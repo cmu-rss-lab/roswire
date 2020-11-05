@@ -5,6 +5,8 @@ import roswire
 from roswire.common import (PackageDatabase, FormatDatabase, TypeDatabase,
                                  MsgFormat, Time)
 
+from roswire.ros1 import ROS1PackageDatabase
+
 
 @pytest.mark.parametrize('sut', ['fetch'], indirect=True)
 def test_build(sut):
@@ -15,7 +17,8 @@ def test_build(sut):
         '/opt/ros/melodic/share/geometry_msgs',
         '/opt/ros/melodic/share/std_msgs'
     ]
-    db_package = PackageDatabase.build(sut, paths)
+    db_package = ROS1PackageDatabase.build(sut, paths)
+
     db_format = FormatDatabase.build(db_package)
     db_type = TypeDatabase.build(db_format)
     assert set(db_type) == {

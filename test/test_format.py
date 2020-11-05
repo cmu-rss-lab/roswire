@@ -5,8 +5,9 @@ from typing import Dict, List, Set
 import os
 
 from roswire.common import (Constant, Field, MsgFormat, SrvFormat,
-                            ActionFormat, PackageDatabase,
-                            FormatDatabase)
+                            ActionFormat, FormatDatabase)
+from roswire.ros1 import ROS1PackageDatabase
+
 import dockerblade
 
 
@@ -36,7 +37,8 @@ string EXAMPLE="#comments" are ignored, and leading and trailing whitespace remo
     assert Constant('int32', 'X', '123') in fmt.constants
     assert Constant('int32', 'Y', '-123') in fmt.constants
     assert Constant('string', 'FOO', 'foo') in fmt.constants
-    assert Constant('string', 'EXAMPLE', '"#comments" are ignored, and leading and trailing whitespace removed') in fmt.constants  # noqa: pycodestyle
+    assert Constant('string', 'EXAMPLE',
+                    '"#comments" are ignored, and leading and trailing whitespace removed') in fmt.constants  # noqa: pycodestyle
 
     assert len(fmt.fields) == 3
     assert Field('uint32', 'seq') in fmt.fields
@@ -192,35 +194,35 @@ def test_srv_format_to_and_from_dict():
          'name': name,
          'definition': definition_service,
          'request': {
-            'definition': definition_request,
-            'fields': [
-                {'type': 'nav_msgs/OccupancyGrid',
-                 'name': 'map'},
-                {'type': 'geometry_msgs/PoseWithCovarianceStamped',
-                 'name': 'initial_pose'}]
+             'definition': definition_request,
+             'fields': [
+                 {'type': 'nav_msgs/OccupancyGrid',
+                  'name': 'map'},
+                 {'type': 'geometry_msgs/PoseWithCovarianceStamped',
+                  'name': 'initial_pose'}]
          },
          'response': {
-            'definition': definition_response,
-            'fields': [{'type': 'bool', 'name': 'success'}]
+             'definition': definition_response,
+             'fields': [{'type': 'bool', 'name': 'success'}]
          }}
     f = SrvFormat(
+        package=pkg,
+        name=name,
+        definition=definition_service,
+        request=MsgFormat(
             package=pkg,
-            name=name,
-            definition=definition_service,
-            request=MsgFormat(
-                package=pkg,
-                definition=definition_request,
-                name=name_request,
-                constants=[],
-                fields=[Field('nav_msgs/OccupancyGrid', 'map'),
-                        Field('geometry_msgs/PoseWithCovarianceStamped',
-                              'initial_pose')]),
-            response=MsgFormat(
-                package=pkg,
-                definition=definition_response,
-                name=name_response,
-                constants=[],
-                fields=[Field('bool', 'success')]))
+            definition=definition_request,
+            name=name_request,
+            constants=[],
+            fields=[Field('nav_msgs/OccupancyGrid', 'map'),
+                    Field('geometry_msgs/PoseWithCovarianceStamped',
+                          'initial_pose')]),
+        response=MsgFormat(
+            package=pkg,
+            definition=definition_response,
+            name=name_response,
+            constants=[],
+            fields=[Field('bool', 'success')]))
     assert SrvFormat.from_dict(d) == f
     assert SrvFormat.from_dict(f.to_dict()) == f
 
@@ -238,32 +240,32 @@ def test_action_format_to_and_from_dict():
          'name': name,
          'definition': definition_action,
          'goal': {
-            'definition': definition_goal,
-            'fields': [{'type': 'int64', 'name': 'a'},
-                       {'type': 'int64', 'name': 'b'}]
+             'definition': definition_goal,
+             'fields': [{'type': 'int64', 'name': 'a'},
+                        {'type': 'int64', 'name': 'b'}]
          },
          'result': {
-            'definition': definition_result,
-            'fields': [{'type': 'int64', 'name': 'sum'}]
+             'definition': definition_result,
+             'fields': [{'type': 'int64', 'name': 'sum'}]
          }}
     f = ActionFormat(
+        package=pkg,
+        name=name,
+        definition=definition_action,
+        goal=MsgFormat(
+            definition=definition_goal,
             package=pkg,
-            name=name,
-            definition=definition_action,
-            goal=MsgFormat(
-                definition=definition_goal,
-                package=pkg,
-                name=name_goal,
-                constants=[],
-                fields=[Field('int64', 'a'),
-                        Field('int64', 'b')]),
-            feedback=None,
-            result=MsgFormat(
-                package=pkg,
-                definition=definition_result,
-                name=name_result,
-                constants=[],
-                fields=[Field('int64', 'sum')]))
+            name=name_goal,
+            constants=[],
+            fields=[Field('int64', 'a'),
+                    Field('int64', 'b')]),
+        feedback=None,
+        result=MsgFormat(
+            package=pkg,
+            definition=definition_result,
+            name=name_result,
+            constants=[],
+            fields=[Field('int64', 'sum')]))
     assert ActionFormat.from_dict(d) == f
     assert ActionFormat.from_dict(f.to_dict()) == f
 
@@ -373,7 +375,7 @@ def test_build_format_database(sut):
         '/opt/ros/melodic/share/tf2_msgs',
         '/opt/ros/melodic/share/tf'
     ]
-    db_package = PackageDatabase.build(sut, paths)
+    db_package = ROS1PackageDatabase.build(sut, paths)
     db_format = FormatDatabase.build(db_package)
     name_messages: Set[str] = set(db_format.messages)
     name_services: Set[str] = set(db_format.services)
@@ -407,7 +409,8 @@ def test_msg_toposort(sut):
         '/ros_ws/src/common_msgs/geometry_msgs',
         '/ros_ws/src/std_msgs'
     ]
-    db_package = PackageDatabase.build(sut, paths)
+
+    db_package = ROS1PackageDatabase.build(sut, paths)
     db_format = FormatDatabase.build(db_package)
 
     msgs = db_format.messages.values()
