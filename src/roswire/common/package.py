@@ -130,7 +130,7 @@ class PackageDatabase(ABC, Mapping[str, Package]):
                                  packages: Iterable[Package],
                                  paths: Iterable[str]) -> 'PackageDatabase':
         """
-        Constructs a packaged database from a packages
+        Constructs a package database from a packages
         and paths in the container
 
         Parameters
