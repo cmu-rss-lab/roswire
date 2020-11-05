@@ -114,12 +114,35 @@ class PackageDatabase(ABC, Mapping[str, Package]):
     @classmethod
     @abstractmethod
     def _determine_paths(cls, app_instance: 'AppInstance') -> List[str]:
-        """Parses the package paths for a given shell.
+        """
+        Parses the package paths for a given shell.
         Parameters
         ----------
         app_instance: AppInstance
             An instance of the application for which the
             list of paths should be obtained
+        """
+        ...
+
+    @classmethod
+    @abstractmethod
+    def _from_pacakages_and_paths(cls,
+                                  packages: Iterable[Package],
+                                  paths: Iterable[str]) -> 'PackageDatabase':
+        """
+        Constructs a packaged database from a packages
+        and paths in the container
+
+        Parameters
+        ----------
+        packages: Iterable[Package]
+            A collection of the packages to be included in the databse
+        paths: Iterable[str]
+            A collection of paths
+
+        Returns
+        -------
+        A Package database
         """
         ...
 
@@ -159,7 +182,7 @@ class PackageDatabase(ABC, Mapping[str, Package]):
                     raise
             else:
                 packages.append(package)
-        return cls(packages, paths)
+        return cls._from_pacakages_and_paths(packages, paths)
 
     def __init__(self,
                  packages: Iterable[Package],
@@ -191,10 +214,6 @@ class PackageDatabase(ABC, Mapping[str, Package]):
         this database.
         """
         yield from self.__contents
-
-    @classmethod
-    def _from_dict_internal(cls, d: List[Dict[str, Any]]) -> 'PackageDatabase':
-        return cls([Package.from_dict(dd) for dd in d], [])
 
     @classmethod
     @abstractmethod

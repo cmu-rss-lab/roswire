@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 __all__ = ('ROS2PackageDatabase',)
+
 import json
 import os
 import typing
-from typing import Any, Dict, List, Mapping
+from typing import Any, Dict, Iterable, List, Mapping
 
 import dockerblade
 from loguru import logger
 from typing_extensions import Final
 
-from ..common import PackageDatabase
+from ..common import Package, PackageDatabase
 
 if typing.TYPE_CHECKING:
     from .. import AppInstance
@@ -23,10 +24,14 @@ _COMMAND_ROS2_PKG_PREFIXES: Final[str] = (
 
 
 class ROS2PackageDatabase(PackageDatabase):
+    @classmethod
+    def _from_pacakages_and_paths(cls, packages: Iterable[Package],
+                                  paths: Iterable[str]) -> 'PackageDatabase':
+        return ROS2PackageDatabase(packages, paths)
 
     @classmethod
     def from_dict(cls, d: List[Dict[str, Any]]) -> 'PackageDatabase':
-        return cls._from_dict_internal(d)
+        return ROS2PackageDatabase([Package.from_dict(dd) for dd in d], [])
 
     @classmethod
     def _determine_paths(cls, app_instance: 'AppInstance') -> List[str]:
