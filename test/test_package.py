@@ -238,7 +238,7 @@ def test_database_paths(sut):
         '/opt/ros/melodic/share/xacro',
         '/opt/ros/melodic/share/xmlrpcpp'
     }
-    actual = ROS1PackageDatabase._determine_paths(sut)
+    actual = set(ROS1PackageDatabase._determine_paths(sut))
     assert actual == expected
 
 
@@ -251,7 +251,7 @@ def test_database_from_paths(sut):
         '/opt/ros/melodic/share/tf2_py',
         '/opt/ros/melodic/share/tf2_ros'
     ]
-    db = ROS1PackageDatabase.from_paths(sut, paths)
+    db = ROS1PackageDatabase.build(sut, paths)
     assert len(db) == len(paths)
     assert set(db) == {'angles', 'tf2', 'tf2_msgs', 'tf2_py', 'tf2_ros'}
 
