@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-This module provides access to the ROSWire session.
-"""
+"""This module provides access to the ROSWire session."""
 __all__ = ('ROSWire',)
 
 import contextlib

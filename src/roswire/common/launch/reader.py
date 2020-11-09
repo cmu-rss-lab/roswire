@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-This file implements a proxy for parsing the contents of launch files.
-"""
+"""This file implements a proxy for parsing the contents of launch files."""
 __all__ = ('LaunchFileReader',)
 
 import abc

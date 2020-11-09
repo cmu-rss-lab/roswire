@@ -29,8 +29,10 @@ class LaunchConfig:
     envs: Mapping[str, Env] = attr.ib(factory=dict)
 
     def with_clear_param(self, ns: str) -> 'LaunchConfig':
-        """Specifies a parameter that should be cleared before new parameters
-        are set."""
+        """
+        Specifies a parameter that should be cleared before new parameters
+        are set.
+        """
         ns = canonical_name(ns)
         if ns in self.clear_params:
             return self

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-This module is used to build and manage descriptions of ROS applications.
-"""
+"""This module is used to build and manage descriptions of ROS applications."""
 __all__ = ('AppDescription',)
 
 import base64
@@ -87,15 +85,19 @@ class AppDescription:
 
     @classmethod
     def saved(cls, app: 'App') -> bool:
-        """Determines whether a given application already has a description
-        saved to the filesystem."""
+        """
+        Determines whether a given application already has a description
+        saved to the filesystem.
+        """
         filename = cls.path(app)
         return os.path.exists(filename)
 
     @classmethod
     def path(cls, app: 'App') -> str:
-        """Determines the filesystem location where the description for a given
-        application will be saved."""
+        """
+        Determines the filesystem location where the description for a given
+        application will be saved.
+        """
         dir_roswire = app._roswire.workspace
         dir_app_descriptions = os.path.join(dir_roswire, 'descriptions')
         os.makedirs(dir_app_descriptions, exist_ok=True)

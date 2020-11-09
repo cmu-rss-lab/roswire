@@ -108,7 +108,8 @@ class BagPlayer:
     def stop(self) -> None:
         """Stops playback from the bag.
 
-        Raises:
+        Raises
+        ------
             PlayerAlreadyStopped: if the player has already been stopped.
         """
         logger.debug("stopping bag playback")

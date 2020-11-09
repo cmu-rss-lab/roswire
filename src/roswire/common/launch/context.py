@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-This module provides data structures that represent ROS launch configurations.
+This module provides data structures that represent ROS
+launch configurations.
 """
 __all__ = ('LaunchContext',)
 

@@ -317,7 +317,7 @@ class Message:
     messages.
 
     Attributes
-    ----------------
+    ----------
     format: MsgFormat
         The format used by this message.
     """
