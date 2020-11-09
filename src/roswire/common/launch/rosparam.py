@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-This file provides utilities for interacting with rosparam.
-"""
+"""This file provides utilities for interacting with rosparam."""
 __all__ = ('load_from_yaml_string',)
 
 import math

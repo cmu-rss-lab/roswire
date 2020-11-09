@@ -251,7 +251,8 @@ class BagReader:
                          topics: Optional[Collection[str]] = None
                          ) -> Iterator[ConnectionInfo]:
         """
-        Returns an iterator over all connections for a given set of topics.
+        Returns an iterator over all connections for a given
+        set of topics.
         """
         if not topics:
             yield from self.connections

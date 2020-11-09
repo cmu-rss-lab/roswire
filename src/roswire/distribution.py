@@ -7,13 +7,17 @@ from typing import Any, Sequence
 
 
 class ROSVersion(enum.IntEnum):
+    """Describes a ROS major version, either ROS 1 or ROS 2."""
+
     ROS1 = 1
     ROS2 = 2
 
     @property
     def distributions(self) -> Sequence['ROSDistribution']:
-        """Returns a list of all distributions for this version of ROS,
-        ordered alphabetically, and therefore, also ordered by release date."""
+        """
+        Returns a list of all distributions for this version of ROS,
+        ordered alphabetically, and therefore, also ordered by release date.
+        """
         return ROSDistribution.for_version(self)
 
 
@@ -29,6 +33,7 @@ class ROSDistribution(enum.Enum):
     name: str
         The name of this distribution.
     """
+
     FOXY = ('foxy', 'ROS2')
     ELOQUENT = ('eloquent', 'ROS2')
     DASHING = ('dashing', 'ROS2')
@@ -66,7 +71,8 @@ class ROSDistribution(enum.Enum):
 
     @classmethod
     def with_name(cls, name: str) -> 'ROSDistribution':
-        """Retrieves the ROS distribution with a given name.
+        """
+        Retrieves the ROS distribution with a given name.
 
         Raises
         ------
@@ -81,7 +87,9 @@ class ROSDistribution(enum.Enum):
 
     @classmethod
     def for_version(cls, version: ROSVersion) -> Sequence['ROSDistribution']:
-        """Returns a list of all distributions for a given version of ROS,
-        ordered alphabetically, and therefore, also ordered by release date."""
+        """
+        Returns a list of all distributions for a given version of ROS,
+        ordered alphabetically, and therefore, also ordered by release date.
+        """
         return sorted((d for d in cls if d.ros == version),
                       key=lambda d: d.name)

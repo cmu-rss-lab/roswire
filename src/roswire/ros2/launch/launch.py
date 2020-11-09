@@ -83,8 +83,7 @@ class ROS2LaunchManager:
 
         Returns
         -------
-        str
-            The absolute path to the generated XML launch file.
+        str: The absolute path to the generated XML launch file.
         """
         raise NotImplementedError
 
