@@ -7,7 +7,9 @@ from typing import Any, Iterable, Tuple
 
 
 def tuple_from_iterable(val: Iterable[Any]) -> Tuple[Any, ...]:
-    """Builds a tuple from an iterable.
+    """
+    Builds a tuple from an iterable.
+
     Workaround for https://github.com/python-attrs/attrs/issues/519
     """
     return tuple(val)
