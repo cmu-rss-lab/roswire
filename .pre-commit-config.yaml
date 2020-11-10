@@ -12,4 +12,4 @@ repos:
       - id: black
         language_version: python3 # Should be a command that runs python3.6+
         types: [python]
-        args: ['-l', '79', 'src']
+        args: ['-l', '79']

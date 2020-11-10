@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # http://wiki.ros.org/Bags/Format/2.0
-__all__ = ('BagPlayer',)
+__all__ = ("BagPlayer",)
 
 import subprocess
 import threading
@@ -14,13 +14,14 @@ from ... import exceptions
 
 
 class BagPlayer:
-    def __init__(self,
-                 fn_container: str,
-                 shell: dockerblade.Shell,
-                 files: dockerblade.FileSystem,
-                 *,
-                 delete_file_after_use: bool = False
-                 ) -> None:
+    def __init__(
+        self,
+        fn_container: str,
+        shell: dockerblade.Shell,
+        files: dockerblade.FileSystem,
+        *,
+        delete_file_after_use: bool = False,
+    ) -> None:
         self.__lock = threading.Lock()
         self.__fn_container = fn_container
         self.__shell = shell
@@ -40,18 +41,21 @@ class BagPlayer:
         """Indicates whether or not playback has stopped."""
         return self.__stopped
 
-    def __enter__(self) -> 'BagPlayer':
+    def __enter__(self) -> "BagPlayer":
         self.start()
         return self
 
-    def __exit__(self,
-                 ex_type: Optional[Type[BaseException]],
-                 ex_val: Optional[BaseException],
-                 ex_tb: Optional[TracebackType]
-                 ) -> None:
+    def __exit__(
+        self,
+        ex_type: Optional[Type[BaseException]],
+        ex_val: Optional[BaseException],
+        ex_tb: Optional[TracebackType],
+    ) -> None:
         if ex_type is not None:
-            logger.error("error occurred during bag playback",
-                         exc_info=(ex_type, ex_val, ex_tb))
+            logger.error(
+                "error occurred during bag playback",
+                exc_info=(ex_type, ex_val, ex_tb),
+            )
         if not self.stopped:
             self.stop()
 
@@ -81,7 +85,7 @@ class BagPlayer:
             retcode = self._process.returncode
             assert retcode is not None
             if retcode != 0:
-                out = '\n'.join(self._process.stream)  # type: ignore
+                out = "\n".join(self._process.stream)  # type: ignore
                 raise exceptions.PlayerFailure(retcode, out)
         except subprocess.TimeoutExpired as error:
             raise exceptions.PlayerTimeout from error
@@ -100,17 +104,18 @@ class BagPlayer:
                 raise exceptions.PlayerAlreadyStarted
             self.__started = True
             command: str = f"rosbag play -q {self.__fn_container}"
-            self._process = self.__shell.popen(command,
-                                               stdout=False,
-                                               stderr=False)
-            logger.debug('started bag playback')
+            self._process = self.__shell.popen(
+                command, stdout=False, stderr=False
+            )
+            logger.debug("started bag playback")
 
     def stop(self) -> None:
         """Stops playback from the bag.
 
         Raises
         ------
-            PlayerAlreadyStopped: if the player has already been stopped.
+        PlayerAlreadyStopped:
+            if the player has already been stopped.
         """
         logger.debug("stopping bag playback")
         with self.__lock:
@@ -118,9 +123,10 @@ class BagPlayer:
                 raise exceptions.PlayerAlreadyStopped
             if not self.__started:
                 raise exceptions.PlayerNotStarted
+
             assert self._process
             self._process.kill()
-            out = '\n'.join(list(self._process.stream))  # type: ignore
+            out = "\n".join(list(self._process.stream))  # type: ignore
             logger.debug("player output:\n%s", out)
             self._process = None
             if self.__delete_file_after_use:
