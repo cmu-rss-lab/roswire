@@ -62,16 +62,16 @@ class ParameterServer(Mapping[str, Any]):
         If the provided key is a namespace, then the contents of that
         namespace will be returned as a dictionary.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
             key: the name of the parameter (or namespace).
 
-        Returns:
-        --------
+        Returns
+        -------
             The value of the parameter or the contents of the given namespace.
 
-        Raises:
-        -------
+        Raises
+        ------
             ParameterNotFoundError: if no parameter with the given key is found
                 on the parameter server.
         """
@@ -98,12 +98,12 @@ class ParameterServer(Mapping[str, Any]):
     def __delitem__(self, key: str) -> None:
         """Deletes a given parameter (or parameter tree) from the server.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
             key: the key for the parameter or parameter tree.
 
-        Raises:
-        -------
+        Raises
+        ------
             KeyError: if no parameter or parameter tree is found with the
                 given key on the server.
         """
