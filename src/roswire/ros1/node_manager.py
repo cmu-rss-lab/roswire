@@ -16,6 +16,7 @@ from ..exceptions import NodeNotFoundError, ROSWireException
 
 class ROS1NodeManager(NodeManager):
     """Provides access to all nodes on a ROS graph."""
+
     def __init__(self,
                  host_ip_master: str,
                  api: xmlrpc.client.ServerProxy,

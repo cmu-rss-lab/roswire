@@ -8,9 +8,12 @@ from .. import exceptions
 
 
 class ParameterServer(Mapping[str, Any]):
-    """Provides access to the ROS parameter server.
+    """
+    Provides access to the ROS parameter server.
+
     See: http://wiki.ros.org/ROS/Parameter%20Server%20API
     """
+
     def __init__(self, connection: xmlrpc.client.ServerProxy) -> None:
         """
         Constructs a new parameter server proxy using an XML-RPC server proxy

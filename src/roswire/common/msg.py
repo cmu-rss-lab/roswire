@@ -42,6 +42,7 @@ class Constant:
     value: Union[str, int, float]
         The value of this constant.
     """
+
     typ: str
     name: str
     value: Union[str, int, float]
@@ -70,6 +71,7 @@ class Field:
     name: str
         The name of this field.
     """
+
     typ: str
     name: str
 
@@ -137,6 +139,7 @@ class MsgFormat:
     ----------
     * http://wiki.ros.org/msg
     """
+
     package: str
     name: str
     definition: str
@@ -321,6 +324,7 @@ class Message:
     format: MsgFormat
         The format used by this message.
     """
+
     format: ClassVar[MsgFormat]
 
     @staticmethod

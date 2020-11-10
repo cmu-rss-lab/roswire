@@ -34,6 +34,7 @@ class ActionFormat:
         The definition of the optional result message for this action, if
         it has one.
     """
+
     package: str
     name: str
     definition: str

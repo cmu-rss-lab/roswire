@@ -40,6 +40,7 @@ class AppDescription:
     packages: PackageDatabase
         A database of the packages contained within the application.
     """
+
     app: 'App'
     distribution: ROSDistribution
     types: TypeDatabase

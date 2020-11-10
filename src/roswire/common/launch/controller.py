@@ -23,6 +23,7 @@ class ROSLaunchController:
     pid: Optional[int]
         The PID of the launch process inside the container, if known.
     """
+
     filename: str
     popen: dockerblade.popen.Popen = attr.ib(repr=False)
 

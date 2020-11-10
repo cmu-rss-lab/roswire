@@ -18,6 +18,7 @@ if typing.TYPE_CHECKING:
 @attr.s(frozen=True, auto_attribs=True, slots=True)
 class ROS2:
     """Provides an interface to ROS2."""
+
     app_instance: 'AppInstance'
     nodes: ROS2NodeManager = attr.ib(init=False)
     services: ROS2ServiceManager = attr.ib(init=False)

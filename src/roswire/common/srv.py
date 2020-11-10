@@ -30,6 +30,7 @@ class SrvFormat:
         The definition of the optional response message for this service, if
         it has one.
     """
+
     package: str
     name: str
     definition: str

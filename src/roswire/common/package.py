@@ -101,6 +101,7 @@ class PackageDatabase(ABC, Mapping[str, Package]):
         :class:`dict` operations are provided (e.g., :code:`del db['foo'])`
         and `db['foo'] = bar`).
     """
+
     @classmethod
     def build(cls,
               app_instance: 'AppInstance',

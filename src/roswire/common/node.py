@@ -12,6 +12,7 @@ class Node(abc.ABC):
     name: str
         The fully qualified name of this node.
     """
+
     @property
     @abc.abstractmethod
     def name(self) -> str:
