@@ -29,9 +29,12 @@ def test_ordering():
         ROSDistribution.KINETIC,
         ROSDistribution.INDIGO,
         ROSDistribution.JADE,
-        ROSDistribution.MELODIC]
+        ROSDistribution.MELODIC,
+    ]
 
-    expected_ascending = ['INDIGO', 'JADE', 'KINETIC', 'MELODIC']
+    expected_ascending = ["INDIGO", "JADE", "KINETIC", "MELODIC"]
     expected_descending = list(reversed(expected_ascending))
     assert [d.name for d in sorted(distributions)] == expected_ascending
-    assert [d.name for d in sorted(distributions, reverse=True)] == expected_descending
+    assert [
+        d.name for d in sorted(distributions, reverse=True)
+    ] == expected_descending

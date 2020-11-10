@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('ROSDistribution', 'ROSVersion')
+__all__ = ("ROSDistribution", "ROSVersion")
 
 import enum
 import functools
@@ -13,7 +13,7 @@ class ROSVersion(enum.IntEnum):
     ROS2 = 2
 
     @property
-    def distributions(self) -> Sequence['ROSDistribution']:
+    def distributions(self) -> Sequence["ROSDistribution"]:
         """
         Return a list of all distributions for this version of ROS.
 
@@ -36,24 +36,24 @@ class ROSDistribution(enum.Enum):
         The name of this distribution.
     """
 
-    FOXY = ('foxy', 'ROS2')
-    ELOQUENT = ('eloquent', 'ROS2')
-    DASHING = ('dashing', 'ROS2')
-    CRYSTAL = ('crystal', 'ROS2')
-    BOUNCY = ('bouncy', 'ROS2')
-    ARDENT = ('ardent', 'ROS2')
+    FOXY = ("foxy", "ROS2")
+    ELOQUENT = ("eloquent", "ROS2")
+    DASHING = ("dashing", "ROS2")
+    CRYSTAL = ("crystal", "ROS2")
+    BOUNCY = ("bouncy", "ROS2")
+    ARDENT = ("ardent", "ROS2")
 
-    NOETIC = ('noetic', 'ROS1')
-    MELODIC = ('melodic', 'ROS1')
-    LUNAR = ('lunar', 'ROS1')
-    KINETIC = ('kinetic', 'ROS1')
-    JADE = ('jade', 'ROS1')
-    INDIGO = ('indigo', 'ROS1')
-    HYDRO = ('hydro', 'ROS1')
-    GROOVY = ('groovy', 'ROS1')
-    FUERTE = ('fuerte', 'ROS1')
-    ELECTRIC = ('electric', 'ROS1')
-    DIAMONDBACK = ('diamondback', 'ROS1')
+    NOETIC = ("noetic", "ROS1")
+    MELODIC = ("melodic", "ROS1")
+    LUNAR = ("lunar", "ROS1")
+    KINETIC = ("kinetic", "ROS1")
+    JADE = ("jade", "ROS1")
+    INDIGO = ("indigo", "ROS1")
+    HYDRO = ("hydro", "ROS1")
+    GROOVY = ("groovy", "ROS1")
+    FUERTE = ("fuerte", "ROS1")
+    ELECTRIC = ("electric", "ROS1")
+    DIAMONDBACK = ("diamondback", "ROS1")
 
     def __init__(self, display_name: str, ros: str) -> None:
         self.display_name = display_name
@@ -64,15 +64,15 @@ class ROSDistribution(enum.Enum):
 
     def __lt__(self, other: Any) -> int:
         if not isinstance(other, ROSDistribution):
-            m = f'can only compare ROSDistribution objects'
+            m = f"can only compare ROSDistribution objects"
             raise ValueError(m)
         if self.ros != other.ros:
-            m = f'can only compare ROSDistributions for same version'
+            m = f"can only compare ROSDistributions for same version"
             raise ValueError(m)
         return self.display_name < other.display_name
 
     @classmethod
-    def with_name(cls, name: str) -> 'ROSDistribution':
+    def with_name(cls, name: str) -> "ROSDistribution":
         """
         Retrieves the ROS distribution with a given name.
 
@@ -88,12 +88,13 @@ class ROSDistribution(enum.Enum):
             raise ValueError(f"ROS distribution not found: {name}")
 
     @classmethod
-    def for_version(cls, version: ROSVersion) -> Sequence['ROSDistribution']:
+    def for_version(cls, version: ROSVersion) -> Sequence["ROSDistribution"]:
         """
         Returns a list of all distributions for a given version of ROS.
 
         The list is ordered alphabetically, and therefore, also ordered
         by release date.
         """
-        return sorted((d for d in cls if d.ros == version),
-                      key=lambda d: d.name)
+        return sorted(
+            (d for d in cls if d.ros == version), key=lambda d: d.name
+        )

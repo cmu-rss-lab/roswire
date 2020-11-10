@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('FormatDatabase',)
+__all__ = ("FormatDatabase",)
 
 from types import MappingProxyType
 from typing import Any, Dict, Mapping, Set
@@ -31,7 +31,7 @@ class FormatDatabase:
     """
 
     @staticmethod
-    def build(db: PackageDatabase) -> 'FormatDatabase':
+    def build(db: PackageDatabase) -> "FormatDatabase":
         """Constructs a format database from a given package database."""
         messages: Set[MsgFormat] = set()
         services: Set[SrvFormat] = set()
@@ -58,17 +58,21 @@ class FormatDatabase:
 
         return FormatDatabase(messages, services, actions)
 
-    def __init__(self,
-                 messages: Set[MsgFormat],
-                 services: Set[SrvFormat],
-                 actions: Set[ActionFormat]
-                 ) -> None:
-        self.__messages: Mapping[str, MsgFormat] = MappingProxyType({
-            f.fullname: f for f in messages})
-        self.__services: Mapping[str, SrvFormat] = MappingProxyType({
-            f.fullname: f for f in services})
-        self.__actions: Mapping[str, ActionFormat] = MappingProxyType({
-            f.fullname: f for f in actions})
+    def __init__(
+        self,
+        messages: Set[MsgFormat],
+        services: Set[SrvFormat],
+        actions: Set[ActionFormat],
+    ) -> None:
+        self.__messages: Mapping[str, MsgFormat] = MappingProxyType(
+            {f.fullname: f for f in messages}
+        )
+        self.__services: Mapping[str, SrvFormat] = MappingProxyType(
+            {f.fullname: f for f in services}
+        )
+        self.__actions: Mapping[str, ActionFormat] = MappingProxyType(
+            {f.fullname: f for f in actions}
+        )
 
     @property
     def messages(self) -> Mapping[str, MsgFormat]:
@@ -84,25 +88,27 @@ class FormatDatabase:
 
     def to_dict(self) -> Dict[str, Any]:
         """Returns a JSON description of this database."""
-        return {'messages': [m.to_dict() for m in self.__messages.values()],
-                'services': [s.to_dict() for s in self.__services.values()],
-                'actions': [a.to_dict() for a in self.__actions.values()]}
+        return {
+            "messages": [m.to_dict() for m in self.__messages.values()],
+            "services": [s.to_dict() for s in self.__services.values()],
+            "actions": [a.to_dict() for a in self.__actions.values()],
+        }
 
     @classmethod
-    def from_dict(cls, d: Dict[str, Any]) -> 'FormatDatabase':
+    def from_dict(cls, d: Dict[str, Any]) -> "FormatDatabase":
         """Loads a format database from a JSON document."""
-        msg = {MsgFormat.from_dict(dd) for dd in d['messages']}
-        srv = {SrvFormat.from_dict(dd) for dd in d['services']}
-        action = {ActionFormat.from_dict(dd) for dd in d['actions']}
+        msg = {MsgFormat.from_dict(dd) for dd in d["messages"]}
+        srv = {SrvFormat.from_dict(dd) for dd in d["services"]}
+        action = {ActionFormat.from_dict(dd) for dd in d["actions"]}
         return FormatDatabase(msg, srv, action)
 
     def save(self, fn: str) -> None:
         """Saves the contents of this format database to disk."""
-        with open(fn, 'w') as f:
+        with open(fn, "w") as f:
             yaml.dump(self.to_dict(), f, default_flow_style=False)
 
     @classmethod
-    def load(cls, fn: str) -> 'FormatDatabase':
+    def load(cls, fn: str) -> "FormatDatabase":
         """Loads a format database from a given file on disk."""
-        with open(fn, 'r') as f:
+        with open(fn, "r") as f:
             return cls.from_dict(yaml.safe_load(f))

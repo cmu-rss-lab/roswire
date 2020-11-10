@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('ROS2ServiceManager',)
+__all__ = ("ROS2ServiceManager",)
 
 import typing
 from typing import Iterator, Mapping
@@ -16,12 +16,12 @@ if typing.TYPE_CHECKING:
 class ROS2ServiceManager(Mapping[str, ROS2Service]):
     """Provides an interface for interacting with ROS2 services."""
 
-    app_instance: 'AppInstance'
+    app_instance: "AppInstance"
 
     @classmethod
-    def for_app_instance(cls,
-                         app_instance: 'AppInstance'
-                         ) -> 'ROS2ServiceManager':
+    def for_app_instance(
+        cls, app_instance: "AppInstance"
+    ) -> "ROS2ServiceManager":
         return ROS2ServiceManager(app_instance=app_instance)
 
     def __getitem__(self, name: str) -> ROS2Service:

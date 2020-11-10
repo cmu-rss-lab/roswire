@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('ROSLaunchController',)
+__all__ = ("ROSLaunchController",)
 
 from types import TracebackType
 from typing import Iterator, Optional, Type
@@ -27,14 +27,15 @@ class ROSLaunchController:
     filename: str
     popen: dockerblade.popen.Popen = attr.ib(repr=False)
 
-    def __enter__(self) -> 'ROSLaunchController':
+    def __enter__(self) -> "ROSLaunchController":
         return self
 
-    def __exit__(self,
-                 ex_type: Optional[Type[BaseException]],
-                 ex_val: Optional[BaseException],
-                 ex_tb: Optional[TracebackType]
-                 ) -> None:
+    def __exit__(
+        self,
+        ex_type: Optional[Type[BaseException]],
+        ex_val: Optional[BaseException],
+        ex_tb: Optional[TracebackType],
+    ) -> None:
         self.close()
 
     @property

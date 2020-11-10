@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-__all__ = ('tuple_from_iterable', 'Stopwatch',)
+__all__ = (
+    "tuple_from_iterable",
+    "Stopwatch",
+)
 
 import warnings
 from timeit import default_timer as timer

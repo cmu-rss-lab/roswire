@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('Node',)
+__all__ = ("Node",)
 
 import abc
 

@@ -34,7 +34,6 @@ def check_timelike(t: Type):
     assert t(100, 300) > t(100, 250)
     assert t(100, 300) >= t(100, 250)
 
-
     assert t(100, 250) <= t(100, 300)
     assert t(500, 0) > t(0, 500)
 

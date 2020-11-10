@@ -1,6 +1,15 @@
 # -*- coding: utf-8 -*-
-__all__ = ('OpCode', 'Compression', 'BagMessage', 'ChunkConnection', 'Chunk',
-           'ConnectionInfo', 'BagHeader', 'IndexEntry', 'Index')
+__all__ = (
+    "OpCode",
+    "Compression",
+    "BagMessage",
+    "ChunkConnection",
+    "Chunk",
+    "ConnectionInfo",
+    "BagHeader",
+    "IndexEntry",
+    "Index",
+)
 
 from enum import Enum
 from typing import Dict, List, Optional, Tuple
@@ -13,21 +22,21 @@ from ...util import tuple_from_iterable
 
 
 class OpCode(Enum):
-    MESSAGE_DATA = b'\x02'
-    HEADER = b'\x03'
-    INDEX_DATA = b'\x04'
-    CHUNK = b'\x05'
-    CHUNK_INFO = b'\x06'
-    CONNECTION_INFO = b'\x07'
+    MESSAGE_DATA = b"\x02"
+    HEADER = b"\x03"
+    INDEX_DATA = b"\x04"
+    CHUNK = b"\x05"
+    CHUNK_INFO = b"\x06"
+    CONNECTION_INFO = b"\x07"
 
     @property
     def hex(self) -> str:
-        return f'0x{self.value.hex()}'
+        return f"0x{self.value.hex()}"
 
 
 class Compression(Enum):
-    NONE = 'none'
-    BZ2 = 'bz2'
+    NONE = "none"
+    BZ2 = "bz2"
 
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
@@ -58,8 +67,9 @@ class Chunk:
     pos_data: int
     time_start: Time
     time_end: Time
-    connections: Tuple[ChunkConnection, ...] = \
-        attr.ib(converter=tuple_from_iterable)
+    connections: Tuple[ChunkConnection, ...] = attr.ib(
+        converter=tuple_from_iterable
+    )
     compression: Compression
     size_uncompressed: int
     size_compressed: int

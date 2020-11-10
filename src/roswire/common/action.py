@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('ActionFormat',)
+__all__ = ("ActionFormat",)
 
 import os
 from typing import Any, Dict, List, Optional
@@ -43,10 +43,9 @@ class ActionFormat:
     result: Optional[MsgFormat]
 
     @staticmethod
-    def from_file(package: str,
-                  filename: str,
-                  files: dockerblade.FileSystem
-                  ) -> 'ActionFormat':
+    def from_file(
+        package: str, filename: str, files: dockerblade.FileSystem
+    ) -> "ActionFormat":
         """Constructs an action format from a .action file for a given package.
 
         Parameters
@@ -63,14 +62,15 @@ class ActionFormat:
         FileNotFoundError
             If the given file cannot be found.
         """
-        assert filename.endswith('.action'), \
-            'action format files must end in .action'
+        assert filename.endswith(
+            ".action"
+        ), "action format files must end in .action"
         name: str = os.path.basename(filename[:-7])
         contents: str = files.read(filename)
         return ActionFormat.from_string(package, name, contents)
 
     @staticmethod
-    def from_string(package: str, name: str, s: str) -> 'ActionFormat':
+    def from_string(package: str, name: str, s: str) -> "ActionFormat":
         """Constructs an action format from its definition (i.e., the contents
         of a .action file).
 
@@ -87,7 +87,7 @@ class ActionFormat:
         name_feed = f"{name}Feedback"
         name_res = f"{name}Result"
 
-        sections: List[str] = [ss.strip() for ss in s.split('---')]
+        sections: List[str] = [ss.strip() for ss in s.split("---")]
         try:
             s_goal, s_res, s_feed = sections
         except ValueError:
@@ -100,41 +100,43 @@ class ActionFormat:
         return ActionFormat(package, name, s, goal, feed, res)
 
     @staticmethod
-    def from_dict(d: Dict[str, Any],
-                  *,
-                  package: Optional[str] = None
-                  ) -> 'ActionFormat':
-        name: str = d['name']
-        definition: str = d['definition']
+    def from_dict(
+        d: Dict[str, Any], *, package: Optional[str] = None
+    ) -> "ActionFormat":
+        name: str = d["name"]
+        definition: str = d["definition"]
         if package is None:
-            assert d['package'] is not None
-            package = d['package']
+            assert d["package"] is not None
+            package = d["package"]
 
         res: Optional[MsgFormat] = None
         feed: Optional[MsgFormat] = None
-        goal: MsgFormat = \
-            MsgFormat.from_dict(d['goal'], package=package, name=f'{name}Goal')
+        goal: MsgFormat = MsgFormat.from_dict(
+            d["goal"], package=package, name=f"{name}Goal"
+        )
 
-        if 'result' in d:
-            res = MsgFormat.from_dict(d['result'],
-                                      package=package,
-                                      name=f'{name}Result')
-        if 'feedback' in d:
-            feed = MsgFormat.from_dict(d['feedback'],
-                                       package=package,
-                                       name=f'{name}Feedback')
+        if "result" in d:
+            res = MsgFormat.from_dict(
+                d["result"], package=package, name=f"{name}Result"
+            )
+        if "feedback" in d:
+            feed = MsgFormat.from_dict(
+                d["feedback"], package=package, name=f"{name}Feedback"
+            )
 
         return ActionFormat(package, name, definition, goal, feed, res)
 
     def to_dict(self) -> Dict[str, Any]:
-        d = {'package': self.package,
-             'name': self.name,
-             'definition': self.definition,
-             'goal': self.goal.to_dict()}
+        d = {
+            "package": self.package,
+            "name": self.name,
+            "definition": self.definition,
+            "goal": self.goal.to_dict(),
+        }
         if self.feedback:
-            d['feedback'] = self.feedback.to_dict()
+            d["feedback"] = self.feedback.to_dict()
         if self.result:
-            d['result'] = self.result.to_dict()
+            d["result"] = self.result.to_dict()
         return d
 
     @property

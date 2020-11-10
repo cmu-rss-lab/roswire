@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from loguru import logger as _logger
-_logger.disable('roswire')
+
+_logger.disable("roswire")
 
 from . import name
 from .app import App, AppDescription, AppInstance

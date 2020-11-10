@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('Package', 'PackageDatabase')
+__all__ = ("Package", "PackageDatabase")
 
 import os
 import typing
@@ -28,7 +28,7 @@ class Package:
     actions: Tuple[ActionFormat, ...] = attr.ib(converter=tuple_from_iterable)
 
     @staticmethod
-    def build(path: str, app_instance: 'AppInstance') -> 'Package':
+    def build(path: str, app_instance: "AppInstance") -> "Package":
         """Constructs a description of a package at a given path."""
         name: str = os.path.basename(path)
         messages: List[MsgFormat] = []
@@ -39,50 +39,56 @@ class Package:
         if not files.isdir(path):
             raise FileNotFoundError(f"directory does not exist: {path}")
 
-        dir_msg = os.path.join(path, 'msg')
-        dir_srv = os.path.join(path, 'srv')
-        dir_action = os.path.join(path, 'action')
+        dir_msg = os.path.join(path, "msg")
+        dir_srv = os.path.join(path, "srv")
+        dir_action = os.path.join(path, "action")
 
         if files.isdir(dir_msg):
-            messages = [MsgFormat.from_file(name, f, files)
-                        for f in files.listdir(dir_msg, absolute=True)
-                        if f.endswith('.msg')]
+            messages = [
+                MsgFormat.from_file(name, f, files)
+                for f in files.listdir(dir_msg, absolute=True)
+                if f.endswith(".msg")
+            ]
         if files.isdir(dir_srv):
-            services = [SrvFormat.from_file(name, f, files)
-                        for f in files.listdir(dir_srv, absolute=True)
-                        if f.endswith('.srv')]
+            services = [
+                SrvFormat.from_file(name, f, files)
+                for f in files.listdir(dir_srv, absolute=True)
+                if f.endswith(".srv")
+            ]
         if files.isdir(dir_action):
-            actions = [ActionFormat.from_file(name, f, files)
-                       for f in files.listdir(dir_action, absolute=True)
-                       if f.endswith('.action')]
+            actions = [
+                ActionFormat.from_file(name, f, files)
+                for f in files.listdir(dir_action, absolute=True)
+                if f.endswith(".action")
+            ]
 
-        return Package(name,
-                       path,
-                       messages,
-                       services,
-                       actions)
+        return Package(name, path, messages, services, actions)
 
     @staticmethod
-    def from_dict(d: Dict[str, Any]) -> 'Package':
-        name: str = d['name']
-        messages: List[MsgFormat] = [MsgFormat.from_dict(dd, package=name)
-                                     for dd in d.get('messages', [])]
-        services: List[SrvFormat] = [SrvFormat.from_dict(dd, package=name)
-                                     for dd in d.get('services', [])]
-        actions: List[ActionFormat] = [ActionFormat.from_dict(dd, package=name)
-                                       for dd in d.get('actions', [])]
-        return Package(d['name'],
-                       d['path'],
-                       messages,
-                       services,
-                       actions)
+    def from_dict(d: Dict[str, Any]) -> "Package":
+        name: str = d["name"]
+        messages: List[MsgFormat] = [
+            MsgFormat.from_dict(dd, package=name)
+            for dd in d.get("messages", [])
+        ]
+        services: List[SrvFormat] = [
+            SrvFormat.from_dict(dd, package=name)
+            for dd in d.get("services", [])
+        ]
+        actions: List[ActionFormat] = [
+            ActionFormat.from_dict(dd, package=name)
+            for dd in d.get("actions", [])
+        ]
+        return Package(d["name"], d["path"], messages, services, actions)
 
     def to_dict(self) -> Dict[str, Any]:
-        d = {'name': self.name,
-             'path': self.path,
-             'messages': [m.to_dict() for m in self.messages],
-             'services': [s.to_dict() for s in self.services],
-             'actions': [a.to_dict() for a in self.actions]}
+        d = {
+            "name": self.name,
+            "path": self.path,
+            "messages": [m.to_dict() for m in self.messages],
+            "services": [s.to_dict() for s in self.services],
+            "actions": [a.to_dict() for a in self.actions],
+        }
         return d
 
 
@@ -103,10 +109,9 @@ class PackageDatabase(ABC, Mapping[str, Package]):
     """
 
     @classmethod
-    def build(cls,
-              app_instance: 'AppInstance',
-              paths: Optional[List[str]] = None
-              ) -> 'PackageDatabase':
+    def build(
+        cls, app_instance: "AppInstance", paths: Optional[List[str]] = None
+    ) -> "PackageDatabase":
         if paths is None:
             paths = cls._determine_paths(app_instance)
         db_package = cls._from_paths(app_instance, paths)
@@ -114,7 +119,7 @@ class PackageDatabase(ABC, Mapping[str, Package]):
 
     @classmethod
     @abstractmethod
-    def _determine_paths(cls, app_instance: 'AppInstance') -> List[str]:
+    def _determine_paths(cls, app_instance: "AppInstance") -> List[str]:
         """Parses the package paths for a given shell.
 
         Parameters
@@ -144,11 +149,12 @@ class PackageDatabase(ABC, Mapping[str, Package]):
         ...
 
     @classmethod
-    def _from_paths(cls,
-                    app_instance: 'AppInstance',
-                    paths: List[str],
-                    ignore_bad_paths: bool = True
-                    ) -> 'PackageDatabase':
+    def _from_paths(
+        cls,
+        app_instance: "AppInstance",
+        paths: List[str],
+        ignore_bad_paths: bool = True,
+    ) -> "PackageDatabase":
         """
         Constructs a package database from a list of the paths of the packages
         belonging to the database.
@@ -181,9 +187,9 @@ class PackageDatabase(ABC, Mapping[str, Package]):
                 packages.append(package)
         return cls._from_packages_and_paths(packages, paths)
 
-    def __init__(self,
-                 packages: Iterable[Package],
-                 paths: Iterable[str]) -> None:
+    def __init__(
+        self, packages: Iterable[Package], paths: Iterable[str]
+    ) -> None:
         self.__contents = {p.name: p for p in packages}
         self._paths_in_package = list(paths)
 
@@ -214,7 +220,7 @@ class PackageDatabase(ABC, Mapping[str, Package]):
 
     @classmethod
     @abstractmethod
-    def from_dict(cls, d: List[Dict[str, Any]]) -> 'PackageDatabase':
+    def from_dict(cls, d: List[Dict[str, Any]]) -> "PackageDatabase":
         ...
 
     def to_dict(self) -> List[Dict[str, Any]]:

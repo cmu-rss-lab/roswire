@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('ROS2Service',)
+__all__ = ("ROS2Service",)
 
 import typing
 
@@ -19,4 +19,4 @@ class ROS2Service:
         The name of the service.
     """
 
-    app_instance: 'AppInstance'
+    app_instance: "AppInstance"

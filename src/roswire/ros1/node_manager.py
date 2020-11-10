@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('ROS1NodeManager',)
+__all__ = ("ROS1NodeManager",)
 
 import xmlrpc.client
 from typing import AbstractSet, Iterator
@@ -17,16 +17,18 @@ from ..exceptions import NodeNotFoundError, ROSWireException
 class ROS1NodeManager(NodeManager):
     """Provides access to all nodes on a ROS graph."""
 
-    def __init__(self,
-                 host_ip_master: str,
-                 api: xmlrpc.client.ServerProxy,
-                 shell: dockerblade.Shell
-                 ) -> None:
+    def __init__(
+        self,
+        host_ip_master: str,
+        api: xmlrpc.client.ServerProxy,
+        shell: dockerblade.Shell,
+    ) -> None:
         self.__host_ip_master: str = host_ip_master
         self.__api: xmlrpc.client.ServerProxy = api
         self.__shell: dockerblade.Shell = shell
-        self.__state_probe: SystemStateProbe = \
+        self.__state_probe: SystemStateProbe = (
             SystemStateProbe.via_xmlrpc_connection(self.__api)
+        )
 
     def __get_node_names(self) -> AbstractSet[str]:
         """Fetches a list of the names of all active nodes."""
@@ -61,12 +63,13 @@ class ROS1NodeManager(NodeManager):
         code: int
         status: str
         uri_container: str
-        code, status, uri_container = \
-            self.__api.lookupNode('/.roswire', name)  # type: ignore
+        code, status, uri_container = self.__api.lookupNode(
+            "/.roswire", name
+        )  # type: ignore
         if code == -1:
             raise NodeNotFoundError(name)
         if code != 1:
-            m = f"unexpected error when attempting to find node [{name}]: {status} (code: {code})"   # noqa: pycodestyle
+            m = f"unexpected error when attempting to find node [{name}]: {status} (code: {code})"  # noqa: pycodestyle
             raise ROSWireException(m)
 
         # convert URI to host network

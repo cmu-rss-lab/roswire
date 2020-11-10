@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('ROS2Node',)
+__all__ = ("ROS2Node",)
 
 import typing
 
@@ -25,19 +25,18 @@ class ROS2Node(Node):
         The name of the node.
     """
 
-    app_instance: 'AppInstance' = attr.ib()
+    app_instance: "AppInstance" = attr.ib()
     name: str = attr.ib()
-    _state_probe: 'ROS2StateProbe' = attr.ib(init=False)
+    _state_probe: "ROS2StateProbe" = attr.ib(init=False)
 
     def __attrs_post_init__(self) -> None:
         state_probe = ROS2StateProbe.for_app_instance(self.app_instance)
-        object.__setattr__(self, '_state_probe', state_probe)
+        object.__setattr__(self, "_state_probe", state_probe)
 
     @classmethod
-    def for_app_instance_and_name(cls,
-                                  app_instance: 'AppInstance',
-                                  name: str
-                                  ) -> 'ROS2Node':
+    def for_app_instance_and_name(
+        cls, app_instance: "AppInstance", name: str
+    ) -> "ROS2Node":
         return ROS2Node(name=name, app_instance=app_instance)
 
     def is_alive(self) -> bool:

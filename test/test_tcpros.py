@@ -8,13 +8,14 @@ from roswire.ros1.tcpros import TCPROSHeader, TCPROSMessage
 
 
 def _hex2bytes(s: str) -> bytes:
-    s = re.sub(r'\s+', '', s, flags=re.UNICODE)
+    s = re.sub(r"\s+", "", s, flags=re.UNICODE)
     return bytes.fromhex(s)
 
 
 def test_encode_and_decode_header():
     # source: http://wiki.ros.org/ROS/Connection%20Header
-    b = _hex2bytes("""
+    b = _hex2bytes(
+        """
 b0 00 00 00
    20 00 00 00
       6d 65 73 73 61 67 65 5f 64 65 66 69 6e 69 74 69 6f 6e 3d 73 74 72 69 6e 67
@@ -33,26 +34,29 @@ b0 00 00 00
       74 79 70 65 3d 73 74 64 5f 6d 73 67 73 2f 53 74 72 69 6e 67
 09 00 00 00
    05 00 00 00
-      68 65 6c 6c 6f""")
+      68 65 6c 6c 6f"""
+    )
 
     header = TCPROSHeader(
-        message_definition='string data\n\n',
-        callerid='/rostopic_4767_1316912741557',
+        message_definition="string data\n\n",
+        callerid="/rostopic_4767_1316912741557",
         latching=True,
-        md5sum='992ce8a1687cec8c8bd883ec73ca41d1',
-        topic='/chatter',
-        type_='std_msgs/String')
+        md5sum="992ce8a1687cec8c8bd883ec73ca41d1",
+        topic="/chatter",
+        type_="std_msgs/String",
+    )
 
     assert TCPROSHeader.decode(b) == header
     assert TCPROSHeader.decode(header.encode()) == header
 
 
-@pytest.mark.parametrize('app', ['fetch'], indirect=True)
+@pytest.mark.parametrize("app", ["fetch"], indirect=True)
 def test_encode_and_decode_message(app: roswire.App):
     # source: http://wiki.ros.org/ROS/Connection%20Header
     types = app.description.types
-    String = types['std_msgs/String']
-    b = _hex2bytes("""
+    String = types["std_msgs/String"]
+    b = _hex2bytes(
+        """
 b0 00 00 00
    20 00 00 00
       6d 65 73 73 61 67 65 5f 64 65 66 69 6e 69 74 69 6f 6e 3d 73 74 72 69 6e 67
@@ -71,16 +75,18 @@ b0 00 00 00
       74 79 70 65 3d 73 74 64 5f 6d 73 67 73 2f 53 74 72 69 6e 67
 09 00 00 00
    05 00 00 00
-      68 65 6c 6c 6f""")
+      68 65 6c 6c 6f"""
+    )
 
     header = TCPROSHeader(
-        message_definition='string data\n\n',
-        callerid='/rostopic_4767_1316912741557',
+        message_definition="string data\n\n",
+        callerid="/rostopic_4767_1316912741557",
         latching=True,
-        md5sum='992ce8a1687cec8c8bd883ec73ca41d1',
-        topic='/chatter',
-        type_='std_msgs/String')
-    data = String('hello')
+        md5sum="992ce8a1687cec8c8bd883ec73ca41d1",
+        topic="/chatter",
+        type_="std_msgs/String",
+    )
+    data = String("hello")
     message = TCPROSMessage(header=header, message=data)
 
     assert TCPROSMessage.decode(types, b) == message
