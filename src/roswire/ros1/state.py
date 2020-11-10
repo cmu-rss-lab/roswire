@@ -12,8 +12,11 @@ from ..common import SystemState
 
 @attr.s(frozen=True, auto_attribs=True)
 class SystemStateProbe:
-    """Provides an interface for obtaining the instantaneous state of a ROS
-    system in terms of its publishers, subscribers, and services."""
+    """
+    Provides an interface for obtaining the instantaneous state of a ROS
+    system in terms of its publishers, subscribers, and services.
+    """
+
     _connection: xmlrpc.client.ServerProxy
 
     @classmethod

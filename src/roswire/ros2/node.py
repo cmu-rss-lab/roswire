@@ -24,6 +24,7 @@ class ROS2Node(Node):
     name: str
         The name of the node.
     """
+
     app_instance: 'AppInstance' = attr.ib()
     name: str = attr.ib()
     _state_probe: 'ROS2StateProbe' = attr.ib(init=False)

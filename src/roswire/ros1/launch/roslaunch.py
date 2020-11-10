@@ -19,11 +19,13 @@ from ...ros1.launch.reader import ROS1LaunchFileReader
 
 @attr.s(eq=False)
 class ROS1LaunchManager(ROSLaunchManager):
-    """Provides access to `launch <wiki.ros.org/roslaunch/>`_ for an
+    """
+    Provides access to `launch <wiki.ros.org/roslaunch/>`_ for an
     associated ROS system. This interface is used to locate, read, and write
     `launch XML files <http://wiki.ros.org/roslaunch/XML>`_,
     and to launch ROS nodes using those files.
     """
+
     _shell: dockerblade.shell.Shell = attr.ib(repr=False)
     _files: dockerblade.files.FileSystem = attr.ib(repr=False)
 

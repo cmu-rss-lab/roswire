@@ -45,6 +45,7 @@ class AppInstance:
     _dockerblade: dockerblade.container.Container
         Provides access to the underlying Docker container.
     """
+
     _dockerblade: dockerblade.container.Container = attr.ib()
     _host_workspace: str = attr.ib(repr=False)
     app: 'App' = attr.ib()

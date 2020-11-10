@@ -18,6 +18,7 @@ if typing.TYPE_CHECKING:
 
 class ServiceManager(Mapping[str, Service]):
     """Provides access to the registered services on a ROS graph."""
+
     def __init__(self,
                  description: 'AppDescription',
                  host_ip_master: str,

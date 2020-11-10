@@ -18,4 +18,5 @@ class ROS2Service:
     name: str
         The name of the service.
     """
+
     app_instance: 'AppInstance'

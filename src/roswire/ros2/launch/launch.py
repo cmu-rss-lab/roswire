@@ -20,12 +20,14 @@ if typing.TYPE_CHECKING:
 
 @attr.s(eq=False)
 class ROS2LaunchManager:
-    """Provides access to `ros2 launch
+    """
+    Provides access to `ros2 launch
     <design.ros2.org/articles/roslaunch.html>`_ for an
     associated ROS2 system. This interface is used to locate, read,
     and write `launch python files and to launch ROS nodes using those
     files.
     """
+
     _app_instance: 'AppInstance' = attr.ib()
 
     @classmethod

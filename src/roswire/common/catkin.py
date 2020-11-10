@@ -20,6 +20,7 @@ from ..exceptions import (CatkinBuildFailed, CatkinCleanFailed,
 
 class CatkinInterface(abc.ABC):
     """Provides an interface to a catkin-based workspace."""
+
     @property
     @abc.abstractmethod
     def directory(self) -> str:
@@ -98,6 +99,7 @@ class CatkinInterface(abc.ABC):
 @attr.s(frozen=True, slots=True, auto_attribs=True)
 class CatkinTools(CatkinInterface):
     """Provides an interface to a catkin workspace created via catkin tools."""
+
     directory: str
     _shell: dockerblade.shell.Shell
     _files: dockerblade.files.FileSystem
@@ -169,6 +171,7 @@ class CatkinTools(CatkinInterface):
 @attr.s(frozen=True, slots=True, auto_attribs=True)
 class CatkinMake(CatkinInterface):
     """Provides an interface to a catkin workspace created via catkin_make."""
+
     directory: str
     _shell: dockerblade.shell.Shell
     _files: dockerblade.files.FileSystem

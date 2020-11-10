@@ -20,6 +20,7 @@ class ROS2StateProbe:
     Provides an interface for obtaining the instantaneous state of a ROS
     system in terms of its publishers, subscribers, and services.
     """
+
     _app_instance: 'AppInstance' = attr.ib()
 
     @classmethod

@@ -28,6 +28,7 @@ class Service:
     format: SrvFormat
         The :code:`.srv` definition for this service.
     """
+
     name: str
     url: str
     format: SrvFormat

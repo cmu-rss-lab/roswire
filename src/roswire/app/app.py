@@ -37,6 +37,7 @@ class App:
     ImageNotFound
         If the given Docker image could not be found.
     """
+
     image: str = attr.ib(eq=False)
     sources: Sequence[str]
     _roswire: 'ROSWire' = attr.ib(repr=False, eq=False)

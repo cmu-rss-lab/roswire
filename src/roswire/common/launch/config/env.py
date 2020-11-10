@@ -17,6 +17,7 @@ class Env:
     value: str
         The concrete value of the environment variable.
     """
+
     name: str
     value: str
 

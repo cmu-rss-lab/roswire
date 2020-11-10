@@ -25,6 +25,7 @@ class SystemState:
         The names of all known topics on the system with at least one
         publisher or one subscriber.
     """
+
     publishers: Mapping[str, Collection[str]]
     subscribers: Mapping[str, Collection[str]]
     services: Mapping[str, Collection[str]]

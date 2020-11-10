@@ -15,6 +15,7 @@ if typing.TYPE_CHECKING:
 @attr.s(frozen=True, auto_attribs=True, slots=True)
 class ROS2ServiceManager(Mapping[str, ROS2Service]):
     """Provides an interface for interacting with ROS2 services."""
+
     app_instance: 'AppInstance'
 
     @classmethod

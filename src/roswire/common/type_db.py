@@ -35,6 +35,7 @@ class TypeDatabase(Mapping[str, Type[Message]]):
     Implements the set of non-destructive :class:`dict` operations as
     :class:`PackageDatabase`.
     """
+
     @classmethod
     def build(cls, db_format: FormatDatabase) -> 'TypeDatabase':
         formats = list(db_format.messages.values())

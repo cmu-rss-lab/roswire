@@ -47,6 +47,7 @@ class ChunkConnection:
     count: int
         The number of messages that arrived on this connection in the chunk
     """
+
     uid: int
     count: int
 

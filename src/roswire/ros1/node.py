@@ -23,6 +23,7 @@ class ROS1Node(Node):
     pid_host: int
         The host PID of the main process for this node.
     """
+
     def __init__(self,
                  name: str,
                  url_host_network: str,
