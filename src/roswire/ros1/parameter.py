@@ -23,9 +23,7 @@ class ParameterServer(Mapping[str, Any]):
         self.__connection = connection
 
     def __len__(self) -> int:
-        """
-        Returns a count of the number of registered parameters.
-        """
+        """Returns a count of the number of registered parameters."""
         return len(list(self))
 
     def __contains__(self, key: object) -> bool:
@@ -91,8 +89,7 @@ class ParameterServer(Mapping[str, Any]):
             raise exceptions.ROSWireException("bad API call!")
 
     def __delitem__(self, key: str) -> None:
-        """
-        Deletes a given parameter (or parameter tree) from the server.
+        """Deletes a given parameter (or parameter tree) from the server.
 
         Parameters:
             key: the key for the parameter or parameter tree.
