@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('ROSLaunchManager',)
+__all__ = ("ROSLaunchManager",)
 
 import abc
 from typing import Collection, Mapping, Optional, Sequence, Tuple, Union
@@ -19,12 +19,13 @@ class ROSLaunchManager(abc.ABC):
     """
 
     @abc.abstractmethod
-    def read(self,
-             filename: str,
-             *,
-             package: Optional[str] = None,
-             argv: Optional[Sequence[str]] = None
-             ) -> LaunchConfig:
+    def read(
+        self,
+        filename: str,
+        *,
+        package: Optional[str] = None,
+        argv: Optional[Sequence[str]] = None
+    ) -> LaunchConfig:
         """Produces a summary of the effects of a launch file.
 
         Parameters
@@ -49,11 +50,9 @@ class ROSLaunchManager(abc.ABC):
 
     # TODO: Should this be included in both versions?
     @abc.abstractmethod
-    def write(self,
-              config: LaunchConfig,
-              *,
-              filename: Optional[str] = None
-              ) -> str:
+    def write(
+        self, config: LaunchConfig, *, filename: Optional[str] = None
+    ) -> str:
         """Writes a given launch configuration to disk as an XML launch file.
 
         Parameters
@@ -100,15 +99,18 @@ class ROSLaunchManager(abc.ABC):
         ...
 
     @abc.abstractmethod
-    def launch(self,
-               filename: str,
-               *,
-               package: Optional[str] = None,
-               args: Optional[Mapping[str, Union[int, str]]] = None,
-               prefix: Optional[str] = None,
-               launch_prefixes: Optional[Mapping[str, str]] = None,
-               node_to_remappings: Optional[Mapping[str, Collection[Tuple[str, str]]]] = None  # noqa:E501
-               ) -> ROSLaunchController:
+    def launch(
+        self,
+        filename: str,
+        *,
+        package: Optional[str] = None,
+        args: Optional[Mapping[str, Union[int, str]]] = None,
+        prefix: Optional[str] = None,
+        launch_prefixes: Optional[Mapping[str, str]] = None,
+        node_to_remappings: Optional[
+            Mapping[str, Collection[Tuple[str, str]]]
+        ] = None  # noqa:E501
+    ) -> ROSLaunchController:
         """Provides an interface to the roslaunch command.
 
         Parameters

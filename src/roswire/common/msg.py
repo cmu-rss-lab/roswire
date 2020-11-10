@@ -1,12 +1,24 @@
 # -*- coding: utf-8 -*-
-__all__ = ('Constant', 'ConstantValue', 'Field', 'MsgFormat', 'Message')
+__all__ = ("Constant", "ConstantValue", "Field", "MsgFormat", "Message")
 
 import hashlib
 import os
 import re
 from io import BytesIO
-from typing import (Any, BinaryIO, ClassVar, Collection, Dict, Iterator, List,
-                    Mapping, Optional, Set, Tuple, Union)
+from typing import (
+    Any,
+    BinaryIO,
+    ClassVar,
+    Collection,
+    Dict,
+    Iterator,
+    List,
+    Mapping,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+)
 
 import attr
 import dockerblade
@@ -48,13 +60,11 @@ class Constant:
     value: Union[str, int, float]
 
     @staticmethod
-    def from_dict(d: Dict[str, Any]) -> 'Constant':
-        return Constant(d['type'], d['name'], d['value'])
+    def from_dict(d: Dict[str, Any]) -> "Constant":
+        return Constant(d["type"], d["name"], d["value"])
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'type': self.typ,
-                'name': self.name,
-                'value': self.value}
+        return {"type": self.typ, "name": self.name, "value": self.value}
 
     def __str__(self) -> str:
         return f"{self.typ} {self.name}={str(self.value)}"
@@ -77,7 +87,7 @@ class Field:
 
     @property
     def is_array(self) -> bool:
-        return '[' in self.typ
+        return "[" in self.typ
 
     @property
     def is_simple(self) -> bool:
@@ -87,31 +97,30 @@ class Field:
     def length(self) -> Optional[int]:
         if not self.is_array:
             return None
-        sz = self.typ.partition('[')[2].partition(']')[0]
-        if sz == '':
+        sz = self.typ.partition("[")[2].partition("]")[0]
+        if sz == "":
             return None
-        elif sz.startswith('<='):
+        elif sz.startswith("<="):
             sz = sz[2:]
         return int(sz)
 
     @property
     def base_type(self) -> str:
-        return self.typ.partition('[')[0] if self.is_array else self.typ
+        return self.typ.partition("[")[0] if self.is_array else self.typ
 
     @property
     def base_typ(self) -> str:
         return self.base_type
 
     @staticmethod
-    def from_dict(d: Dict[str, Any]) -> 'Field':
-        return Field(d['type'], d['name'])
+    def from_dict(d: Dict[str, Any]) -> "Field":
+        return Field(d["type"], d["name"])
 
     def to_dict(self) -> Dict[str, str]:
-        return {'type': self.typ,
-                'name': self.name}
+        return {"type": self.typ, "name": self.name}
 
-    def without_package_name(self) -> 'Field':
-        typ = self.typ.partition('/')[2] if '/' in self.typ else self.typ
+    def without_package_name(self) -> "Field":
+        typ = self.typ.partition("/")[2] if "/" in self.typ else self.typ
         return Field(typ, self.name)
 
     def __str__(self) -> str:
@@ -147,26 +156,29 @@ class MsgFormat:
     constants: Tuple[Constant, ...] = attr.ib(converter=tuple)
 
     @staticmethod
-    def toposort(fmts: Collection['MsgFormat']) -> List['MsgFormat']:
+    def toposort(fmts: Collection["MsgFormat"]) -> List["MsgFormat"]:
         fn_to_fmt: Dict[str, MsgFormat] = {fmt.fullname: fmt for fmt in fmts}
-        fn_to_deps: Dict[str, Set[str]] = \
-            {filename: {f.base_typ for f in fmt.fields
-                        if not is_builtin(f.base_typ)}
-             for filename, fmt in fn_to_fmt.items()}
+        fn_to_deps: Dict[str, Set[str]] = {
+            filename: {
+                f.base_typ for f in fmt.fields if not is_builtin(f.base_typ)
+            }
+            for filename, fmt in fn_to_fmt.items()
+        }
         toposorted = list(toposort(fn_to_deps))
         missing_packages: Set[str] = set(toposorted) - set(fn_to_fmt)
         if missing_packages:
-            logger.error("Messages are relied upon but are not present in "
-                         f"the format database: {', '.join(missing_packages)}")
+            logger.error(
+                "Messages are relied upon but are not present in "
+                f"the format database: {', '.join(missing_packages)}"
+            )
             missing_package_name = next(iter(missing_packages))
             raise exc.PackageNotFound(missing_package_name)
         return [fn_to_fmt[filename] for filename in toposorted]
 
     @staticmethod
-    def from_file(package: str,
-                  filename: str,
-                  files: dockerblade.FileSystem
-                  ) -> 'MsgFormat':
+    def from_file(
+        package: str, filename: str, files: dockerblade.FileSystem
+    ) -> "MsgFormat":
         """Constructs a message format from a .msg file for a given package.
 
         Parameters
@@ -183,14 +195,15 @@ class MsgFormat:
         FileNotFoundError
             If the given file cannot be found.
         """
-        assert filename.endswith('.msg'), \
-            'message format files must end in .msg'
+        assert filename.endswith(
+            ".msg"
+        ), "message format files must end in .msg"
         name: str = os.path.basename(filename[:-4])
         contents: str = files.read(filename)
         return MsgFormat.from_string(package, name, contents)
 
     @staticmethod
-    def from_string(package: str, name: str, text: str) -> 'MsgFormat':
+    def from_string(package: str, name: str, text: str) -> "MsgFormat":
         """Constructs a message format from its description.
 
         Parameters
@@ -212,7 +225,7 @@ class MsgFormat:
         fields: List[Field] = []
         constants: List[Constant] = []
 
-        for line in text.split('\n'):
+        for line in text.split("\n"):
             m_blank = R_BLANK.match(line)
             m_string_constant = R_STRING_CONSTANT.match(line)
             m_other_constant = R_OTHER_CONSTANT.match(line)
@@ -222,7 +235,7 @@ class MsgFormat:
                 continue
             elif m_string_constant:
                 name_const, val = m_string_constant.group(1, 2)
-                constant = Constant('string', name_const, val)
+                constant = Constant("string", name_const, val)
                 constants.append(constant)
             elif m_other_constant:
                 typ, name_const, val_str = m_other_constant.group(1, 2, 3)
@@ -234,11 +247,11 @@ class MsgFormat:
 
                 # resolve the type of the field
                 typ_resolved = typ
-                base_typ = typ.partition('[')[0]
-                if typ == 'Header':
-                    typ_resolved = 'std_msgs/Header'
-                elif '/' not in typ and not is_builtin(base_typ):
-                    typ_resolved = f'{package}/{typ}'
+                base_typ = typ.partition("[")[0]
+                if typ == "Header":
+                    typ_resolved = "std_msgs/Header"
+                elif "/" not in typ and not is_builtin(base_typ):
+                    typ_resolved = f"{package}/{typ}"
 
                 if typ != typ_resolved:
                     logger.debug(f"resolved type [{typ}]: {typ_resolved}")
@@ -252,28 +265,31 @@ class MsgFormat:
         return MsgFormat(package, name, text, fields, constants)  # type: ignore  # noqa
 
     @staticmethod
-    def from_dict(d: Dict[str, Any],
-                  *,
-                  package: Optional[str] = None,
-                  name: Optional[str] = None
-                  ) -> 'MsgFormat':
+    def from_dict(
+        d: Dict[str, Any],
+        *,
+        package: Optional[str] = None,
+        name: Optional[str] = None,
+    ) -> "MsgFormat":
         if not package:
-            package = d['package']
+            package = d["package"]
         if not name:
-            name = d['name']
-        definition = d['definition']
-        fields = [Field.from_dict(dd) for dd in d.get('fields', [])]
-        constants = [Constant.from_dict(dd) for dd in d.get('constants', [])]
+            name = d["name"]
+        definition = d["definition"]
+        fields = [Field.from_dict(dd) for dd in d.get("fields", [])]
+        constants = [Constant.from_dict(dd) for dd in d.get("constants", [])]
         return MsgFormat(package, name, definition, fields, constants)  # type: ignore  # noqa
 
     def to_dict(self) -> Dict[str, Any]:
-        d: Dict[str, Any] = {'package': self.package,
-                             'name': self.name,
-                             'definition': self.definition}
+        d: Dict[str, Any] = {
+            "package": self.package,
+            "name": self.name,
+            "definition": self.definition,
+        }
         if self.fields:
-            d['fields'] = [f.to_dict() for f in self.fields]
+            d["fields"] = [f.to_dict() for f in self.fields]
         if self.constants:
-            d['constants'] = [c.to_dict() for c in self.constants]
+            d["constants"] = [c.to_dict() for c in self.constants]
         return d
 
     @property
@@ -281,10 +297,11 @@ class MsgFormat:
         """The fully qualified name of this message format."""
         return f"{self.package}/{self.name}"
 
-    def flatten(self,
-                name_to_format: Mapping[str, 'MsgFormat'],
-                ctx: Tuple[str, ...] = ()
-                ) -> Iterator[Tuple[Tuple[str, ...], Field]]:
+    def flatten(
+        self,
+        name_to_format: Mapping[str, "MsgFormat"],
+        ctx: Tuple[str, ...] = (),
+    ) -> Iterator[Tuple[Tuple[str, ...], Field]]:
         for field in self.fields:
             if field.is_array or is_builtin(field.typ):
                 yield (ctx, field)
@@ -292,7 +309,7 @@ class MsgFormat:
                 fmt = name_to_format[field.typ]
                 yield from fmt.flatten(name_to_format, ctx + (field.name,))
 
-    def md5text(self, name_to_msg: Mapping[str, 'MsgFormat']) -> str:
+    def md5text(self, name_to_msg: Mapping[str, "MsgFormat"]) -> str:
         """Computes the MD5 text for this format."""
         lines: List[str] = []
         lines += [str(c) for c in self.constants]
@@ -301,15 +318,15 @@ class MsgFormat:
                 lines += [str(f.without_package_name())]
             else:
                 f_md5 = name_to_msg[f.base_type].md5sum(name_to_msg)
-                lines += [f'{f_md5} {f.name}']
-        return '\n'.join(lines)
+                lines += [f"{f_md5} {f.name}"]
+        return "\n".join(lines)
 
-    def md5sum(self, name_to_msg: Mapping[str, 'MsgFormat']) -> str:
+    def md5sum(self, name_to_msg: Mapping[str, "MsgFormat"]) -> str:
         """Computes the MD5 sum for this format."""
         logger.debug(f"generating md5sum: {self.fullname}")
         txt = self.md5text(name_to_msg)
         logger.debug(f"generated md5 text [{self.fullname}]:\n{txt}")
-        md5sum = hashlib.md5(txt.encode('utf-8')).hexdigest()
+        md5sum = hashlib.md5(txt.encode("utf-8")).hexdigest()
         logger.debug(f"generated md5sum [{self.fullname}]: {md5sum}")
         return md5sum
 
@@ -360,12 +377,12 @@ class Message:
         raise NotImplementedError
 
     @classmethod
-    def read(cls, b: BinaryIO) -> 'Message':
+    def read(cls, b: BinaryIO) -> "Message":
         """Reads a binary encoding of this message from a given stream."""
         raise NotImplementedError
 
     @classmethod
-    def decode(cls, b: bytes) -> 'Message':
+    def decode(cls, b: bytes) -> "Message":
         """Decodes a binary encoding of this message."""
         return cls.read(BytesIO(b))
 

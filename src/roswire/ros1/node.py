@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('ROS1Node',)
+__all__ = ("ROS1Node",)
 
 import xmlrpc.client
 from typing import Optional
@@ -24,11 +24,9 @@ class ROS1Node(Node):
         The host PID of the main process for this node.
     """
 
-    def __init__(self,
-                 name: str,
-                 url_host_network: str,
-                 shell: dockerblade.Shell
-                 ) -> None:
+    def __init__(
+        self, name: str, url_host_network: str, shell: dockerblade.Shell
+    ) -> None:
         self.__name = name
         self._url = url_host_network
         self.__shell = shell
@@ -46,7 +44,7 @@ class ROS1Node(Node):
     @property
     def _pid(self) -> int:
         """The container PID of the main process for this node."""
-        code, status, pid = self.api.getPid('/.roswire')  # type: ignore
+        code, status, pid = self.api.getPid("/.roswire")  # type: ignore
         if code != 1:
             m = f"failed to obtain PID [{self.name}]: {status} (code: {code})"
             raise ROSWireException(m)
@@ -72,4 +70,4 @@ class ROS1Node(Node):
 
     def shutdown(self) -> None:
         """Instructs this node to shutdown."""
-        self.__shell.run(f'rosnode kill {self.name}')
+        self.__shell.run(f"rosnode kill {self.name}")

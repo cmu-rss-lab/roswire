@@ -3,7 +3,7 @@
 This module provides data structures that represent ROS
 launch configurations.
 """
-__all__ = ('LaunchContext',)
+__all__ = ("LaunchContext",)
 
 from copy import deepcopy
 from typing import Any, Dict, Optional, Sequence, Tuple
@@ -19,8 +19,8 @@ from ...name import canonical_name, name_is_legal, namespace_join
 class LaunchContext:
     filename: str = attr.ib()
     resolve_dict: Dict[str, Any] = attr.ib(factory=dict)
-    parent: Optional['LaunchContext'] = attr.ib(default=None)
-    namespace: str = attr.ib(default='/')
+    parent: Optional["LaunchContext"] = attr.ib(default=None)
+    namespace: str = attr.ib(default="/")
     arg_names: Tuple[str, ...] = attr.ib(default=())
     env_args: Tuple[Tuple[str, str], ...] = attr.ib(default=())
     pass_all_args: bool = attr.ib(default=False)
@@ -33,38 +33,33 @@ class LaunchContext:
         """Determines whether or not this context is node-local."""
         return self.node_name is not None
 
-    def include_child(self,
-                      ns: Optional[str],
-                      filename: str
-                      ) -> 'LaunchContext':
+    def include_child(
+        self, ns: Optional[str], filename: str
+    ) -> "LaunchContext":
         ctx = self.child(ns)
-        ctx = attr.evolve(ctx,
-                          filename=filename,
-                          arg_names=(),
-                          include_resolve_dict={})
+        ctx = attr.evolve(
+            ctx, filename=filename, arg_names=(), include_resolve_dict={}
+        )
         return ctx
 
-    def node_child(self, ns: Optional[str], name: str) -> 'LaunchContext':
+    def node_child(self, ns: Optional[str], name: str) -> "LaunchContext":
         ctx = self.child(ns).child(name)
-        ctx = attr.evolve(ctx,
-                          node_name=name,
-                          include_resolve_dict={})
+        ctx = attr.evolve(ctx, node_name=name, include_resolve_dict={})
         return ctx
 
-    def child(self, ns: Optional[str] = None) -> 'LaunchContext':
+    def child(self, ns: Optional[str] = None) -> "LaunchContext":
         """Creates a child context that inherits from this context."""
         if ns is None:
             child_ns = self.namespace
-        elif ns.startswith('/') or ns == '~':
+        elif ns.startswith("/") or ns == "~":
             child_ns = ns
         else:
             child_ns = namespace_join(self.namespace, ns)
-        return attr.evolve(self,
-                           parent=self,
-                           namespace=child_ns,
-                           pass_all_args=False)
+        return attr.evolve(
+            self, parent=self, namespace=child_ns, pass_all_args=False
+        )
 
-    def with_remapping(self, frm: str, to: str) -> 'LaunchContext':
+    def with_remapping(self, frm: str, to: str) -> "LaunchContext":
         """Adds a name remapping."""
         frm = canonical_name(frm)
         to = canonical_name(to)
@@ -81,54 +76,57 @@ class LaunchContext:
         # overwrite any existing remapping from the given source before adding
         # the given remapping
         remappings = tuple(r for r in self.remappings if r[0] != frm)
-        remappings = remappings + ((frm, to), )
+        remappings = remappings + ((frm, to),)
         return attr.evolve(self, remappings=remappings)
 
-    def with_pass_all_args(self) -> 'LaunchContext':
+    def with_pass_all_args(self) -> "LaunchContext":
         ctx = self
-        if self.parent and 'arg' in self.parent.resolve_dict:
-            for var, val in self.parent.resolve_dict['arg'].items():
+        if self.parent and "arg" in self.parent.resolve_dict:
+            for var, val in self.parent.resolve_dict["arg"].items():
                 ctx = ctx.with_arg(var, value=val)
         return attr.evolve(ctx, pass_all_args=True)
 
-    def process_include_args(self) -> 'LaunchContext':
+    def process_include_args(self) -> "LaunchContext":
         if self.include_resolve_dict is None:
             return attr.evolve(self, arg_names=())
 
-        arg_dict = self.include_resolve_dict.get('arg', {})
+        arg_dict = self.include_resolve_dict.get("arg", {})
         for arg in self.arg_names:
             if arg not in arg_dict:
-                m = f'include arg [{arg}] is missing value.'
+                m = f"include arg [{arg}] is missing value."
                 raise FailedToParseLaunchFile(m)
 
-        return attr.evolve(self,
-                           arg_names=(),
-                           resolve_dict=deepcopy(self.include_resolve_dict),
-                           include_resolve_dict=None)
+        return attr.evolve(
+            self,
+            arg_names=(),
+            resolve_dict=deepcopy(self.include_resolve_dict),
+            include_resolve_dict=None,
+        )
 
-    def with_argv(self, argv: Sequence[str]) -> 'LaunchContext':
+    def with_argv(self, argv: Sequence[str]) -> "LaunchContext":
         # ignore parameter assignment mappings
         logger.debug(f"loading argv: {argv}")
         mappings: Dict[str, str] = {}
-        for arg in (a for a in argv if ':=' in a):
-            var, sep, val = [a.strip() for a in arg.partition(':=')]
-            if not var.startswith('__'):
+        for arg in (a for a in argv if ":=" in a):
+            var, sep, val = [a.strip() for a in arg.partition(":=")]
+            if not var.startswith("__"):
                 mappings[var] = val
         logger.debug(f"loaded argv: {mappings}")
         resolve_dict = self.resolve_dict.copy()
-        resolve_dict['arg'] = mappings
+        resolve_dict["arg"] = mappings
         return attr.evolve(self, resolve_dict=resolve_dict)
 
-    def with_env_arg(self, var: str, val: Any) -> 'LaunchContext':
+    def with_env_arg(self, var: str, val: Any) -> "LaunchContext":
         env_args = self.env_args + ((var, val),)
         return attr.evolve(self, env_args=env_args)
 
-    def with_arg(self,
-                 name: str,
-                 default: Optional[Any] = None,
-                 value: Optional[Any] = None,
-                 doc: Optional[str] = None
-                 ) -> 'LaunchContext':
+    def with_arg(
+        self,
+        name: str,
+        default: Optional[Any] = None,
+        value: Optional[Any] = None,
+        doc: Optional[str] = None,
+    ) -> "LaunchContext":
         logger.debug(f"adding arg [{name}] to context")
         arg_names = self.arg_names
         if name in self.arg_names:
@@ -146,7 +144,7 @@ class LaunchContext:
         else:
             resolve_dict = self.resolve_dict.copy()
 
-        arg_dict = resolve_dict['arg'] = resolve_dict.get('arg', {}).copy()
+        arg_dict = resolve_dict["arg"] = resolve_dict.get("arg", {}).copy()
 
         if value is not None:
             if name in arg_dict and not self.pass_all_args:

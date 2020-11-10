@@ -1,11 +1,19 @@
 # -*- coding: utf-8 -*-
-__all__ = ('Package', 'PackageDatabase')
+__all__ = ("Package", "PackageDatabase")
 
 import json
 import os
 import typing
-from typing import (Any, Dict, Iterable, Iterator, List,
-                    Mapping, Optional, Tuple)
+from typing import (
+    Any,
+    Dict,
+    Iterable,
+    Iterator,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+)
 
 import attr
 import dockerblade
@@ -26,7 +34,8 @@ _COMMAND_ROS2_PKG_PREFIXES: Final[str] = (
     "import json; "
     "import ament_index_python; "
     "print(json.dumps(ament_index_python.get_packages_with_prefixes()))"
-    "'")
+    "'"
+)
 
 
 @attr.s(frozen=True, auto_attribs=True, slots=True)
@@ -38,7 +47,7 @@ class Package:
     actions: Tuple[ActionFormat, ...] = attr.ib(converter=tuple_from_iterable)
 
     @staticmethod
-    def build(path: str, app_instance: 'AppInstance') -> 'Package':
+    def build(path: str, app_instance: "AppInstance") -> "Package":
         """Constructs a description of a package at a given path."""
         name: str = os.path.basename(path)
         messages: List[MsgFormat] = []
@@ -49,50 +58,56 @@ class Package:
         if not files.isdir(path):
             raise FileNotFoundError(f"directory does not exist: {path}")
 
-        dir_msg = os.path.join(path, 'msg')
-        dir_srv = os.path.join(path, 'srv')
-        dir_action = os.path.join(path, 'action')
+        dir_msg = os.path.join(path, "msg")
+        dir_srv = os.path.join(path, "srv")
+        dir_action = os.path.join(path, "action")
 
         if files.isdir(dir_msg):
-            messages = [MsgFormat.from_file(name, f, files)
-                        for f in files.listdir(dir_msg, absolute=True)
-                        if f.endswith('.msg')]
+            messages = [
+                MsgFormat.from_file(name, f, files)
+                for f in files.listdir(dir_msg, absolute=True)
+                if f.endswith(".msg")
+            ]
         if files.isdir(dir_srv):
-            services = [SrvFormat.from_file(name, f, files)
-                        for f in files.listdir(dir_srv, absolute=True)
-                        if f.endswith('.srv')]
+            services = [
+                SrvFormat.from_file(name, f, files)
+                for f in files.listdir(dir_srv, absolute=True)
+                if f.endswith(".srv")
+            ]
         if files.isdir(dir_action):
-            actions = [ActionFormat.from_file(name, f, files)
-                       for f in files.listdir(dir_action, absolute=True)
-                       if f.endswith('.action')]
+            actions = [
+                ActionFormat.from_file(name, f, files)
+                for f in files.listdir(dir_action, absolute=True)
+                if f.endswith(".action")
+            ]
 
-        return Package(name,
-                       path,
-                       messages,
-                       services,
-                       actions)
+        return Package(name, path, messages, services, actions)
 
     @staticmethod
-    def from_dict(d: Dict[str, Any]) -> 'Package':
-        name: str = d['name']
-        messages: List[MsgFormat] = [MsgFormat.from_dict(dd, package=name)
-                                     for dd in d.get('messages', [])]
-        services: List[SrvFormat] = [SrvFormat.from_dict(dd, package=name)
-                                     for dd in d.get('services', [])]
-        actions: List[ActionFormat] = [ActionFormat.from_dict(dd, package=name)
-                                       for dd in d.get('actions', [])]
-        return Package(d['name'],
-                       d['path'],
-                       messages,
-                       services,
-                       actions)
+    def from_dict(d: Dict[str, Any]) -> "Package":
+        name: str = d["name"]
+        messages: List[MsgFormat] = [
+            MsgFormat.from_dict(dd, package=name)
+            for dd in d.get("messages", [])
+        ]
+        services: List[SrvFormat] = [
+            SrvFormat.from_dict(dd, package=name)
+            for dd in d.get("services", [])
+        ]
+        actions: List[ActionFormat] = [
+            ActionFormat.from_dict(dd, package=name)
+            for dd in d.get("actions", [])
+        ]
+        return Package(d["name"], d["path"], messages, services, actions)
 
     def to_dict(self) -> Dict[str, Any]:
-        d = {'name': self.name,
-             'path': self.path,
-             'messages': [m.to_dict() for m in self.messages],
-             'services': [s.to_dict() for s in self.services],
-             'actions': [a.to_dict() for a in self.actions]}
+        d = {
+            "name": self.name,
+            "path": self.path,
+            "messages": [m.to_dict() for m in self.messages],
+            "services": [s.to_dict() for s in self.services],
+            "actions": [a.to_dict() for a in self.actions],
+        }
         return d
 
 
@@ -113,50 +128,52 @@ class PackageDatabase(Mapping[str, Package]):
     """
 
     @classmethod
-    def build(cls,
-              app_instance: 'AppInstance',
-              paths: Optional[List[str]] = None
-              ) -> 'PackageDatabase':
+    def build(
+        cls, app_instance: "AppInstance", paths: Optional[List[str]] = None
+    ) -> "PackageDatabase":
         if paths is None:
             paths = cls._determine_paths(app_instance)
         db_package = cls._from_paths(app_instance, paths)
         return db_package
 
     @classmethod
-    def _paths_ros1(cls, app_instance: 'AppInstance') -> List[str]:
+    def _paths_ros1(cls, app_instance: "AppInstance") -> List[str]:
         """Parses :code:`ROS_PACKAGE_PATH` for a given shell."""
         paths: List[str] = []
         shell = app_instance.shell
         files = app_instance.files
-        path_str = shell.environ('ROS_PACKAGE_PATH')
-        package_paths: List[str] = path_str.strip().split(':')
+        path_str = shell.environ("ROS_PACKAGE_PATH")
+        package_paths: List[str] = path_str.strip().split(":")
         for path in package_paths:
             try:
-                all_packages = files.find(path, 'package.xml')
+                all_packages = files.find(path, "package.xml")
             except dockerblade.exceptions.DockerBladeException:
-                logger.warning('unable to find directory in ROS_PACKAGE_PATH:'
-                               f' {path}')
+                logger.warning(
+                    "unable to find directory in ROS_PACKAGE_PATH:" f" {path}"
+                )
                 continue
             package_dirs = [os.path.dirname(p) for p in all_packages]
             paths.extend(package_dirs)
         return paths
 
     @classmethod
-    def _paths_ros2(cls, app_instance: 'AppInstance') -> List[str]:
+    def _paths_ros2(cls, app_instance: "AppInstance") -> List[str]:
         """Returns a list of paths for all ROS2 packages in an application."""
         try:
             shell = app_instance.shell
             jsn = shell.check_output(_COMMAND_ROS2_PKG_PREFIXES, text=True)
         except dockerblade.exceptions.CalledProcessError:
-            logger.error('failed to obtain ROS2 package prefixes')
+            logger.error("failed to obtain ROS2 package prefixes")
             raise
         package_to_prefix: Mapping[str, str] = json.loads(jsn)
-        paths: List[str] = [os.path.join(prefix, f'share/{package}')
-                            for (package, prefix) in package_to_prefix.items()]
+        paths: List[str] = [
+            os.path.join(prefix, f"share/{package}")
+            for (package, prefix) in package_to_prefix.items()
+        ]
         return paths
 
     @classmethod
-    def _determine_paths(cls, app_instance: 'AppInstance') -> List[str]:
+    def _determine_paths(cls, app_instance: "AppInstance") -> List[str]:
         """
         Parses :code:`ROS_PACKAGE_PATH` for a given shell.
 
@@ -171,11 +188,12 @@ class PackageDatabase(Mapping[str, Package]):
         return cls._paths_ros1(app_instance)
 
     @classmethod
-    def _from_paths(cls,
-                    app_instance: 'AppInstance',
-                    paths: List[str],
-                    ignore_bad_paths: bool = True
-                    ) -> 'PackageDatabase':
+    def _from_paths(
+        cls,
+        app_instance: "AppInstance",
+        paths: List[str],
+        ignore_bad_paths: bool = True,
+    ) -> "PackageDatabase":
         """
         Constructs a package database from a list of the paths of the packages
         belonging to the database.
@@ -208,9 +226,9 @@ class PackageDatabase(Mapping[str, Package]):
                 packages.append(package)
         return PackageDatabase(packages, paths)
 
-    def __init__(self,
-                 packages: Iterable[Package],
-                 paths: Iterable[str]) -> None:
+    def __init__(
+        self, packages: Iterable[Package], paths: Iterable[str]
+    ) -> None:
         self.__contents = {p.name: p for p in packages}
         self._paths_in_package = list(paths)
 
@@ -240,7 +258,7 @@ class PackageDatabase(Mapping[str, Package]):
         yield from self.__contents
 
     @staticmethod
-    def from_dict(d: List[Dict[str, Any]]) -> 'PackageDatabase':
+    def from_dict(d: List[Dict[str, Any]]) -> "PackageDatabase":
         return PackageDatabase((Package.from_dict(dd) for dd in d), [])
 
     def to_dict(self) -> List[Dict[str, Any]]:

@@ -124,7 +124,7 @@ class ParsingError(ROSWireException):
 class NoDescriptionError(RuntimeError, ROSWireException):
     """No description has been generated for an application."""
 
-    app: 'App'
+    app: "App"
 
     def __str__(self) -> str:
         return f"no description for application: {self.app}"

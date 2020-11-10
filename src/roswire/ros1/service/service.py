@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('Service',)
+__all__ = ("Service",)
 
 import typing
 from typing import Optional
@@ -32,7 +32,7 @@ class Service:
     name: str
     url: str
     format: SrvFormat
-    _description: 'AppDescription'
+    _description: "AppDescription"
     _shell: dockerblade.Shell
 
     def call(self, message: Optional[Message] = None) -> Optional[Message]:
@@ -49,7 +49,7 @@ class Service:
             The reply produced by the service, if any.
         """
         if not message:
-            yml = '{}'
+            yml = "{}"
         else:
             yml = yaml.dump(message.to_dict())
         command = f"rosservice call {self.name} '{yml}'"
@@ -57,8 +57,12 @@ class Service:
             output = self._shell.check_output(command, text=True)
         except dockerblade.exceptions.CalledProcessError as error:
             if error.returncode == 2:
-                raise exceptions.ROSWireException('illegal service call args') from error  # noqa
-            raise exceptions.ROSWireException('unexpected error during service call') from error  # noqa
+                raise exceptions.ROSWireException(
+                    "illegal service call args"
+                ) from error  # noqa
+            raise exceptions.ROSWireException(
+                "unexpected error during service call"
+            ) from error  # noqa
 
         fmt_response: Optional[MsgFormat] = self.format.response
         if not fmt_response:

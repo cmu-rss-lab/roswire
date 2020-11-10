@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('SystemStateProbe',)
+__all__ = ("SystemStateProbe",)
 
 import xmlrpc
 from typing import Dict, Sequence, Tuple
@@ -20,20 +20,23 @@ class SystemStateProbe:
     _connection: xmlrpc.client.ServerProxy
 
     @classmethod
-    def via_xmlrpc_connection(cls,
-                              connection: xmlrpc.client.ServerProxy
-                              ) -> 'SystemStateProbe':
+    def via_xmlrpc_connection(
+        cls, connection: xmlrpc.client.ServerProxy
+    ) -> "SystemStateProbe":
         return SystemStateProbe(connection)
 
     def probe(self) -> SystemState:
         """Obtains the instantaneous state of the associated ROS system."""
         code: int
         msg: str
-        result: Tuple[Sequence[Tuple[str, Sequence[str]]],
-                      Sequence[Tuple[str, Sequence[str]]],
-                      Sequence[Tuple[str, Sequence[str]]]]
-        code, msg, result = \
-            self._connection.getSystemState('roswire-probe')  # type: ignore
+        result: Tuple[
+            Sequence[Tuple[str, Sequence[str]]],
+            Sequence[Tuple[str, Sequence[str]]],
+            Sequence[Tuple[str, Sequence[str]]],
+        ]
+        code, msg, result = self._connection.getSystemState(
+            "roswire-probe"
+        )  # type: ignore
         if code != 1:
             raise exc.ROSWireException("probe failed!")
 
@@ -48,9 +51,9 @@ class SystemStateProbe:
         for topic, service_names in result[2]:
             services[topic] = service_names
 
-        state = SystemState(publishers=publishers,
-                            subscribers=subscribers,
-                            services=services)
+        state = SystemState(
+            publishers=publishers, subscribers=subscribers, services=services
+        )
         return state
 
     __call__ = probe

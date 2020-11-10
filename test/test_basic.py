@@ -16,35 +16,39 @@ DIR_TEST = os.path.dirname(__file__)
 
 
 def skip_if_on_travis(f):
-    if os.environ.get('TRAVIS') == 'true':
-        return pytest.mark.skipif(f, reason='skipping test on Travis')
+    if os.environ.get("TRAVIS") == "true":
+        return pytest.mark.skipif(f, reason="skipping test on Travis")
     else:
         return f
 
 
 def load_hello_world_type_db() -> TypeDatabase:
-    fn_db_format = os.path.join(DIR_TEST,
-                                'format-databases/helloworld.formats.yml')
+    fn_db_format = os.path.join(
+        DIR_TEST, "format-databases/helloworld.formats.yml"
+    )
     db_format = FormatDatabase.load(fn_db_format)
     return TypeDatabase.build(db_format)
 
 
 def load_hello_world_description() -> AppDescription:
-    fn_db_format = os.path.join(DIR_TEST,
-                                'format-databases/helloworld.formats.yml')
+    fn_db_format = os.path.join(
+        DIR_TEST, "format-databases/helloworld.formats.yml"
+    )
     db_format = FormatDatabase.load(fn_db_format)
     db_type = TypeDatabase.build(db_format)
-    desc = AppDescription(sha256='foo',
-                             types=db_type,
-                             formats=db_format,
-                             packages=PackageDatabase([]))
+    desc = AppDescription(
+        sha256="foo",
+        types=db_type,
+        formats=db_format,
+        packages=PackageDatabase([]),
+    )
     return desc
 
 
 @contextlib.contextmanager
 def build_ardu() -> Iterator[Tuple[AppInstance, ROS1]]:
     rsw = ROSWire()
-    with rsw.launch('brass') as sut:
+    with rsw.launch("brass") as sut:
         with sut.ros1() as ros:
             time.sleep(5)
             yield (sut, ros)
@@ -53,7 +57,7 @@ def build_ardu() -> Iterator[Tuple[AppInstance, ROS1]]:
 @contextlib.contextmanager
 def build_hello_world() -> Iterator[Tuple[AppInstance, ROS1]]:
     rsw = ROSWire()
-    image = 'roswire/helloworld:buggy'
+    image = "roswire/helloworld:buggy"
     desc = load_hello_world_description()
     with rsw.launch(image, desc) as sut:
         with sut.ros1() as ros:
@@ -64,7 +68,7 @@ def build_hello_world() -> Iterator[Tuple[AppInstance, ROS1]]:
 @contextlib.contextmanager
 def build_shell_proxy() -> Iterator[Shell]:
     rsw = ROSWire()
-    image = 'brass'
+    image = "brass"
     desc = AppDescription(image, [], [], [])
     with rsw.launch(image, desc) as sut:
         yield sut.shell
@@ -73,7 +77,7 @@ def build_shell_proxy() -> Iterator[Shell]:
 @contextlib.contextmanager
 def build_file_proxy() -> Iterator[FileSystem]:
     rsw = ROSWire()
-    image = 'brass'
+    image = "brass"
     desc = AppDescription(image, [], [], [])
     with rsw.launch(image, desc) as sut:
         yield sut.files
@@ -82,28 +86,30 @@ def build_file_proxy() -> Iterator[FileSystem]:
 @contextlib.contextmanager
 def build_file_and_shell_proxy() -> Iterator[Tuple[FileSystem, Shell]]:
     rsw = ROSWire()
-    image = 'brass'
+    image = "brass"
     desc = AppDescription(image, [], [], [])
     with rsw.launch(image, desc) as sut:
         yield sut.files, sut.shell
 
 
 @skip_if_on_travis
-@pytest.mark.parametrize('sut', ['fetch'], indirect=True)
+@pytest.mark.parametrize("sut", ["fetch"], indirect=True)
 def test_parameters(sut):
     with sut.ros1() as ros:
-        assert ros.topic_to_type == {'/rosout': 'rosgraph_msgs/Log',
-                                     '/rosout_agg': 'rosgraph_msgs/Log'}
+        assert ros.topic_to_type == {
+            "/rosout": "rosgraph_msgs/Log",
+            "/rosout_agg": "rosgraph_msgs/Log",
+        }
 
-        assert '/rosversion' in ros.parameters
-        assert '/rosdistro' in ros.parameters
+        assert "/rosversion" in ros.parameters
+        assert "/rosdistro" in ros.parameters
 
-        assert '/hello' not in ros.parameters
-        ros.parameters['/hello'] = 'world'
-        assert '/hello' in ros.parameters
-        assert ros.parameters['/hello'] == 'world'
+        assert "/hello" not in ros.parameters
+        ros.parameters["/hello"] = "world"
+        assert "/hello" in ros.parameters
+        assert ros.parameters["/hello"] == "world"
 
-        del ros.parameters['/hello']
-        assert 'hello' not in ros.parameters
+        del ros.parameters["/hello"]
+        assert "hello" not in ros.parameters
         with pytest.raises(KeyError):
-            ros.parameters['/hello']
+            ros.parameters["/hello"]

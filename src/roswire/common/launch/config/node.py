@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-__all__ = ('NodeConfig', 'ExecutableType',)
+__all__ = (
+    "NodeConfig",
+    "ExecutableType",
+)
 
 import xml.etree.ElementTree as ET
 from enum import Enum
@@ -38,14 +41,15 @@ class NodeConfig:
     def full_name(self) -> str:
         return namespace_join(self.namespace, self.name)
 
-    def with_launch_prefix(self, launch_prefix: str) -> 'NodeConfig':
+    def with_launch_prefix(self, launch_prefix: str) -> "NodeConfig":
         return attr.evolve(self, launch_prefix=launch_prefix)
 
-    def with_remappings(self,
-                        remappings: Collection[Tuple[str, str]],
-                        *,
-                        overwrite: bool = False
-                        ) -> 'NodeConfig':
+    def with_remappings(
+        self,
+        remappings: Collection[Tuple[str, str]],
+        *,
+        overwrite: bool = False
+    ) -> "NodeConfig":
         """Applies a set of remappings to this configuration.
 
         Parameters
@@ -68,24 +72,24 @@ class NodeConfig:
         return attr.evolve(self, remappings=remappings)
 
     def to_xml_element(self) -> ET.Element:
-        element = ET.Element('node')
+        element = ET.Element("node")
         if self.package:
-            element.attrib['pkg'] = self.package
-        element.attrib['type'] = self.typ
-        element.attrib['name'] = self.name
-        element.attrib['ns'] = self.namespace
-        element.attrib['respawn'] = str(self.respawn)
-        element.attrib['respawn_delay'] = str(self.respawn_delay)
-        element.attrib['required'] = str(self.required)
+            element.attrib["pkg"] = self.package
+        element.attrib["type"] = self.typ
+        element.attrib["name"] = self.name
+        element.attrib["ns"] = self.namespace
+        element.attrib["respawn"] = str(self.respawn)
+        element.attrib["respawn_delay"] = str(self.respawn_delay)
+        element.attrib["required"] = str(self.required)
         if self.launch_prefix:
-            element.attrib['launch-prefix'] = self.launch_prefix
+            element.attrib["launch-prefix"] = self.launch_prefix
         if self.args:
-            element.attrib['args'] = self.args
+            element.attrib["args"] = self.args
         if self.cwd:
-            element.attrib['cwd'] = self.cwd
+            element.attrib["cwd"] = self.cwd
         if self.output:
-            element.attrib['output'] = self.output
+            element.attrib["output"] = self.output
         for remap_from, remap_to in self.remappings:
-            attrib = {'from': remap_from, 'to': remap_to}
-            ET.SubElement(element, 'remap', attrib=attrib)
+            attrib = {"from": remap_from, "to": remap_to}
+            ET.SubElement(element, "remap", attrib=attrib)
         return element
