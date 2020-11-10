@@ -33,7 +33,10 @@ class ParameterServer(Mapping[str, Any]):
         """
         assert isinstance(key, str)
         conn = self.__connection
-        code, msg, result = conn.hasParam(self.__caller_id, key)  # type: ignore
+        # fmt:off
+        code, msg, result = \
+            conn.hasParam(self.__caller_id, key)  # type: ignore
+        # fmt: on
         if code != 1:
             raise exceptions.ROSWireException("bad API call!")
         assert isinstance(result, bool)
