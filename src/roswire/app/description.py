@@ -121,7 +121,7 @@ class AppDescription:
     def for_app(cls, app: "App") -> "AppDescription":
         """Produces a description for a given application."""
         with app.launch(require_description=False) as app_instance:
-            distribution_name = app_instance.shell.environ('ROS_DISTRO')
+            distribution_name = app_instance.shell.environ("ROS_DISTRO")
             distribution = ROSDistribution.with_name(distribution_name)
             if distribution.ros == ROSVersion.ROS1:
                 db_package = ROS1PackageDatabase.build(app_instance)
