@@ -108,9 +108,10 @@ class ROS1:
         code: int
         msg: str
         result: Sequence[Tuple[str, str]]
-        code, msg, result = self.connection.getTopicTypes(
-            self.__caller_id
-        )  # type: ignore
+        # fmt: off
+        code, msg, result = \
+            self.connection.getTopicTypes(self.__caller_id)  # type: ignore
+        # fmt: on
         if code != 1:
             raise ROSWireException("bad API call!")
         return {name: typ for (name, typ) in result}

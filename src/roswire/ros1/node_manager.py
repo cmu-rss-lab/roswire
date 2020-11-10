@@ -63,9 +63,10 @@ class ROS1NodeManager(NodeManager):
         code: int
         status: str
         uri_container: str
-        code, status, uri_container = self.__api.lookupNode(
-            "/.roswire", name
-        )  # type: ignore
+        # fmt: off
+        code, status, uri_container = \
+            self.__api.lookupNode("/.roswire", name)  # type: ignore
+        # fmt: on
         if code == -1:
             raise NodeNotFoundError(name)
         if code != 1:

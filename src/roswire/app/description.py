@@ -48,22 +48,23 @@ class AppDescription:
     packages: PackageDatabase
 
     @classmethod
-    def _from_dict_for_app(cls,
-                           d: Dict[str, Any],
-                           app: 'App'
-                           ) -> 'AppDescription':
-        distribution = ROSDistribution.with_name(d['distribution'])
+    def _from_dict_for_app(
+        cls, d: Dict[str, Any], app: "App"
+    ) -> "AppDescription":
+        distribution = ROSDistribution.with_name(d["distribution"])
         if distribution.ros == ROSVersion.ROS1:
-            packages = ROS1PackageDatabase.from_dict(d['packages'])
+            packages = ROS1PackageDatabase.from_dict(d["packages"])
         else:
-            packages = ROS2PackageDatabase.from_dict(d['pacakges'])
+            packages = ROS2PackageDatabase.from_dict(d["pacakges"])
         formats = FormatDatabase.build(packages)
         types = TypeDatabase.build(formats)
-        return AppDescription(app=app,
-                              distribution=distribution,
-                              packages=packages,
-                              formats=formats,
-                              types=types)
+        return AppDescription(
+            app=app,
+            distribution=distribution,
+            packages=packages,
+            formats=formats,
+            types=types,
+        )
 
     def _to_dict(self) -> Dict[str, Any]:
         return {

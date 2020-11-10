@@ -50,9 +50,10 @@ class ParameterServer(Mapping[str, Any]):
         code: int
         msg: str
         result: Sequence[str]
-        code, msg, result = self.__connection.getParamNames(
-            self.__caller_id
-        )  # type: ignore
+        # fmt: off
+        code, msg, result = \
+            self.__connection.getParamNames(self.__caller_id)  # type: ignore
+        # fmt: on
         if code != 1:
             raise exceptions.ROSWireException("bad API call!")
         yield from result

@@ -34,9 +34,10 @@ class SystemStateProbe:
             Sequence[Tuple[str, Sequence[str]]],
             Sequence[Tuple[str, Sequence[str]]],
         ]
-        code, msg, result = self._connection.getSystemState(
-            "roswire-probe"
-        )  # type: ignore
+        # fmt: off
+        code, msg, result = \
+            self._connection.getSystemState("roswire-probe")  # type: ignore
+        # fmt: on
         if code != 1:
             raise exc.ROSWireException("probe failed!")
 
