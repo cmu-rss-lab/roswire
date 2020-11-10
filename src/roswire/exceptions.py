@@ -14,6 +14,7 @@ class ROSWireException(Exception):
 @_attr.s(frozen=True, auto_exc=True, auto_attribs=True, str=False)
 class PackageNotFound(ValueError, ROSWireException):
     """No package was found with a given name."""
+
     package: str
 
     def __str__(self) -> str:
@@ -23,6 +24,7 @@ class PackageNotFound(ValueError, ROSWireException):
 @_attr.s(frozen=True, auto_exc=True, auto_attribs=True, str=False)
 class ImageNotFound(ValueError, ROSWireException):
     """No Docker image was found with a given name."""
+
     image: str
 
     def __str__(self) -> str:
@@ -32,6 +34,7 @@ class ImageNotFound(ValueError, ROSWireException):
 @_attr.s(frozen=True, auto_exc=True, auto_attribs=True, str=False)
 class LaunchFileNotFound(ValueError, ROSWireException):
     """No launch file was found at the given path."""
+
     path: str
 
     def __str__(self) -> str:
@@ -44,6 +47,7 @@ class FailedToParseLaunchFile(ROSWireException):
 
 class EnvNotFoundError(ROSWireException):
     """A given environment variable could not be found."""
+
     def __init__(self, var: str) -> None:
         m = f"could not find enviroment variable: {var}"
         super().__init__(m)
@@ -59,6 +63,7 @@ class CatkinException(ROSWireException):
 
 class CatkinBuildFailed(CatkinException):
     """The attempt to build via catkin failed."""
+
     def __init__(self, retcode: int, reason: str) -> None:
         msg = f"catkin build failed [retcode: {retcode}]: {reason}"
         super().__init__(msg)
@@ -66,6 +71,7 @@ class CatkinBuildFailed(CatkinException):
 
 class CatkinCleanFailed(CatkinException):
     """An attempt to clean the catkin workspace failed."""
+
     def __init__(self, retcode: int, reason: str) -> None:
         msg = f"catkin clean failed [retcode: {retcode}]: {reason}"
         super().__init__(msg)
@@ -85,6 +91,7 @@ class PlayerAlreadyStopped(ROSWireException):
 
 class PlayerFailure(ROSWireException):
     """An unexpected error occurred during playback."""
+
     def __init__(self, retcode: int, stdout: str) -> None:
         self.retcode = retcode
         self.stdout = stdout
@@ -116,6 +123,7 @@ class ParsingError(ROSWireException):
 @_attr.s(frozen=True, auto_exc=True, auto_attribs=True, str=False)
 class NoDescriptionError(RuntimeError, ROSWireException):
     """No description has been generated for an application."""
+
     app: 'App'
 
     def __str__(self) -> str:
@@ -124,18 +132,21 @@ class NoDescriptionError(RuntimeError, ROSWireException):
 
 class NodeNotFoundError(KeyError, ROSWireException):
     """No node was found with the given name."""
+
     def __init__(self, name: str) -> None:
         super().__init__(f"node not found: {name}")
 
 
 class ServiceNotFoundError(KeyError, ROSWireException):
     """No service was found with the given name."""
+
     def __init__(self, name: str) -> None:
         super().__init__(f"service not found: {name}")
 
 
 class ParameterNotFoundError(KeyError, ROSWireException):
     """No parameter was found with the given name."""
+
     def __init__(self, name: str) -> None:
         super().__init__(f"parameter not found: {name}")
 
@@ -143,6 +154,7 @@ class ParameterNotFoundError(KeyError, ROSWireException):
 @_attr.s(frozen=True, auto_exc=True, auto_attribs=True)
 class PatchFailedError(ROSWireException):
     """An error occurred during the application of a patch."""
+
     retcode: int
     output: str
 
@@ -150,6 +162,7 @@ class PatchFailedError(ROSWireException):
 @_attr.s(frozen=True, auto_exc=True, auto_attribs=True, str=False)
 class SourceNotFoundError(ValueError, ROSWireException):
     """A given source could not be found inside the container."""
+
     source: str
 
     def __str__(self) -> str:
@@ -158,6 +171,7 @@ class SourceNotFoundError(ValueError, ROSWireException):
 
 class NodeShutdownError(ROSWireException):
     """ROS2 node could not be killed"""
+
     def __init__(self, node: str) -> None:
         m = f"could not shut down node: {node}"
         super().__init__(m)

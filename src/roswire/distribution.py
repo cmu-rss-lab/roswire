@@ -15,8 +15,10 @@ class ROSVersion(enum.IntEnum):
     @property
     def distributions(self) -> Sequence['ROSDistribution']:
         """
-        Returns a list of all distributions for this version of ROS,
-        ordered alphabetically, and therefore, also ordered by release date.
+        Return a list of all distributions for this version of ROS.
+
+        Th list is ordered alphabetically, and therefore, also
+        ordered by release date.
         """
         return ROSDistribution.for_version(self)
 
@@ -88,8 +90,10 @@ class ROSDistribution(enum.Enum):
     @classmethod
     def for_version(cls, version: ROSVersion) -> Sequence['ROSDistribution']:
         """
-        Returns a list of all distributions for a given version of ROS,
-        ordered alphabetically, and therefore, also ordered by release date.
+        Returns a list of all distributions for a given version of ROS.
+
+        The list is ordered alphabetically, and therefore, also ordered
+        by release date.
         """
         return sorted((d for d in cls if d.ros == version),
                       key=lambda d: d.name)

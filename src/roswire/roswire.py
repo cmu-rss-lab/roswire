@@ -29,6 +29,7 @@ class ROSWire:
         directories between the host machine and containerised ROS
         applications.
     """
+
     def __init__(self,
                  *,
                  workspace: Optional[str] = None,

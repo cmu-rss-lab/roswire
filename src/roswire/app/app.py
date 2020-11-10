@@ -20,8 +20,9 @@ if typing.TYPE_CHECKING:
 
 @attr.s(frozen=True, auto_attribs=True, slots=True)
 class App:
-    """Specifies a ROS application in terms of its associated Docker image
-    and source files.
+    """
+    Specifies a ROS application in terms of its associated
+    Docker image and source files.
 
     Attributes
     ----------
