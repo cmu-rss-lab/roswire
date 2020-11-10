@@ -4,8 +4,16 @@ __all__ = ("Package", "PackageDatabase")
 import os
 import typing
 from abc import ABC, abstractmethod
-from typing import (Any, Dict, Iterable, Iterator, List,
-                    Mapping, Optional, Tuple)
+from typing import (
+    Any,
+    Dict,
+    Iterable,
+    Iterator,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+)
 
 import attr
 from loguru import logger
