@@ -69,7 +69,7 @@ class ServiceManager(Mapping[str, Service]):
         # fmt: off
         code, msg, url_container = \
             self.__api.lookupService("/.roswire", name)  # type: ignore
-        # fmt: onn
+        # fmt: on
         if code == -1:
             raise exceptions.ServiceNotFoundError(name)
         if code != 1:
