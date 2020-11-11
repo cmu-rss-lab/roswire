@@ -41,6 +41,9 @@ deploy:
   on:
     tags: true
     python: '3.6'
+  edge:
+    source: 'native-api/dpl'
+    branch: 'pip_fix_upgrade_deps'
 
 - provider: pages
   skip_cleanup: true
