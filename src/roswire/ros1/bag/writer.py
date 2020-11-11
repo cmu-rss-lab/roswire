@@ -7,20 +7,30 @@ See
 ---
 https://github.com/ros/ros_comm/blob/melodic-devel/tools/rosbag/src/rosbag/bag.py
 """
-__all__ = ('BagWriter',)
+__all__ = ("BagWriter",)
 
 from typing import BinaryIO, Dict, Iterable, List, Optional, Tuple, Type
 
 from loguru import logger
 
-from .core import (BagMessage, Chunk, ChunkConnection, Compression,
-                   ConnectionInfo, Index, IndexEntry, OpCode)
-from ...common.encode import (encode_time,
-                              encode_uint32,
-                              encode_uint64,
-                              write_encoded_header,
-                              write_time,
-                              write_uint32)
+from .core import (
+    BagMessage,
+    Chunk,
+    ChunkConnection,
+    Compression,
+    ConnectionInfo,
+    Index,
+    IndexEntry,
+    OpCode,
+)
+from ...common.encode import (
+    encode_time,
+    encode_uint32,
+    encode_uint64,
+    write_encoded_header,
+    write_time,
+    write_uint32,
+)
 from ...common.msg import Message
 
 BIN_CHUNK_INFO_VERSION = encode_uint32(1)
@@ -39,7 +49,7 @@ class BagWriter:
 
     def __init__(self, fn: str) -> None:
         self.__fn = fn
-        self.__fp: BinaryIO = open(fn, 'wb')
+        self.__fp: BinaryIO = open(fn, "wb")
         self.__connections: Dict[str, ConnectionInfo] = {}
         self.__chunks: List[Chunk] = []
         self.__pos_header = 0
@@ -50,22 +60,24 @@ class BagWriter:
     def filename(self) -> str:
         return self.__fn
 
-    def _write_header(self,
-                      code: Optional[OpCode],
-                      fields: Dict[str, bytes]
-                      ) -> None:
+    def _write_header(
+        self, code: Optional[OpCode], fields: Dict[str, bytes]
+    ) -> None:
         if code:
-            fields['op'] = code.value
+            fields["op"] = code.value
         write_encoded_header(fields, self.__fp)
 
     def _write_header_record(self) -> None:
         logger.debug("writing bag header record")
         self.__fp.seek(self.__pos_header)
-        self._write_header(OpCode.HEADER, {
-            'chunk_count': encode_uint32(len(self.__chunks)),
-            'conn_count': encode_uint32(len(self.__connections)),
-            'index_pos': encode_uint64(self.__pos_index)
-        })
+        self._write_header(
+            OpCode.HEADER,
+            {
+                "chunk_count": encode_uint32(len(self.__chunks)),
+                "conn_count": encode_uint32(len(self.__connections)),
+                "index_pos": encode_uint64(self.__pos_index),
+            },
+        )
 
         # ensure the bag header record is 4096 characters long by padding it
         # with ASCII space characters (0x20) where necessary.
@@ -78,23 +90,25 @@ class BagWriter:
         size_padding = size - size_header
 
         write_uint32(size_padding, self.__fp)
-        padding = b'\x20' * size_padding
+        padding = b"\x20" * size_padding
         self.__fp.write(padding)
         logger.debug("wrote bag header record")
 
-    def _write_message(self,
-                       pos_chunk_start: int,
-                       index: Index,
-                       message: BagMessage
-                       ) -> None:
+    def _write_message(
+        self, pos_chunk_start: int, index: Index, message: BagMessage
+    ) -> None:
         typ = message.message.__class__
         connection = self._get_connection(message.topic, typ)
         logger.debug(f"writing message on connection [{connection.topic}]")
 
         pos_header = self.__fp.tell()
-        self._write_header(OpCode.MESSAGE_DATA, {
-            'conn': encode_uint32(connection.conn),
-            'time': encode_time(message.time)})
+        self._write_header(
+            OpCode.MESSAGE_DATA,
+            {
+                "conn": encode_uint32(connection.conn),
+                "time": encode_time(message.time),
+            },
+        )
 
         bin_data = message.message.encode()
         size_data = len(bin_data)
@@ -103,9 +117,9 @@ class BagWriter:
 
         # update index
         offset = pos_header - pos_chunk_start
-        index_entry = IndexEntry(time=message.time,
-                                 pos=pos_header,
-                                 offset=offset)
+        index_entry = IndexEntry(
+            time=message.time, pos=pos_header, offset=offset
+        )
         if connection.conn not in index:
             index[connection.conn] = []
         index[connection.conn].append(index_entry)
@@ -119,18 +133,18 @@ class BagWriter:
         logger.debug("wrote messages to chunk")
         return index
 
-    def _write_chunk_record(self,
-                            compression: Compression,
-                            messages: Iterable[BagMessage]
-                            ) -> Tuple[Chunk, Index]:
-        bin_compression = compression.value.encode('utf-8')
+    def _write_chunk_record(
+        self, compression: Compression, messages: Iterable[BagMessage]
+    ) -> Tuple[Chunk, Index]:
+        bin_compression = compression.value.encode("utf-8")
 
         # for now, we write a bogus header and size field
         # once we've finished writing the data, we'll correct them
         pos_header = self.__fp.tell()
-        self._write_header(OpCode.CHUNK, {
-            'compression': bin_compression,
-            'size': encode_uint32(0)})
+        self._write_header(
+            OpCode.CHUNK,
+            {"compression": bin_compression, "size": encode_uint32(0)},
+        )
         write_uint32(0, self.__fp)
         pos_data = self.__fp.tell()
 
@@ -149,45 +163,55 @@ class BagWriter:
 
         # update header and size
         self.__fp.seek(pos_header)
-        self._write_header(OpCode.CHUNK, {
-            'compression': bin_compression,
-            'size': encode_uint32(size_uncompressed)})
+        self._write_header(
+            OpCode.CHUNK,
+            {
+                "compression": bin_compression,
+                "size": encode_uint32(size_uncompressed),
+            },
+        )
         write_uint32(size_compressed, self.__fp)
         self.__fp.seek(pos_end)
 
         # build a description of the chunk
-        conns = [ChunkConnection(conn, len(entries))
-                 for conn, entries in index.items()]
-        chunk = Chunk(pos_record=pos_header,
-                      pos_data=pos_data,
-                      time_start=time_start,
-                      time_end=time_end,
-                      connections=conns,
-                      compression=compression,
-                      size_compressed=size_compressed,
-                      size_uncompressed=size_uncompressed)
+        conns = [
+            ChunkConnection(conn, len(entries))
+            for conn, entries in index.items()
+        ]
+        chunk = Chunk(
+            pos_record=pos_header,
+            pos_data=pos_data,
+            time_start=time_start,
+            time_end=time_end,
+            connections=conns,
+            compression=compression,
+            size_compressed=size_compressed,
+            size_uncompressed=size_uncompressed,
+        )
         return chunk, index
 
-    def _write_connection_index(self,
-                                conn: int,
-                                entries: List[IndexEntry]
-                                ) -> None:
+    def _write_connection_index(
+        self, conn: int, entries: List[IndexEntry]
+    ) -> None:
         logger.debug(f"writing connection index [{conn}]")
         num_entries = len(entries)
         size_data = num_entries * 12
-        self._write_header(OpCode.INDEX_DATA, {
-            'ver': BIN_INDEX_VERSION,
-            'conn': encode_uint32(conn),
-            'count': encode_uint32(num_entries)})
+        self._write_header(
+            OpCode.INDEX_DATA,
+            {
+                "ver": BIN_INDEX_VERSION,
+                "conn": encode_uint32(conn),
+                "count": encode_uint32(num_entries),
+            },
+        )
         write_uint32(size_data, self.__fp)
         for entry in entries:
             write_time(entry.time, self.__fp)
             write_uint32(entry.offset, self.__fp)
 
-    def _write_chunk(self,
-                     compression: Compression,
-                     messages: Iterable[BagMessage]
-                     ) -> None:
+    def _write_chunk(
+        self, compression: Compression, messages: Iterable[BagMessage]
+    ) -> None:
         # TODO for now, we only support uncompressed writing
         assert compression == Compression.NONE
         chunk, index = self._write_chunk_record(compression, messages)
@@ -196,40 +220,46 @@ class BagWriter:
             self._write_connection_index(conn, entries)
 
     def _write_connection_record(self, conn: ConnectionInfo) -> None:
-        self._write_header(OpCode.CONNECTION_INFO, {
-            'conn': encode_uint32(conn.conn),
-            'topic': conn.topic.encode('utf-8')})
+        self._write_header(
+            OpCode.CONNECTION_INFO,
+            {
+                "conn": encode_uint32(conn.conn),
+                "topic": conn.topic.encode("utf-8"),
+            },
+        )
 
         # write the connection header
         header_conn: Dict[str, bytes] = {}
         if conn.callerid is not None:
-            header_conn['callerid'] = conn.callerid.encode('utf-8')
+            header_conn["callerid"] = conn.callerid.encode("utf-8")
         if conn.latching is not None:
-            header_conn['latching'] = conn.latching.encode('utf-8')
-        header_conn['topic'] = conn.topic_original.encode('utf-8')
-        header_conn['type'] = conn.typ.encode('utf-8')
-        header_conn['md5sum'] = conn.md5sum.encode('utf-8')
-        header_conn['message_definition'] = \
-            conn.message_definition.encode('utf-8')
+            header_conn["latching"] = conn.latching.encode("utf-8")
+        header_conn["topic"] = conn.topic_original.encode("utf-8")
+        header_conn["type"] = conn.typ.encode("utf-8")
+        header_conn["md5sum"] = conn.md5sum.encode("utf-8")
+        header_conn["message_definition"] = conn.message_definition.encode(
+            "utf-8"
+        )
         self._write_header(None, header_conn)
 
-    def _get_connection(self,
-                        topic: str,
-                        typ: Type[Message]
-                        ) -> ConnectionInfo:
+    def _get_connection(
+        self, topic: str, typ: Type[Message]
+    ) -> ConnectionInfo:
         # if there isn't a connection for the topic, create one and write a
         # connection record.
         if topic not in self.__connections:
             msg_format = typ.format
             conn = len(self.__connections)
-            info = ConnectionInfo(conn=conn,
-                                  topic=topic,
-                                  topic_original=topic,
-                                  typ=msg_format.fullname,
-                                  md5sum=typ.md5sum(),
-                                  message_definition=msg_format.definition,
-                                  callerid=None,
-                                  latching=None)
+            info = ConnectionInfo(
+                conn=conn,
+                topic=topic,
+                topic_original=topic,
+                typ=msg_format.fullname,
+                md5sum=typ.md5sum(),
+                message_definition=msg_format.definition,
+                callerid=None,
+                latching=None,
+            )
             self.__connections[topic] = info
             self._write_connection_record(info)
 
@@ -238,12 +268,16 @@ class BagWriter:
     def _write_chunk_info_record(self, chunk: Chunk) -> None:
         num_connections = len(chunk.connections)
         # pos_header = self.__fp.tell()
-        self._write_header(OpCode.CHUNK_INFO, {
-            'ver': BIN_CHUNK_INFO_VERSION,
-            'chunk_pos': encode_uint64(chunk.pos_record),
-            'start_time': encode_time(chunk.time_start),
-            'end_time': encode_time(chunk.time_end),
-            'count': encode_uint32(num_connections)})
+        self._write_header(
+            OpCode.CHUNK_INFO,
+            {
+                "ver": BIN_CHUNK_INFO_VERSION,
+                "chunk_pos": encode_uint64(chunk.pos_record),
+                "start_time": encode_time(chunk.time_start),
+                "end_time": encode_time(chunk.time_end),
+                "count": encode_uint32(num_connections),
+            },
+        )
 
         size_data = num_connections * 8
         write_uint32(size_data, self.__fp)
@@ -263,7 +297,7 @@ class BagWriter:
         Any existing bag file contents will be overwritten.
         """
         self.__fp.truncate(0)
-        self.__fp.write('#ROSBAG V2.0\n'.encode('utf-8'))
+        self.__fp.write("#ROSBAG V2.0\n".encode("utf-8"))
 
         # create a placeholder header for now
         self.__pos_header = self.__fp.tell()

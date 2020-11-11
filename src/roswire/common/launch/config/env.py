@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('Env',)
+__all__ = ("Env",)
 
 import xml.etree.ElementTree as ET
 
@@ -17,11 +17,12 @@ class Env:
     value: str
         The concrete value of the environment variable.
     """
+
     name: str
     value: str
 
     def to_xml_element(self) -> ET.Element:
-        element = ET.Element('env')
-        element.attrib['name'] = self.name
-        element.attrib['value'] = self.value
+        element = ET.Element("env")
+        element.attrib["name"] = self.name
+        element.attrib["value"] = self.value
         return element

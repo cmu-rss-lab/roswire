@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('ROS1',)
+__all__ = ("ROS1",)
 
 import os
 import time
@@ -46,19 +46,20 @@ class ROS1:
         A mapping from topic names to the names of their message types.
     """
 
-    def __init__(self,
-                 description: 'AppDescription',
-                 shell: dockerblade.Shell,
-                 files: dockerblade.FileSystem,
-                 ws_host: str,
-                 ip_address: str,
-                 port: int = 11311
-                 ) -> None:
+    def __init__(
+        self,
+        description: "AppDescription",
+        shell: dockerblade.Shell,
+        files: dockerblade.FileSystem,
+        ws_host: str,
+        ip_address: str,
+        port: int = 11311,
+    ) -> None:
         self.__description = description
         self.__shell = shell
         self.__files = files
         self.__ws_host = ws_host
-        self.__caller_id = '/roswire'
+        self.__caller_id = "/roswire"
         self.__port = port
         self.__ip_address = ip_address
         self.__uri = f"http://{ip_address}:{port}"
@@ -66,19 +67,21 @@ class ROS1:
         self.__connection = xmlrpc.client.ServerProxy(self.__uri)
         time.sleep(5)  # FIXME #1
         self.__parameters = ParameterServer(self.__connection)
-        self.__nodes: NodeManager = \
-            ROS1NodeManager(self.__ip_address,
-                            self.__connection,
-                            self.__shell)
-        self.__services: ServiceManager = \
-            ServiceManager(self.__description,
-                           self.__ip_address,
-                           self.__connection,
-                           self.__shell)
-        self.__state_probe: SystemStateProbe = \
+        self.__nodes: NodeManager = ROS1NodeManager(
+            self.__ip_address, self.__connection, self.__shell
+        )
+        self.__services: ServiceManager = ServiceManager(
+            self.__description,
+            self.__ip_address,
+            self.__connection,
+            self.__shell,
+        )
+        self.__state_probe: SystemStateProbe = (
             SystemStateProbe.via_xmlrpc_connection(self.__connection)
-        self.roslaunch: ROSLaunchManager = \
-            ROS1LaunchManager(self.__shell, self.__files)
+        )
+        self.roslaunch: ROSLaunchManager = ROS1LaunchManager(
+            self.__shell, self.__files
+        )
 
     @property
     def nodes(self) -> NodeManager:
@@ -105,17 +108,20 @@ class ROS1:
         code: int
         msg: str
         result: Sequence[Tuple[str, str]]
+        # fmt: off
         code, msg, result = \
             self.connection.getTopicTypes(self.__caller_id)  # type: ignore
+        # fmt: on
         if code != 1:
             raise ROSWireException("bad API call!")
         return {name: typ for (name, typ) in result}
 
-    def record(self,
-               fn: str,
-               exclude_topics: Optional[str] = None,
-               restrict_to_topics: Optional[str] = None
-               ) -> BagRecorder:
+    def record(
+        self,
+        fn: str,
+        exclude_topics: Optional[str] = None,
+        restrict_to_topics: Optional[str] = None,
+    ) -> BagRecorder:
         """Provides an interface to rosbag for recording ROS topics to disk.
 
         Note
@@ -140,18 +146,16 @@ class ROS1:
         BagRecorder
             An interface for dynamically interacting with the bag recorder.
         """
-        return BagRecorder(fn,
-                           self.__ws_host,
-                           self.__shell,
-                           self.__nodes,
-                           exclude_topics=exclude_topics,
-                           restrict_to_topics=restrict_to_topics)
+        return BagRecorder(
+            fn,
+            self.__ws_host,
+            self.__shell,
+            self.__nodes,
+            exclude_topics=exclude_topics,
+            restrict_to_topics=restrict_to_topics,
+        )
 
-    def playback(self,
-                 fn: str,
-                 *,
-                 file_on_host: bool = True
-                 ) -> BagPlayer:
+    def playback(self, fn: str, *, file_on_host: bool = True) -> BagPlayer:
         """Provides an interface to rosbag for replaying bag files from disk.
 
         Parameters
@@ -172,17 +176,20 @@ class ROS1:
         delete_file_after_use: bool = False
         if file_on_host:
             if fn.startswith(self.__ws_host):
-                fn_ctr = os.path.join('/.roswire', fn[len(self.__ws_host):])
+                fn_ctr = os.path.join("/.roswire", fn[len(self.__ws_host) :])
             else:
                 delete_file_after_use = True
-                fn_ctr = self.__files.mktemp(suffix='.bag')
-                logger.debug(f"copying bag from host [{fn}] "
-                             f"to container [{fn_ctr}]")
+                fn_ctr = self.__files.mktemp(suffix=".bag")
+                logger.debug(
+                    f"copying bag from host [{fn}] " f"to container [{fn_ctr}]"
+                )
                 self.__files.copy_from_host(fn, fn_ctr)
         else:
             fn_ctr = fn
         logger.debug(f"playing back bag file: {fn_ctr}")
-        return BagPlayer(fn_ctr,
-                         self.__shell,
-                         self.__files,
-                         delete_file_after_use=delete_file_after_use)
+        return BagPlayer(
+            fn_ctr,
+            self.__shell,
+            self.__files,
+            delete_file_after_use=delete_file_after_use,
+        )

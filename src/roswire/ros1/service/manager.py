@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('ServiceManager',)
+__all__ = ("ServiceManager",)
 
 import typing
 import xmlrpc.client
@@ -18,18 +18,21 @@ if typing.TYPE_CHECKING:
 
 class ServiceManager(Mapping[str, Service]):
     """Provides access to the registered services on a ROS graph."""
-    def __init__(self,
-                 description: 'AppDescription',
-                 host_ip_master: str,
-                 api: xmlrpc.client.Server,
-                 shell: dockerblade.Shell
-                 ) -> None:
+
+    def __init__(
+        self,
+        description: "AppDescription",
+        host_ip_master: str,
+        api: xmlrpc.client.Server,
+        shell: dockerblade.Shell,
+    ) -> None:
         self.__description = description
         self.__host_ip_master = host_ip_master
         self.__api = api
         self.__shell = shell
-        self.__state_probe: SystemStateProbe = \
+        self.__state_probe: SystemStateProbe = (
             SystemStateProbe.via_xmlrpc_connection(self.__api)
+        )
 
     def __get_service_names(self) -> AbstractSet[str]:
         return set(self.__state_probe().services.keys())
@@ -63,9 +66,10 @@ class ServiceManager(Mapping[str, Service]):
         code: int
         msg: str
         url_container: str
+        # fmt: off
         code, msg, url_container = \
-            self.__api.lookupService('/.roswire', name)  # type: ignore
-
+            self.__api.lookupService("/.roswire", name)  # type: ignore
+        # fmt: on
         if code == -1:
             raise exceptions.ServiceNotFoundError(name)
         if code != 1:
@@ -78,15 +82,17 @@ class ServiceManager(Mapping[str, Service]):
         url_host = f"{parsed.scheme}://{self.__host_ip_master}:{parsed.port}"
 
         # find the format for the service
-        command = f'rosservice type {name}'
+        command = f"rosservice type {name}"
         try:
             name_fmt = self.__shell.check_output(command, text=True)
         except dockerblade.exceptions.CalledProcessError as error:
             m = f"unable to determine type for service [{name}]"
             raise exceptions.ROSWireException(m) from error
         fmt = self.__description.formats.services[name_fmt]
-        return Service(name=name,
-                       url=url_host,
-                       format=fmt,
-                       description=self.__description,
-                       shell=self.__shell)
+        return Service(
+            name=name,
+            url=url_host,
+            format=fmt,
+            description=self.__description,
+            shell=self.__shell,
+        )

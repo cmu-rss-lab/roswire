@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-"""
-This module provides access to the ROSWire session.
-"""
-__all__ = ('ROSWire',)
+"""This module provides access to the ROSWire session."""
+__all__ = ("ROSWire",)
 
 import contextlib
 import os
@@ -15,7 +13,7 @@ from loguru import logger
 from .app import App, AppDescription, AppInstance
 from .exceptions import ROSWireException
 
-_DEFAULT_URL = os.environ.get('DOCKER_HOST', 'unix://var/run/docker.sock')
+_DEFAULT_URL = os.environ.get("DOCKER_HOST", "unix://var/run/docker.sock")
 
 
 class ROSWire:
@@ -31,11 +29,13 @@ class ROSWire:
         directories between the host machine and containerised ROS
         applications.
     """
-    def __init__(self,
-                 *,
-                 workspace: Optional[str] = None,
-                 docker_url: str = _DEFAULT_URL
-                 ) -> None:
+
+    def __init__(
+        self,
+        *,
+        workspace: Optional[str] = None,
+        docker_url: str = _DEFAULT_URL,
+    ) -> None:
         if not workspace:
             logger.debug("no workspace specified: using default workspace.")
             dir_home = os.path.expanduser("~")
@@ -66,28 +66,30 @@ class ROSWire:
 
     def load(self, filename: str) -> App:
         """Loads a ROS application from a given file."""
-        with open(filename, 'r') as f:
+        with open(filename, "r") as f:
             contents = yaml.safe_load(f)
-        image: str = contents['image']
-        sources: Sequence[str] = contents['sources']
+        image: str = contents["image"]
+        sources: Sequence[str] = contents["sources"]
         app = self.app(image=image, sources=sources)
 
-        if 'description' in contents:
-            description = \
-                AppDescription._from_dict_for_app(contents['description'], app)
-            object.__setattr__(app, '_description', description)
+        if "description" in contents:
+            description = AppDescription._from_dict_for_app(
+                contents["description"], app
+            )
+            object.__setattr__(app, "_description", description)
 
         return app
 
     @contextlib.contextmanager
-    def launch(self,
-               image: str,
-               sources: Sequence[str],
-               description: Optional[AppDescription] = None,
-               *,
-               ports: Optional[Dict[int, int]] = None,
-               environment: Optional[Mapping[str, str]] = None
-               ) -> Iterator[AppInstance]:
+    def launch(
+        self,
+        image: str,
+        sources: Sequence[str],
+        description: Optional[AppDescription] = None,
+        *,
+        ports: Optional[Dict[int, int]] = None,
+        environment: Optional[Mapping[str, str]] = None,
+    ) -> Iterator[AppInstance]:
         """Launches a ROS application using a provided Docker image.
 
         Parameters

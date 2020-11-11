@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('Time', 'Duration', 'is_builtin', 'get_builtin')
+__all__ = ("Time", "Duration", "is_builtin", "get_builtin")
 
 from typing import Any, Dict, Type
 
@@ -12,12 +12,11 @@ class Time:
     nsecs: int = attr.ib()
 
     @staticmethod
-    def from_dict(d: Dict[str, Any]) -> 'Time':
-        return Time(d['secs'], d['nsecs'])
+    def from_dict(d: Dict[str, Any]) -> "Time":
+        return Time(d["secs"], d["nsecs"])
 
     def to_dict(self) -> Dict[str, int]:
-        return {'secs': self.secs,
-                'nsecs': self.nsecs}
+        return {"secs": self.secs, "nsecs": self.nsecs}
 
 
 @attr.s(frozen=True, slots=True)
@@ -26,7 +25,7 @@ class Duration:
     nsecs: int = attr.ib()
 
     @staticmethod
-    def between(start: Time, stop: Time) -> 'Duration':
+    def between(start: Time, stop: Time) -> "Duration":
         """Computes the length of time between two timestamps."""
         assert stop.secs > start.secs or stop.nsecs >= start.nsecs
         if start.secs == stop.secs:
@@ -40,31 +39,30 @@ class Duration:
             return Duration(d_secs - 1, stop.nsecs + sec_to_nsec - start.nsecs)
 
     @staticmethod
-    def from_dict(d: Dict[str, Any]) -> 'Duration':
-        return Duration(d['secs'], d['nsecs'])
+    def from_dict(d: Dict[str, Any]) -> "Duration":
+        return Duration(d["secs"], d["nsecs"])
 
     def to_dict(self) -> Dict[str, int]:
-        return {'secs': self.secs,
-                'nsecs': self.nsecs}
+        return {"secs": self.secs, "nsecs": self.nsecs}
 
 
 _BUILTIN_TYPES: Dict[str, Type] = {
-    'bool': bool,
-    'int8': int,
-    'uint8': int,
-    'int16': int,
-    'uint16': int,
-    'int32': int,
-    'uint32': int,
-    'int64': int,
-    'uint64': int,
-    'float32': float,
-    'float64': float,
-    'string': str,
-    'time': Time,
-    'duration': Duration,
-    'char': int,  # deprecated: alias for uint8
-    'byte': int  # deprecated: alias for int8
+    "bool": bool,
+    "int8": int,
+    "uint8": int,
+    "int16": int,
+    "uint16": int,
+    "int32": int,
+    "uint32": int,
+    "int64": int,
+    "uint64": int,
+    "float32": float,
+    "float64": float,
+    "string": str,
+    "time": Time,
+    "duration": Duration,
+    "char": int,  # deprecated: alias for uint8
+    "byte": int,  # deprecated: alias for int8
 }
 
 

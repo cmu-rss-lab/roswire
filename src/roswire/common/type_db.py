@@ -1,26 +1,38 @@
 # -*- coding: utf-8 -*-
-__all__ = ('TypeDatabase',)
+__all__ = ("TypeDatabase",)
 
 from collections import OrderedDict
-from typing import (Any, BinaryIO, Callable, Collection, Dict, Iterator,
-                    Mapping, Type)
+from typing import (
+    Any,
+    BinaryIO,
+    Callable,
+    Collection,
+    Dict,
+    Iterator,
+    Mapping,
+    Type,
+)
 
 import attr
 
 from .base import get_builtin, Time
-from .decode import (complex_array_reader,
-                     is_simple,
-                     read_duration,
-                     read_time,
-                     simple_array_reader,
-                     simple_reader,
-                     string_reader)
-from .encode import (complex_array_writer,
-                     simple_array_writer,
-                     simple_writer,
-                     string_writer,
-                     write_duration,
-                     write_time)
+from .decode import (
+    complex_array_reader,
+    is_simple,
+    read_duration,
+    read_time,
+    simple_array_reader,
+    simple_reader,
+    string_reader,
+)
+from .encode import (
+    complex_array_writer,
+    simple_array_writer,
+    simple_writer,
+    string_writer,
+    write_duration,
+    write_time,
+)
 from .format import FormatDatabase
 from .msg import Field, Message, MsgFormat
 
@@ -35,8 +47,9 @@ class TypeDatabase(Mapping[str, Type[Message]]):
     Implements the set of non-destructive :class:`dict` operations as
     :class:`PackageDatabase`.
     """
+
     @classmethod
-    def build(cls, db_format: FormatDatabase) -> 'TypeDatabase':
+    def build(cls, db_format: FormatDatabase) -> "TypeDatabase":
         formats = list(db_format.messages.values())
         formats = MsgFormat.toposort(formats)
         name_to_type: Dict[str, Type[Message]] = {}
@@ -50,41 +63,41 @@ class TypeDatabase(Mapping[str, Type[Message]]):
                     f_base_typ = get_builtin(f.base_type)
                 converter = tuple if f.is_array else None
                 ns[f.name] = attr.ib(type=f_base_typ, converter=converter)
-            ns['format'] = fmt
-            ns['read'] = classmethod(cls._build_read(name_to_type, fmt))
-            ns['write'] = cls._build_write(name_to_type, fmt)
+            ns["format"] = fmt
+            ns["read"] = classmethod(cls._build_read(name_to_type, fmt))
+            ns["write"] = cls._build_write(name_to_type, fmt)
             md5 = fmt.md5sum(db_format.messages)
-            ns['md5sum'] = classmethod(lambda cls, md5=md5: md5)
+            ns["md5sum"] = classmethod(lambda cls, md5=md5: md5)
             t: Type[Message] = type(fmt.name, (Message,), ns)
             t = attr.s(t, frozen=True, slots=True)
             name_to_type[fmt.fullname] = t
         return TypeDatabase(name_to_type.values())
 
     @classmethod
-    def _build_read(cls,
-                    name_to_type: Mapping[str, Type[Message]],
-                    fmt: MsgFormat
-                    ) -> Callable[[Type[Message], BinaryIO], Message]:
+    def _build_read(
+        cls, name_to_type: Mapping[str, Type[Message]], fmt: MsgFormat
+    ) -> Callable[[Type[Message], BinaryIO], Message]:
         """Builds a reader for a given message format."""
+
         def get_factory(field: Field) -> Callable[[BinaryIO], Any]:
             if field.is_simple:
                 return simple_reader(field.typ)
-            if field.typ == 'time':
+            if field.typ == "time":
                 return read_time
-            if field.typ == 'duration':
+            if field.typ == "duration":
                 return read_duration
-            if field.typ == 'string':
+            if field.typ == "string":
                 return string_reader(field.length)
             if field.is_array and is_simple(field.base_type):
                 return simple_array_reader(field.base_type, field.length)
             if field.is_array and not is_simple(field.base_type):
                 entry_factory: Callable[[BinaryIO], Any]
-                if field.base_type == 'time':
+                if field.base_type == "time":
                     entry_factory = read_time
-                elif field.base_type == 'duration':
+                elif field.base_type == "duration":
                     entry_factory = read_duration
                 # FIXME how about arrays of fixed-length strings?
-                elif field.base_type == 'string':
+                elif field.base_type == "string":
                     entry_factory = string_reader()
                 elif field.base_type in name_to_type:
                     entry_factory = name_to_type[field.base_type].read
@@ -111,30 +124,30 @@ class TypeDatabase(Mapping[str, Type[Message]]):
         return reader
 
     @classmethod
-    def _build_write(cls,
-                     name_to_type: Mapping[str, Type[Message]],
-                     fmt: MsgFormat
-                     ) -> Callable[[Any, BinaryIO], None]:
+    def _build_write(
+        cls, name_to_type: Mapping[str, Type[Message]], fmt: MsgFormat
+    ) -> Callable[[Any, BinaryIO], None]:
         """Builds a write for a given message format."""
+
         def get_field_writer(field: Field) -> Callable[[Any, BinaryIO], None]:
             if field.is_simple:
                 return simple_writer(field.typ)
-            if field.typ == 'time':
+            if field.typ == "time":
                 return write_time
-            if field.typ == 'duration':
+            if field.typ == "duration":
                 return write_duration
-            if field.typ == 'string':
+            if field.typ == "string":
                 return string_writer(field.length)
             if field.is_array and is_simple(field.base_type):
                 return simple_array_writer(field.base_type, field.length)
             if field.is_array and not is_simple(field.base_type):
                 entry_writer: Callable[[Any, BinaryIO], None]
-                if field.base_type == 'time':
+                if field.base_type == "time":
                     entry_writer = write_time
-                elif field.base_type == 'duration':
+                elif field.base_type == "duration":
                     entry_writer = write_duration
                 # FIXME how about arrays of fixed-length strings?
-                elif field.base_type == 'string':
+                elif field.base_type == "string":
                     entry_writer = string_writer()
                 elif field.base_type in name_to_type:
                     entry_writer = name_to_type[field.base_type].write
@@ -146,8 +159,9 @@ class TypeDatabase(Mapping[str, Type[Message]]):
             m = "unable to find writer for field: {field.name} [{field.typ}]"
             raise Exception(m)
 
-        field_writers: OrderedDict[str, Callable[[Any, BinaryIO], None]] = \
-            OrderedDict()
+        field_writers: OrderedDict[
+            str, Callable[[Any, BinaryIO], None]
+        ] = OrderedDict()
         for field in fmt.fields:
             field_writers[field.name] = get_field_writer(field)
 
@@ -158,8 +172,9 @@ class TypeDatabase(Mapping[str, Type[Message]]):
         return writer
 
     def __init__(self, types: Collection[Type[Message]]) -> None:
-        self.__contents: Dict[str, Type[Message]] = \
-            {t.format.fullname: t for t in types}
+        self.__contents: Dict[str, Type[Message]] = {
+            t.format.fullname: t for t in types
+        }
 
     def __len__(self) -> int:
         return len(self.__contents)
@@ -177,13 +192,14 @@ class TypeDatabase(Mapping[str, Type[Message]]):
         if field.is_array:
             fmt_item: MsgFormat = self[field.base_type].format
             return [self.from_dict(fmt_item, dd) for dd in val]
-        if field.typ == 'time':
+        if field.typ == "time":
             return Time.from_dict(val)
         # NOTE covers simple values (e.g., str, int, float, bool)
         return val
 
     def from_dict(self, fmt: MsgFormat, d: Dict[str, Any]) -> Message:
         typ: Type[Message] = self[fmt.fullname]
-        args: Dict[str, Any] = {f.name: self._from_dict_value(f, d[f.name])
-                                for f in fmt.fields}
+        args: Dict[str, Any] = {
+            f.name: self._from_dict_value(f, d[f.name]) for f in fmt.fields
+        }
         return typ(**args)  # type: ignore

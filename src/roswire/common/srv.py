@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('SrvFormat',)
+__all__ = ("SrvFormat",)
 
 import os
 from typing import Any, Dict, List, Optional
@@ -30,6 +30,7 @@ class SrvFormat:
         The definition of the optional response message for this service, if
         it has one.
     """
+
     package: str
     name: str
     definition: str
@@ -37,10 +38,9 @@ class SrvFormat:
     response: Optional[MsgFormat]
 
     @staticmethod
-    def from_file(package: str,
-                  filename: str,
-                  files: dockerblade.FileSystem
-                  ) -> 'SrvFormat':
+    def from_file(
+        package: str, filename: str, files: dockerblade.FileSystem
+    ) -> "SrvFormat":
         """Constructs a service format from a .srv file for a given package.
 
         Parameters
@@ -57,14 +57,15 @@ class SrvFormat:
         FileNotFoundError
             If the given file cannot be found.
         """
-        assert filename.endswith('.srv'), \
-            'service format files must end in .srv'
+        assert filename.endswith(
+            ".srv"
+        ), "service format files must end in .srv"
         name: str = os.path.basename(filename[:-4])
         contents: str = files.read(filename)
         return SrvFormat.from_string(package, name, contents)
 
     @staticmethod
-    def from_string(package: str, name: str, s: str) -> 'SrvFormat':
+    def from_string(package: str, name: str, s: str) -> "SrvFormat":
         """Constructs a service format from its definition.
 
         Raises
@@ -77,10 +78,10 @@ class SrvFormat:
         name_req = f"{name}Request"
         name_res = f"{name}Response"
 
-        sections: List[str] = [ss.strip() for ss in s.split('---')]
+        sections: List[str] = [ss.strip() for ss in s.split("---")]
         assert len(sections) < 3
         s_req = sections[0]
-        s_res = sections[1] if len(sections) > 1 else ''
+        s_res = sections[1] if len(sections) > 1 else ""
 
         if s_req:
             req = MsgFormat.from_string(package, name_req, s_req)
@@ -90,37 +91,38 @@ class SrvFormat:
         return SrvFormat(package, name, s, req, res)
 
     @staticmethod
-    def from_dict(d: Dict[str, Any],
-                  *,
-                  package: Optional[str] = None
-                  ) -> 'SrvFormat':
+    def from_dict(
+        d: Dict[str, Any], *, package: Optional[str] = None
+    ) -> "SrvFormat":
         req: Optional[MsgFormat] = None
         res: Optional[MsgFormat] = None
-        name: str = d['name']
-        definition: str = d['definition']
+        name: str = d["name"]
+        definition: str = d["definition"]
         if package is None:
-            assert d['package'] is not None
-            package = d['package']
+            assert d["package"] is not None
+            package = d["package"]
 
-        if 'request' in d:
-            req = MsgFormat.from_dict(d['request'],
-                                      package=package,
-                                      name=f'{name}Request')
-        if 'response' in d:
-            res = MsgFormat.from_dict(d['response'],
-                                      package=package,
-                                      name=f'{name}Response')
+        if "request" in d:
+            req = MsgFormat.from_dict(
+                d["request"], package=package, name=f"{name}Request"
+            )
+        if "response" in d:
+            res = MsgFormat.from_dict(
+                d["response"], package=package, name=f"{name}Response"
+            )
 
         return SrvFormat(package, name, definition, req, res)
 
     def to_dict(self) -> Dict[str, Any]:
-        d: Dict[str, Any] = {'package': self.package,
-                             'name': self.name,
-                             'definition': self.definition}
+        d: Dict[str, Any] = {
+            "package": self.package,
+            "name": self.name,
+            "definition": self.definition,
+        }
         if self.request:
-            d['request'] = self.request.to_dict()
+            d["request"] = self.request.to_dict()
         if self.response:
-            d['response'] = self.response.to_dict()
+            d["response"] = self.response.to_dict()
         return d
 
     @property

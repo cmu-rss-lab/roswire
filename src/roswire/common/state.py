@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('SystemState',)
+__all__ = ("SystemState",)
 
 from typing import AbstractSet, Collection, Mapping, Set
 
@@ -25,6 +25,7 @@ class SystemState:
         The names of all known topics on the system with at least one
         publisher or one subscriber.
     """
+
     publishers: Mapping[str, Collection[str]]
     subscribers: Mapping[str, Collection[str]]
     services: Mapping[str, Collection[str]]
@@ -41,5 +42,5 @@ class SystemState:
         topics = topics.union(self.publishers)
         topics = topics.union(self.subscribers)
 
-        object.__setattr__(self, 'nodes', frozenset(nodes))
-        object.__setattr__(self, 'topics', frozenset(topics))
+        object.__setattr__(self, "nodes", frozenset(nodes))
+        object.__setattr__(self, "topics", frozenset(topics))

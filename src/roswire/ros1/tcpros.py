@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('TCPROSHeader', 'TCPROSMessage')
+__all__ = ("TCPROSHeader", "TCPROSMessage")
 
 from io import BytesIO
 from typing import BinaryIO, Dict, Mapping, Optional, Type
@@ -10,7 +10,7 @@ from ..common.decode import read_string_dictionary, read_uint32
 from ..common.encode import write_encoded_header, write_uint32
 from ..common.msg import Message
 
-_UTF8_ONE = '1'.encode('utf-8')
+_UTF8_ONE = "1".encode("utf-8")
 
 
 @attr.s(frozen=True, auto_attribs=True, slots=True)
@@ -44,6 +44,7 @@ class TCPROSHeader:
     service: str, optional
         The name of service, if any, that is being called.
     """
+
     callerid: str
     md5sum: str
     type_: str
@@ -58,25 +59,27 @@ class TCPROSHeader:
     def write(self, b: BinaryIO) -> None:
         """Writes a binary encoding of this header to a given stream."""
         field_to_bytes: Dict[str, bytes] = {
-            'callerid': self.callerid.encode('utf-8'),
-            'md5sum': self.md5sum.encode('utf-8')}
+            "callerid": self.callerid.encode("utf-8"),
+            "md5sum": self.md5sum.encode("utf-8"),
+        }
         if self.message_definition:
-            field_to_bytes['message_definition'] = \
-                self.message_definition.encode('utf-8')
+            field_to_bytes[
+                "message_definition"
+            ] = self.message_definition.encode("utf-8")
         if self.type_:
-            field_to_bytes['type'] = self.type_.encode('utf-8')
+            field_to_bytes["type"] = self.type_.encode("utf-8")
         if self.service:
-            field_to_bytes['service'] = self.service.encode('utf-8')
+            field_to_bytes["service"] = self.service.encode("utf-8")
         if self.topic:
-            field_to_bytes['topic'] = self.topic.encode('utf-8')
+            field_to_bytes["topic"] = self.topic.encode("utf-8")
         if self.error:
-            field_to_bytes['error'] = self.error.encode('utf-8')
+            field_to_bytes["error"] = self.error.encode("utf-8")
         if self.tcp_nodelay:
-            field_to_bytes['tcp_nodelay'] = _UTF8_ONE
+            field_to_bytes["tcp_nodelay"] = _UTF8_ONE
         if self.persistent:
-            field_to_bytes['persistent'] = _UTF8_ONE
+            field_to_bytes["persistent"] = _UTF8_ONE
         if self.latching:
-            field_to_bytes['latching'] = _UTF8_ONE
+            field_to_bytes["latching"] = _UTF8_ONE
         write_encoded_header(field_to_bytes, b)
 
     def encode(self) -> bytes:
@@ -86,39 +89,41 @@ class TCPROSHeader:
         return b.getvalue()
 
     @classmethod
-    def decode(cls, b: bytes) -> 'TCPROSHeader':
+    def decode(cls, b: bytes) -> "TCPROSHeader":
         return cls.read(BytesIO(b))
 
     @classmethod
-    def read(cls, b: BinaryIO) -> 'TCPROSHeader':
+    def read(cls, b: BinaryIO) -> "TCPROSHeader":
         field_to_value: Dict[str, str] = read_string_dictionary(b)
 
         def fetch_optional_bool(key: str) -> Optional[bool]:
             if key not in field_to_value:
                 return None
-            return field_to_value[key] == '1'
+            return field_to_value[key] == "1"
 
-        callerid = field_to_value['callerid']
-        md5sum = field_to_value['md5sum']
-        type_ = field_to_value['type']
-        message_definition = field_to_value['message_definition']
-        service = field_to_value.get('service')
-        topic = field_to_value.get('topic')
-        error = field_to_value.get('error')
-        tcp_nodelay = fetch_optional_bool('tcp_nodelay')
-        persistent = fetch_optional_bool('persistent')
-        latching = fetch_optional_bool('latching')
+        callerid = field_to_value["callerid"]
+        md5sum = field_to_value["md5sum"]
+        type_ = field_to_value["type"]
+        message_definition = field_to_value["message_definition"]
+        service = field_to_value.get("service")
+        topic = field_to_value.get("topic")
+        error = field_to_value.get("error")
+        tcp_nodelay = fetch_optional_bool("tcp_nodelay")
+        persistent = fetch_optional_bool("persistent")
+        latching = fetch_optional_bool("latching")
 
-        return TCPROSHeader(callerid=callerid,
-                            md5sum=md5sum,
-                            type_=type_,
-                            message_definition=message_definition,
-                            tcp_nodelay=tcp_nodelay,
-                            persistent=persistent,
-                            latching=latching,
-                            error=error,
-                            topic=topic,
-                            service=service)
+        return TCPROSHeader(
+            callerid=callerid,
+            md5sum=md5sum,
+            type_=type_,
+            message_definition=message_definition,
+            tcp_nodelay=tcp_nodelay,
+            persistent=persistent,
+            latching=latching,
+            error=error,
+            topic=topic,
+            service=service,
+        )
 
 
 @attr.s(auto_attribs=True, slots=True)
@@ -150,10 +155,9 @@ class TCPROSMessage:
         b.seek(position_message_end)
 
     @classmethod
-    def decode(cls,
-               types: Mapping[str, Type[Message]],
-               b: bytes
-               ) -> 'TCPROSMessage':
+    def decode(
+        cls, types: Mapping[str, Type[Message]], b: bytes
+    ) -> "TCPROSMessage":
         """Decodes a TCPROS message from its binary form.
 
         Parameters
@@ -166,15 +170,13 @@ class TCPROSMessage:
         return cls.read(types, BytesIO(b))
 
     @classmethod
-    def read(cls,
-             types: Mapping[str, Type[Message]],
-             b: BytesIO
-             ) -> 'TCPROSMessage':
+    def read(
+        cls, types: Mapping[str, Type[Message]], b: BytesIO
+    ) -> "TCPROSMessage":
         """Reads a TCPROS message from a binary stream."""
         header = TCPROSHeader.read(b)
         type_ = types[header.type_]
         # read message size
         read_uint32(b)
         message = type_.read(b)
-        return TCPROSMessage(header=header,
-                             message=message)
+        return TCPROSMessage(header=header, message=message)

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('ROS2NodeManager',)
+__all__ = ("ROS2NodeManager",)
 
 import typing
 from typing import Iterator
@@ -19,21 +19,22 @@ if typing.TYPE_CHECKING:
 @attr.s(frozen=True, auto_attribs=True, slots=True)
 class ROS2NodeManager(NodeManager):
     """Provides an interface for interacting with ROS2 nodes."""
-    app_instance: 'AppInstance' = attr.ib()
-    _state_probe: 'ROS2StateProbe' = attr.ib(init=False)
+
+    app_instance: "AppInstance" = attr.ib()
+    _state_probe: "ROS2StateProbe" = attr.ib(init=False)
 
     def __attrs_post_init__(self) -> None:
         state_probe = ROS2StateProbe.for_app_instance(self.app_instance)
-        object.__setattr__(self, '_state_probe', state_probe)
+        object.__setattr__(self, "_state_probe", state_probe)
 
     @classmethod
-    def for_app_instance(cls,
-                         app_instance: 'AppInstance'
-                         ) -> 'ROS2NodeManager':
+    def for_app_instance(
+        cls, app_instance: "AppInstance"
+    ) -> "ROS2NodeManager":
         return ROS2NodeManager(app_instance=app_instance)
 
     @property
-    def state(self) -> 'SystemState':
+    def state(self) -> "SystemState":
         return self._state_probe.probe()
 
     def __getitem__(self, name: str) -> ROS2Node:

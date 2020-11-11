@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # http://wiki.ros.org/Bags/Format/2.0
-__all__ = ('BagRecorder',)
+__all__ = ("BagRecorder",)
 
 import os
 import shlex
@@ -18,14 +18,15 @@ from ...common import NodeManager
 
 
 class BagRecorder:
-    def __init__(self,
-                 fn_dest: str,
-                 ws_host: str,
-                 shell: dockerblade.Shell,
-                 nodes: NodeManager,
-                 exclude_topics: Optional[str] = None,
-                 restrict_to_topics: Optional[str] = None
-                 ) -> None:
+    def __init__(
+        self,
+        fn_dest: str,
+        ws_host: str,
+        shell: dockerblade.Shell,
+        nodes: NodeManager,
+        exclude_topics: Optional[str] = None,
+        restrict_to_topics: Optional[str] = None,
+    ) -> None:
         """
         Notes
         -----
@@ -63,8 +64,9 @@ class BagRecorder:
         # create a temporary file inside the shared directory
         self.__fn_host_dest: str = fn_dest
         self.__fn_container: str = f"/.roswire/{self.__bag_name}.bag"
-        self.__fn_host_temp: str = \
-            os.path.join(ws_host, f'{self.__bag_name}.bag')
+        self.__fn_host_temp: str = os.path.join(
+            ws_host, f"{self.__bag_name}.bag"
+        )
 
     @property
     def started(self) -> bool:
@@ -76,18 +78,21 @@ class BagRecorder:
         """Indicates whether or not recording has stopped."""
         return self.__stopped
 
-    def __enter__(self) -> 'BagRecorder':
+    def __enter__(self) -> "BagRecorder":
         self.start()
         return self
 
-    def __exit__(self,
-                 ex_type: Optional[Type[BaseException]],
-                 ex_val: Optional[BaseException],
-                 ex_tb: Optional[TracebackType]
-                 ) -> None:
+    def __exit__(
+        self,
+        ex_type: Optional[Type[BaseException]],
+        ex_val: Optional[BaseException],
+        ex_tb: Optional[TracebackType],
+    ) -> None:
         if ex_type is not None:
-            logger.error("error occurred during bag recording",
-                         exc_info=(ex_type, ex_val, ex_tb))
+            logger.error(
+                "error occurred during bag recording",
+                exc_info=(ex_type, ex_val, ex_tb),
+            )
         should_save = ex_type is None
         if not self.stopped:
             self.stop(save=should_save)
@@ -105,19 +110,22 @@ class BagRecorder:
             if self.__started:
                 raise exceptions.RecorderAlreadyStarted
             self.__started = True
-            args = ['rosbag record', '-q',
-                    f'-O {self.__fn_container}',
-                    f'__name:={self.__bag_name}']
+            args = [
+                "rosbag record",
+                "-q",
+                f"-O {self.__fn_container}",
+                f"__name:={self.__bag_name}",
+            ]
             if self.__exclude_topics:
-                args += ['-x', shlex.quote(self.__exclude_topics)]
+                args += ["-x", shlex.quote(self.__exclude_topics)]
             if self.__restrict_to_topics:
-                args += ['-e', shlex.quote(self.__restrict_to_topics)]
+                args += ["-e", shlex.quote(self.__restrict_to_topics)]
             else:
-                args.append('-a')
-            command = ' '.join(args)
-            self.__process = self.__shell.popen(command,
-                                                stderr=False,
-                                                stdout=False)
+                args.append("-a")
+            command = " ".join(args)
+            self.__process = self.__shell.popen(
+                command, stderr=False, stdout=False
+            )
             logger.debug("started bag recording")
 
     def stop(self, save: bool = True) -> None:
@@ -140,7 +148,7 @@ class BagRecorder:
             if not self.__started:
                 raise exceptions.RecorderNotStarted
 
-            name_node = f'/{self.__bag_name}'
+            name_node = f"/{self.__bag_name}"
             del self.__nodes[name_node]
             time.sleep(5)  # FIXME
 
@@ -155,6 +163,8 @@ class BagRecorder:
                     logger.debug("bag file will not be saved")
                 os.remove(self.__fn_host_temp)
             else:
-                logger.debug("temporary bag file not found on "
-                             f"host: {self.__fn_host_temp}")
+                logger.debug(
+                    "temporary bag file not found on "
+                    f"host: {self.__fn_host_temp}"
+                )
         logger.debug("stopped bag recording")

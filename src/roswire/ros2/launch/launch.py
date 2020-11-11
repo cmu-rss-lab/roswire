@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('ROS2LaunchManager',)
+__all__ = ("ROS2LaunchManager",)
 
 import os
 import shlex
@@ -20,26 +20,29 @@ if typing.TYPE_CHECKING:
 
 @attr.s(eq=False)
 class ROS2LaunchManager:
-    """Provides access to `ros2 launch
+    """
+    Provides access to `ros2 launch
     <design.ros2.org/articles/roslaunch.html>`_ for an
     associated ROS2 system. This interface is used to locate, read,
     and write `launch python files and to launch ROS nodes using those
     files.
     """
-    _app_instance: 'AppInstance' = attr.ib()
+
+    _app_instance: "AppInstance" = attr.ib()
 
     @classmethod
-    def for_app_instance(cls,
-                         app_instance: 'AppInstance'
-                         ) -> 'ROS2LaunchManager':
+    def for_app_instance(
+        cls, app_instance: "AppInstance"
+    ) -> "ROS2LaunchManager":
         return ROS2LaunchManager(app_instance=app_instance)
 
-    def read(self,
-             filename: str,
-             *,
-             package: Optional[str] = None,
-             argv: Optional[Sequence[str]] = None
-             ) -> LaunchConfig:
+    def read(
+        self,
+        filename: str,
+        *,
+        package: Optional[str] = None,
+        argv: Optional[Sequence[str]] = None,
+    ) -> LaunchConfig:
         """Produces a summary of the effects of a launch file.
 
         Parameters
@@ -64,11 +67,9 @@ class ROS2LaunchManager:
         reader = ROS2LaunchFileReader(self._app_instance)
         return reader.read(filename, argv)
 
-    def write(self,
-              config: LaunchConfig,
-              *,
-              filename: Optional[str] = None
-              ) -> str:
+    def write(
+        self, config: LaunchConfig, *, filename: Optional[str] = None
+    ) -> str:
         """Writes a given launch configuration to disk as an XML launch file.
 
         Parameters
@@ -83,8 +84,7 @@ class ROS2LaunchManager:
 
         Returns
         -------
-        str
-            The absolute path to the generated XML launch file.
+        str: The absolute path to the generated XML launch file.
         """
         raise NotImplementedError
 
@@ -110,7 +110,7 @@ class ROS2LaunchManager:
             If the given package could not be found.
         LaunchFileNotFound
             If the given launch file could not be found in the package.
-       """
+        """
         if not package:
             assert os.path.isabs(filename)
             return filename
@@ -121,23 +121,26 @@ class ROS2LaunchManager:
             paths = self._app_instance.files.find(package_location, filename)
             for path in paths:
                 if package in path:
-                    logger.debug('determined location of launch file'
-                                 f' [{filename}] in package [{package}]: '
-                                 f'{path}')
+                    logger.debug(
+                        "determined location of launch file"
+                        f" [{filename}] in package [{package}]: "
+                        f"{path}"
+                    )
                     return path
         raise exc.LaunchFileNotFound(path=filename)
 
-    def launch(self,
-               filename: str,
-               *,
-               package: Optional[str] = None,
-               args: Optional[Mapping[str, Union[int, str]]] = None,
-               prefix: Optional[str] = None,
-               launch_prefixes: Optional[Mapping[str, str]] = None,
-               node_to_remappings: Optional[
-                   Mapping[str, Collection[Tuple[str, str]]]
-               ] = None
-               ) -> ROSLaunchController:
+    def launch(
+        self,
+        filename: str,
+        *,
+        package: Optional[str] = None,
+        args: Optional[Mapping[str, Union[int, str]]] = None,
+        prefix: Optional[str] = None,
+        launch_prefixes: Optional[Mapping[str, str]] = None,
+        node_to_remappings: Optional[
+            Mapping[str, Collection[Tuple[str, str]]]
+        ] = None,
+    ) -> ROSLaunchController:
         """Provides an interface to the roslaunch command.
 
         Parameters
@@ -183,18 +186,20 @@ class ROS2LaunchManager:
             raise NotImplementedError(m)
         if package:
             filename_without_path = os.path.basename(filename)
-            cmd = ['ros2 launch', shlex.quote(package),
-                   shlex.quote(filename_without_path)]
+            cmd = [
+                "ros2 launch",
+                shlex.quote(package),
+                shlex.quote(filename_without_path),
+            ]
         else:
             m = "Not yet implemented when package is None"
             raise NotImplementedError(m)
-        launch_args: List[str] = [f'{arg}:={val}' for arg, val in args.items()]
+        launch_args: List[str] = [f"{arg}:={val}" for arg, val in args.items()]
         cmd += launch_args
         if prefix:
             cmd = [prefix] + cmd
-        cmd_str = ' '.join(cmd)
+        cmd_str = " ".join(cmd)
         popen = shell.popen(cmd_str, stdout=True, stderr=True)
-        return ROSLaunchController(filename=filename,
-                                   popen=popen)
+        return ROSLaunchController(filename=filename, popen=popen)
 
     __call__ = launch

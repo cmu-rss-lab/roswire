@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('App',)
+__all__ = ("App",)
 
 import os
 import tempfile
@@ -20,8 +20,9 @@ if typing.TYPE_CHECKING:
 
 @attr.s(frozen=True, auto_attribs=True, slots=True)
 class App:
-    """Specifies a ROS application in terms of its associated Docker image
-    and source files.
+    """
+    Specifies a ROS application in terms of its associated
+    Docker image and source files.
 
     Attributes
     ----------
@@ -36,11 +37,13 @@ class App:
     ImageNotFound
         If the given Docker image could not be found.
     """
+
     image: str = attr.ib(eq=False)
     sources: Sequence[str]
-    _roswire: 'ROSWire' = attr.ib(repr=False, eq=False)
-    _description: Optional[AppDescription] = \
-        attr.ib(eq=False, repr=False, default=None)
+    _roswire: "ROSWire" = attr.ib(repr=False, eq=False)
+    _description: Optional[AppDescription] = attr.ib(
+        eq=False, repr=False, default=None
+    )
     sha256: str = attr.ib(repr=False, init=False)
 
     def __attrs_post_init__(self) -> None:
@@ -51,7 +54,7 @@ class App:
         except docker.errors.ImageNotFound as err:
             raise exc.ImageNotFound(self.image) from err
         sha256: str = image.id[7:]
-        object.__setattr__(self, 'sha256', sha256)
+        object.__setattr__(self, "sha256", sha256)
 
     @property
     def description(self) -> AppDescription:
@@ -66,11 +69,9 @@ class App:
             raise exc.NoDescriptionError(app=self)
         return self._description
 
-    def describe(self,
-                 *,
-                 save: bool = True,
-                 force: bool = False
-                 ) -> AppDescription:
+    def describe(
+        self, *, save: bool = True, force: bool = False
+    ) -> AppDescription:
         """Produces a static description of this application.
 
         Parameters
@@ -90,20 +91,21 @@ class App:
             description = AppDescription.load(self)
         else:
             description = AppDescription.for_app(self)
-        object.__setattr__(self, '_description', description)
+        object.__setattr__(self, "_description", description)
 
         if save:
             description.save()
 
         return description
 
-    def launch(self,
-               *,
-               name: Optional[str] = None,
-               ports: Optional[Mapping[int, int]] = None,
-               environment: Optional[Mapping[str, str]] = None,
-               require_description: bool = True
-               ) -> AppInstance:
+    def launch(
+        self,
+        *,
+        name: Optional[str] = None,
+        ports: Optional[Mapping[int, int]] = None,
+        environment: Optional[Mapping[str, str]] = None,
+        require_description: bool = True
+    ) -> AppInstance:
         """Launches an instance of this application.
 
         Parameters
@@ -134,21 +136,22 @@ class App:
         environment = dict(environment) if environment else {}
 
         # generate a temporary shared directory
-        dir_containers = os.path.join(self._roswire.workspace, 'containers')
+        dir_containers = os.path.join(self._roswire.workspace, "containers")
         os.makedirs(dir_containers, exist_ok=True)
         host_workspace = tempfile.mkdtemp(dir=dir_containers)
 
         container = dockerblade.provision(
             image=self.image,
-            command='/bin/sh',
-            user='root',
+            command="/bin/sh",
+            user="root",
             name=name,
-            entrypoint='/bin/sh -c',
+            entrypoint="/bin/sh -c",
             environment=environment,
-            volumes={host_workspace: {'bind': '/.roswire', 'mode': 'rw'}},
-            ports=ports)
+            volumes={host_workspace: {"bind": "/.roswire", "mode": "rw"}},
+            ports=ports,
+        )
 
-        instance = AppInstance(app=self,
-                               dockerblade=container,
-                               host_workspace=host_workspace)
+        instance = AppInstance(
+            app=self, dockerblade=container, host_workspace=host_workspace
+        )
         return instance

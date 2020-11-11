@@ -5,7 +5,7 @@ index d6c3278..8d1d379 100644
 @@ -29,6 +29,8 @@
  #include "ros/ros.h"
  #include "std_msgs/String.h"
- 
+
 +#include <stdlib.h>
 +
  /**
@@ -20,7 +20,7 @@ index d6c3278..8d1d379 100644
 +     ROS_INFO("number smaller than 50");
  }
  // %EndTag(CALLBACK)%
- 
+
 diff --git a/roscpp_tutorials/talker/talker.cpp b/roscpp_tutorials/talker/talker.cpp
 index f0899ac..1a9361f 100644
 --- a/roscpp_tutorials/talker/talker.cpp
@@ -28,17 +28,17 @@ index f0899ac..1a9361f 100644
 @@ -32,6 +32,7 @@
  #include "std_msgs/String.h"
  // %EndTag(MSG_HEADER)%
- 
+
 +#include <stdlib.h>
  #include <sstream>
- 
+
  /**
 @@ -103,7 +104,7 @@ int main(int argc, char **argv)
      std_msgs::String msg;
- 
+
      std::stringstream ss;
 -    ss << "hello world " << count;
 +    ss << "hello world " << rand() % 1000;
      msg.data = ss.str();
  // %EndTag(FILL_MESSAGE)%
- 
+

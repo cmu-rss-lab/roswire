@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('SystemStateProbe',)
+__all__ = ("SystemStateProbe",)
 
 import xmlrpc
 from typing import Dict, Sequence, Tuple
@@ -12,25 +12,32 @@ from ..common import SystemState
 
 @attr.s(frozen=True, auto_attribs=True)
 class SystemStateProbe:
-    """Provides an interface for obtaining the instantaneous state of a ROS
-    system in terms of its publishers, subscribers, and services."""
+    """
+    Provides an interface for obtaining the instantaneous state of a ROS
+    system in terms of its publishers, subscribers, and services.
+    """
+
     _connection: xmlrpc.client.ServerProxy
 
     @classmethod
-    def via_xmlrpc_connection(cls,
-                              connection: xmlrpc.client.ServerProxy
-                              ) -> 'SystemStateProbe':
+    def via_xmlrpc_connection(
+        cls, connection: xmlrpc.client.ServerProxy
+    ) -> "SystemStateProbe":
         return SystemStateProbe(connection)
 
     def probe(self) -> SystemState:
         """Obtains the instantaneous state of the associated ROS system."""
         code: int
         msg: str
-        result: Tuple[Sequence[Tuple[str, Sequence[str]]],
-                      Sequence[Tuple[str, Sequence[str]]],
-                      Sequence[Tuple[str, Sequence[str]]]]
+        result: Tuple[
+            Sequence[Tuple[str, Sequence[str]]],
+            Sequence[Tuple[str, Sequence[str]]],
+            Sequence[Tuple[str, Sequence[str]]],
+        ]
+        # fmt: off
         code, msg, result = \
-            self._connection.getSystemState('roswire-probe')  # type: ignore
+            self._connection.getSystemState("roswire-probe")  # type: ignore
+        # fmt: on
         if code != 1:
             raise exc.ROSWireException("probe failed!")
 
@@ -45,9 +52,9 @@ class SystemStateProbe:
         for topic, service_names in result[2]:
             services[topic] = service_names
 
-        state = SystemState(publishers=publishers,
-                            subscribers=subscribers,
-                            services=services)
+        state = SystemState(
+            publishers=publishers, subscribers=subscribers, services=services
+        )
         return state
 
     __call__ = probe

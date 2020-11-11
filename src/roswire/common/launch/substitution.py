@@ -7,7 +7,7 @@ Reference
 ---------
 https://github.com/ros/ros_comm/tree/kinetic-devel/tools/roslaunch/src/roslaunch/substitution_args.py
 """
-__all__ = ('ArgumentResolver',)
+__all__ = ("ArgumentResolver",)
 
 import os
 import re
@@ -21,8 +21,8 @@ from loguru import logger
 
 from ...exceptions import SubstitutionError
 
-R_ARG = re.compile(r'\$\(.+?\)')
-R_FIND_ARG = re.compile(r'\$\(find .+?\)([^\s]+)')
+R_ARG = re.compile(r"\$\(.+?\)")
+R_FIND_ARG = re.compile(r"\$\(find .+?\)([^\s]+)")
 
 
 @attr.s(auto_attribs=True)
@@ -41,33 +41,33 @@ class ArgumentResolver:
         logger.debug(f"resolving substitution argument: {s}")
         s = s[2:-1]
         logger.debug(f"stripped delimiters: {s}")
-        kind, *params = s.split(' ')
+        kind, *params = s.split(" ")
         logger.debug(f"argument kind: {kind}")
 
         # we deal with find in a later stage
-        if kind == 'find':
-            return f'$({s})'
-        elif kind == 'env':
+        if kind == "find":
+            return f"$({s})"
+        elif kind == "env":
             var = params[0]
             return self._resolve_env(var)
-        elif kind == 'optenv':
+        elif kind == "optenv":
             var = params[0]
-            default = ' '.join(params[1:])
+            default = " ".join(params[1:])
             return self._resolve_optenv(var, default)
-        elif kind == 'dirname':
+        elif kind == "dirname":
             return self._resolve_dirname()
-        elif kind == 'arg':
+        elif kind == "arg":
             arg_name = params[0]
             return self._resolve_arg(arg_name)
-        elif kind == 'anon':
+        elif kind == "anon":
             return self._resolve_anon(params[0])
         return s
 
     def _resolve_dirname(self) -> str:
         try:
-            dirname = os.path.dirname(self.context['filename'])
+            dirname = os.path.dirname(self.context["filename"])
         except KeyError:
-            m = 'filename is not provided by the launch context'
+            m = "filename is not provided by the launch context"
             raise SubstitutionError(m)
         return os.path.normpath(dirname)
 
@@ -85,29 +85,34 @@ class ArgumentResolver:
 
     def _resolve_arg(self, arg_name: str) -> str:
         context = self.context
-        if 'arg' not in context or arg_name not in context['arg']:
-            m = f'arg not supplied to launch context [{arg_name}]'
+        if "arg" not in context or arg_name not in context["arg"]:
+            m = f"arg not supplied to launch context [{arg_name}]"
             raise SubstitutionError(m)
-        return context['arg'][arg_name]
+        return context["arg"][arg_name]
 
     def _find_package_path(self, package: str) -> str:
-        cmd = f'rospack find {shlex.quote(package)}'
+        cmd = f"rospack find {shlex.quote(package)}"
         try:
             location = self.shell.check_output(cmd, text=True)
         except subprocess.CalledProcessError as err:
-            raise SubstitutionError(f'failed to locate package: {package}') from err  # noqa
+            raise SubstitutionError(
+                f"failed to locate package: {package}"
+            ) from err  # noqa
         return location.strip()
 
     def _find_executable(self, package: str, path: str) -> str:
-        logger.debug(f'$(find-executable [package={package}] [path={path}]')
+        logger.debug(f"$(find-executable [package={package}] [path={path}]")
         path_original = path
 
         # look for executable in lib/ directory of workspaces
-        catkin_find_command = ("catkin_find --first-only --libexec "
-                               f"{shlex.quote(package)} {shlex.quote(path)}")
+        catkin_find_command = (
+            "catkin_find --first-only --libexec "
+            f"{shlex.quote(package)} {shlex.quote(path)}"
+        )
         try:
-            path_in_ws = self.shell.check_output(catkin_find_command,
-                                                 text=True)
+            path_in_ws = self.shell.check_output(
+                catkin_find_command, text=True
+            )
             path_in_ws = path_in_ws.strip()
             return path_in_ws
         except dockerblade.CalledProcessError:
@@ -117,17 +122,22 @@ class ArgumentResolver:
         path_package = self._find_package_path(package)
         path_in_package = os.path.join(path_package, path)
         if not self.files.access(path_in_package, os.X_OK):
-            m = ("$(find-executable pkg path) failed "
-                 f"[package={package}; path={path_original}]")
+            m = (
+                "$(find-executable pkg path) failed "
+                f"[package={package}; path={path_original}]"
+            )
             raise SubstitutionError(m)
         return path_in_package
 
     def _find_resource(self, package: str, path: str) -> str:
-        catkin_find_command = ("catkin_find --first-only --share "
-                               f"{shlex.quote(package)} {shlex.quote(path)}")
+        catkin_find_command = (
+            "catkin_find --first-only --share "
+            f"{shlex.quote(package)} {shlex.quote(path)}"
+        )
         try:
-            path_in_ws = self.shell.check_output(catkin_find_command,
-                                                 text=True)
+            path_in_ws = self.shell.check_output(
+                catkin_find_command, text=True
+            )
             path_in_ws = path_in_ws.strip()
             return path_in_ws
         except dockerblade.CalledProcessError:
@@ -136,32 +146,34 @@ class ArgumentResolver:
         path_package = self._find_package_path(package)
         path_in_package = os.path.join(path_package, path)
         if not self.files.isfile(path_in_package):
-            m = ("$(find-resource pkg path) failed "
-                 f"[package={package}; path={path}]")
+            m = (
+                "$(find-resource pkg path) failed "
+                f"[package={package}; path={path}]"
+            )
             raise SubstitutionError(m)
         return path_in_package
 
-    def _resolve_find(self, package: str, path: str = '') -> str:
-        logger.debug(f'resolving find: {package}')
+    def _resolve_find(self, package: str, path: str = "") -> str:
+        logger.debug(f"resolving find: {package}")
         path_original = path
 
         # if there is a path following the $(find ...) argument, then we first
         # attempt to treat the argument as part of an executable or resource
         # path
         if path:
-            path = path.replace('\\', '/')
-            if path.startswith('/'):
+            path = path.replace("\\", "/")
+            if path.startswith("/"):
                 path = path[1:]
 
             try:
                 resolved_path = self._find_executable(package, path)
-                logger.debug(f'resolved executable path: {resolved_path}')
+                logger.debug(f"resolved executable path: {resolved_path}")
                 return resolved_path
             except SubstitutionError:
                 pass
             try:
                 resolved_path = self._find_resource(package, path)
-                logger.debug(f'resolved resource path: {resolved_path}')
+                logger.debug(f"resolved resource path: {resolved_path}")
                 return resolved_path
             except SubstitutionError:
                 pass
@@ -170,42 +182,46 @@ class ArgumentResolver:
         return resolved_path
 
     def _resolve_eval(self, attribute_string: str) -> str:
-        logger.debug(f'resolving eval: {attribute_string}')
-        assert attribute_string.startswith('$(eval ')
-        assert attribute_string[-1] == ')'
+        logger.debug(f"resolving eval: {attribute_string}")
+        assert attribute_string.startswith("$(eval ")
+        assert attribute_string[-1] == ")"
         eval_string = attribute_string[7:-1]
 
-        if '__' in attribute_string:
-            m = ("$(eval ...): refusing to evaluate potentially dangerous "
-                 "expression -- must not contain double underscores")
+        if "__" in attribute_string:
+            m = (
+                "$(eval ...): refusing to evaluate potentially dangerous "
+                "expression -- must not contain double underscores"
+            )
             raise SubstitutionError(m)
 
-        _builtins = {x: __builtins__[x]  # type: ignore
-                     for x in ('dict', 'float', 'int', 'list', 'map')}
+        _builtins = {
+            x: __builtins__[x]  # type: ignore
+            for x in ("dict", "float", "int", "list", "map")
+        }
         _locals = {
-            'true': True,
-            'True': True,
-            'false': False,
-            'False': False,
-            '__builtins__': _builtins,
-            'arg': self._resolve_arg,
-            'anon': self._resolve_anon,
-            'dirname': self._resolve_dirname,
-            'env': self._resolve_env,
-            'find': self._resolve_find,
-            'optenv': self._resolve_optenv
+            "true": True,
+            "True": True,
+            "false": False,
+            "False": False,
+            "__builtins__": _builtins,
+            "arg": self._resolve_arg,
+            "anon": self._resolve_anon,
+            "dirname": self._resolve_dirname,
+            "env": self._resolve_env,
+            "find": self._resolve_find,
+            "optenv": self._resolve_optenv,
         }
 
-        for var, val in self.context['arg'].items():
+        for var, val in self.context["arg"].items():
             _locals[var] = val
 
         result = str(eval(eval_string, {}, _locals))
-        logger.debug(f'resolved eval [{attribute_string}]: {result}')
+        logger.debug(f"resolved eval [{attribute_string}]: {result}")
         return result
 
     def resolve(self, s: str) -> str:
         """Resolves a given argument string."""
-        if s.startswith('$(eval ') and s[-1] == ')':
+        if s.startswith("$(eval ") and s[-1] == ")":
             return self._resolve_eval(s)
         s = R_ARG.sub(lambda m: self._resolve_substitution_arg(m.group(0)), s)
 
@@ -213,12 +229,12 @@ class ArgumentResolver:
             # split tag and optional trailing path
             tag: str
             path: str
-            tag, path = match.group(0).split(')', 1)
-            tag += ')'
-            args = tag[2:-1].split(' ')
+            tag, path = match.group(0).split(")", 1)
+            tag += ")"
+            args = tag[2:-1].split(" ")
             assert len(args) == 2
             tag_name, package = args
-            assert tag_name == 'find'
+            assert tag_name == "find"
             return self._resolve_find(package, path)
 
         # resolve find arguments

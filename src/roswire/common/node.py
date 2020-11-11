@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('Node',)
+__all__ = ("Node",)
 
 import abc
 
@@ -12,6 +12,7 @@ class Node(abc.ABC):
     name: str
         The fully qualified name of this node.
     """
+
     @property
     @abc.abstractmethod
     def name(self) -> str:

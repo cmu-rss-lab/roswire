@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('NodeManager',)
+__all__ = ("NodeManager",)
 
 import abc
 from typing import Iterator, Mapping
@@ -9,6 +9,7 @@ from .node import Node
 
 class NodeManager(Mapping[str, Node], abc.ABC):
     """Provides a common interface for interacting with ROS1 and RO2 nodes."""
+
     @abc.abstractmethod
     def __getitem__(self, name: str) -> Node:
         """Attempts to fetch a given node.
