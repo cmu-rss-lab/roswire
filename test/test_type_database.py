@@ -149,3 +149,20 @@ def test_md5sum(app: roswire.App):
     check('tf/tfMessage', '94810edda583a504dfda3829e70d7eec')
     check('visualization_msgs/InteractiveMarkerPose', 'a6e6833209a196a38d798dadb02c81f8')
     check('rosgraph_msgs/Log', 'acffd30cd6b6de30f120938c17c593fb')
+
+
+def test_encode_and_decode():
+    db_type = load_mavros_type_db()
+    Waypoint = db_type['mavros_msgs/Waypoint']
+    wp = Waypoint(frame=3,
+                  command=82,
+                  is_current=False,
+                  autocontinue=True,
+                  param1=2.545384369178356,
+                  param2=0.0,
+                  param3=0.0,
+                  param4=0.0,
+                  x_lat=-35.36326497378809,
+                  y_long=149.1652387253908,
+                  z_alt=3.45551165104657)
+    assert wp == Waypoint.decode(wp.encode())
