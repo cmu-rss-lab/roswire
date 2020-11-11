@@ -66,16 +66,19 @@ class ParameterServer(Mapping[str, Any]):
 
         Parameters
         ----------
-            key: the name of the parameter (or namespace).
+        key: str
+            the name of the parameter (or namespace).
 
         Returns
         -------
+        Any
             The value of the parameter or the contents of the given namespace.
 
         Raises
         ------
-            ParameterNotFoundError: if no parameter with the given key is found
-                on the parameter server.
+        ParameterNotFoundError
+            if no parameter with the given key is found on the
+            parameter server.
         """
         # fmt: off
         code, msg, result = \
@@ -104,12 +107,14 @@ class ParameterServer(Mapping[str, Any]):
 
         Parameters
         ----------
-            key: the key for the parameter or parameter tree.
+        key: str
+            the key for the parameter or parameter tree.
 
         Raises
         ------
-            KeyError: if no parameter or parameter tree is found with the
-                given key on the server.
+        KeyError
+            if no parameter or parameter tree is found with the given
+            key on the server.
         """
         # fmt: off
         code, msg, result = \
