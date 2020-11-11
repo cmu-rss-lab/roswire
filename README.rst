@@ -42,6 +42,24 @@ Features
   manipulated, and saved to disk.
 * **Bag Playback:** safely replay bag files inside containers.
 
+Development
+-----------
+
+For code formatting, we now use `black <https://github.com/psf/black>`_.
+To install black:
+
+.. code:: shell
+
+   $ pip install black
+
+Before checking code in, black should be run to reformat the code. To run black:
+
+.. code:: shell
+
+   $ black -l 79 src test
+
+This will reformat your code in `src` and `test`, with the maximum line length
+set to 79 (the PEP8 standard length)
 
 Installation
 ------------
@@ -70,3 +88,5 @@ ROSWire can also be installed from source:
    $ cd roswire
    $ pipenv shell
    (roswire) $ pip install .
+
+
