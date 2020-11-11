@@ -77,9 +77,10 @@ class ParameterServer(Mapping[str, Any]):
             ParameterNotFoundError: if no parameter with the given key is found
                 on the parameter server.
         """
-        code, msg, result = self.__connection.getParam(
-            self.__caller_id, key
-        )  # type: ignore
+        # fmt: off
+        code, msg, result = \
+            self.__connection.getParam(self.__caller_id, key)  # type: ignore
+        # fmt: on
         if code == -1:
             raise exceptions.ParameterNotFoundError(key)
         if code != 1:
@@ -91,9 +92,10 @@ class ParameterServer(Mapping[str, Any]):
         Sets the value of a parameter on the server. If the value is a
         dictionary, it will be treated as a parameter tree.
         """
-        code, msg, result = self.__connection.setParam(
-            self.__caller_id, key, value
-        )  # type: ignore  # noqa
+        # fmt: off
+        code, msg, result = \
+            self.__connection.setParam(self.__caller_id, key, value)  # type: ignore  # noqa
+        # fmt: on
         if code != 1:
             raise exceptions.ROSWireException("bad API call!")
 
@@ -109,9 +111,10 @@ class ParameterServer(Mapping[str, Any]):
             KeyError: if no parameter or parameter tree is found with the
                 given key on the server.
         """
-        code, msg, result = self.__connection.deleteParam(
-            self.__caller_id, key
-        )  # type: ignore  # noqa
+        # fmt: off
+        code, msg, result = \
+            self.__connection.deleteParam(self.__caller_id, key)  # type: ignore  # noqa
+        # fmt: on
         if code == -1:
             raise exceptions.ParameterNotFoundError(key)
         if code != 1:
