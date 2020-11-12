@@ -277,8 +277,7 @@ class ROS1LaunchFileReader(LaunchFileReader):
 
         # handle delete command
         if cmd == "delete":
-            m = "'delete' command is currently not supported in <rosparam>"
-            raise NotImplementedError(m)
+            cfg = cfg.without_param(name=full_param)
 
         return ctx, cfg
 

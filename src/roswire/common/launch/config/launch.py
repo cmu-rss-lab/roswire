@@ -99,6 +99,20 @@ class LaunchConfig:
         params[name] = param
         return attr.evolve(self, params=params, errors=errors)
 
+    def without_param(self, name: str) -> "LaunchConfig":
+        params: Dict[str, Any] = dict(self.params)
+        errors = self.errors
+
+        if not name_is_global(name):
+            m = f"expected parameter name to be global: {name}"
+            raise FailedToParseLaunchFile(m)
+        if name not in params:
+            err = f"parameter [{name}] is not in the context"
+            errors = tuple(errors) + (err,)
+        else:
+            del params[name]
+        return attr.evolve(self, params=params, errors=errors)
+
     def with_remappings(
         self,
         node_to_remappings: Mapping[str, Collection[Tuple[str, str]]],  # noqa
