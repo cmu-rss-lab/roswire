@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 __all__ = ("AppInstance",)
 
-import contextlib
 import os
 import shutil
 import typing
 from types import TracebackType
-from typing import Iterator, Optional, Type
+from typing import Optional, Type
 
 import attr
 import dockerblade
@@ -127,39 +126,22 @@ class AppInstance:
             shell=self.shell, directory=directory, files=self.files
         )
 
-    @contextlib.contextmanager
-    def ros1(self, port: int = 11311) -> Iterator[ROS1]:
-        """
-        Launches a context-managed roscore inside the container.
-        Upon exiting the context, the ROS master (and its associated resources)
-        will be destroyed.
+    def ros1(self, port: int = 11311) -> ROS1:
+        """Provides access to ROS1 inside this application instance.
 
         Parameters
         ----------
         port: int, optional
-            The port inside the container on which roscore should run.
-
-        Yields
-        ------
-        ROS1
-            An interface to the launched ROS Master.
+            The port that should be used by the ROS Master.
         """
-        assert port > 1023
-        command = f"roscore -p {port}"
-        process = self.shell.popen(command)
-        try:
-            yield ROS1(
-                description=self.app.description,
-                shell=self.shell,
-                files=self.files,
-                ws_host=self._host_workspace,
-                ip_address=self.ip_address,
-                port=port,
-            )
-        finally:
-            process.terminate()
-            process.wait(2.0)
-            process.kill()
+        return ROS1(
+            description=self.app.description,
+            shell=self.shell,
+            files=self.files,
+            ws_host=self._host_workspace,
+            ip_address=self.ip_address,
+            port=port,
+        )
 
     @property
     def ros2(self) -> ROS2:
@@ -177,7 +159,9 @@ class AppInstance:
             logger.debug(f"destroyed app instance directory: {workspace}")
 
     def persist(
-        self, repo: Optional[str] = None, tag: Optional[str] = None
+        self,
+        repo: Optional[str] = None,
+        tag: Optional[str] = None
     ) -> DockerImage:
         """Persists this application instance to a Docker image.
 

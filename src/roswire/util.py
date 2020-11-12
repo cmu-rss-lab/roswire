@@ -1,12 +1,19 @@
 # -*- coding: utf-8 -*-
 __all__ = (
-    "tuple_from_iterable",
+    "is_port_open",
     "Stopwatch",
+    "tuple_from_iterable",
+    "wait_till_open",
 )
 
+import contextlib
+import socket
+import time
 import warnings
 from timeit import default_timer as timer
 from typing import Any, Iterable, Tuple
+
+from . import exceptions as exc
 
 
 def tuple_from_iterable(val: Iterable[Any]) -> Tuple[Any, ...]:
@@ -56,3 +63,48 @@ class Stopwatch:
         if not self.__paused:
             d += timer() - self.__time_start
         return d
+
+
+def wait_till_open(host: str,
+                   port: int,
+                   timeout: float,
+                   *,
+                   interval: float = 0.5
+                   ) -> None:
+    """Blocks until either a given port is open or a timeout expires.
+
+    Parameters
+    ----------
+    host: str
+        The name or IP address of the port host.
+    port: int
+        The port number.
+    timeout: float
+        The maximum number of seconds to wait before throwing a timeout.
+    interval: float
+        The number of seconds to wait between re-checking if the port is open.
+
+    Raises
+    ------
+    TimeoutExpiredError
+        If the timeout expires before the port is open.
+    """
+    with contextlib.closing(
+        socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    ) as s:
+        stopwatch = Stopwatch()
+        stopwatch.start()
+        while stopwatch.duration < timeout:
+            if s.connect_ex((host, port)) == 0:
+                return
+            time.sleep(interval)
+    m = f"unable to reach port [{host}:{port}] after {timeout} seconds"
+    raise exc.TimeoutExpiredError(m)
+
+
+def is_port_open(host: str, port: int) -> bool:
+    """Determines whether a port on a given host is open."""
+    with contextlib.closing(
+        socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    ) as s:
+        return s.connect_ex((host, port)) == 0

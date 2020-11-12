@@ -12,7 +12,9 @@ __all__ = (
 )
 
 from enum import Enum
-from typing import Dict, List, Optional, Tuple
+from typing import (  # noqa: F401  # prevents a mypy false positive
+    Any, Dict, Iterable, List, Optional, Sequence
+)
 
 import attr
 
@@ -67,7 +69,7 @@ class Chunk:
     pos_data: int
     time_start: Time
     time_end: Time
-    connections: Tuple[ChunkConnection, ...] = attr.ib(
+    connections: Sequence[ChunkConnection] = attr.ib(
         converter=tuple_from_iterable
     )
     compression: Compression

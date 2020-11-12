@@ -5,7 +5,14 @@ import os
 import time
 import typing
 import xmlrpc.client
-from typing import Dict, Optional, Sequence, Tuple
+from types import TracebackType
+from typing import (
+    Dict,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+)
 
 import dockerblade
 from loguru import logger
@@ -16,15 +23,17 @@ from .node_manager import ROS1NodeManager
 from .parameter import ParameterServer
 from .service import ServiceManager
 from .state import SystemStateProbe
+from .. import exceptions as exc
 from ..common import NodeManager, ROSLaunchManager, SystemState
 from ..exceptions import ROSWireException
+from ..util import is_port_open, Stopwatch, wait_till_open
 
 if typing.TYPE_CHECKING:
     from .. import AppDescription
 
 
 class ROS1:
-    """Provides access to a remote ROS master via XML-RPC.
+    """Provides access to the ROS1 API.
 
     Attributes
     ----------
@@ -59,13 +68,117 @@ class ROS1:
         self.__shell = shell
         self.__files = files
         self.__ws_host = ws_host
-        self.__caller_id = "/roswire"
+        assert port > 1023
         self.__port = port
         self.__ip_address = ip_address
         self.__uri = f"http://{ip_address}:{port}"
-        logger.debug(f"connecting to ROS Master: {self.__uri}")
+        self.__connection: Optional[xmlrpc.client.ServerProxy] = None
+        self.__roscore_process: Optional[dockerblade.popen.Popen] = None
+
+    def __enter__(self) -> "ROS1":
+        """
+        Ensures that a ROS Master is up and running by either connecting to
+        an existing ROS Master or launching a new one at the associated URI.
+        """
+        if not self.connected:
+            self.connect_or_launch()
+        return self
+
+    def __exit__(
+        self,
+        ex_type: Optional[Type[BaseException]],
+        ex_val: Optional[BaseException],
+        ex_tb: Optional[TracebackType],
+    ) -> None:
+        """
+        Disconnects from the associated ROS Master, and, if the ROS Master was
+        launched by this class, kills the associated roscore process.
+        """
+        self.close()
+
+    @property
+    def connected(self) -> bool:
+        """Indicates if there is a connection to the ROS Master."""
+        return self.__connection is not None
+
+    def close(self) -> None:
+        logger.debug(f"closing connection to ROS Master: {self.__uri}")
+        if self.__roscore_process is not None:
+            self._shutdown()
+        else:
+            self._disconnect()
+
+    def _shutdown(self) -> None:
+        if self.__roscore_process is None:
+            raise exc.IllegalOperation("No associated roscore process.")
+
+        logger.debug("shutting down roscore...")
+        self.__roscore_process.terminate()
+        self.__roscore_process.wait(2.0)
+        self.__roscore_process.kill()
+        self.__roscore_process = None
+        logger.debug("shutdown roscore")
+
+        self._disconnect()
+
+    def _disconnect(self) -> None:
+        """Disconnects from the associated ROS Master.
+
+        Raises
+        ------
+        NotConnectedError
+            No connection to the ROS Master has been established.
+        IllegalOperation
+            If the ROS Master is managed by this class, then the associated
+            roscore process must be killed before attempting to disconnect.
+        """
+        if self.__connection is None:
+            raise exc.NotConnectedError("Not connected to ROS Master")
+
+        if self.__roscore_process is not None:
+            raise exc.IllegalOperation("Not connected to ROS Master")
+
+        self.__connection = None
+        logger.debug("disconnected from ROS Master")
+
+    def connect_or_launch(self) -> None:
+        """
+        Attempts to connect to an already running ROS Master at the port
+        associated with this interface. If ROS Master isn't running at that
+        port, the roscore process will be launched.
+        """
+        if self._is_rosmaster_online():
+            self.connect()
+        else:
+            self.launch()
+
+    def connect(self, *, timeout: float = 30.0) -> None:
+        """Establishes a connection to an already running ROS Master.
+
+        Parameters
+        ----------
+        timeout: float
+            The maximum number of seconds to wait when trying to connect to
+            the ROS Master before timing out.
+
+        Raises
+        ------
+        TimeoutExpiredError
+            if a timeout occurred when attempting to connect to ROS Master.
+        AlreadyConnectedError
+            if a connection to the ROS Master has already been established.
+        """
+        logger.debug(f"attempting to connect to ROS Master: {self.__uri}")
+        timer = Stopwatch()
+        timer.start()
+        if self.connected:
+            raise exc.AlreadyConnectedError()
+
+        logger.debug(f"waiting for ROS Master to be online: {self.__uri}")
+        self._wait_until_rosmaster_is_online(timeout)
+        logger.debug(f"ROS Master is online: {self.__uri}")
+
         self.__connection = xmlrpc.client.ServerProxy(self.__uri)
-        time.sleep(5)  # FIXME #1
         self.__parameters = ParameterServer(self.__connection)
         self.__nodes: NodeManager = ROS1NodeManager(
             self.__ip_address, self.__connection, self.__shell
@@ -83,34 +196,109 @@ class ROS1:
             self.__shell, self.__files
         )
 
+        logger.debug("waiting for /rosout to be online")
+        self._wait_until_rosout_is_online(timeout)
+        logger.debug("/rosout is up and running")
+        logger.debug(f"connected to ROS Master: {self.__uri}")
+
+    def _wait_until_rosout_is_online(self, timeout: float) -> None:
+        assert self.__connection is not None
+        timer = Stopwatch()
+        timer.start()
+        is_online = False
+        while not is_online:
+            state = self.state
+            is_online = "/rosout" in state.topics
+            is_online &= "/rosout/set_logger_level" in state.services
+            is_online &= "/rosout/set_logger_level" in state.services
+
+            if timer.duration > timeout:
+                m = "timed out waiting for /rosout to become available"
+                raise exc.TimeoutExpiredError(m)
+
+            time.sleep(0.1)
+
+    def _wait_until_rosmaster_is_online(self, timeout: float = 5.0) -> None:
+        """Blocks until the ROS Master is online or a timeout occurs.
+
+        Parameters
+        ----------
+        timeout: float
+            The maximum number of seconds to wait before timing out.
+
+        Raises
+        ------
+        TimeoutExpiredError
+            If the ROS Master does not become available within the given
+            timeout.
+        """
+        wait_till_open(self.__ip_address, self.__port, timeout)
+
+    def _is_rosmaster_online(self) -> bool:
+        """
+        Checks whether the ROS Master is online at the port associated with
+        this interface.
+        """
+        return is_port_open(self.__ip_address, self.__port)
+
+    def launch(self) -> None:
+        """Launches the roscore process.
+
+        Raises
+        ------
+        AlreadyConnected
+            If a connection to ROS Master has already been established.
+        """
+        if self.__roscore_process is not None:
+            raise exc.AlreadyConnectedError()
+
+        command = f"roscore -p {self.__port}"
+        logger.debug(f"launching roscore via: {command}")
+        self.__roscore_process = self.__shell.popen(command)
+        logger.debug("launched roscore")
+        self.connect()
+
+    def must_be_connected(self) -> None:
+        """Raises a NotConnectedError if no connected to ROS Master."""
+        if not self.connected:
+            raise exc.NotConnectedError("not connected to ROS Master")
+
     @property
     def nodes(self) -> NodeManager:
+        self.must_be_connected()
         return self.__nodes
 
     @property
     def services(self) -> ServiceManager:
+        self.must_be_connected()
         return self.__services
 
     @property
     def parameters(self) -> ParameterServer:
+        self.must_be_connected()
         return self.__parameters
 
     @property
     def connection(self) -> xmlrpc.client.ServerProxy:
+        self.must_be_connected()
+        assert self.__connection is not None
         return self.__connection
 
     @property
     def state(self) -> SystemState:
+        self.must_be_connected()
         return self.__state_probe()
 
     @property
     def topic_to_type(self) -> Dict[str, str]:
+        self.must_be_connected()
+
         code: int
         msg: str
         result: Sequence[Tuple[str, str]]
         # fmt: off
         code, msg, result = \
-            self.connection.getTopicTypes(self.__caller_id)  # type: ignore
+            self.connection.getTopicTypes('/roswire')  # type: ignore
         # fmt: on
         if code != 1:
             raise ROSWireException("bad API call!")
@@ -146,6 +334,7 @@ class ROS1:
         BagRecorder
             An interface for dynamically interacting with the bag recorder.
         """
+        self.must_be_connected()
         return BagRecorder(
             fn,
             self.__ws_host,
@@ -172,8 +361,11 @@ class ROS1:
         BagPlayer
             An interface for dynamically controlling the bag player.
         """
+        self.must_be_connected()
+
         fn_ctr: str
         delete_file_after_use: bool = False
+
         if file_on_host:
             if fn.startswith(self.__ws_host):
                 fn_ctr = os.path.join("/.roswire", fn[len(self.__ws_host) :])
