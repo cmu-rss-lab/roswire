@@ -60,7 +60,7 @@ class ROS1:
         description: "AppDescription",
         shell: dockerblade.Shell,
         files: dockerblade.FileSystem,
-        ws_host: str,
+        ws_host: Optional[str],
         ip_address: str,
         port: int = 11311,
     ) -> None:
@@ -306,7 +306,7 @@ class ROS1:
 
     def record(
         self,
-        fn: str,
+        filename: str,
         exclude_topics: Optional[str] = None,
         restrict_to_topics: Optional[str] = None,
     ) -> BagRecorder:
@@ -319,7 +319,7 @@ class ROS1:
 
         Parameters
         ----------
-        fn: str
+        filename: str
             The name of the file, on the host machine, to which the bag should
             be recorded
         exclude_topics: str, optional
@@ -336,7 +336,7 @@ class ROS1:
         """
         self.must_be_connected()
         return BagRecorder(
-            fn,
+            filename,
             self.__ws_host,
             self.__shell,
             self.__nodes,
@@ -344,16 +344,21 @@ class ROS1:
             restrict_to_topics=restrict_to_topics,
         )
 
-    def playback(self, fn: str, *, file_on_host: bool = True) -> BagPlayer:
+    def playback(
+        self,
+        filename: str,
+        *,
+        file_on_host: bool = True
+    ) -> BagPlayer:
         """Provides an interface to rosbag for replaying bag files from disk.
 
         Parameters
         ----------
-        fn: str
+        filename: str
             The bag file that should be replayed.
         file_on_host: bool
-            If :code:`True`, as by default, :code:`fn` will be considered to
-            be a file on the host machine. If :code:`False`, :code:`fn` will
+            If ``True``, as by default, ``filename`` will be considered to
+            be a file on the host machine. If ``False``, ``filename`` will
             be considered to be a file inside the container.
 
         Returns
@@ -363,25 +368,29 @@ class ROS1:
         """
         self.must_be_connected()
 
-        fn_ctr: str
-        delete_file_after_use: bool = False
+        container_filename: str
+        delete_file_after_use = False
 
-        if file_on_host:
-            if fn.startswith(self.__ws_host):
-                fn_ctr = os.path.join("/.roswire", fn[len(self.__ws_host) :])
-            else:
-                delete_file_after_use = True
-                fn_ctr = self.__files.mktemp(suffix=".bag")
-                logger.debug(
-                    f"copying bag from host [{fn}] " f"to container [{fn_ctr}]"
-                )
-                self.__files.copy_from_host(fn, fn_ctr)
+        # check if file is inside shared workspace
+        if file_on_host and self.__ws_host and filename.startswith(self.__ws_host):  # noqa: E501
+            container_filename = os.path.join(
+                "/.roswire", filename[len(self.__ws_host):]
+            )
+        elif file_on_host:
+            delete_file_after_use = True
+            container_filename = self.__files.mktemp(suffix=".bag")
+            logger.debug(
+                f"copying bag from host [{filename}] "
+                f"to container [{container_filename}]"
+            )
+            self.__files.copy_from_host(filename, container_filename)
         else:
-            fn_ctr = fn
-        logger.debug(f"playing back bag file: {fn_ctr}")
+            container_filename = filename
+
+        logger.debug(f"playing back bag file: {container_filename}")
         return BagPlayer(
-            fn_ctr,
-            self.__shell,
-            self.__files,
+            container_filename,
+            shell=self.__shell,
+            files=self.__files,
             delete_file_after_use=delete_file_after_use,
         )

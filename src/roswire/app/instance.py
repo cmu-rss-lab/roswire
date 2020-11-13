@@ -38,20 +38,20 @@ class AppInstance:
         Provides access to a bash shell for this container.
     files: dockerblade.files.FileSystem
         Provides access to the filesystem for this container.
-    _host_workspace: str
-        The absolute path to the shared directory for this container's
+    _host_workspace: str, optional
+        The absolute path to the shared directory, if any, for this container's
         workspace on the host machine.
     _dockerblade: dockerblade.container.Container
         Provides access to the underlying Docker container.
     """
 
     _dockerblade: dockerblade.container.Container = attr.ib()
-    _host_workspace: str = attr.ib(repr=False)
     app: "App" = attr.ib()
     shell: dockerblade.shell.Shell = attr.ib(repr=False, init=False, eq=False)
     files: dockerblade.files.FileSystem = attr.ib(
         repr=False, init=False, eq=False
     )
+    _host_workspace: Optional[str] = attr.ib(repr=False, default=None)
 
     def __attrs_post_init__(self) -> None:
         dockerblade = self._dockerblade
@@ -153,7 +153,7 @@ class AppInstance:
         self._dockerblade.remove()
 
         workspace = self._host_workspace
-        if os.path.exists(workspace):
+        if workspace and os.path.exists(workspace):
             logger.debug(f"destroying app instance directory: {workspace}")
             shutil.rmtree(workspace)
             logger.debug(f"destroyed app instance directory: {workspace}")
