@@ -20,8 +20,8 @@ from ...common import NodeManager
 class BagRecorder:
     def __init__(
         self,
-        fn_dest: str,
-        ws_host: str,
+        host_filename: str,
+        ws_host: Optional[str],
         shell: dockerblade.Shell,
         nodes: NodeManager,
         exclude_topics: Optional[str] = None,
@@ -34,10 +34,11 @@ class BagRecorder:
 
         Parameters
         ----------
-        fn_dest: str
+        host_filename: str
             the destination filepath for the bag (on the host).
-        ws_host: str
-            the workspace directory for the associated container (on the host).
+        ws_host: str, optional
+            the workspace directory for the associated container (on the
+            host), if one exists.
         shell: Shell
             a shell proxy.
         nodes: NodeManager
@@ -49,6 +50,9 @@ class BagRecorder:
             An optional regular expression specifying the topics to which
             recording should be restricted.
         """
+        # TODO add support for recording to outside of shared workspace
+        assert ws_host is not None
+
         self.__lock: threading.Lock = threading.Lock()
         self.__process: Optional[dockerblade.popen.Popen] = None
         self.__started: bool = False
@@ -62,7 +66,7 @@ class BagRecorder:
         self.__bag_name: str = "my_bag"
 
         # create a temporary file inside the shared directory
-        self.__fn_host_dest: str = fn_dest
+        self.__host_filename: str = host_filename
         self.__fn_container: str = f"/.roswire/{self.__bag_name}.bag"
         self.__fn_host_temp: str = os.path.join(
             ws_host, f"{self.__bag_name}.bag"
@@ -157,8 +161,8 @@ class BagRecorder:
 
             if os.path.exists(self.__fn_host_temp):
                 if save:
-                    shutil.copyfile(self.__fn_host_temp, self.__fn_host_dest)
-                    logger.debug(f"bag file saved to {self.__fn_host_dest}")
+                    shutil.copyfile(self.__fn_host_temp, self.__host_filename)
+                    logger.debug(f"bag file saved to {self.__host_filename}")
                 else:
                     logger.debug("bag file will not be saved")
                 os.remove(self.__fn_host_temp)

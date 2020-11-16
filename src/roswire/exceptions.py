@@ -11,6 +11,10 @@ class ROSWireException(Exception):
     """Base class used by all ROSWire exceptions."""
 
 
+class TimeoutExpiredError(TimeoutError, ROSWireException):
+    """A timeout expired during an operation."""
+
+
 @_attr.s(frozen=True, auto_exc=True, auto_attribs=True, str=False)
 class PackageNotFound(ValueError, ROSWireException):
     """No package was found with a given name."""
@@ -55,6 +59,40 @@ class EnvNotFoundError(ROSWireException):
 
 class SubstitutionError(ROSWireException):
     """An error occurred during substitution argument handling."""
+
+
+class IllegalOperation(ROSWireException):
+    """Attempted to perform an illegal operation."""
+
+
+class NotConnectedError(ROSWireException):
+    """There is no connection to a given service."""
+
+
+class AlreadyConnectedError(ROSWireException):
+    """There is already a connection to a given service."""
+
+
+@_attr.s(frozen=True, auto_exc=True, auto_attribs=True, str=False)
+class ROSCoreAlreadyRunningError(ROSWireException):
+    """ROSCore is already running on a given port."""
+
+    url: str
+    port: int
+
+    def __str__(self) -> str:
+        return f"ROSCore is already running at: {self.url}:{self.port}"
+
+
+@_attr.s(frozen=True, auto_exc=True, auto_attribs=True, str=False)
+class ROSCoreNotRunningError(ROSWireException):
+    """ROSCore is not running on a given port."""
+
+    url: str
+    port: int
+
+    def __str__(self) -> str:
+        return f"ROSCore is not running at: {self.url}:{self.port}"
 
 
 class CatkinException(ROSWireException):

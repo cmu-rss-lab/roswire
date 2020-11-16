@@ -155,3 +155,39 @@ class App:
             app=self, dockerblade=container, host_workspace=host_workspace
         )
         return instance
+
+    def attach(
+        self,
+        container_name_or_id: str,
+        *,
+        require_description: bool = True
+    ) -> AppInstance:
+        """Attaches to a running container for this application.
+
+        Parameters
+        ----------
+        container_name_or_id: str
+            The name or ID of the container to which ROSWire should be
+            attached.
+        require_description: bool
+            If :code:`True`, this method call will ensure that there is a
+            description of the application before launching. If :code:`False`,
+            no check will be performed.
+
+        Returns
+        -------
+        AppInstance
+            A ROSWire interface around the given container.
+        """
+        dockerblade = self._roswire._dockerblade
+
+        if require_description and not self._description:
+            self.describe()
+
+        container = dockerblade.attach(container_name_or_id)
+        instance = AppInstance(
+            app=self,
+            dockerblade=container,
+            host_workspace=None
+        )
+        return instance
