@@ -12,23 +12,6 @@ from ..common import SystemState
 
 @attr.s(frozen=True, auto_attribs=True, slots=True)
 class ROS1SystemState(SystemState):
-    """Provides a description of the instantaneous state of a ROS system in
-    terms of its publishers, subscribers, and services.
-
-    Attributes
-    ----------
-    publishers: Mapping[str, Collection[str]]
-        A mapping from topics to the names of publishers to that topic.
-    subscribers: Mapping[str, Collection[str]]
-        A mapping from topics to the names of subscribers to that topic.
-    services: Mapping[str, Collection[str]]
-        A mapping from services to the names of providers of that service.
-    nodes: AbstractSet[str]
-        The names of all known nodes running on the system.
-    topics: AbstractSet[str]
-        The names of all known topics on the system with at least one
-        publisher or one subscriber.
-    """
 
     publishers: Mapping[str, Collection[str]]
     subscribers: Mapping[str, Collection[str]]
@@ -61,7 +44,7 @@ class SystemStateProbe:
 
     @classmethod
     def via_xmlrpc_connection(
-            cls, connection: xmlrpc.client.ServerProxy
+        cls, connection: xmlrpc.client.ServerProxy
     ) -> "SystemStateProbe":
         return SystemStateProbe(connection)
 
