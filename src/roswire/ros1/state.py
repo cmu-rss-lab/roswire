@@ -2,12 +2,35 @@
 __all__ = ("SystemStateProbe",)
 
 import xmlrpc
-from typing import Dict, Sequence, Tuple
+from typing import AbstractSet, Collection, Dict, Mapping, Sequence, Set, Tuple
 
 import attr
 
 from .. import exceptions as exc
 from ..common import SystemState
+
+
+@attr.s(frozen=True, auto_attribs=True, slots=True)
+class ROS1SystemState(SystemState):
+
+    publishers: Mapping[str, Collection[str]]
+    subscribers: Mapping[str, Collection[str]]
+    services: Mapping[str, Collection[str]]
+    nodes: AbstractSet[str] = attr.ib(init=False, repr=False)
+    topics: AbstractSet[str] = attr.ib(init=False, repr=False)
+
+    def __attrs_post_init__(self) -> None:
+        nodes: Set[str] = set()
+        nodes = nodes.union(*self.publishers.values())
+        nodes = nodes.union(*self.subscribers.values())
+        nodes = nodes.union(*self.services.values())
+
+        topics: Set[str] = set()
+        topics = topics.union(self.publishers)
+        topics = topics.union(self.subscribers)
+
+        object.__setattr__(self, "nodes", frozenset(nodes))
+        object.__setattr__(self, "topics", frozenset(topics))
 
 
 @attr.s(frozen=True, auto_attribs=True)
@@ -52,7 +75,7 @@ class SystemStateProbe:
         for topic, service_names in result[2]:
             services[topic] = service_names
 
-        state = SystemState(
+        state = ROS1SystemState(
             publishers=publishers, subscribers=subscribers, services=services
         )
         return state

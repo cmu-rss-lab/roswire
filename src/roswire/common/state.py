@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 __all__ = ("SystemState",)
 
-from typing import AbstractSet, Collection, Mapping, Set
+from abc import ABC, abstractmethod
+from typing import AbstractSet, Collection, Mapping
 
-import attr
 
-
-@attr.s(frozen=True, auto_attribs=True, slots=True)
-class SystemState:
-    """Provides a description of the instantaneous state of a ROS system in
+class SystemState(ABC):
+    """
+    Provides a description of the instantaneous state of a ROS system in
     terms of its publishers, subscribers, and services.
 
     Attributes
@@ -26,21 +25,27 @@ class SystemState:
         publisher or one subscriber.
     """
 
-    publishers: Mapping[str, Collection[str]]
-    subscribers: Mapping[str, Collection[str]]
-    services: Mapping[str, Collection[str]]
-    nodes: AbstractSet[str] = attr.ib(init=False, repr=False)
-    topics: AbstractSet[str] = attr.ib(init=False, repr=False)
+    @property
+    @abstractmethod
+    def publishers(self) -> Mapping[str, Collection[str]]:
+        ...
 
-    def __attrs_post_init__(self) -> None:
-        nodes: Set[str] = set()
-        nodes = nodes.union(*self.publishers.values())
-        nodes = nodes.union(*self.subscribers.values())
-        nodes = nodes.union(*self.services.values())
+    @property
+    @abstractmethod
+    def subscribers(self) -> Mapping[str, Collection[str]]:
+        ...
 
-        topics: Set[str] = set()
-        topics = topics.union(self.publishers)
-        topics = topics.union(self.subscribers)
+    @property
+    @abstractmethod
+    def services(self) -> Mapping[str, Collection[str]]:
+        ...
 
-        object.__setattr__(self, "nodes", frozenset(nodes))
-        object.__setattr__(self, "topics", frozenset(topics))
+    @property
+    @abstractmethod
+    def nodes(self) -> AbstractSet[str]:
+        ...
+
+    @property
+    @abstractmethod
+    def topics(self) -> AbstractSet[str]:
+        ...
