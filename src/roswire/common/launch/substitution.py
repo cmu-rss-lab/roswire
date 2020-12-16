@@ -10,9 +10,11 @@ https://github.com/ros/ros_comm/tree/kinetic-devel/tools/roslaunch/src/roslaunch
 __all__ = ("ArgumentResolver",)
 
 import os
+import random
 import re
 import shlex
 import subprocess
+import sys
 from typing import Any, Dict, Match
 
 import attr
@@ -72,7 +74,17 @@ class ArgumentResolver:
         return os.path.normpath(dirname)
 
     def _resolve_anon(self, name: str) -> str:
-        raise NotImplementedError
+        context = self.context
+        if "anon" not in context:
+            context["anon"] = {}
+        anon_context = context["anon"]
+        if name not in anon_context:
+            anon_context[name] = self._generate_anon(name)
+        return anon_context[name]
+
+    def _generate_anon(self, name: str) -> str:
+        name = name.replace('.', '_').replace('-', '_').replace(':', '_')
+        return f"anon_{name}_{random.randint(0, sys.maxsize)}"
 
     def _resolve_env(self, var: str) -> str:
         return self.shell.environ(var)
