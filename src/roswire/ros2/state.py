@@ -18,7 +18,7 @@ if typing.TYPE_CHECKING:
 class ROS2SystemState(SystemState):
     """
     Provides a description of the instantaneous state of a ROS2 system in
-    terms of its publishers, subscribers, and services.
+    terms of its publishers, subscribers, actions, and services.
 
     Attributes
     ----------
