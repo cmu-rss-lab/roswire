@@ -28,31 +28,61 @@ class ROS2SystemState(SystemState):
         A mapping from topics to the names of subscribers to that topic.
     services: Mapping[str, Collection[str]]
         A mapping from services to the names of providers of that service.
+    clients: Mapping[str, Collection[str]]
+        A mapping from services to the names of clients of that service.
+    action_servers: Mapping[str, Collection[str]]
+        A mapping from actions to the names of providesr of that action.
+    action_clients: Mapping[str, Collection[str]]
+        A mapping from actions to the names of clients of that action
     nodes: AbstractSet[str]
         The names of all known nodes running on the system.
     topics: AbstractSet[str]
         The names of all known topics on the system with at least one
         publisher or one subscriber.
+    all_services: AbstractSet[str]
+        The name of all the known services on the system with at least
+        one server or client
+    actions: AbstractSet[str]
+        The name of all the known actions on the system with at least one
+        one action server or client
     """
 
     publishers: Mapping[str, Collection[str]]
     subscribers: Mapping[str, Collection[str]]
     services: Mapping[str, Collection[str]]
+    clients: Mapping[str, Collection[str]]
+    action_servers: Mapping[str, Collection[str]]
+    action_clients: Mapping[str, Collection[str]]
     nodes: AbstractSet[str] = attr.ib(init=False, repr=False)
     topics: AbstractSet[str] = attr.ib(init=False, repr=False)
+    all_services: AbstractSet[str] = attr.ib(init=False, repr=False)
+    actions: AbstractSet[str] = attr.ib(init=False, repr=False)
 
     def __attrs_post_init__(self) -> None:
         nodes: Set[str] = set()
         nodes = nodes.union(*self.publishers.values())
         nodes = nodes.union(*self.subscribers.values())
         nodes = nodes.union(*self.services.values())
+        nodes = nodes.union(*self.clients.values())
+        nodes = nodes.union(*self.action_servers.values())
+        nodes = nodes.union(*self.action_clients.values())
 
         topics: Set[str] = set()
         topics = topics.union(self.publishers)
         topics = topics.union(self.subscribers)
 
+        all_services: Set[str] = set()
+        all_services = all_services.union(self.services)
+        all_services = all_services.union(self.clients)
+
+        actions: Set[str] = set()
+        actions = actions.union(self.action_servers)
+        actions = actions.union(self.action_clients)
+
         object.__setattr__(self, "nodes", frozenset(nodes))
         object.__setattr__(self, "topics", frozenset(topics))
+        object.__setattr__(self, "all_services", frozenset(all_services))
+        object.__setattr__(self, "actions", frozenset(actions))
 
 
 @attr.s(frozen=True, auto_attribs=True)
@@ -75,6 +105,9 @@ class ROS2StateProbe:
             "pub": {},
             "sub": {},
             "serv": {},
+            "cli": {},
+            "a_serv": {},
+            "a_cli": {}
         }
         command = "ros2 node list"
         try:
@@ -107,7 +140,14 @@ class ROS2StateProbe:
                     mode = "serv"
                     continue
                 elif "Action Servers:" in line:
-                    break
+                    mode = "act_serv"
+                    continue
+                elif "Service Clients:" in line:
+                    mode = "cli"
+                    continue
+                elif "Action Clients:" in line:
+                    mode = "act_cli"
+                    continue
 
                 if mode:
                     name = line.partition(":")[0]
@@ -120,6 +160,9 @@ class ROS2StateProbe:
             publishers=node_to_state["pub"],
             subscribers=node_to_state["sub"],
             services=node_to_state["serv"],
+            clients=node_to_state["cli"],
+            action_servers=node_to_state["act_serv"],
+            action_clients=node_to_state["act_cli"]
         )
         return state
 
