@@ -34,6 +34,12 @@ class ROS2SystemState(SystemState):
         A mapping from actions to the names of providesr of that action.
     action_clients: Mapping[str, Collection[str]]
         A mapping from actions to the names of clients of that action
+    topic_to_type: Mapping[str, str]
+        A mapping from topics to their type
+    service_to_type: Mapping[str, str]
+        A mapping from services to their type
+    action_to_type:
+        A mapping from actions to their type
     nodes: AbstractSet[str]
         The names of all known nodes running on the system.
     topics: AbstractSet[str]
@@ -53,6 +59,9 @@ class ROS2SystemState(SystemState):
     clients: Mapping[str, Collection[str]]
     action_servers: Mapping[str, Collection[str]]
     action_clients: Mapping[str, Collection[str]]
+    topic_to_type: Mapping[str, str]
+    service_to_type: Mapping[str, str]
+    action_to_type: Mapping[str, str]
     nodes: AbstractSet[str] = attr.ib(init=False, repr=False)
     topics: AbstractSet[str] = attr.ib(init=False, repr=False)
     all_services: AbstractSet[str] = attr.ib(init=False, repr=False)
@@ -109,6 +118,11 @@ class ROS2StateProbe:
             "a_serv": {},
             "a_cli": {}
         }
+        # The place to store type information
+        topic_to_type: Dict[str, str] = {}
+        service_to_type: Dict[str, str] = {}
+        action_to_type: Dict[str, str] = {}
+
         command = "ros2 node list"
         try:
             output = shell.check_output(command, text=True)
@@ -121,6 +135,7 @@ class ROS2StateProbe:
                 continue
             command_info = f"ros2 node info '{node_name}'"
             mode: Optional[str] = None
+            types: Dict[str, str] = {}
             try:
                 output = shell.check_output(command_info, text=True)
             except dockerblade.exceptions.CalledProcessError:
@@ -132,29 +147,43 @@ class ROS2StateProbe:
             for line in lines:
                 if "Publishers:" in line:
                     mode = "pub"
+                    types = topic_to_type
                     continue
                 elif "Subscribers:" in line:
                     mode = "sub"
+                    types = topic_to_type
                     continue
                 elif "Services:" in line:
                     mode = "serv"
+                    types = service_to_type
                     continue
                 elif "Action Servers:" in line:
                     mode = "act_serv"
+                    types = action_to_type
                     continue
                 elif "Service Clients:" in line:
                     mode = "cli"
+                    types = service_to_type
                     continue
                 elif "Action Clients:" in line:
                     mode = "act_cli"
+                    types = action_to_type
                     continue
 
                 if mode:
-                    name = line.partition(":")[0]
+                    partition = line.partition(":")
+                    name = partition[0]
+                    type_ = partition[1]
                     if name in node_to_state[mode]:
                         node_to_state[mode][name].add(node_name)
                     else:
                         node_to_state[mode][name] = {node_name}
+                    if name in types and type_ != types[name]:
+                        logger.warning(
+                            f'The entity {name} has conflictig types: '
+                            f'{types[name]} =/= {type_}')
+                    else:
+                        types[name] = type_
 
         state = ROS2SystemState(
             publishers=node_to_state["pub"],
@@ -162,7 +191,10 @@ class ROS2StateProbe:
             services=node_to_state["serv"],
             clients=node_to_state["cli"],
             action_servers=node_to_state["act_serv"],
-            action_clients=node_to_state["act_cli"]
+            action_clients=node_to_state["act_cli"],
+            topic_to_type=topic_to_type,
+            service_to_type=service_to_type,
+            action_to_type=action_to_type
         )
         return state
 
