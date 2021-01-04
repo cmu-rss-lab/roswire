@@ -80,7 +80,7 @@ class ROS2SystemState(SystemState):
         nodes = nodes.union(*self.publishers.values())
         nodes = nodes.union(*self.subscribers.values())
         nodes = nodes.union(*self.services.values())
-        nodes = nodes.union(*self.clients.values())
+        nodes = nodes.union(*self.service_clients.values())
         nodes = nodes.union(*self.action_servers.values())
         nodes = nodes.union(*self.action_clients.values())
 
