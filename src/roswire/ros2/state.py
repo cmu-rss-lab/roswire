@@ -10,6 +10,13 @@ from loguru import logger
 
 from ..common import SystemState
 
+ACTION_CLIENTS = "act_cli"
+ACTION_SERVERS = "act_serv"
+SERVICE_CLIENTS = "cli"
+SERVICES = "serv"
+SUBSCRIBERS = "sub"
+PUBLISHERS = "pub"
+
 if typing.TYPE_CHECKING:
     from .. import AppInstance
 
@@ -39,10 +46,10 @@ class ROS2SystemState(SystemState):
     topics: AbstractSet[str]
         The names of all known topics on the system with at least one
         publisher or one subscriber.
-    all_services: AbstractSet[str]
+    service_names: AbstractSet[str]
         The name of all the known services on the system with at least
         one server or client
-    actions: AbstractSet[str]
+    action_names: AbstractSet[str]
         The name of all the known actions on the system with at least one
         one action server or client
     """
@@ -50,20 +57,20 @@ class ROS2SystemState(SystemState):
     publishers: Mapping[str, Collection[str]]
     subscribers: Mapping[str, Collection[str]]
     services: Mapping[str, Collection[str]]
-    clients: Mapping[str, Collection[str]]
+    service_clients: Mapping[str, Collection[str]]
     action_servers: Mapping[str, Collection[str]]
     action_clients: Mapping[str, Collection[str]]
     nodes: AbstractSet[str] = attr.ib(init=False, repr=False)
     topics: AbstractSet[str] = attr.ib(init=False, repr=False)
-    all_services: AbstractSet[str] = attr.ib(init=False, repr=False)
-    actions: AbstractSet[str] = attr.ib(init=False, repr=False)
+    service_names: AbstractSet[str] = attr.ib(init=False, repr=False)
+    action_names: AbstractSet[str] = attr.ib(init=False, repr=False)
 
     def __attrs_post_init__(self) -> None:
         nodes: Set[str] = set()
         nodes = nodes.union(*self.publishers.values())
         nodes = nodes.union(*self.subscribers.values())
         nodes = nodes.union(*self.services.values())
-        nodes = nodes.union(*self.clients.values())
+        nodes = nodes.union(*self.service_clients.values())
         nodes = nodes.union(*self.action_servers.values())
         nodes = nodes.union(*self.action_clients.values())
 
@@ -71,18 +78,18 @@ class ROS2SystemState(SystemState):
         topics = topics.union(self.publishers)
         topics = topics.union(self.subscribers)
 
-        all_services: Set[str] = set()
-        all_services = all_services.union(self.services)
-        all_services = all_services.union(self.clients)
+        service_names: Set[str] = set()
+        service_names = service_names.union(self.services)
+        service_names = service_names.union(self.service_clients)
 
-        actions: Set[str] = set()
-        actions = actions.union(self.action_servers)
-        actions = actions.union(self.action_clients)
+        action_names: Set[str] = set()
+        action_names = action_names.union(self.action_servers)
+        action_names = action_names.union(self.action_clients)
 
         object.__setattr__(self, "nodes", frozenset(nodes))
         object.__setattr__(self, "topics", frozenset(topics))
-        object.__setattr__(self, "all_services", frozenset(all_services))
-        object.__setattr__(self, "actions", frozenset(actions))
+        object.__setattr__(self, "service_names", frozenset(service_names))
+        object.__setattr__(self, "action_names", frozenset(action_names))
 
 
 @attr.s(frozen=True, auto_attribs=True)
@@ -102,12 +109,12 @@ class ROS2StateProbe:
         """Obtains the instantaneous state of the associated ROS system."""
         shell = self._app_instance.shell
         node_to_state: Dict[Optional[str], Dict[str, Set[str]]] = {
-            "pub": {},
-            "sub": {},
-            "serv": {},
-            "cli": {},
-            "a_serv": {},
-            "a_cli": {}
+            PUBLISHERS: {},
+            SUBSCRIBERS: {},
+            SERVICES: {},
+            SERVICE_CLIENTS: {},
+            ACTION_SERVERS: {},
+            ACTION_CLIENTS: {}
         }
         command = "ros2 node list"
         try:
@@ -131,22 +138,22 @@ class ROS2StateProbe:
             lines = output.split("\r\n")
             for line in lines:
                 if "Publishers:" in line:
-                    mode = "pub"
+                    mode = PUBLISHERS
                     continue
                 elif "Subscribers:" in line:
-                    mode = "sub"
+                    mode = SUBSCRIBERS
                     continue
                 elif "Services:" in line:
-                    mode = "serv"
+                    mode = SERVICES
                     continue
                 elif "Action Servers:" in line:
-                    mode = "act_serv"
+                    mode = ACTION_SERVERS
                     continue
                 elif "Service Clients:" in line:
-                    mode = "cli"
+                    mode = SERVICE_CLIENTS
                     continue
                 elif "Action Clients:" in line:
-                    mode = "act_cli"
+                    mode = ACTION_CLIENTS
                     continue
 
                 if mode:
@@ -157,12 +164,12 @@ class ROS2StateProbe:
                         node_to_state[mode][name] = {node_name}
 
         state = ROS2SystemState(
-            publishers=node_to_state["pub"],
-            subscribers=node_to_state["sub"],
-            services=node_to_state["serv"],
-            clients=node_to_state["cli"],
-            action_servers=node_to_state["act_serv"],
-            action_clients=node_to_state["act_cli"]
+            publishers=node_to_state[PUBLISHERS],
+            subscribers=node_to_state[SUBSCRIBERS],
+            services=node_to_state[SERVICES],
+            service_clients=node_to_state[SERVICE_CLIENTS],
+            action_servers=node_to_state[ACTION_SERVERS],
+            action_clients=node_to_state[ACTION_CLIENTS]
         )
         return state
 
