@@ -10,12 +10,12 @@ from loguru import logger
 
 from ..common import SystemState
 
-ACTION_CLIENTS = "act_cli"
-ACTION_SERVERS = "act_serv"
-SERVICE_CLIENTS = "cli"
-SERVICES = "serv"
-SUBSCRIBERS = "sub"
-PUBLISHERS = "pub"
+_ACTION_CLIENTS = "act_cli"
+_ACTION_SERVERS = "act_serv"
+_SERVICE_CLIENTS = "cli"
+_SERVICES = "serv"
+_SUBSCRIBERS = "sub"
+_PUBLISHERS = "pub"
 
 if typing.TYPE_CHECKING:
     from .. import AppInstance
@@ -75,16 +75,16 @@ class ROS2SystemState(SystemState):
         nodes = nodes.union(*self.action_clients.values())
 
         topics: Set[str] = set()
-        topics = topics.union(self.publishers)
-        topics = topics.union(self.subscribers)
+        topics = topics.union(self.publishers.keys())
+        topics = topics.union(self.subscribers.keys())
 
         service_names: Set[str] = set()
-        service_names = service_names.union(self.services)
-        service_names = service_names.union(self.service_clients)
+        service_names = service_names.union(self.services.keys())
+        service_names = service_names.union(self.service_clients.keys())
 
         action_names: Set[str] = set()
-        action_names = action_names.union(self.action_servers)
-        action_names = action_names.union(self.action_clients)
+        action_names = action_names.union(self.action_servers.keys())
+        action_names = action_names.union(self.action_clients.keys())
 
         object.__setattr__(self, "nodes", frozenset(nodes))
         object.__setattr__(self, "topics", frozenset(topics))
@@ -109,12 +109,12 @@ class ROS2StateProbe:
         """Obtains the instantaneous state of the associated ROS system."""
         shell = self._app_instance.shell
         node_to_state: Dict[Optional[str], Dict[str, Set[str]]] = {
-            PUBLISHERS: {},
-            SUBSCRIBERS: {},
-            SERVICES: {},
-            SERVICE_CLIENTS: {},
-            ACTION_SERVERS: {},
-            ACTION_CLIENTS: {}
+            _PUBLISHERS: {},
+            _SUBSCRIBERS: {},
+            _SERVICES: {},
+            _SERVICE_CLIENTS: {},
+            _ACTION_SERVERS: {},
+            _ACTION_CLIENTS: {}
         }
         command = "ros2 node list"
         try:
@@ -138,22 +138,22 @@ class ROS2StateProbe:
             lines = output.split("\r\n")
             for line in lines:
                 if "Publishers:" in line:
-                    mode = PUBLISHERS
+                    mode = _PUBLISHERS
                     continue
                 elif "Subscribers:" in line:
-                    mode = SUBSCRIBERS
+                    mode = _SUBSCRIBERS
                     continue
                 elif "Services:" in line:
-                    mode = SERVICES
+                    mode = _SERVICES
                     continue
                 elif "Action Servers:" in line:
-                    mode = ACTION_SERVERS
+                    mode = _ACTION_SERVERS
                     continue
                 elif "Service Clients:" in line:
-                    mode = SERVICE_CLIENTS
+                    mode = _SERVICE_CLIENTS
                     continue
                 elif "Action Clients:" in line:
-                    mode = ACTION_CLIENTS
+                    mode = _ACTION_CLIENTS
                     continue
 
                 if mode:
@@ -164,12 +164,12 @@ class ROS2StateProbe:
                         node_to_state[mode][name] = {node_name}
 
         state = ROS2SystemState(
-            publishers=node_to_state[PUBLISHERS],
-            subscribers=node_to_state[SUBSCRIBERS],
-            services=node_to_state[SERVICES],
-            service_clients=node_to_state[SERVICE_CLIENTS],
-            action_servers=node_to_state[ACTION_SERVERS],
-            action_clients=node_to_state[ACTION_CLIENTS]
+            publishers=node_to_state[_PUBLISHERS],
+            subscribers=node_to_state[_SUBSCRIBERS],
+            services=node_to_state[_SERVICES],
+            service_clients=node_to_state[_SERVICE_CLIENTS],
+            action_servers=node_to_state[_ACTION_SERVERS],
+            action_clients=node_to_state[_ACTION_CLIENTS]
         )
         return state
 
