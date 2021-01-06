@@ -185,8 +185,9 @@ class ROS2StateProbe:
                         node_to_state[mode][name].add(node_name)
                     else:
                         node_to_state[mode][name] = {node_name}
-                    # Add type information and report conflict if a different types
-                    # was registered (probably should never happen)
+                    # Add type information and report conflict if a
+                    # different types was registered (probably
+                    # should never happen)
                     if name in types and fmt != types[name]:
                         logger.warning(
                             f'The entity {name} has conflictig types: '
