@@ -8,7 +8,8 @@ import attr
 from .launch import ROS2LaunchManager
 from .node_manager import ROS2NodeManager
 from .service_manager import ROS2ServiceManager
-from .state import ROS2StateProbe, ROS2SystemState
+from .state import ROS2StateProbe
+from ..common import SystemState
 
 if typing.TYPE_CHECKING:
     from .. import AppInstance
@@ -39,5 +40,5 @@ class ROS2:
         return ROS2(app_instance=app_instance)
 
     @property
-    def state(self) -> ROS2SystemState:
+    def state(self) -> SystemState:
         return self._state_probe.probe()
