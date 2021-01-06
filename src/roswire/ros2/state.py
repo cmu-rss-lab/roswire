@@ -183,7 +183,6 @@ class ROS2StateProbe:
                 elif "Action Clients:" in line:
                     mode = _ACTION_CLIENTS
                     types = action_to_type
-                    mode = "act_cli"
                     continue
 
                 if mode:
@@ -209,9 +208,9 @@ class ROS2StateProbe:
                     if name in types and type_ != types[name]:
                         logger.warning(
                             f'The entity {name} has conflictig types: '
-                            f'{types[name]} =/= {type_}')
+                            f'{types[name]} =/= {fmt}')
                     else:
-                        types[name] = type_
+                        types[name] = fmt
 
         state = ROS2SystemState(
             publishers=node_to_state[_PUBLISHERS],
