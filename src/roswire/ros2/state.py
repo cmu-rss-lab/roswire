@@ -180,17 +180,19 @@ class ROS2StateProbe:
                 if mode:
                     partition = line.partition(":")
                     name = partition[0]
-                    type_ = partition[1]
+                    fmt = partition[1]
                     if name in node_to_state[mode]:
                         node_to_state[mode][name].add(node_name)
                     else:
                         node_to_state[mode][name] = {node_name}
-                    if name in types and type_ != types[name]:
+                    # Add type information and report conflict if a different types
+                    # was registered (probably should never happen)
+                    if name in types and fmt != types[name]:
                         logger.warning(
                             f'The entity {name} has conflictig types: '
-                            f'{types[name]} =/= {type_}')
+                            f'{types[name]} =/= {fmt}')
                     else:
-                        types[name] = type_
+                        types[name] = fmt
 
         state = ROS2SystemState(
             publishers=node_to_state[_PUBLISHERS],
