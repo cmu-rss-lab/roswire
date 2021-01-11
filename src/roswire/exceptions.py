@@ -159,6 +159,19 @@ class ParsingError(ROSWireException):
 
 
 @_attr.s(frozen=True, auto_exc=True, auto_attribs=True, str=False)
+class ConflictingTypes(ROSWireException):
+    """ROSWire found two or more types for a service, topic, or action."""
+
+    entity: str
+    existing: str
+    conflicting: str
+
+    def __str__(self) -> str:
+        return (f"error declaring type {self.conflicting} for {self.entity}. "
+                f"It already has type {self.existing}")
+
+
+@_attr.s(frozen=True, auto_exc=True, auto_attribs=True, str=False)
 class NoDescriptionError(RuntimeError, ROSWireException):
     """No description has been generated for an application."""
 

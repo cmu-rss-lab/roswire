@@ -9,6 +9,7 @@ import dockerblade
 from loguru import logger
 
 from ..common import SystemState
+from ..exceptions import ConflictingTypes
 
 _ACTION_CLIENTS = "act_cli"
 _ACTION_SERVERS = "act_serv"
@@ -42,11 +43,11 @@ class ROS2SystemState(SystemState):
     action_clients: Mapping[str, Collection[str]]
         A mapping from actions to the names of clients of that action
     topic_to_type: Mapping[str, str]
-        A mapping from topics to their type
+        A mapping from topics to the name of their type
     service_to_type: Mapping[str, str]
-        A mapping from services to their type
-    action_to_type:
-        A mapping from actions to their type
+        A mapping from services to the name of their type
+    action_to_type: Mapping[str, str]
+        A mapping from actions to the name of their type
     nodes: AbstractSet[str]
         The names of all known nodes running on the system.
     topics: AbstractSet[str]
@@ -115,7 +116,14 @@ class ROS2StateProbe:
         return ROS2StateProbe(app_instance=app_instance)
 
     def probe(self) -> ROS2SystemState:
-        """Obtains the instantaneous state of the associated ROS system."""
+        """Obtains the instantaneous state of the associated ROS system.
+
+        Raises
+        ------
+        ConflictingTypeException
+            If more than one type is detected for a given topic, service,
+            or action
+        """
         shell = self._app_instance.shell
         node_to_state: Dict[Optional[str], Dict[str, Set[str]]] = {
             _PUBLISHERS: {},
@@ -125,7 +133,7 @@ class ROS2StateProbe:
             _ACTION_SERVERS: {},
             _ACTION_CLIENTS: {}
         }
-        # The place to store type information
+
         topic_to_type: Dict[str, str] = {}
         service_to_type: Dict[str, str] = {}
         action_to_type: Dict[str, str] = {}
@@ -189,9 +197,12 @@ class ROS2StateProbe:
                     # different types was registered (probably
                     # should never happen)
                     if name in types and fmt != types[name]:
-                        logger.warning(
-                            f'The entity {name} has conflictig types: '
+                        logger.error(
+                            f'The entity {name} has conflicting types: '
                             f'{types[name]} =/= {fmt}')
+                        raise ConflictingTypes(entity=name,
+                                               existing=types[name],
+                                               conflicting=fmt)
                     else:
                         types[name] = fmt
 
