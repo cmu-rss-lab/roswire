@@ -167,8 +167,8 @@ class ConflictingTypes(ROSWireException):
     conflicting: str
 
     def __str__(self) -> str:
-        return f"error declaring type {self.conflicting} for {self.entity}. " \
-               f"It already has type {self.existing}"
+        return (f"error declaring type {self.conflicting} for {self.entity}. "
+                f"It already has type {self.existing}")
 
 
 @_attr.s(frozen=True, auto_exc=True, auto_attribs=True, str=False)

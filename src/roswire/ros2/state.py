@@ -121,7 +121,8 @@ class ROS2StateProbe:
         Raises
         ------
         ConflictingTypeException
-            If more than one type is detected for topics, services, or actions
+            If more than one type is detected for a given topic, service,
+            or action
         """
         shell = self._app_instance.shell
         node_to_state: Dict[Optional[str], Dict[str, Set[str]]] = {
