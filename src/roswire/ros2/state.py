@@ -9,6 +9,7 @@ import dockerblade
 from loguru import logger
 
 from ..common import SystemState
+from ..exceptions import ConflictingTypes
 
 _ACTION_CLIENTS = "act_cli"
 _ACTION_SERVERS = "act_serv"
@@ -115,7 +116,13 @@ class ROS2StateProbe:
         return ROS2StateProbe(app_instance=app_instance)
 
     def probe(self) -> ROS2SystemState:
-        """Obtains the instantaneous state of the associated ROS system."""
+        """Obtains the instantaneous state of the associated ROS system.
+
+        Raises
+        ------
+        ConflictingTypeException
+            If more than one type is detected for topics, services, or actions
+        """
         shell = self._app_instance.shell
         node_to_state: Dict[Optional[str], Dict[str, Set[str]]] = {
             _PUBLISHERS: {},
@@ -189,9 +196,10 @@ class ROS2StateProbe:
                     # different types was registered (probably
                     # should never happen)
                     if name in types and fmt != types[name]:
-                        logger.warning(
+                        logger.error(
                             f'The entity {name} has conflicting types: '
                             f'{types[name]} =/= {fmt}')
+                        raise ConflictingTypes(entity=name, existing=types[name], conflicting=fmt)
                     else:
                         types[name] = fmt
 
