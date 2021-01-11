@@ -199,7 +199,9 @@ class ROS2StateProbe:
                         logger.error(
                             f'The entity {name} has conflicting types: '
                             f'{types[name]} =/= {fmt}')
-                        raise ConflictingTypes(entity=name, existing=types[name], conflicting=fmt)
+                        raise ConflictingTypes(entity=name,
+                                               existing=types[name],
+                                               conflicting=fmt)
                     else:
                         types[name] = fmt
 
