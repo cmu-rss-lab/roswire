@@ -205,12 +205,6 @@ class ROS2StateProbe:
                                                conflicting=fmt)
                     else:
                         types[name] = fmt
-                    if name in types and type_ != types[name]:
-                        logger.warning(
-                            f'The entity {name} has conflictig types: '
-                            f'{types[name]} =/= {fmt}')
-                    else:
-                        types[name] = fmt
 
 
         state = ROS2SystemState(
