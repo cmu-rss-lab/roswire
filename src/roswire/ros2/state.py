@@ -9,6 +9,7 @@ import dockerblade
 from loguru import logger
 
 from ..common import SystemState
+from ..exceptions import ConflictingTypes
 
 _ACTION_CLIENTS = "act_cli"
 _ACTION_SERVERS = "act_serv"
@@ -41,6 +42,12 @@ class ROS2SystemState(SystemState):
         A mapping from actions to the names of providesr of that action.
     action_clients: Mapping[str, Collection[str]]
         A mapping from actions to the names of clients of that action
+    topic_to_type: Mapping[str, str]
+        A mapping from topics to the name of their type
+    service_to_type: Mapping[str, str]
+        A mapping from services to the name of their type
+    action_to_type: Mapping[str, str]
+        A mapping from actions to the name of their type
     nodes: AbstractSet[str]
         The names of all known nodes running on the system.
     topics: AbstractSet[str]
@@ -60,6 +67,9 @@ class ROS2SystemState(SystemState):
     service_clients: Mapping[str, Collection[str]]
     action_servers: Mapping[str, Collection[str]]
     action_clients: Mapping[str, Collection[str]]
+    topic_to_type: Mapping[str, str]
+    service_to_type: Mapping[str, str]
+    action_to_type: Mapping[str, str]
     nodes: AbstractSet[str] = attr.ib(init=False, repr=False)
     topics: AbstractSet[str] = attr.ib(init=False, repr=False)
     service_names: AbstractSet[str] = attr.ib(init=False, repr=False)
@@ -106,7 +116,14 @@ class ROS2StateProbe:
         return ROS2StateProbe(app_instance=app_instance)
 
     def probe(self) -> ROS2SystemState:
-        """Obtains the instantaneous state of the associated ROS system."""
+        """Obtains the instantaneous state of the associated ROS system.
+
+        Raises
+        ------
+        ConflictingTypeException
+            If more than one type is detected for a given topic, service,
+            or action
+        """
         shell = self._app_instance.shell
         node_to_state: Dict[Optional[str], Dict[str, Set[str]]] = {
             _PUBLISHERS: {},
@@ -116,6 +133,11 @@ class ROS2StateProbe:
             _ACTION_SERVERS: {},
             _ACTION_CLIENTS: {}
         }
+
+        topic_to_type: Dict[str, str] = {}
+        service_to_type: Dict[str, str] = {}
+        action_to_type: Dict[str, str] = {}
+
         command = "ros2 node list"
         try:
             output = shell.check_output(command, text=True)
@@ -128,6 +150,7 @@ class ROS2StateProbe:
                 continue
             command_info = f"ros2 node info '{node_name}'"
             mode: Optional[str] = None
+            types: Dict[str, str] = {}
             try:
                 output = shell.check_output(command_info, text=True)
             except dockerblade.exceptions.CalledProcessError:
@@ -139,29 +162,49 @@ class ROS2StateProbe:
             for line in lines:
                 if "Publishers:" in line:
                     mode = _PUBLISHERS
+                    types = topic_to_type
                     continue
                 elif "Subscribers:" in line:
                     mode = _SUBSCRIBERS
+                    types = topic_to_type
                     continue
                 elif "Services:" in line:
                     mode = _SERVICES
+                    types = service_to_type
                     continue
                 elif "Action Servers:" in line:
                     mode = _ACTION_SERVERS
+                    types = action_to_type
                     continue
                 elif "Service Clients:" in line:
                     mode = _SERVICE_CLIENTS
+                    types = service_to_type
                     continue
                 elif "Action Clients:" in line:
                     mode = _ACTION_CLIENTS
+                    types = action_to_type
                     continue
 
                 if mode:
-                    name = line.partition(":")[0]
+                    partition = line.partition(":")
+                    name = partition[0]
+                    fmt = partition[1]
                     if name in node_to_state[mode]:
                         node_to_state[mode][name].add(node_name)
                     else:
                         node_to_state[mode][name] = {node_name}
+                    # Add type information and report conflict if a
+                    # different types was registered (probably
+                    # should never happen)
+                    if name in types and fmt != types[name]:
+                        logger.error(
+                            f'The entity {name} has conflicting types: '
+                            f'{types[name]} =/= {fmt}')
+                        raise ConflictingTypes(entity=name,
+                                               existing=types[name],
+                                               conflicting=fmt)
+                    else:
+                        types[name] = fmt
 
         state = ROS2SystemState(
             publishers=node_to_state[_PUBLISHERS],
@@ -169,7 +212,10 @@ class ROS2StateProbe:
             services=node_to_state[_SERVICES],
             service_clients=node_to_state[_SERVICE_CLIENTS],
             action_servers=node_to_state[_ACTION_SERVERS],
-            action_clients=node_to_state[_ACTION_CLIENTS]
+            action_clients=node_to_state[_ACTION_CLIENTS],
+            topic_to_type=topic_to_type,
+            service_to_type=service_to_type,
+            action_to_type=action_to_type
         )
         return state
 
