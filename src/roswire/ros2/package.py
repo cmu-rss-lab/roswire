@@ -3,7 +3,6 @@ __all__ = ("ROS2PackageDatabase",)
 
 import json
 import os
-import re
 import typing
 from typing import Any, Dict, Iterable, List, Mapping
 
@@ -17,15 +16,12 @@ if typing.TYPE_CHECKING:
     from .. import AppInstance
 
 _COMMAND_ROS2_PKG_PREFIXES: Final[str] = (
-    "python -c '"
+    "python3 -c '"
     "import json; "
     "import ament_index_python; "
     "print(json.dumps(ament_index_python.get_packages_with_prefixes()))"
     "'"
 )
-
-_COMMAND_ROS2_PKG_PREFIXES_3: Final[str] = re.compile("python ").\
-    sub("python3 ", _COMMAND_ROS2_PKG_PREFIXES, count=1)
 
 
 class ROS2PackageDatabase(PackageDatabase):
@@ -46,13 +42,8 @@ class ROS2PackageDatabase(PackageDatabase):
             shell = app_instance.shell
             jsn = shell.check_output(_COMMAND_ROS2_PKG_PREFIXES, text=True)
         except dockerblade.exceptions.CalledProcessError:
-            # maybe python is python3, try that
-            try:
-                jsn = shell.check_output(_COMMAND_ROS2_PKG_PREFIXES_3,
-                                         text=True)
-            except dockerblade.exceptions.CalledProcessError:
-                logger.error("failed to obtain ROS2 package prefixes")
-                raise
+            logger.error("failed to obtain ROS2 package prefixes")
+            raise
         package_to_prefix: Mapping[str, str] = json.loads(jsn)
         paths: List[str] = [
             os.path.join(prefix, f"share/{package}")

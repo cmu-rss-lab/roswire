@@ -206,7 +206,6 @@ class ROS2StateProbe:
                     else:
                         types[name] = fmt
 
-
         state = ROS2SystemState(
             publishers=node_to_state[_PUBLISHERS],
             subscribers=node_to_state[_SUBSCRIBERS],
