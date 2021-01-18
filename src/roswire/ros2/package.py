@@ -16,7 +16,7 @@ if typing.TYPE_CHECKING:
     from .. import AppInstance
 
 _COMMAND_ROS2_PKG_PREFIXES: Final[str] = (
-    "python -c '"
+    "python3 -c '"
     "import json; "
     "import ament_index_python; "
     "print(json.dumps(ament_index_python.get_packages_with_prefixes()))"
