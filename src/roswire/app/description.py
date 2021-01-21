@@ -55,7 +55,7 @@ class AppDescription:
         if distribution.ros == ROSVersion.ROS1:
             packages = ROS1PackageDatabase.from_dict(d["packages"])
         else:
-            packages = ROS2PackageDatabase.from_dict(d["pacakges"])
+            packages = ROS2PackageDatabase.from_dict(d["packages"])
         formats = FormatDatabase.build(packages)
         types = TypeDatabase.build(formats)
         return AppDescription(
