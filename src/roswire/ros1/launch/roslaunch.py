@@ -217,7 +217,7 @@ class ROS1LaunchManager(ROSLaunchManager):
             logger.debug(f"instrumented launch file [{filename}]:\n{contents}")
             self._files.write(filename, contents)
 
-        cmd = ["launch", shlex.quote(filename)]
+        cmd = ["roslaunch", shlex.quote(filename)]
         launch_args: List[str] = [f"{arg}:={val}" for arg, val in args.items()]
         cmd += launch_args
         if prefix:

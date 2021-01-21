@@ -40,7 +40,7 @@ class ROSLaunchController:
 
     @property
     def stream(self) -> Iterator[str]:
-        yield from self.popen.stream()  # type: ignore
+        yield from self.popen.stream
 
     @property
     def running(self) -> bool:
