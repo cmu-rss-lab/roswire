@@ -6,4 +6,4 @@ from .package import ROS1Package, ROS1PackageDatabase
 from .parameter import ParameterServer
 from .ros1 import ROS1
 from .service import Service, ServiceManager
-from .state import SystemStateProbe
+from .state import ROS1SystemState, SystemStateProbe

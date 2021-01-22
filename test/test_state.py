@@ -5,7 +5,7 @@ import time
 
 import dockerblade
 
-from roswire.common import SystemState
+from roswire.ros1.state import ROS1SystemState
 
 
 @pytest.mark.parametrize("sut", ["fetch"], indirect=True)
@@ -17,7 +17,7 @@ def test_state(sut):
             "/rosout/set_logger_level": ["/rosout"],
             "/rosout/get_loggers": ["/rosout"],
         }
-        expected = SystemState(
+        expected = ROS1SystemState(
             publishers=expected_pubs,
             subscribers=expected_subs,
             services=expected_services,

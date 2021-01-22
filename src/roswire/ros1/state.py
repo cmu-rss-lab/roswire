@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ("SystemStateProbe",)
+__all__ = ("ROS1SystemState", "SystemStateProbe",)
 
 import xmlrpc
 from typing import AbstractSet, Collection, Dict, Mapping, Sequence, Set, Tuple
