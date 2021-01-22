@@ -52,6 +52,7 @@ class AppDescription:
         cls, d: Dict[str, Any], app: "App"
     ) -> "AppDescription":
         distribution = ROSDistribution.with_name(d["distribution"])
+        packages: PackageDatabase
         if distribution.ros == ROSVersion.ROS1:
             packages = ROS1PackageDatabase.from_dict(d["packages"])
         else:
