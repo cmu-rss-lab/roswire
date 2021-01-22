@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from roswire.common import MsgFormat, SrvFormat, Package, PackageDatabase
-from roswire.ros1 import ROS1PackageDatabase
-
+from roswire.common import MsgFormat, SrvFormat, PackageDatabase
+from roswire.ros1 import ROS1Package, ROS1PackageDatabase
 
 def test_to_and_from_dict():
     pkg = "tf"
@@ -31,20 +30,20 @@ def test_to_and_from_dict():
             },
         }
     )
-    p = Package(
+    p = ROS1Package(
         name=pkg,
         path="/ros_ws/src/geometry/tf",
         messages=[msg_tf],
         actions=[],
         services=[srv_fg],
     )
-    assert p == Package.from_dict(p.to_dict())
+    assert p == ROS1Package.from_dict(p.to_dict())
 
 
 @pytest.mark.parametrize("sut", ["fetch"], indirect=True)
 def test_build(sut):
     path = "/opt/ros/melodic/share/tf"
-    expected = Package.from_dict(
+    expected = ROS1Package.from_dict(
         {
             "path": path,
             "name": "tf",
@@ -72,7 +71,7 @@ def test_build(sut):
             ],
         }
     )
-    actual = Package.build(path, sut)
+    actual = ROS1Package.build(path, sut)
     assert actual == expected
 
 
