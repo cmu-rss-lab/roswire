@@ -8,11 +8,10 @@ from typing import (
     Any,
     Collection,
     Dict,
-    Iterable,
     List,
     Mapping,
-    Optional,
 )
+from typing import Iterable  # noqa: F401 (Needed for tuple_from_iterable)
 
 import attr
 import dockerblade
@@ -104,11 +103,16 @@ class ROS2Package(Package[MsgFormat, SrvFormat, ActionFormat]):
 class ROS2PackageDatabase(PackageDatabase[ROS2Package]):
 
     @classmethod
-    def from_dict(cls, d: List[Dict[str, Any]]) -> "PackageDatabase[ROS2Package]":
+    def from_dict(cls,
+                  d: List[Dict[str, Any]]
+                  ) -> "PackageDatabase[ROS2Package]":
         return cls.from_packages(ROS2Package.from_dict(dd) for dd in d)
 
     @classmethod
-    def _build_package(cls, app_instance: "AppInstance", path: str) -> ROS2Package:
+    def _build_package(cls,
+                       app_instance: "AppInstance",
+                       path: str
+                       ) -> ROS2Package:
         return ROS2Package.build(path, app_instance)
 
     @classmethod
@@ -126,5 +130,3 @@ class ROS2PackageDatabase(PackageDatabase[ROS2Package]):
             for (package, prefix) in package_to_prefix.items()
         ]
         return paths
-
-

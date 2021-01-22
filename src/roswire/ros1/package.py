@@ -3,7 +3,8 @@ __all__ = ("ROS1Package", "ROS1PackageDatabase",)
 
 import os
 import typing
-from typing import Any, Collection, Dict, Iterable, List, Optional
+from typing import Any, Collection, Dict, List
+from typing import Iterable  # noqa: F401 (Needed for tuple_from_iterable)
 
 import attr
 import dockerblade
@@ -93,11 +94,16 @@ class ROS1Package(Package[MsgFormat, SrvFormat, ActionFormat]):
 class ROS1PackageDatabase(PackageDatabase[ROS1Package]):
 
     @classmethod
-    def from_dict(cls, d: List[Dict[str, Any]]) -> "PackageDatabase[ROS1Package]":
+    def from_dict(cls,
+                  d: List[Dict[str, Any]]
+                  ) -> "PackageDatabase[ROS1Package]":
         return cls.from_packages(ROS1Package.from_dict(dd) for dd in d)
 
     @classmethod
-    def _build_package(cls, app_instance: "AppInstance", path: str) -> ROS1Package:
+    def _build_package(cls,
+                       app_instance: "AppInstance",
+                       path: str
+                       ) -> ROS1Package:
         return ROS1Package.build(path, app_instance)
 
     @classmethod

@@ -12,7 +12,6 @@ from typing import (
     List,
     Mapping,
     Optional,
-    Sequence
 )
 
 import attr
@@ -81,7 +80,9 @@ class PackageDatabase(Generic[PT], ABC, Mapping[str, PT]):
     _contents: Mapping[str, PT] = attr.ib()
 
     @classmethod
-    def from_packages(cls, packages: typing.Iterable[PT]) -> "PackageDatabase[PT]":
+    def from_packages(cls,
+                      packages: typing.Iterable[PT]
+                      ) -> "PackageDatabase[PT]":
         return cls({p.name: p for p in packages})
 
     @classmethod
