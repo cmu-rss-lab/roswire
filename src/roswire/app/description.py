@@ -125,6 +125,7 @@ class AppDescription:
         with app.launch(require_description=False) as app_instance:
             distribution_name = app_instance.shell.environ("ROS_DISTRO")
             distribution = ROSDistribution.with_name(distribution_name)
+            db_package: PackageDatabase
             if distribution.ros == ROSVersion.ROS1:
                 db_package = ROS1PackageDatabase.build(app_instance)
             else:

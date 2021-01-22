@@ -8,11 +8,15 @@ from typing import (
     Collection,
     Dict,
     Generic,
+    Iterator,
     List,
     Mapping,
     Optional,
     Sequence
 )
+
+import attr
+from loguru import logger
 
 from .action import ActionFormat
 from .msg import MsgFormat
@@ -54,7 +58,11 @@ class Package(Generic[MF, SF, AF], ABC):
         return d
 
 
-class PackageDatabase(ABC, Mapping[str, Package]):
+PT = typing.TypeVar("PT", bound=Package)
+
+
+@attr.s(frozen=True)
+class PackageDatabase(Generic[PT], ABC, Mapping[str, PT]):
     """
     An immutable database of packages, represented as :class:`Package`
     instances, indexed by their names, given as :class:`str`.
@@ -70,24 +78,95 @@ class PackageDatabase(ABC, Mapping[str, Package]):
         and `db['foo'] = bar`).
     """
 
-    _paths_in_package: Sequence[str]
+    _contents: Mapping[str, PT] = attr.ib()
+
+    @classmethod
+    def from_packages(cls, packages: typing.Iterable[PT]) -> "PackageDatabase[PT]":
+        return cls({p.name: p for p in packages})
+
+    @classmethod
+    def from_paths(cls,
+                   app_instance: "AppInstance",
+                   paths: List[str],
+                   ignore_bad_paths: bool = True,
+                   ) -> "PackageDatabase[PT]":
+        """
+        Constructs a package database from a list of the paths of the packages
+        belonging to the database.
+
+        Parameters
+        ----------
+        app_instance: AppInstance
+            an instance of an application from which to get
+            the package database
+        paths: List[str]
+            a list of the absolute paths of the packages.
+        ignore_bad_paths: bool
+            If :code:`True`, non-existent paths will be ignored.
+            If :code:`False`, a :exc:`FileNotFoundError` will be raised.
+
+        Raises
+        ------
+        FileNotFoundError
+            if no package is found at a given path.
+        """
+        packages: List[PT] = []
+        for p in paths:
+            try:
+                package = cls._build_package(app_instance, p)
+            except FileNotFoundError:
+                logger.exception(f"unable to build package: {p}")
+                if not ignore_bad_paths:
+                    raise
+            else:
+                packages.append(package)
+        return cls.from_packages(packages)
 
     @classmethod
     @abstractmethod
+    def _build_package(cls, app_instance: "AppInstance", path: str) -> PT:
+        ...
+
+    @classmethod
     def build(cls,
               app_instance: "AppInstance",
               paths: Optional[List[str]] = None
-              ) -> "PackageDatabase":
-        ...
-
-    @property
-    def paths(self) -> Sequence[str]:
-        return self._paths_in_package
+              ) -> "PackageDatabase[PT]":
+        if paths is None:
+            paths = cls._determine_paths(app_instance)
+        db_package = cls.from_paths(app_instance, paths)
+        return db_package
 
     @classmethod
     @abstractmethod
-    def from_dict(cls, d: List[Dict[str, Any]]) -> "PackageDatabase":
+    def _determine_paths(cls, app_instance: "AppInstance") -> List[str]:
+        ...
+
+    @classmethod
+    @abstractmethod
+    def from_dict(cls, d: List[Dict[str, Any]]) -> "PackageDatabase[PT]":
         ...
 
     def to_dict(self) -> List[Dict[str, Any]]:
         return [p.to_dict() for p in self.values()]
+
+    def __len__(self) -> int:
+        """Returns the number of packages within this database."""
+        return len(self._contents)
+
+    def __getitem__(self, name: str) -> PT:
+        """Fetches the description for a given package.
+
+        Raises
+        ------
+        KeyError
+            if no package exists with the given name.
+        """
+        return self._contents[name]
+
+    def __iter__(self) -> Iterator[str]:
+        """
+        Returns an iterator over the names of the packages contained within
+        this database.
+        """
+        yield from self._contents

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-__all__ = ("ROS1PackageDatabase",)
+__all__ = ("ROS1Package", "ROS1PackageDatabase",)
 
 import os
 import typing
-from typing import Any, Collection, Dict, Iterable, Iterator, List, Optional
+from typing import Any, Collection, Dict, Iterable, List, Optional
 
 import attr
 import dockerblade
@@ -90,73 +90,15 @@ class ROS1Package(Package[MsgFormat, SrvFormat, ActionFormat]):
         return d
 
 
-class ROS1PackageDatabase(PackageDatabase):
-
-    __contents: Dict[str, Any]
+class ROS1PackageDatabase(PackageDatabase[ROS1Package]):
 
     @classmethod
-    def _from_packages_and_paths(
-            cls, packages: Iterable[ROS1Package], paths: Iterable[str]
-    ) -> "ROS1PackageDatabase":
-        return ROS1PackageDatabase(packages, paths)
+    def from_dict(cls, d: List[Dict[str, Any]]) -> "PackageDatabase[ROS1Package]":
+        return cls.from_packages(ROS1Package.from_dict(dd) for dd in d)
 
     @classmethod
-    def from_dict(cls, d: List[Dict[str, Any]]) -> "ROS1PackageDatabase":
-        return ROS1PackageDatabase([ROS1Package.from_dict(dd) for dd in d], [])
-
-    @classmethod
-    def build(
-            cls, app_instance: "AppInstance", paths: Optional[List[str]] = None
-    ) -> "PackageDatabase":
-        if paths is None:
-            paths = cls._determine_paths(app_instance)
-        db_package = cls._from_paths(app_instance, paths)
-        return db_package
-
-    @classmethod
-    def _from_paths(
-            cls,
-            app_instance: "AppInstance",
-            paths: List[str],
-            ignore_bad_paths: bool = True,
-    ) -> "ROS1PackageDatabase":
-        """
-        Constructs a package database from a list of the paths of the packages
-        belonging to the database.
-
-        Parameters
-        ----------
-        app_instance: AppInstance
-            an instance of an application from which to get
-            the package database
-        paths: List[str]
-            a list of the absolute paths of the packages.
-        ignore_bad_paths: bool
-            If :code:`True`, non-existent paths will be ignored.
-            If :code:`False`, a :exc:`FileNotFoundError` will be raised.
-
-        Raises
-        ------
-        FileNotFoundError
-            if no package is found at a given path.
-        """
-        packages: List[ROS1Package] = []
-        for p in paths:
-            try:
-                package = ROS1Package.build(p, app_instance)
-            except FileNotFoundError:
-                logger.exception(f"unable to build package: {p}")
-                if not ignore_bad_paths:
-                    raise
-            else:
-                packages.append(package)
-        return cls._from_packages_and_paths(packages, paths)
-
-    def __init__(
-            self, packages: Iterable[ROS1Package], paths: Iterable[str]
-    ) -> None:
-        self.__contents = {p.name: p for p in packages}
-        self._paths_in_package = list(paths)
+    def _build_package(cls, app_instance: "AppInstance", path: str) -> ROS1Package:
+        return ROS1Package.build(path, app_instance)
 
     @classmethod
     def _determine_paths(cls, app_instance: "AppInstance") -> List[str]:
@@ -174,27 +116,5 @@ class ROS1PackageDatabase(PackageDatabase):
                     "unable to find directory in ROS_PACKAGE_PATH:" f" {path}"
                 )
                 continue
-            package_dirs = [os.path.dirname(p) for p in all_packages]
-            paths.extend(package_dirs)
+            paths.extend(os.path.dirname(p) for p in all_packages)
         return paths
-
-    def __len__(self) -> int:
-        """Returns the number of packages within this database."""
-        return len(self.__contents)
-
-    def __getitem__(self, name: str) -> ROS1Package:
-        """Fetches the description for a given package.
-
-        Raises
-        ------
-        KeyError
-            if no package exists with the given name.
-        """
-        return self.__contents[name]
-
-    def __iter__(self) -> Iterator[str]:
-        """
-        Returns an iterator over the names of the packages contained within
-        this database.
-        """
-        yield from self.__contents
