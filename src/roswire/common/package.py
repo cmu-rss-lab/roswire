@@ -10,7 +10,8 @@ from typing import (
     Generic,
     List,
     Mapping,
-    Optional
+    Optional,
+    Sequence
 )
 
 from .action import ActionFormat
@@ -69,17 +70,18 @@ class PackageDatabase(ABC, Mapping[str, Package]):
         and `db['foo'] = bar`).
     """
 
-    _paths_in_package: List[str]
+    _paths_in_package: Sequence[str]
 
     @classmethod
     @abstractmethod
     def build(cls,
               app_instance: "AppInstance",
-              paths: Optional[List[str]]) -> "PackageDatabase":
+              paths: Optional[List[str]] = None
+              ) -> "PackageDatabase":
         ...
 
     @property
-    def paths(self) -> List[str]:
+    def paths(self) -> Sequence[str]:
         return self._paths_in_package
 
     @classmethod
