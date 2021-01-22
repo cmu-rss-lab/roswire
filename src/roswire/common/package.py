@@ -38,11 +38,6 @@ class Package(Generic[MF, SF, AF], ABC):
 
     @classmethod
     @abstractmethod
-    def build(cls, path: str, app_instance: "AppInstance") -> "Package":
-        ...
-
-    @classmethod
-    @abstractmethod
     def from_dict(cls, dict: Dict[str, Any]) -> "Package":
         ...
 
