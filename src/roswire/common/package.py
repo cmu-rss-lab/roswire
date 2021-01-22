@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
 __all__ = ("Package", "PackageDatabase")
 
-import os
 import typing
 from abc import ABC, abstractmethod
 from typing import (
     Any,
+    Collection,
     Dict,
-    Iterable,
+    Generic,
     Iterator,
     List,
     Mapping,
     Optional,
-    Tuple,
 )
 
 import attr
@@ -21,73 +20,26 @@ from loguru import logger
 from .action import ActionFormat
 from .msg import MsgFormat
 from .srv import SrvFormat
-from ..util import tuple_from_iterable
 
 if typing.TYPE_CHECKING:
     from .. import AppInstance
 
+MF = typing.TypeVar("MF", bound=MsgFormat)
+SF = typing.TypeVar("SF", bound=SrvFormat)
+AF = typing.TypeVar("AF", bound=ActionFormat)
 
-@attr.s(frozen=True, auto_attribs=True, slots=True)
-class Package:
+
+class Package(Generic[MF, SF, AF], ABC):
     name: str
     path: str
-    messages: Tuple[MsgFormat, ...] = attr.ib(converter=tuple_from_iterable)
-    services: Tuple[SrvFormat, ...] = attr.ib(converter=tuple_from_iterable)
-    actions: Tuple[ActionFormat, ...] = attr.ib(converter=tuple_from_iterable)
+    messages: Collection[MF]
+    services: Collection[SF]
+    actions: Collection[AF]
 
-    @staticmethod
-    def build(path: str, app_instance: "AppInstance") -> "Package":
-        """Constructs a description of a package at a given path."""
-        name: str = os.path.basename(path)
-        messages: List[MsgFormat] = []
-        services: List[SrvFormat] = []
-        actions: List[ActionFormat] = []
-        files = app_instance.files
-
-        if not files.isdir(path):
-            raise FileNotFoundError(f"directory does not exist: {path}")
-
-        dir_msg = os.path.join(path, "msg")
-        dir_srv = os.path.join(path, "srv")
-        dir_action = os.path.join(path, "action")
-
-        if files.isdir(dir_msg):
-            messages = [
-                MsgFormat.from_file(name, f, files)
-                for f in files.listdir(dir_msg, absolute=True)
-                if f.endswith(".msg")
-            ]
-        if files.isdir(dir_srv):
-            services = [
-                SrvFormat.from_file(name, f, files)
-                for f in files.listdir(dir_srv, absolute=True)
-                if f.endswith(".srv")
-            ]
-        if files.isdir(dir_action):
-            actions = [
-                ActionFormat.from_file(name, f, files)
-                for f in files.listdir(dir_action, absolute=True)
-                if f.endswith(".action")
-            ]
-
-        return Package(name, path, messages, services, actions)
-
-    @staticmethod
-    def from_dict(d: Dict[str, Any]) -> "Package":
-        name: str = d["name"]
-        messages: List[MsgFormat] = [
-            MsgFormat.from_dict(dd, package=name)
-            for dd in d.get("messages", [])
-        ]
-        services: List[SrvFormat] = [
-            SrvFormat.from_dict(dd, package=name)
-            for dd in d.get("services", [])
-        ]
-        actions: List[ActionFormat] = [
-            ActionFormat.from_dict(dd, package=name)
-            for dd in d.get("actions", [])
-        ]
-        return Package(d["name"], d["path"], messages, services, actions)
+    @classmethod
+    @abstractmethod
+    def from_dict(cls, dict: Dict[str, Any]) -> "Package":
+        ...
 
     def to_dict(self) -> Dict[str, Any]:
         d = {
@@ -100,7 +52,11 @@ class Package:
         return d
 
 
-class PackageDatabase(ABC, Mapping[str, Package]):
+PT = typing.TypeVar("PT", bound=Package)
+
+
+@attr.s(frozen=True)
+class PackageDatabase(Generic[PT], ABC, Mapping[str, PT]):
     """
     An immutable database of packages, represented as :class:`Package`
     instances, indexed by their names, given as :class:`str`.
@@ -116,53 +72,20 @@ class PackageDatabase(ABC, Mapping[str, Package]):
         and `db['foo'] = bar`).
     """
 
-    @classmethod
-    def build(
-        cls, app_instance: "AppInstance", paths: Optional[List[str]] = None
-    ) -> "PackageDatabase":
-        if paths is None:
-            paths = cls._determine_paths(app_instance)
-        db_package = cls._from_paths(app_instance, paths)
-        return db_package
+    _contents: Mapping[str, PT] = attr.ib()
 
     @classmethod
-    @abstractmethod
-    def _determine_paths(cls, app_instance: "AppInstance") -> List[str]:
-        """Parses the package paths for a given shell.
-
-        Parameters
-        ----------
-        app_instance: AppInstance
-            An instance of the application for which the
-            list of paths should be obtained
-        """
-        ...
+    def from_packages(cls,
+                      packages: typing.Iterable[PT]
+                      ) -> "PackageDatabase[PT]":
+        return cls({p.name: p for p in packages})
 
     @classmethod
-    @abstractmethod
-    def _from_packages_and_paths(
-        cls, packages: Iterable[Package], paths: Iterable[str]
-    ) -> "PackageDatabase":
-        """
-        Constructs a package database from a packages
-        and paths in the container
-
-        Parameters
-        ----------
-        packages: Iterable[Package]
-            A collection of the packages to be included in the databse
-        paths: Iterable[str]
-            A collection of paths
-        """
-        ...
-
-    @classmethod
-    def _from_paths(
-        cls,
-        app_instance: "AppInstance",
-        paths: List[str],
-        ignore_bad_paths: bool = True,
-    ) -> "PackageDatabase":
+    def from_paths(cls,
+                   app_instance: "AppInstance",
+                   paths: List[str],
+                   ignore_bad_paths: bool = True,
+                   ) -> "PackageDatabase[PT]":
         """
         Constructs a package database from a list of the paths of the packages
         belonging to the database.
@@ -183,33 +106,51 @@ class PackageDatabase(ABC, Mapping[str, Package]):
         FileNotFoundError
             if no package is found at a given path.
         """
-        packages: List[Package] = []
+        packages: List[PT] = []
         for p in paths:
             try:
-                package = Package.build(p, app_instance)
+                package = cls._build_package(app_instance, p)
             except FileNotFoundError:
                 logger.exception(f"unable to build package: {p}")
                 if not ignore_bad_paths:
                     raise
             else:
                 packages.append(package)
-        return cls._from_packages_and_paths(packages, paths)
+        return cls.from_packages(packages)
 
-    def __init__(
-        self, packages: Iterable[Package], paths: Iterable[str]
-    ) -> None:
-        self.__contents = {p.name: p for p in packages}
-        self._paths_in_package = list(paths)
+    @classmethod
+    @abstractmethod
+    def _build_package(cls, app_instance: "AppInstance", path: str) -> PT:
+        ...
 
-    @property
-    def paths(self) -> List[str]:
-        return self._paths_in_package
+    @classmethod
+    def build(cls,
+              app_instance: "AppInstance",
+              paths: Optional[List[str]] = None
+              ) -> "PackageDatabase[PT]":
+        if paths is None:
+            paths = cls._determine_paths(app_instance)
+        db_package = cls.from_paths(app_instance, paths)
+        return db_package
+
+    @classmethod
+    @abstractmethod
+    def _determine_paths(cls, app_instance: "AppInstance") -> List[str]:
+        ...
+
+    @classmethod
+    @abstractmethod
+    def from_dict(cls, d: List[Dict[str, Any]]) -> "PackageDatabase[PT]":
+        ...
+
+    def to_dict(self) -> List[Dict[str, Any]]:
+        return [p.to_dict() for p in self.values()]
 
     def __len__(self) -> int:
         """Returns the number of packages within this database."""
-        return len(self.__contents)
+        return len(self._contents)
 
-    def __getitem__(self, name: str) -> Package:
+    def __getitem__(self, name: str) -> PT:
         """Fetches the description for a given package.
 
         Raises
@@ -217,19 +158,11 @@ class PackageDatabase(ABC, Mapping[str, Package]):
         KeyError
             if no package exists with the given name.
         """
-        return self.__contents[name]
+        return self._contents[name]
 
     def __iter__(self) -> Iterator[str]:
         """
         Returns an iterator over the names of the packages contained within
         this database.
         """
-        yield from self.__contents
-
-    @classmethod
-    @abstractmethod
-    def from_dict(cls, d: List[Dict[str, Any]]) -> "PackageDatabase":
-        ...
-
-    def to_dict(self) -> List[Dict[str, Any]]:
-        return [p.to_dict() for p in self.values()]
+        yield from self._contents

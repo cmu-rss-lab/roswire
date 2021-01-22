@@ -52,10 +52,11 @@ class AppDescription:
         cls, d: Dict[str, Any], app: "App"
     ) -> "AppDescription":
         distribution = ROSDistribution.with_name(d["distribution"])
+        packages: PackageDatabase
         if distribution.ros == ROSVersion.ROS1:
             packages = ROS1PackageDatabase.from_dict(d["packages"])
         else:
-            packages = ROS2PackageDatabase.from_dict(d["pacakges"])
+            packages = ROS2PackageDatabase.from_dict(d["packages"])
         formats = FormatDatabase.build(packages)
         types = TypeDatabase.build(formats)
         return AppDescription(
@@ -124,6 +125,7 @@ class AppDescription:
         with app.launch(require_description=False) as app_instance:
             distribution_name = app_instance.shell.environ("ROS_DISTRO")
             distribution = ROSDistribution.with_name(distribution_name)
+            db_package: PackageDatabase
             if distribution.ros == ROSVersion.ROS1:
                 db_package = ROS1PackageDatabase.build(app_instance)
             else:
