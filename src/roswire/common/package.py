@@ -74,7 +74,7 @@ class PackageDatabase(ABC, Mapping[str, Package]):
     @classmethod
     @abstractmethod
     def build(cls,
-              app_instance: AppInstance,
+              app_instance: "AppInstance",
               paths: Optional[List[str]]) -> "PackageDatabase":
         ...
 
