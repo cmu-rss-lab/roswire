@@ -11,7 +11,7 @@ from typing import (
     List,
     Mapping,
 )
-from typing import Iterable  # noqa: F401 (Needed for tuple_from_iterable)
+from typing import Iterable  # noqa: F401 # Needed for tuple_from_iterable
 
 import attr
 import dockerblade
