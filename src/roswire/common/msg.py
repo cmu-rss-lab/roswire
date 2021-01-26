@@ -60,7 +60,8 @@ class Constant:
     @classmethod
     def from_string(cls, package: str, line: str) -> "Optional[Constant]":
         """
-        Produce a constant from a string, checking first if it is a valid constant, otherwise None.
+        Produce a constant from a string, checking first if it is a valid
+        constant, otherwise None.
 
         Parameters
         ----------
@@ -120,7 +121,8 @@ class Field:
     @classmethod
     def from_string(cls, package: str, line: str) -> "Optional[Field]":
         """
-        Produce a field from a string, checking first if it is a valid field, otherwise None.
+        Produce a field from a string, checking first if it is a
+        valid field, otherwise None.
 
         Parameters
         ----------
