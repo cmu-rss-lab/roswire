@@ -29,13 +29,8 @@ from .base import Duration, is_builtin, Time
 from .decode import is_simple
 from .. import exceptions as exc
 
-R_TYPE = r"[a-zA-Z0-9_/]+(?:\[(?:<=)?\d*\])?"
-R_NAME = r"[a-zA-Z0-9_/]+"
-R_VAL = r".+"
+
 R_COMMENT = r"(#.*)?"
-R_FIELD = re.compile(f"^\s*({R_TYPE})\s+({R_NAME})\s*{R_COMMENT}$")
-R_STRING_CONSTANT = re.compile("^\s*string\s+(\w+)\s*=\s*(.+)\s*$")
-R_OTHER_CONSTANT = re.compile("^\s*(\w+)\s+(\w+)\s*=\s*([^\s]+).*$")
 R_BLANK = re.compile(f"^\s*{R_COMMENT}$")
 
 ConstantValue = Union[str, int, float]
@@ -55,9 +50,41 @@ class Constant:
         The value of this constant.
     """
 
+    R_STRING_CONSTANT = re.compile("^\s*string\s+(\w+)\s*=\s*(.+)\s*$")
+    R_OTHER_CONSTANT = re.compile("^\s*(\w+)\s+(\w+)\s*=\s*([^\s]+).*$")
+
     typ: str
     name: str
     value: Union[str, int, float]
+
+    @classmethod
+    def from_string(cls, package: str, line: str) -> "Optional[Constant]":
+        """
+
+        Parameters
+        ----------
+        package: str
+            The name of the package that provides the constant.
+        line: str
+            The line of text containing the constant
+
+        Returns
+        -------
+        Optional[Constant]
+            A Constant object if the line is a constant, None otherwise
+        """
+        m_string_constant = cls.R_STRING_CONSTANT.match(line)
+        m_other_constant = cls.R_OTHER_CONSTANT.match(line)
+        if m_string_constant:
+            name_const, val = m_string_constant.group(1, 2)
+            constant = Constant("string", name_const, val)
+            return constant
+        elif m_other_constant:
+            typ, name_const, val_str = m_other_constant.group(1, 2, 3)
+            val = val_str  # FIXME convert value
+            constant = Constant(typ, name_const, val)
+            return constant
+        return None
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> "Constant":
@@ -82,8 +109,48 @@ class Field:
         The name of this field.
     """
 
+    R_TYPE = r"[a-zA-Z0-9_/]+(?:\[(?:<=)?\d*\])?"
+    R_NAME = r"[a-zA-Z0-9_/]+"
+    R_VAL = r".+"
+    R_FIELD = re.compile(f"^\s*({R_TYPE})\s+({R_NAME})\s*{R_COMMENT}$")
+
     typ: str
     name: str
+
+    @classmethod
+    def from_string(cls, package: str,  line: str) -> "Optional[Field]":
+        """
+
+        Parameters
+        ----------
+        package: str
+            The name of the package that provides the field.
+        line: str
+            The line of text containing the field
+
+        Returns
+        -------
+        Optional[Field]
+            A Field object if the line is a constant, None otherwise
+        """
+        m_field = cls.R_FIELD.match(line)
+
+        if m_field:
+            typ, name_field = m_field.group(1, 2)
+
+            # resolve the type of the field
+            typ_resolved = typ
+            base_typ = typ.partition("[")[0]
+            if typ == "Header":
+                typ_resolved = "std_msgs/Header"
+            elif "/" not in typ and not is_builtin(base_typ):
+                typ_resolved = f"{package}/{typ}"
+
+            if typ != typ_resolved:
+                logger.debug(f"resolved type [{typ}]: {typ_resolved}")
+                typ = typ_resolved
+
+            field: Field = Field(typ, name_field)
 
     @property
     def is_array(self) -> bool:
@@ -227,37 +294,14 @@ class MsgFormat:
 
         for line in text.split("\n"):
             m_blank = R_BLANK.match(line)
-            m_string_constant = R_STRING_CONSTANT.match(line)
-            m_other_constant = R_OTHER_CONSTANT.match(line)
-            m_field = R_FIELD.match(line)
-
             if m_blank:
                 continue
-            elif m_string_constant:
-                name_const, val = m_string_constant.group(1, 2)
-                constant = Constant("string", name_const, val)
+
+            constant = Constant.from_string(package, name, line)
+            field = Field.from_string(package, name, line)
+            if constant:
                 constants.append(constant)
-            elif m_other_constant:
-                typ, name_const, val_str = m_other_constant.group(1, 2, 3)
-                val = val_str  # FIXME convert value
-                constant = Constant(typ, name_const, val)
-                constants.append(constant)
-            elif m_field:
-                typ, name_field = m_field.group(1, 2)
-
-                # resolve the type of the field
-                typ_resolved = typ
-                base_typ = typ.partition("[")[0]
-                if typ == "Header":
-                    typ_resolved = "std_msgs/Header"
-                elif "/" not in typ and not is_builtin(base_typ):
-                    typ_resolved = f"{package}/{typ}"
-
-                if typ != typ_resolved:
-                    logger.debug(f"resolved type [{typ}]: {typ_resolved}")
-                    typ = typ_resolved
-
-                field: Field = Field(typ, name_field)
+            elif field:
                 fields.append(field)
             else:
                 raise exc.ParsingError(f"failed to parse line: {line}")
