@@ -118,7 +118,7 @@ class Field:
     name: str
 
     @classmethod
-    def from_string(cls, package: str,  line: str) -> "Optional[Field]":
+    def from_string(cls, package: str, line: str) -> "Optional[Field]":
         """
 
         Parameters
@@ -151,6 +151,8 @@ class Field:
                 typ = typ_resolved
 
             field: Field = Field(typ, name_field)
+            return field
+        return None
 
     @property
     def is_array(self) -> bool:
@@ -297,8 +299,8 @@ class MsgFormat:
             if m_blank:
                 continue
 
-            constant = Constant.from_string(package, name, line)
-            field = Field.from_string(package, name, line)
+            constant = Constant.from_string(package, line)
+            field = Field.from_string(package, line)
             if constant:
                 constants.append(constant)
             elif field:
