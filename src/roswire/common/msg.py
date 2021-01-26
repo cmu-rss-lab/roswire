@@ -60,18 +60,19 @@ class Constant:
     @classmethod
     def from_string(cls, package: str, line: str) -> "Optional[Constant]":
         """
+        Produce a constant from a string, checking first if it is a valid constant, otherwise None.
 
         Parameters
         ----------
         package: str
             The name of the package that provides the constant.
         line: str
-            The line of text containing the constant
+            The line of text containing the constant.
 
         Returns
         -------
         Optional[Constant]
-            A Constant object if the line is a constant, None otherwise
+            A Constant object if the line is a constant, None otherwise.
         """
         m_string_constant = cls.R_STRING_CONSTANT.match(line)
         m_other_constant = cls.R_OTHER_CONSTANT.match(line)
@@ -111,7 +112,6 @@ class Field:
 
     R_TYPE = r"[a-zA-Z0-9_/]+(?:\[(?:<=)?\d*\])?"
     R_NAME = r"[a-zA-Z0-9_/]+"
-    R_VAL = r".+"
     R_FIELD = re.compile(f"^\s*({R_TYPE})\s+({R_NAME})\s*{R_COMMENT}$")
 
     typ: str
@@ -120,18 +120,19 @@ class Field:
     @classmethod
     def from_string(cls, package: str, line: str) -> "Optional[Field]":
         """
+        Produce a field from a string, checking first if it is a valid field, otherwise None.
 
         Parameters
         ----------
         package: str
             The name of the package that provides the field.
         line: str
-            The line of text containing the field
+            The line of text containing the field.
 
         Returns
         -------
         Optional[Field]
-            A Field object if the line is a constant, None otherwise
+            A Field object if the line is a constant, None otherwise.
         """
         m_field = cls.R_FIELD.match(line)
 
