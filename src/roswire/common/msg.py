@@ -58,15 +58,13 @@ class Constant:
     value: Union[str, int, float]
 
     @classmethod
-    def from_string(cls, package: str, line: str) -> "Optional[Constant]":
+    def from_string(cls, line: str) -> "Optional[Constant]":
         """
         Produce a constant from a string, checking first if it is a valid
         constant, otherwise None.
 
         Parameters
         ----------
-        package: str
-            The name of the package that provides the constant.
         line: str
             The line of text containing the constant.
 
@@ -302,7 +300,7 @@ class MsgFormat:
             if m_blank:
                 continue
 
-            constant = Constant.from_string(package, line)
+            constant = Constant.from_string(line)
             field = Field.from_string(package, line)
             if constant:
                 constants.append(constant)
