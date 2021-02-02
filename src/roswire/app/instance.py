@@ -13,7 +13,8 @@ from docker.models.images import Image as DockerImage
 from loguru import logger
 
 from ..common import TypeDatabase
-from ..common.catkin import CatkinInterface, CatkinMake, CatkinTools, CatkinMakeIsolated
+from ..common.catkin import CatkinInterface, CatkinMake, \
+    CatkinTools, CatkinMakeIsolated
 from ..ros1 import ROS1
 from ..ros2 import ROS2
 
@@ -127,7 +128,7 @@ class AppInstance:
         )
 
     def catkin_make_isolated(self, directory: str) -> CatkinMakeIsolated:
-        """Returns an interface to a catkin_make workspace.
+        """Returns an interface to a catkin_make_isolated workspace.
 
         Parameters
         ----------
@@ -142,7 +143,6 @@ class AppInstance:
         return CatkinMakeIsolated(
             shell=self.shell, directory=directory, files=self.files
         )
-
 
     def ros1(self, port: int = 11311) -> ROS1:
         """Provides access to ROS1 inside this application instance.

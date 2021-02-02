@@ -84,7 +84,8 @@ class CatkinInterface(abc.ABC):
             if removing directories fail.
         """
         files = self._files
-        for rm_directory in ["build", "devel", "install"]:
+        for rm_directory in ["build", "devel", "install",
+                             "build_isolated", "devel_isolated"]:
             path = os.path.join(self.directory, rm_directory)
             if files.exists(path):
                 try:
@@ -259,7 +260,8 @@ class CatkinMake(CatkinInterface):
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
 class CatkinMakeIsolated(CatkinMake):
-    """Provides an interface to a catkin workspace created via catkin_make_isolated."""
+    """Provides an interface to a catkin workspace
+    created via catkin_make_isolated."""
 
     directory: str
     _shell: dockerblade.shell.Shell
@@ -282,7 +284,7 @@ class CatkinMakeIsolated(CatkinMake):
             if self._files.exists(path):
                 try:
                     command = f"rm -r {path}"
-                    self._shell.check_output(command, text=True, cwd=context)
+                    shell.check_output(command, text=True, cwd=context)
                 except dockerblade.exceptions.CalledProcessError as err:
                     msg = (
                         f'Failed to remove directory "{path}" '
@@ -290,8 +292,6 @@ class CatkinMakeIsolated(CatkinMake):
                     )
                     logger.error(msg)
                     raise CatkinException(msg)
-
-
 
         for directory in ['build_isolated', 'devel_isolated']:
             if packages:
