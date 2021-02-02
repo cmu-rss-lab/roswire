@@ -38,6 +38,7 @@ class FormatDatabase(ABC, Generic[MF, SF, AF]):
     @classmethod
     @abstractmethod
     def build(cls, db: PackageDatabase) -> "FormatDatabase":
+        """Constructs a format database from a given package database."""
         ...
 
     @property
@@ -70,8 +71,10 @@ class FormatDatabase(ABC, Generic[MF, SF, AF]):
 
     @classmethod
     def from_dict(cls, d: Dict[str, Any]) -> "FormatDatabase":
+        """Loads a format database from a JSON document."""
         ...
 
     @classmethod
     def load(cls, fn: str) -> "FormatDatabase":
+        """Loads a format database from a given file on disk."""
         ...
