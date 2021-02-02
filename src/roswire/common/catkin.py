@@ -254,3 +254,92 @@ class CatkinMake(CatkinInterface):
         if result.returncode != 0:
             assert isinstance(result.output, str)
             raise CatkinBuildFailed(result.returncode, result.output)
+
+
+@attr.s(frozen=True, slots=True, auto_attribs=True)
+class CatkinMakeIsolated(CatkinInterface):
+    """Provides an interface to a catkin workspace created via catkin_make_isolated."""
+
+    directory: str
+    _shell: dockerblade.shell.Shell
+    _files: dockerblade.files.FileSystem
+
+    def clean(
+        self,
+        packages: Optional[List[str]] = None,
+        orphans: bool = False,
+        context: Optional[str] = None,
+    ) -> None:
+        shell = self._shell
+        if orphans:
+            raise NotImplementedError
+        if not context:
+            context = self.directory
+
+        def rm_path(path):
+            if self._files.exists(path):
+                try:
+                    command = f"rm -r {path}"
+                    self._shell.check_output(command, text=True, cwd=context)
+                except dockerblade.exceptions.CalledProcessError as err:
+                    msg = (
+                        f'Failed to remove directory "{path}" '
+                        f"due to {err}"
+                    )
+                    logger.error(msg)
+                    raise CatkinException(msg)
+
+
+
+        for directory in ['build_isolated', 'devel_isolated']:
+            if packages:
+                for p in packages:
+                    path = os.path.join(directory, p)
+                    rm_path(path)
+            else:
+                rm_path(directory)
+
+        logger.debug("clean completed")
+
+
+    def build(
+        self,
+        packages: Optional[List[str]] = None,
+        no_deps: bool = False,
+        pre_clean: bool = False,
+        jobs: Optional[int] = None,
+        cmake_args: Optional[List[str]] = None,
+        make_args: Optional[List[str]] = None,
+        context: Optional[str] = None,
+        time_limit: Optional[int] = None,
+    ) -> None:
+        command = ["catkin_make_isolated"]
+        if packages:
+            command += ["--pkg"]
+            command += [shlex.quote(p) for p in packages]
+        if no_deps:
+            raise NotImplementedError
+        if pre_clean:
+            raise NotImplementedError
+        if cmake_args:
+            command += cmake_args
+        if make_args:
+            command += ["--make-args"]
+            command += make_args
+        if not context:
+            context = self.directory
+
+        command_str = " ".join(command)
+        logger.debug(f"building via: {command_str}")
+        result = self._shell.run(
+            command_str, cwd=context, time_limit=time_limit, text=True
+        )
+        duration_mins = result.duration / 60
+        logger.debug(
+            f"build completed after {duration_mins:.2f} minutes "
+            "[retcode: {result.returncode}]:\n{result.output}"
+        )
+
+        if result.returncode != 0:
+            assert isinstance(result.output, str)
+            raise CatkinBuildFailed(result.returncode, result.output)
