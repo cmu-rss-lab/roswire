@@ -183,6 +183,7 @@ class CatkinMake(CatkinInterface):
     directory: str
     _shell: dockerblade.shell.Shell
     _files: dockerblade.files.FileSystem
+    _command: str = "catkin_make"
 
     def clean(
         self,
@@ -191,7 +192,7 @@ class CatkinMake(CatkinInterface):
         context: Optional[str] = None,
     ) -> None:
         shell = self._shell
-        command = ["catkin_make", "clean"]
+        command = [self._command, "clean"]
         if orphans:
             raise NotImplementedError
         if packages:
@@ -224,7 +225,7 @@ class CatkinMake(CatkinInterface):
         context: Optional[str] = None,
         time_limit: Optional[int] = None,
     ) -> None:
-        command = ["catkin_make"]
+        command = [self._command]
         if packages:
             command += ["--pkg"]
             command += [shlex.quote(p) for p in packages]
@@ -257,12 +258,13 @@ class CatkinMake(CatkinInterface):
 
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
-class CatkinMakeIsolated(CatkinInterface):
+class CatkinMakeIsolated(CatkinMake):
     """Provides an interface to a catkin workspace created via catkin_make_isolated."""
 
     directory: str
     _shell: dockerblade.shell.Shell
     _files: dockerblade.files.FileSystem
+    _command: str = "catkin_make_isolated"
 
     def clean(
         self,
@@ -300,46 +302,3 @@ class CatkinMakeIsolated(CatkinInterface):
                 rm_path(directory)
 
         logger.debug("clean completed")
-
-
-    def build(
-        self,
-        packages: Optional[List[str]] = None,
-        no_deps: bool = False,
-        pre_clean: bool = False,
-        jobs: Optional[int] = None,
-        cmake_args: Optional[List[str]] = None,
-        make_args: Optional[List[str]] = None,
-        context: Optional[str] = None,
-        time_limit: Optional[int] = None,
-    ) -> None:
-        command = ["catkin_make_isolated"]
-        if packages:
-            command += ["--pkg"]
-            command += [shlex.quote(p) for p in packages]
-        if no_deps:
-            raise NotImplementedError
-        if pre_clean:
-            raise NotImplementedError
-        if cmake_args:
-            command += cmake_args
-        if make_args:
-            command += ["--make-args"]
-            command += make_args
-        if not context:
-            context = self.directory
-
-        command_str = " ".join(command)
-        logger.debug(f"building via: {command_str}")
-        result = self._shell.run(
-            command_str, cwd=context, time_limit=time_limit, text=True
-        )
-        duration_mins = result.duration / 60
-        logger.debug(
-            f"build completed after {duration_mins:.2f} minutes "
-            "[retcode: {result.returncode}]:\n{result.output}"
-        )
-
-        if result.returncode != 0:
-            assert isinstance(result.output, str)
-            raise CatkinBuildFailed(result.returncode, result.output)
