@@ -4,43 +4,13 @@ __all__ = ("ROS1ActionFormat",)
 import os
 from typing import Any, Dict, List, Optional
 
-import attr
 import dockerblade
 
 from .. import exceptions
 from ..common import ActionFormat, MsgFormat
 
 
-@attr.s(frozen=True, auto_attribs=True, slots=True)
 class ROS1ActionFormat(ActionFormat[MsgFormat]):
-    """Provides an immutable definition of a
-    `ROS Action <https://www.christimperley.co.uk/roswire/>`_.
-
-    Attributes
-    ----------
-    package: str
-        The name of the package to which this action belongs.
-    name: str
-        The name of this action.
-    definition: str
-        The plaintext definition of this action (e.g., the contents of a
-        .action file).
-    goal: MsgFormat
-        The definition of the goal message for this action.
-    feedback: Optional[MsgFormat]
-        The definition of the optional feedback message for this action, if
-        it has one.
-    result: Optional[MsgFormat]
-        The definition of the optional result message for this action, if
-        it has one.
-    """
-
-    package: str
-    name: str
-    definition: str
-    goal: MsgFormat
-    feedback: Optional[MsgFormat]
-    result: Optional[MsgFormat]
 
     @classmethod
     def from_file(
@@ -128,15 +98,17 @@ class ROS1ActionFormat(ActionFormat[MsgFormat]):
 
         return ROS1ActionFormat(package, name, definition, goal, feed, res)
 
-    def to_dict(self) -> Dict[str, Any]:
-        d = {
-            "package": self.package,
-            "name": self.name,
-            "definition": self.definition,
-            "goal": self.goal.to_dict(),
-        }
-        if self.feedback:
-            d["feedback"] = self.feedback.to_dict()
-        if self.result:
-            d["result"] = self.result.to_dict()
-        return d
+    def __init__(self,
+                 package: str,
+                 name: str,
+                 definition: str,
+                 goal: MsgFormat,
+                 feedback: Optional[MsgFormat],
+                 result: Optional[MsgFormat]
+                 ):
+        self.package = package
+        self.name = name
+        self.definition = definition
+        self.goal = goal
+        self.feeback = feedback
+        self.result = result
