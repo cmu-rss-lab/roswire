@@ -11,7 +11,9 @@ from ..common import (
 )
 
 
-class ROS2FormatDatabase(FormatDatabase[MsgFormat, SrvFormat, ROS2ActionFormat]):
+class ROS2FormatDatabase(FormatDatabase[MsgFormat,
+                                        SrvFormat,
+                                        ROS2ActionFormat]):
 
     @classmethod
     def build(cls,

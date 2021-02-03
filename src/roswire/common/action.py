@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__ = ("ActionFormat",)
 
+import os
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Generic, Optional, TypeVar
 
@@ -42,9 +43,8 @@ class ActionFormat(ABC, Generic[MF]):
     result: Optional[MF]
 
     @classmethod
-    @abstractmethod
     def from_file(
-        cls, package: str, filename: str, files: dockerblade.FileSystem
+            cls, package: str, filename: str, files: dockerblade.FileSystem
     ) -> "ActionFormat":
         """Constructs an action format from a .action file for a given package.
 
@@ -62,7 +62,12 @@ class ActionFormat(ABC, Generic[MF]):
         FileNotFoundError
             If the given file cannot be found.
         """
-        ...
+        assert filename.endswith(
+            ".action"
+        ), "action format files must end in .action"
+        name: str = os.path.basename(filename[:-7])
+        contents: str = files.read(filename)
+        return cls.from_string(package, name, contents)
 
     @classmethod
     @abstractmethod
@@ -80,13 +85,22 @@ class ActionFormat(ABC, Generic[MF]):
     @classmethod
     @abstractmethod
     def from_dict(
-        cls, d: Dict[str, Any], *, package: Optional[str] = None
+            cls, d: Dict[str, Any], *, package: Optional[str] = None
     ) -> "ActionFormat":
         ...
 
-    @abstractmethod
     def to_dict(self) -> Dict[str, Any]:
-        ...
+        d = {
+            "package": self.package,
+            "name": self.name,
+            "definition": self.definition,
+            "goal": self.goal.to_dict(),
+        }
+        if self.feedback:
+            d["feedback"] = self.feedback.to_dict()
+        if self.result:
+            d["result"] = self.result.to_dict()
+        return d
 
     @property
     def fullname(self) -> str:
