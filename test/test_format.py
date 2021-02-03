@@ -412,7 +412,7 @@ def test_msg_from_file(filesystem):
 def test_build_format_database(sut):
     paths = ["/opt/ros/melodic/share/tf2_msgs", "/opt/ros/melodic/share/tf"]
     db_package = ROS1PackageDatabase.build(sut, paths)
-    db_format = ROS1FormatDatabase.build(db_package)
+    db_format = ROS1FormatDatabase.from_packages(db_package)
     name_messages: Set[str] = set(db_format.messages)
     name_services: Set[str] = set(db_format.services)
     name_actions: Set[str] = set(db_format.actions)
@@ -444,7 +444,7 @@ def test_msg_toposort(sut):
     ]
 
     db_package = ROS1PackageDatabase.build(sut, paths)
-    db_format = ROS1FormatDatabase.build(db_package)
+    db_format = ROS1FormatDatabase.from_packages(db_package)
 
     msgs = db_format.messages.values()
     msgs = MsgFormat.toposort(msgs)

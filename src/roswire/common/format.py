@@ -2,7 +2,8 @@
 __all__ = ("FormatDatabase",)
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Generic, Mapping, TypeVar
+from types import MappingProxyType
+from typing import Any, Dict, Generic, Mapping, Set, TypeVar
 
 import yaml
 
@@ -10,7 +11,6 @@ from .action import ActionFormat
 from .msg import MsgFormat
 from .package import PackageDatabase
 from .srv import SrvFormat
-
 
 MF = TypeVar("MF", bound=MsgFormat)
 SF = TypeVar("SF", bound=SrvFormat)
@@ -36,25 +36,71 @@ class FormatDatabase(ABC, Generic[MF, SF, AF]):
     """
 
     @classmethod
-    @abstractmethod
-    def build(cls, db: PackageDatabase) -> "FormatDatabase":
+    def from_packages(cls,
+                      db: PackageDatabase
+                      ) -> "FormatDatabase[MF, SF, AF]":
         """Constructs a format database from a given package database."""
+        messages: Set[MF] = set()
+        services: Set[SF] = set()
+        actions: Set[AF] = set()
+
+        for package in db.values():
+            messages.update(package.messages)
+            services.update(package.services)
+            actions.update(package.actions)
+
+            for service in package.services:
+                if service.request:
+                    messages.add(service.request)
+                if service.response:
+                    messages.add(service.response)
+
+            for action in package.actions:
+                if action.goal:
+                    messages.add(action.goal)
+                if action.result:
+                    messages.add(action.result)
+                if action.feedback:
+                    messages.add(action.feedback)
+
+        return cls(messages, services, actions)
+
+    @classmethod
+    @abstractmethod
+    def build(cls,
+              messages: Set[MF],
+              services: Set[SF],
+              actions: Set[AF]
+              ) -> "FormatDatabase":
         ...
 
+    def __init__(
+            self,
+            messages: Set[MF],
+            services: Set[SF],
+            actions: Set[AF],
+    ) -> None:
+        self.__messages: Mapping[str, MF] = MappingProxyType(
+            {f.fullname: f for f in messages}
+        )
+        self.__services: Mapping[str, SF] = MappingProxyType(
+            {f.fullname: f for f in services}
+        )
+        self.__actions: Mapping[str, AF] = MappingProxyType(
+            {f.fullname: f for f in actions}
+        )
+
     @property
-    @abstractmethod
     def messages(self) -> Mapping[str, MF]:
-        ...
+        return self.__messages
 
     @property
-    @abstractmethod
     def services(self) -> Mapping[str, SF]:
-        ...
+        return self.__services
 
     @property
-    @abstractmethod
     def actions(self) -> Mapping[str, AF]:
-        ...
+        return self.__actions
 
     def to_dict(self) -> Dict[str, Any]:
         """Returns a JSON description of this database."""
@@ -77,4 +123,5 @@ class FormatDatabase(ABC, Generic[MF, SF, AF]):
     @classmethod
     def load(cls, fn: str) -> "FormatDatabase":
         """Loads a format database from a given file on disk."""
-        ...
+        with open(fn, "r") as f:
+            return cls.from_dict(yaml.safe_load(f))

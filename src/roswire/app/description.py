@@ -56,10 +56,10 @@ class AppDescription:
         formats: FormatDatabase
         if distribution.ros == ROSVersion.ROS1:
             packages = ROS1PackageDatabase.from_dict(d["packages"])
-            formats = ROS1FormatDatabase.build(packages)
+            formats = ROS1FormatDatabase.from_packages(packages)
         else:
             packages = ROS2PackageDatabase.from_dict(d["packages"])
-            formats = ROS2FormatDatabase.build(packages)
+            formats = ROS2FormatDatabase.from_packages(packages)
         types = TypeDatabase.build(formats)
         return AppDescription(
             app=app,
@@ -131,10 +131,10 @@ class AppDescription:
             db_format: FormatDatabase
             if distribution.ros == ROSVersion.ROS1:
                 db_package = ROS1PackageDatabase.build(app_instance)
-                db_format = ROS1FormatDatabase.build(db_package)
+                db_format = ROS1FormatDatabase.from_packages(db_package)
             else:
                 db_package = ROS2PackageDatabase.build(app_instance)
-                db_format = ROS2FormatDatabase.build(db_package)
+                db_format = ROS2FormatDatabase.from_packages(db_package)
         db_type = TypeDatabase.build(db_format)
         return AppDescription(
             app=app,

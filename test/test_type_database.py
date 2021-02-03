@@ -22,7 +22,7 @@ def test_build(sut):
     ]
     db_package = ROS1PackageDatabase.build(sut, paths)
 
-    db_format = ROS1FormatDatabase.build(db_package)
+    db_format = ROS1FormatDatabase.from_packages(db_package)
     db_type = TypeDatabase.build(db_format)
     assert set(db_type) == {
         "geometry_msgs/Point",
