@@ -260,8 +260,10 @@ class CatkinMake(CatkinInterface):
 
 @attr.s(frozen=True, slots=True, auto_attribs=True)
 class CatkinMakeIsolated(CatkinMake):
-    """Provides an interface to a catkin workspace
-    created via catkin_make_isolated."""
+    """
+    Provides an interface to a catkin workspace
+    created via catkin_make_isolated.
+    """
 
     directory: str
     _shell: dockerblade.shell.Shell
