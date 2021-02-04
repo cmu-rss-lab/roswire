@@ -66,10 +66,10 @@ class FormatDatabase(ABC, Generic[MF, SF, AF]):
         return cls(messages, services, actions)
 
     def __init__(
-            self,
-            messages: Set[MF],
-            services: Set[SF],
-            actions: Set[AF],
+        self,
+        messages: Set[MF],
+        services: Set[SF],
+        actions: Set[AF],
     ) -> None:
         self.__messages: Mapping[str, MF] = MappingProxyType(
             {f.fullname: f for f in messages}
