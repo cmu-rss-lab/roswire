@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__ = ("ROS2FormatDatabase",)
 
-from typing import Any, Dict, Set
+from typing import Any, Dict
 
 from ..common import (
     ActionFormat,
@@ -12,14 +12,6 @@ from ..common import (
 
 
 class ROS2FormatDatabase(FormatDatabase[MsgFormat, SrvFormat, ActionFormat]):
-
-    @classmethod
-    def build(cls,
-              messages: Set[MsgFormat],
-              services: Set[SrvFormat],
-              actions: Set[ActionFormat]
-              ) -> "FormatDatabase":
-        return ROS2FormatDatabase(messages, services, actions)
 
     @classmethod
     def from_dict(cls, d: Dict[str, Any]) -> "FormatDatabase":

@@ -65,15 +65,6 @@ class FormatDatabase(ABC, Generic[MF, SF, AF]):
 
         return cls(messages, services, actions)
 
-    @classmethod
-    @abstractmethod
-    def build(cls,
-              messages: Set[MF],
-              services: Set[SF],
-              actions: Set[AF]
-              ) -> "FormatDatabase":
-        ...
-
     def __init__(
             self,
             messages: Set[MF],
@@ -116,6 +107,7 @@ class FormatDatabase(ABC, Generic[MF, SF, AF]):
             yaml.dump(self.to_dict(), f, default_flow_style=False)
 
     @classmethod
+    @abstractmethod
     def from_dict(cls, d: Dict[str, Any]) -> "FormatDatabase":
         """Loads a format database from a JSON document."""
         ...
