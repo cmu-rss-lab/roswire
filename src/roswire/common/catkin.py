@@ -282,7 +282,7 @@ class CatkinMakeIsolated(CatkinMake):
         if not context:
             context = self.directory
 
-        def rm_path(path):
+        def rm_path(path: str) -> None:
             if self._files.exists(path):
                 try:
                     command = f"rm -r {path}"
