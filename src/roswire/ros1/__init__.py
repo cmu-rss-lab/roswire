@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from .format import ROS1FormatDatabase
 from .launch import ROS1LaunchManager
 from .node import ROS1Node
 from .node_manager import ROS1NodeManager
