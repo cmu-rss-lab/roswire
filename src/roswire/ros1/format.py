@@ -16,17 +16,9 @@ class ROS1FormatDatabase(FormatDatabase[MsgFormat,
                                         ROS1ActionFormat]):
 
     @classmethod
-    def build(cls,
-              messages: Set[MsgFormat],
-              services: Set[SrvFormat],
-              actions: Set[ROS1ActionFormat]
-              ) -> "FormatDatabase":
-        return ROS1FormatDatabase(messages, services, actions)
-
-    @classmethod
     def from_dict(cls, d: Dict[str, Any]) -> "FormatDatabase":
         """Loads a format database from a JSON document."""
         msg = {MsgFormat.from_dict(dd) for dd in d["messages"]}
         srv = {SrvFormat.from_dict(dd) for dd in d["services"]}
         action = {ROS1ActionFormat.from_dict(dd) for dd in d["actions"]}
-        return cls.build(msg, srv, action)
+        return cls(msg, srv, action)
