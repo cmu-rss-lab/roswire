@@ -51,6 +51,13 @@ class ROSLaunchController:
         """Terminates this launch process."""
         self.popen.terminate()
 
-    def close(self) -> None:
-        """Terminates this launch process."""
+    def close(self,
+              wait_to_finish: bool = False,
+              time_limit: Optional[float] = None) -> None:
+        """
+        Terminates this launch process, and optionally waits
+        until the process is terminates.
+        """
         self.terminate()
+        if wait_to_finish:
+            self.popen.wait(time_limit)
