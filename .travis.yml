@@ -17,7 +17,7 @@ install:
 # see #337: flag potential twine issues before attempting to upload to PyPI
 - python setup.py sdist
 - python setup.py bdist_wheel
-- twine check dist/*
+- CRYPTOGRAPHY_DONT_BUILD_RUST=1 twine check dist/*
 
 script:
 - tox
