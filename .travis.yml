@@ -7,6 +7,7 @@ python:
 - '3.6'
 
 install:
+- sudo apt list --installed
 - sudo apt upgrade python-pip
 - pip install -r requirements.dev.txt
 - pip install -e .
