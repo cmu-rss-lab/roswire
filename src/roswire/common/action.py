@@ -5,6 +5,7 @@ import os
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Generic, Optional, TypeVar
 
+import attr
 import dockerblade
 
 from ..common.msg import MsgFormat
@@ -12,6 +13,7 @@ from ..common.msg import MsgFormat
 MF = TypeVar("MF", bound=MsgFormat)
 
 
+@attr.s(frozen=True)
 class ActionFormat(ABC, Generic[MF]):
     """Provides an immutable definition of a
     `ROS Action <https://www.christimperley.co.uk/roswire/>`_.
@@ -35,12 +37,12 @@ class ActionFormat(ABC, Generic[MF]):
         it has one.
     """
 
-    package: str
-    name: str
-    definition: str
-    goal: MF
-    feedback: Optional[MF]
-    result: Optional[MF]
+    package: str = attr.ib()
+    name: str = attr.ib()
+    definition: str = attr.ib()
+    goal: MF = attr.ib()
+    feedback: Optional[MF] = attr.ib()
+    result: Optional[MF] = attr.ib()
 
     @classmethod
     def from_file(
