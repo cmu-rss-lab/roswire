@@ -299,7 +299,9 @@ def test_action_format_to_and_from_dict():
             fields=[Field("int64", "sum")],
         ),
     )
-    assert ROS1ActionFormat.from_dict(d) == f
+
+    f1 = ROS1ActionFormat.from_dict(d)
+    assert f1 == f
     assert ROS1ActionFormat.from_dict(f.to_dict()) == f
 
 

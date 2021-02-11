@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 __all__ = ("ROS2ActionFormat",)
 
-import os
 from typing import Any, Dict, List, Optional
 
 import dockerblade
@@ -16,41 +15,14 @@ class ROS2ActionFormat(ActionFormat[MsgFormat]):
     def from_file(
         cls, package: str, filename: str, files: dockerblade.FileSystem
     ) -> "ROS2ActionFormat":
-        """Constructs an action format from a .action file for a given package.
-
-        Parameters
-        ----------
-        package: str
-            The name of the package that provides the file.
-        filename: str
-            The path to the .msg file.
-        files: dockerblade.FileSystem
-            An interface to the filesystem that hosts the .action file.
-
-        Raises
-        ------
-        FileNotFoundError
-            If the given file cannot be found.
-        """
-        assert filename.endswith(
-            ".action"
-        ), "action format files must end in .action"
-        name: str = os.path.basename(filename[:-7])
-        contents: str = files.read(filename)
-        return ROS2ActionFormat.from_string(package, name, contents)
+        fmt = super().from_file(package, filename, files)
+        assert isinstance(fmt, ROS2ActionFormat)
+        return fmt
 
     @classmethod
     def from_string(
         cls, package: str, name: str, s: str
     ) -> "ROS2ActionFormat":
-        """Constructs an action format from its definition (i.e., the contents
-        of a .action file).
-
-        Raises
-        ------
-        ParsingError
-            If the description cannot be parsed.
-        """
         goal: MsgFormat
         feed: Optional[MsgFormat]
         res: Optional[MsgFormat]
@@ -97,18 +69,3 @@ class ROS2ActionFormat(ActionFormat[MsgFormat]):
             )
 
         return ROS2ActionFormat(package, name, definition, goal, feed, res)
-
-    def __init__(self,
-                 package: str,
-                 name: str,
-                 definition: str,
-                 goal: MsgFormat,
-                 feedback: Optional[MsgFormat],
-                 result: Optional[MsgFormat]
-                 ):
-        self.package = package
-        self.name = name
-        self.definition = definition
-        self.goal = goal
-        self.feeback = feedback
-        self.result = result

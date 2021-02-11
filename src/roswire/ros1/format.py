@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__ = ("ROS1FormatDatabase",)
 
-from typing import Any, Dict, Set
+from typing import Any, Dict
 
 from . import ROS1ActionFormat
 from ..common import (
