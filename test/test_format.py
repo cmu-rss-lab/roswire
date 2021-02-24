@@ -8,9 +8,8 @@ from roswire.common import (
     Constant,
     Field,
     MsgFormat,
-    ActionFormat,
 )
-from roswire.ros1 import ROS1PackageDatabase, ROS1FormatDatabase, ROS1SrvFormat
+from roswire.ros1 import ROS1ActionFormat, ROS1FormatDatabase, ROS1PackageDatabase, ROS1SrvFormat
 
 import dockerblade
 
@@ -123,7 +122,7 @@ uint32 total_dishes_cleaned
 float32 percent_complete
 """
 
-    fmt = ActionFormat.from_string("PkgName", "MessageName", s)
+    fmt = ROS1ActionFormat.from_string("PkgName", "MessageName", s)
     assert fmt.name == "MessageName"
     assert fmt.package == "PkgName"
 
@@ -152,7 +151,7 @@ float32 percent_complete
 def test_empty_action_from_string():
     """see #332"""
     s = "---\n---\n"
-    fmt = ActionFormat.from_string("PkgName", "MessageName", s)
+    fmt = ROS1ActionFormat.from_string("PkgName", "MessageName", s)
     assert fmt.goal is not None
     assert not fmt.goal.fields
 
@@ -279,7 +278,7 @@ def test_action_format_to_and_from_dict():
             "fields": [{"type": "int64", "name": "sum"}],
         },
     }
-    f = ActionFormat(
+    f = ROS1ActionFormat(
         package=pkg,
         name=name,
         definition=definition_action,
@@ -299,8 +298,10 @@ def test_action_format_to_and_from_dict():
             fields=[Field("int64", "sum")],
         ),
     )
-    assert ActionFormat.from_dict(d) == f
-    assert ActionFormat.from_dict(f.to_dict()) == f
+
+    f1 = ROS1ActionFormat.from_dict(d)
+    assert f1 == f
+    assert ROS1ActionFormat.from_dict(f.to_dict()) == f
 
 
 @pytest.mark.parametrize("filesystem", ["fetch"], indirect=True)
@@ -309,7 +310,7 @@ def test_action_from_file(filesystem):
     pkg = "tf2_msgs"
     pkg_dir = "/opt/ros/melodic/share/tf2_msgs"
     fn = os.path.join(pkg_dir, "action/LookupTransform.action")
-    fmt = ActionFormat.from_file(pkg, fn, filesystem)
+    fmt = ROS1ActionFormat.from_file(pkg, fn, filesystem)
     assert fmt.package == pkg
     assert fmt.name == "LookupTransform"
     assert fmt.fullname == "tf2_msgs/LookupTransform"
@@ -335,12 +336,12 @@ def test_action_from_file(filesystem):
     # attempt to read .msg file
     fn = os.path.join(pkg_dir, "msg/TFMessage.msg")
     with pytest.raises(AssertionError):
-        ActionFormat.from_file(pkg, fn, filesystem)
+        ROS1ActionFormat.from_file(pkg, fn, filesystem)
 
     # attempt to read non-existent file
     fn = os.path.join(pkg_dir, "action/Spooky.action")
     with pytest.raises(dockerblade.exceptions.ContainerFileNotFound):
-        ActionFormat.from_file(pkg, fn, filesystem)
+        ROS1ActionFormat.from_file(pkg, fn, filesystem)
 
 
 @pytest.mark.parametrize("filesystem", ["fetch"], indirect=True)

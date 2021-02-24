@@ -4,6 +4,7 @@ __all__ = ("Constant", "ConstantValue", "Field", "MsgFormat", "Message")
 import hashlib
 import os
 import re
+from abc import ABC, abstractmethod
 from io import BytesIO
 from typing import (
     Any,
@@ -11,13 +12,13 @@ from typing import (
     ClassVar,
     Collection,
     Dict,
-    Iterator,
+    Generic, Iterator,
     List,
     Mapping,
     Optional,
     Set,
     Tuple,
-    Union,
+    TypeVar, Union,
 )
 
 import attr
@@ -182,8 +183,8 @@ class Field:
     def base_typ(self) -> str:
         return self.base_type
 
-    @staticmethod
-    def from_dict(d: Dict[str, Any]) -> "Field":
+    @classmethod
+    def from_dict(cls, d: Dict[str, Any]) -> "Field":
         return Field(d["type"], d["name"])
 
     def to_dict(self) -> Dict[str, str]:
@@ -197,8 +198,11 @@ class Field:
         return f"{self.typ} {self.name}"
 
 
+F = TypeVar("F", bound=Field)
+
+
 @attr.s(frozen=True, slots=True, auto_attribs=True)
-class MsgFormat:
+class MsgFormat(ABC, Generic[F]):
     """Provides an immutable definition of a given ROS message format.
 
     Attributes
@@ -222,7 +226,7 @@ class MsgFormat:
     package: str
     name: str
     definition: str
-    fields: Tuple[Field, ...] = attr.ib(converter=tuple)
+    fields: Tuple[F, ...] = attr.ib(converter=tuple)
     constants: Tuple[Constant, ...] = attr.ib(converter=tuple)
 
     @staticmethod
@@ -245,9 +249,9 @@ class MsgFormat:
             raise exc.PackageNotFound(missing_package_name)
         return [fn_to_fmt[filename] for filename in toposorted]
 
-    @staticmethod
+    @classmethod
     def from_file(
-        package: str, filename: str, files: dockerblade.FileSystem
+        cls, package: str, filename: str, files: dockerblade.FileSystem
     ) -> "MsgFormat":
         """Constructs a message format from a .msg file for a given package.
 
@@ -270,10 +274,10 @@ class MsgFormat:
         ), "message format files must end in .msg"
         name: str = os.path.basename(filename[:-4])
         contents: str = files.read(filename)
-        return MsgFormat.from_string(package, name, contents)
+        return cls.from_string(package, name, contents)
 
-    @staticmethod
-    def from_string(package: str, name: str, text: str) -> "MsgFormat":
+    @classmethod
+    def from_string(cls, package: str, name: str, text: str) -> "MsgFormat":
         """Constructs a message format from its description.
 
         Parameters
@@ -292,7 +296,7 @@ class MsgFormat:
         """
         typ: str
         name_const: str
-        fields: List[Field] = []
+        fields: List[F] = []
         constants: List[Constant] = []
 
         for line in text.split("\n"):
@@ -301,7 +305,7 @@ class MsgFormat:
                 continue
 
             constant = Constant.from_string(line)
-            field = Field.from_string(package, line)
+            field = cls._field_from_string(package, line)
             if constant:
                 constants.append(constant)
             elif field:
@@ -309,10 +313,21 @@ class MsgFormat:
             else:
                 raise exc.ParsingError(f"failed to parse line: {line}")
 
-        return MsgFormat(package, name, text, fields, constants)  # type: ignore  # noqa
+        return cls(package, name, text, fields, constants)  # type: ignore  # noqa
 
-    @staticmethod
+    @classmethod
+    @abstractmethod
+    def _field_from_string(cls, package: str, line: str) -> Optional[F]:
+        ...
+
+    @classmethod
+    @abstractmethod
+    def _field_from_dict(cls, dict: Dict[str, Any]) -> F:
+        ...
+
+    @classmethod
     def from_dict(
+        cls,
         d: Dict[str, Any],
         *,
         package: Optional[str] = None,
@@ -323,9 +338,9 @@ class MsgFormat:
         if not name:
             name = d["name"]
         definition = d["definition"]
-        fields = [Field.from_dict(dd) for dd in d.get("fields", [])]
+        fields = [cls._field_from_dict(dd) for dd in d.get("fields", [])]
         constants = [Constant.from_dict(dd) for dd in d.get("constants", [])]
-        return MsgFormat(package, name, definition, fields, constants)  # type: ignore  # noqa
+        return cls(package, name, definition, fields, constants)  # type: ignore  # noqa
 
     def to_dict(self) -> Dict[str, Any]:
         d: Dict[str, Any] = {
