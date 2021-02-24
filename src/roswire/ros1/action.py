@@ -23,9 +23,9 @@ class ROS1ActionFormat(ActionFormat[MsgFormat]):
     def from_string(
         cls, package: str, name: str, s: str
     ) -> "ROS1ActionFormat":
-        goal: ROS1MsgFormat
-        feed: Optional[ROS1MsgFormat]
-        res: Optional[ROS1MsgFormat]
+        goal: MsgFormat
+        feed: Optional[MsgFormat]
+        res: Optional[MsgFormat]
 
         name_goal = f"{name}Goal"
         name_feed = f"{name}Feedback"
@@ -40,7 +40,7 @@ class ROS1ActionFormat(ActionFormat[MsgFormat]):
 
         goal = MsgFormat.from_string(package, name_goal, s_goal)
         feed = MsgFormat.from_string(package, name_feed, s_feed)
-        res = ROS1MsgFormat.from_string(package, name_res, s_res)
+        res = MsgFormat.from_string(package, name_res, s_res)
         return ROS1ActionFormat(package, name, s, goal, feed, res)
 
     @classmethod
@@ -53,18 +53,18 @@ class ROS1ActionFormat(ActionFormat[MsgFormat]):
             assert d["package"] is not None
             package = d["package"]
 
-        res: Optional[ROS1MsgFormat] = None
-        feed: Optional[ROS1MsgFormat] = None
-        goal: MsgFormat = ROS1MsgFormat.from_dict(
+        res: Optional[MsgFormat] = None
+        feed: Optional[MsgFormat] = None
+        goal: MsgFormat = MsgFormat.from_dict(
             d["goal"], package=package, name=f"{name}Goal"
         )
 
         if "result" in d:
-            res = ROS1MsgFormat.from_dict(
+            res = MsgFormat.from_dict(
                 d["result"], package=package, name=f"{name}Result"
             )
         if "feedback" in d:
-            feed = ROS1MsgFormat.from_dict(
+            feed = MsgFormat.from_dict(
                 d["feedback"], package=package, name=f"{name}Feedback"
             )
 
