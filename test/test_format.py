@@ -7,9 +7,9 @@ import os
 from roswire.common import (
     Constant,
     Field,
-    MsgFormat,
+    MsgFormat,,
 )
-from roswire.ros1 import ROS1ActionFormat, ROS1FormatDatabase, ROS1PackageDatabase, ROS1SrvFormat
+from roswire.ros1 import ROS1ActionFormat, ROS1PackageDatabase, ROS1FormatDatabase, ROS1SrvFormat
 
 import dockerblade
 

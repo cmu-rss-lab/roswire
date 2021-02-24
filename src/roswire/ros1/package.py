@@ -23,8 +23,10 @@ class ROS1Package(Package[MsgFormat, ROS1SrvFormat, ROS1ActionFormat]):
     name: str
     path: str
     messages: Collection[MsgFormat] = attr.ib(converter=tuple_from_iterable)
-    services: Collection[ROS1SrvFormat] = attr.ib(converter=tuple_from_iterable)
-    actions: Collection[ROS1ActionFormat] = attr.ib(converter=tuple_from_iterable)
+    services: Collection[ROS1SrvFormat] = \
+        attr.ib(converter=tuple_from_iterable)
+    actions: Collection[ROS1ActionFormat] = \
+        attr.ib(converter=tuple_from_iterable)
 
     @classmethod
     def build(cls, path: str, app_instance: "AppInstance") -> "ROS1Package":
