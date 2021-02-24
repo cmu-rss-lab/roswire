@@ -46,7 +46,7 @@ class ActionFormat(ABC, Generic[MF]):
 
     @classmethod
     def from_file(
-            cls, package: str, filename: str, files: dockerblade.FileSystem
+        cls, package: str, filename: str, files: dockerblade.FileSystem
     ) -> "ActionFormat":
         """Constructs an action format from a .action file for a given package.
 
@@ -87,7 +87,7 @@ class ActionFormat(ABC, Generic[MF]):
     @classmethod
     @abstractmethod
     def from_dict(
-            cls, d: Dict[str, Any], *, package: Optional[str] = None
+        cls, d: Dict[str, Any], *, package: Optional[str] = None
     ) -> "ActionFormat":
         ...
 
