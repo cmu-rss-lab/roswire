@@ -5,12 +5,11 @@ from typing import Any, Dict, List, Optional
 
 import dockerblade
 
-from . import ROS1MsgFormat
 from .. import exceptions
-from ..common import ActionFormat
+from ..common import ActionFormat, MsgFormat
 
 
-class ROS1ActionFormat(ActionFormat[ROS1MsgFormat]):
+class ROS1ActionFormat(ActionFormat[MsgFormat]):
 
     @classmethod
     def from_file(
@@ -39,8 +38,8 @@ class ROS1ActionFormat(ActionFormat[ROS1MsgFormat]):
             m = "failed to parse action description: expected three sections."
             raise exceptions.ParsingError(m)
 
-        goal = ROS1MsgFormat.from_string(package, name_goal, s_goal)
-        feed = ROS1MsgFormat.from_string(package, name_feed, s_feed)
+        goal = MsgFormat.from_string(package, name_goal, s_goal)
+        feed = MsgFormat.from_string(package, name_feed, s_feed)
         res = ROS1MsgFormat.from_string(package, name_res, s_res)
         return ROS1ActionFormat(package, name, s, goal, feed, res)
 
@@ -56,7 +55,7 @@ class ROS1ActionFormat(ActionFormat[ROS1MsgFormat]):
 
         res: Optional[ROS1MsgFormat] = None
         feed: Optional[ROS1MsgFormat] = None
-        goal: ROS1MsgFormat = ROS1MsgFormat.from_dict(
+        goal: MsgFormat = ROS1MsgFormat.from_dict(
             d["goal"], package=package, name=f"{name}Goal"
         )
 
