@@ -4,7 +4,6 @@ __all__ = ("Constant", "ConstantValue", "Field", "MsgFormat", "Message")
 import hashlib
 import os
 import re
-from abc import ABC, abstractmethod
 from io import BytesIO
 from typing import (
     Any,
@@ -12,13 +11,13 @@ from typing import (
     ClassVar,
     Collection,
     Dict,
-    Generic, Iterator,
+    Iterator,
     List,
     Mapping,
     Optional,
     Set,
     Tuple,
-    TypeVar, Union,
+    Union,
 )
 
 import attr
@@ -183,8 +182,8 @@ class Field:
     def base_typ(self) -> str:
         return self.base_type
 
-    @classmethod
-    def from_dict(cls, d: Dict[str, Any]) -> "Field":
+    @staticmethod
+    def from_dict(d: Dict[str, Any]) -> "Field":
         return Field(d["type"], d["name"])
 
     def to_dict(self) -> Dict[str, str]:
@@ -198,11 +197,8 @@ class Field:
         return f"{self.typ} {self.name}"
 
 
-F = TypeVar("F", bound=Field)
-
-
 @attr.s(frozen=True, slots=True, auto_attribs=True)
-class MsgFormat(ABC, Generic[F]):
+class MsgFormat:
     """Provides an immutable definition of a given ROS message format.
 
     Attributes
@@ -226,7 +222,7 @@ class MsgFormat(ABC, Generic[F]):
     package: str
     name: str
     definition: str
-    fields: Tuple[F, ...] = attr.ib(converter=tuple)
+    fields: Tuple[Field, ...] = attr.ib(converter=tuple)
     constants: Tuple[Constant, ...] = attr.ib(converter=tuple)
 
     @staticmethod
@@ -249,9 +245,9 @@ class MsgFormat(ABC, Generic[F]):
             raise exc.PackageNotFound(missing_package_name)
         return [fn_to_fmt[filename] for filename in toposorted]
 
-    @classmethod
+    @staticmethod
     def from_file(
-        cls, package: str, filename: str, files: dockerblade.FileSystem
+        package: str, filename: str, files: dockerblade.FileSystem
     ) -> "MsgFormat":
         """Constructs a message format from a .msg file for a given package.
 
@@ -274,10 +270,10 @@ class MsgFormat(ABC, Generic[F]):
         ), "message format files must end in .msg"
         name: str = os.path.basename(filename[:-4])
         contents: str = files.read(filename)
-        return cls.from_string(package, name, contents)
+        return MsgFormat.from_string(package, name, contents)
 
-    @classmethod
-    def from_string(cls, package: str, name: str, text: str) -> "MsgFormat":
+    @staticmethod
+    def from_string(package: str, name: str, text: str) -> "MsgFormat":
         """Constructs a message format from its description.
 
         Parameters
@@ -296,7 +292,7 @@ class MsgFormat(ABC, Generic[F]):
         """
         typ: str
         name_const: str
-        fields: List[F] = []
+        fields: List[Field] = []
         constants: List[Constant] = []
 
         for line in text.split("\n"):
@@ -305,7 +301,7 @@ class MsgFormat(ABC, Generic[F]):
                 continue
 
             constant = Constant.from_string(line)
-            field = cls._field_from_string(package, line)
+            field = Field.from_string(package, line)
             if constant:
                 constants.append(constant)
             elif field:
@@ -313,21 +309,10 @@ class MsgFormat(ABC, Generic[F]):
             else:
                 raise exc.ParsingError(f"failed to parse line: {line}")
 
-        return cls(package, name, text, fields, constants)  # type: ignore  # noqa
+        return MsgFormat(package, name, text, fields, constants)  # type: ignore  # noqa
 
-    @classmethod
-    @abstractmethod
-    def _field_from_string(cls, package: str, line: str) -> Optional[F]:
-        ...
-
-    @classmethod
-    @abstractmethod
-    def _field_from_dict(cls, dict: Dict[str, Any]) -> F:
-        ...
-
-    @classmethod
+    @staticmethod
     def from_dict(
-        cls,
         d: Dict[str, Any],
         *,
         package: Optional[str] = None,
@@ -338,9 +323,9 @@ class MsgFormat(ABC, Generic[F]):
         if not name:
             name = d["name"]
         definition = d["definition"]
-        fields = [cls._field_from_dict(dd) for dd in d.get("fields", [])]
+        fields = [Field.from_dict(dd) for dd in d.get("fields", [])]
         constants = [Constant.from_dict(dd) for dd in d.get("constants", [])]
-        return cls(package, name, definition, fields, constants)  # type: ignore  # noqa
+        return MsgFormat(package, name, definition, fields, constants)  # type: ignore  # noqa
 
     def to_dict(self) -> Dict[str, Any]:
         d: Dict[str, Any] = {
