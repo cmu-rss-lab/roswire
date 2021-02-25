@@ -18,7 +18,7 @@ class ROS2FormatDatabase(FormatDatabase[MsgFormat,
     @classmethod
     def from_dict(cls, d: Dict[str, Any]) -> "FormatDatabase":
         """Loads a format database from a JSON document."""
-        msg= {MsgFormat.from_dict(dd) for dd in d["messages"]}
+        msg = {MsgFormat.from_dict(dd) for dd in d["messages"]}
         srv = {SrvFormat.from_dict(dd) for dd in d["services"]}
         action = {ROS2ActionFormat.from_dict(dd) for dd in d["actions"]}
         return ROS2FormatDatabase(msg, srv, action)
