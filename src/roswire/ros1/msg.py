@@ -10,7 +10,7 @@ from ..common import Field, MsgFormat
 
 
 @attr.s(frozen=True)
-class ROS1MsgFormat(MsgFormat[Field]):
+class ROS1MsgFormat(MsgFormat):
 
     @classmethod
     def _field_from_string(cls, package: str, line: str) -> Optional[Field]:
