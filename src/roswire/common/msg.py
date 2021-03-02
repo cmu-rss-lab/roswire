@@ -140,21 +140,25 @@ class Field:
         if m_field:
             typ, name_field = m_field.group(1, 2)
 
-            # resolve the type of the field
-            typ_resolved = typ
-            base_typ = typ.partition("[")[0]
-            if typ == "Header":
-                typ_resolved = "std_msgs/Header"
-            elif "/" not in typ and not is_builtin(base_typ):
-                typ_resolved = f"{package}/{typ}"
-
-            if typ != typ_resolved:
-                logger.debug(f"resolved type [{typ}]: {typ_resolved}")
-                typ = typ_resolved
+            typ = cls._resolve_type(package, typ)
 
             field: Field = Field(typ, name_field)
             return field
         return None
+
+    @classmethod
+    def _resolve_type(cls, package, typ):
+        # resolve the type of the field
+        typ_resolved = typ
+        base_typ = typ.partition("[")[0]
+        if typ == "Header":
+            typ_resolved = "std_msgs/Header"
+        elif "/" not in typ and not is_builtin(base_typ):
+            typ_resolved = f"{package}/{typ}"
+        if typ != typ_resolved:
+            logger.debug(f"resolved type [{typ}]: {typ_resolved}")
+            typ = typ_resolved
+        return typ
 
     @property
     def is_array(self) -> bool:
