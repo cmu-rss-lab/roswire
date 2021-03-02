@@ -11,7 +11,6 @@ from ..common import (
 )
 
 
-
 class ROS2FormatDatabase(FormatDatabase[MsgFormat,
                                         SrvFormat,
                                         ROS2ActionFormat]):
