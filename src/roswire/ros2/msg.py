@@ -54,7 +54,7 @@ class ROS2Field(Field):
 
 
 @attr.s(frozen=True)
-class ROS2MsgFormat(MsgFormat[ROS2Field]):
+class ROS2MsgFormat(MsgFormat):
 
     @classmethod
     def _field_from_dict(cls, dict: Dict[str, Any]) -> ROS2Field:
