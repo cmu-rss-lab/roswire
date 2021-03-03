@@ -8,9 +8,8 @@ from roswire.common import (
     Constant,
     Field,
     MsgFormat,
-    SrvFormat,
 )
-from roswire.ros1 import ROS1ActionFormat, ROS1PackageDatabase, ROS1FormatDatabase
+from roswire.ros1 import ROS1ActionFormat, ROS1PackageDatabase, ROS1FormatDatabase, ROS1SrvFormat
 
 import dockerblade
 
@@ -73,7 +72,7 @@ CustomMessageDefinedInThisPackage value
 uint32 an_integer
     """
 
-    fmt = SrvFormat.from_string("PkgName", "MessageName", s)
+    fmt = ROS1SrvFormat.from_string("PkgName", "MessageName", s)
     assert fmt.name == "MessageName"
     assert fmt.package == "PkgName"
 
@@ -106,7 +105,7 @@ uint32 an_integer
 
     # bug #269
     s = "map_msgs/ProjectedMapInfo[] projected_maps_info"
-    fmt = SrvFormat.from_string("map_msgs", "ProjectedMapsInfo", s)
+    fmt = ROS1SrvFormat.from_string("map_msgs", "ProjectedMapsInfo", s)
     assert fmt.request is not None
     assert fmt.response is None
 
@@ -226,7 +225,7 @@ def test_srv_format_to_and_from_dict():
             "fields": [{"type": "bool", "name": "success"}],
         },
     }
-    f = SrvFormat(
+    f = ROS1SrvFormat(
         package=pkg,
         name=name,
         definition=definition_service,
@@ -250,8 +249,8 @@ def test_srv_format_to_and_from_dict():
             fields=[Field("bool", "success")],
         ),
     )
-    assert SrvFormat.from_dict(d) == f
-    assert SrvFormat.from_dict(f.to_dict()) == f
+    assert ROS1SrvFormat.from_dict(d) == f
+    assert ROS1SrvFormat.from_dict(f.to_dict()) == f
 
 
 def test_action_format_to_and_from_dict():
@@ -351,7 +350,7 @@ def test_srv_from_file(filesystem):
     pkg = "nav_msgs"
     pkg_dir = "/opt/ros/melodic/share/nav_msgs"
     fn = os.path.join(pkg_dir, "srv/SetMap.srv")
-    fmt = SrvFormat.from_file(pkg, fn, filesystem)
+    fmt = ROS1SrvFormat.from_file(pkg, fn, filesystem)
     assert fmt.package == pkg
     assert fmt.name == "SetMap"
     assert fmt.fullname == "nav_msgs/SetMap"
@@ -374,12 +373,12 @@ def test_srv_from_file(filesystem):
     # attempt to read .action file
     fn = "/opt/ros/melodic/share/tf2_msgs/action/LookupTransform.action"
     with pytest.raises(AssertionError):
-        SrvFormat.from_file(pkg, fn, filesystem)
+        ROS1SrvFormat.from_file(pkg, fn, filesystem)
 
     # attempt to read non-existent file
     fn = os.path.join(pkg_dir, "srv/Spooky.srv")
     with pytest.raises(dockerblade.exceptions.ContainerFileNotFound):
-        SrvFormat.from_file(pkg, fn, filesystem)
+        ROS1SrvFormat.from_file(pkg, fn, filesystem)
 
 
 @pytest.mark.parametrize("filesystem", ["fetch"], indirect=True)
@@ -401,7 +400,7 @@ def test_msg_from_file(filesystem):
     # attempt to read .action file
     fn = os.path.join(pkg_dir, "action/LookupTransform.action")
     with pytest.raises(AssertionError):
-        SrvFormat.from_file(pkg, fn, filesystem)
+        ROS1SrvFormat.from_file(pkg, fn, filesystem)
 
     # attempt to read non-existent file
     fn = os.path.join(pkg_dir, "msg/Spooky.msg")

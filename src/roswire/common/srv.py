@@ -2,16 +2,19 @@
 __all__ = ("SrvFormat",)
 
 import os
-from typing import Any, Dict, List, Optional
+from abc import ABC, abstractmethod
+from typing import Any, Dict, Generic, Optional, TypeVar
 
 import attr
 import dockerblade
 
 from .msg import MsgFormat
 
+MF = TypeVar("MF", bound=MsgFormat)
 
-@attr.s(frozen=True, auto_attribs=True, slots=True)
-class SrvFormat:
+
+@attr.s(frozen=True)
+class SrvFormat(ABC, Generic[MF]):
     """Provides an immutable definition of a given
     `ROS service format <http://wiki.ros.org/srv>`_.
 
@@ -23,23 +26,23 @@ class SrvFormat:
         The unqualified name of the service format.
     definition: str
         The plaintext contents of the associated .srv file.
-    request: Optional[MsgFormat]
+    request: Optional[MF]
         The definition of the optional request message for this service, if
         it has one.
-    response: Optional[MsgFormat]
+    response: Optional[MF]
         The definition of the optional response message for this service, if
         it has one.
     """
 
-    package: str
-    name: str
-    definition: str
-    request: Optional[MsgFormat]
-    response: Optional[MsgFormat]
+    package: str = attr.ib()
+    name: str = attr.ib()
+    definition: str = attr.ib()
+    request: Optional[MF] = attr.ib()
+    response: Optional[MF] = attr.ib()
 
-    @staticmethod
+    @classmethod
     def from_file(
-        package: str, filename: str, files: dockerblade.FileSystem
+        cls, package: str, filename: str, files: dockerblade.FileSystem
     ) -> "SrvFormat":
         """Constructs a service format from a .srv file for a given package.
 
@@ -62,10 +65,11 @@ class SrvFormat:
         ), "service format files must end in .srv"
         name: str = os.path.basename(filename[:-4])
         contents: str = files.read(filename)
-        return SrvFormat.from_string(package, name, contents)
+        return cls.from_string(package, name, contents)
 
-    @staticmethod
-    def from_string(package: str, name: str, s: str) -> "SrvFormat":
+    @classmethod
+    @abstractmethod
+    def from_string(cls, package: str, name: str, s: str) -> "SrvFormat":
         """Constructs a service format from its definition.
 
         Raises
@@ -73,45 +77,14 @@ class SrvFormat:
         ParsingError
             If the description cannot be parsed.
         """
-        req: Optional[MsgFormat] = None
-        res: Optional[MsgFormat] = None
-        name_req = f"{name}Request"
-        name_res = f"{name}Response"
+        ...
 
-        sections: List[str] = [ss.strip() for ss in s.split("---")]
-        assert len(sections) < 3
-        s_req = sections[0]
-        s_res = sections[1] if len(sections) > 1 else ""
-
-        if s_req:
-            req = MsgFormat.from_string(package, name_req, s_req)
-        if s_res:
-            res = MsgFormat.from_string(package, name_res, s_res)
-
-        return SrvFormat(package, name, s, req, res)
-
-    @staticmethod
+    @classmethod
+    @abstractmethod
     def from_dict(
-        d: Dict[str, Any], *, package: Optional[str] = None
+        cls, d: Dict[str, Any], *, package: Optional[str] = None
     ) -> "SrvFormat":
-        req: Optional[MsgFormat] = None
-        res: Optional[MsgFormat] = None
-        name: str = d["name"]
-        definition: str = d["definition"]
-        if package is None:
-            assert d["package"] is not None
-            package = d["package"]
-
-        if "request" in d:
-            req = MsgFormat.from_dict(
-                d["request"], package=package, name=f"{name}Request"
-            )
-        if "response" in d:
-            res = MsgFormat.from_dict(
-                d["response"], package=package, name=f"{name}Response"
-            )
-
-        return SrvFormat(package, name, definition, req, res)
+        ...
 
     def to_dict(self) -> Dict[str, Any]:
         d: Dict[str, Any] = {
