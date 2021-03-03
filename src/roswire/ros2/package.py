@@ -18,11 +18,12 @@ import dockerblade
 from loguru import logger
 from typing_extensions import Final
 
+from . import ROS2SrvFormat
 from ..common import (ActionFormat,
                       MsgFormat,
                       Package,
                       PackageDatabase,
-                      SrvFormat)
+                      )
 from ..util import tuple_from_iterable
 
 if typing.TYPE_CHECKING:
@@ -38,11 +39,12 @@ _COMMAND_ROS2_PKG_PREFIXES: Final[str] = (
 
 
 @attr.s(frozen=True, auto_attribs=True, slots=True)
-class ROS2Package(Package[MsgFormat, SrvFormat, ActionFormat]):
+class ROS2Package(Package[MsgFormat, ROS2SrvFormat, ActionFormat]):
     name: str
     path: str
     messages: Collection[MsgFormat] = attr.ib(converter=tuple_from_iterable)
-    services: Collection[SrvFormat] = attr.ib(converter=tuple_from_iterable)
+    services: Collection[ROS2SrvFormat] = \
+        attr.ib(converter=tuple_from_iterable)
     actions: Collection[ActionFormat] = attr.ib(converter=tuple_from_iterable)
 
     @classmethod
@@ -50,7 +52,7 @@ class ROS2Package(Package[MsgFormat, SrvFormat, ActionFormat]):
         """Constructs a description of a package at a given path."""
         name: str = os.path.basename(path)
         messages: List[MsgFormat] = []
-        services: List[SrvFormat] = []
+        services: List[ROS2SrvFormat] = []
         actions: List[ActionFormat] = []
         files = app_instance.files
 
@@ -69,7 +71,7 @@ class ROS2Package(Package[MsgFormat, SrvFormat, ActionFormat]):
             ]
         if files.isdir(dir_srv):
             services = [
-                SrvFormat.from_file(name, f, files)
+                ROS2SrvFormat.from_file(name, f, files)
                 for f in files.listdir(dir_srv, absolute=True)
                 if f.endswith(".srv")
             ]
@@ -89,8 +91,8 @@ class ROS2Package(Package[MsgFormat, SrvFormat, ActionFormat]):
             MsgFormat.from_dict(dd, package=name)
             for dd in d.get("messages", [])
         ]
-        services: List[SrvFormat] = [
-            SrvFormat.from_dict(dd, package=name)
+        services: List[ROS2SrvFormat] = [
+            ROS2SrvFormat.from_dict(dd, package=name)
             for dd in d.get("services", [])
         ]
         actions: List[ActionFormat] = [

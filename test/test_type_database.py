@@ -3,14 +3,12 @@ import pytest
 
 import roswire
 from roswire.common import (
-    PackageDatabase,
-    FormatDatabase,
     TypeDatabase,
     MsgFormat,
     Time,
 )
 
-from roswire.ros1 import ROS1PackageDatabase
+from roswire.ros1 import ROS1FormatDatabase, ROS1PackageDatabase
 
 
 @pytest.mark.parametrize("sut", ["fetch"], indirect=True)
@@ -24,7 +22,7 @@ def test_build(sut):
     ]
     db_package = ROS1PackageDatabase.build(sut, paths)
 
-    db_format = FormatDatabase.build(db_package)
+    db_format = ROS1FormatDatabase.from_packages(db_package)
     db_type = TypeDatabase.build(db_format)
     assert set(db_type) == {
         "geometry_msgs/Point",
@@ -125,7 +123,7 @@ time stamp
 string frame_id
     """
     fmt = MsgFormat.from_string("PkgName", "MessageName", s)
-    db_fmt = FormatDatabase({fmt}, {}, {})
+    db_fmt = ROS1FormatDatabase({fmt}, {}, {})
     db_type = TypeDatabase.build(db_fmt)
 
     t = db_type["PkgName/MessageName"]

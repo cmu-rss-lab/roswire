@@ -8,12 +8,8 @@ from roswire.common import (
     Constant,
     Field,
     MsgFormat,
-    SrvFormat,
-    ActionFormat,
-    PackageDatabase,
-    FormatDatabase,
 )
-from roswire.ros1 import ROS1PackageDatabase
+from roswire.ros1 import ROS1ActionFormat, ROS1PackageDatabase, ROS1FormatDatabase, ROS1SrvFormat
 
 import dockerblade
 
@@ -76,7 +72,7 @@ CustomMessageDefinedInThisPackage value
 uint32 an_integer
     """
 
-    fmt = SrvFormat.from_string("PkgName", "MessageName", s)
+    fmt = ROS1SrvFormat.from_string("PkgName", "MessageName", s)
     assert fmt.name == "MessageName"
     assert fmt.package == "PkgName"
 
@@ -109,7 +105,7 @@ uint32 an_integer
 
     # bug #269
     s = "map_msgs/ProjectedMapInfo[] projected_maps_info"
-    fmt = SrvFormat.from_string("map_msgs", "ProjectedMapsInfo", s)
+    fmt = ROS1SrvFormat.from_string("map_msgs", "ProjectedMapsInfo", s)
     assert fmt.request is not None
     assert fmt.response is None
 
@@ -126,7 +122,7 @@ uint32 total_dishes_cleaned
 float32 percent_complete
 """
 
-    fmt = ActionFormat.from_string("PkgName", "MessageName", s)
+    fmt = ROS1ActionFormat.from_string("PkgName", "MessageName", s)
     assert fmt.name == "MessageName"
     assert fmt.package == "PkgName"
 
@@ -155,7 +151,7 @@ float32 percent_complete
 def test_empty_action_from_string():
     """see #332"""
     s = "---\n---\n"
-    fmt = ActionFormat.from_string("PkgName", "MessageName", s)
+    fmt = ROS1ActionFormat.from_string("PkgName", "MessageName", s)
     assert fmt.goal is not None
     assert not fmt.goal.fields
 
@@ -229,7 +225,7 @@ def test_srv_format_to_and_from_dict():
             "fields": [{"type": "bool", "name": "success"}],
         },
     }
-    f = SrvFormat(
+    f = ROS1SrvFormat(
         package=pkg,
         name=name,
         definition=definition_service,
@@ -253,8 +249,8 @@ def test_srv_format_to_and_from_dict():
             fields=[Field("bool", "success")],
         ),
     )
-    assert SrvFormat.from_dict(d) == f
-    assert SrvFormat.from_dict(f.to_dict()) == f
+    assert ROS1SrvFormat.from_dict(d) == f
+    assert ROS1SrvFormat.from_dict(f.to_dict()) == f
 
 
 def test_action_format_to_and_from_dict():
@@ -282,7 +278,7 @@ def test_action_format_to_and_from_dict():
             "fields": [{"type": "int64", "name": "sum"}],
         },
     }
-    f = ActionFormat(
+    f = ROS1ActionFormat(
         package=pkg,
         name=name,
         definition=definition_action,
@@ -302,8 +298,10 @@ def test_action_format_to_and_from_dict():
             fields=[Field("int64", "sum")],
         ),
     )
-    assert ActionFormat.from_dict(d) == f
-    assert ActionFormat.from_dict(f.to_dict()) == f
+
+    f1 = ROS1ActionFormat.from_dict(d)
+    assert f1 == f
+    assert ROS1ActionFormat.from_dict(f.to_dict()) == f
 
 
 @pytest.mark.parametrize("filesystem", ["fetch"], indirect=True)
@@ -312,7 +310,7 @@ def test_action_from_file(filesystem):
     pkg = "tf2_msgs"
     pkg_dir = "/opt/ros/melodic/share/tf2_msgs"
     fn = os.path.join(pkg_dir, "action/LookupTransform.action")
-    fmt = ActionFormat.from_file(pkg, fn, filesystem)
+    fmt = ROS1ActionFormat.from_file(pkg, fn, filesystem)
     assert fmt.package == pkg
     assert fmt.name == "LookupTransform"
     assert fmt.fullname == "tf2_msgs/LookupTransform"
@@ -338,12 +336,12 @@ def test_action_from_file(filesystem):
     # attempt to read .msg file
     fn = os.path.join(pkg_dir, "msg/TFMessage.msg")
     with pytest.raises(AssertionError):
-        ActionFormat.from_file(pkg, fn, filesystem)
+        ROS1ActionFormat.from_file(pkg, fn, filesystem)
 
     # attempt to read non-existent file
     fn = os.path.join(pkg_dir, "action/Spooky.action")
     with pytest.raises(dockerblade.exceptions.ContainerFileNotFound):
-        ActionFormat.from_file(pkg, fn, filesystem)
+        ROS1ActionFormat.from_file(pkg, fn, filesystem)
 
 
 @pytest.mark.parametrize("filesystem", ["fetch"], indirect=True)
@@ -352,7 +350,7 @@ def test_srv_from_file(filesystem):
     pkg = "nav_msgs"
     pkg_dir = "/opt/ros/melodic/share/nav_msgs"
     fn = os.path.join(pkg_dir, "srv/SetMap.srv")
-    fmt = SrvFormat.from_file(pkg, fn, filesystem)
+    fmt = ROS1SrvFormat.from_file(pkg, fn, filesystem)
     assert fmt.package == pkg
     assert fmt.name == "SetMap"
     assert fmt.fullname == "nav_msgs/SetMap"
@@ -375,12 +373,12 @@ def test_srv_from_file(filesystem):
     # attempt to read .action file
     fn = "/opt/ros/melodic/share/tf2_msgs/action/LookupTransform.action"
     with pytest.raises(AssertionError):
-        SrvFormat.from_file(pkg, fn, filesystem)
+        ROS1SrvFormat.from_file(pkg, fn, filesystem)
 
     # attempt to read non-existent file
     fn = os.path.join(pkg_dir, "srv/Spooky.srv")
     with pytest.raises(dockerblade.exceptions.ContainerFileNotFound):
-        SrvFormat.from_file(pkg, fn, filesystem)
+        ROS1SrvFormat.from_file(pkg, fn, filesystem)
 
 
 @pytest.mark.parametrize("filesystem", ["fetch"], indirect=True)
@@ -402,7 +400,7 @@ def test_msg_from_file(filesystem):
     # attempt to read .action file
     fn = os.path.join(pkg_dir, "action/LookupTransform.action")
     with pytest.raises(AssertionError):
-        SrvFormat.from_file(pkg, fn, filesystem)
+        ROS1SrvFormat.from_file(pkg, fn, filesystem)
 
     # attempt to read non-existent file
     fn = os.path.join(pkg_dir, "msg/Spooky.msg")
@@ -414,7 +412,7 @@ def test_msg_from_file(filesystem):
 def test_build_format_database(sut):
     paths = ["/opt/ros/melodic/share/tf2_msgs", "/opt/ros/melodic/share/tf"]
     db_package = ROS1PackageDatabase.build(sut, paths)
-    db_format = FormatDatabase.build(db_package)
+    db_format = ROS1FormatDatabase.from_packages(db_package)
     name_messages: Set[str] = set(db_format.messages)
     name_services: Set[str] = set(db_format.services)
     name_actions: Set[str] = set(db_format.actions)
@@ -446,7 +444,7 @@ def test_msg_toposort(sut):
     ]
 
     db_package = ROS1PackageDatabase.build(sut, paths)
-    db_format = FormatDatabase.build(db_package)
+    db_format = ROS1FormatDatabase.from_packages(db_package)
 
     msgs = db_format.messages.values()
     msgs = MsgFormat.toposort(msgs)

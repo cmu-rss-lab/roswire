@@ -2,17 +2,19 @@
 __all__ = ("ActionFormat",)
 
 import os
-from typing import Any, Dict, List, Optional
+from abc import ABC, abstractmethod
+from typing import Any, Dict, Generic, Optional, TypeVar
 
 import attr
 import dockerblade
 
-from .. import exceptions
 from ..common.msg import MsgFormat
 
+MF = TypeVar("MF", bound=MsgFormat)
 
-@attr.s(frozen=True, auto_attribs=True, slots=True)
-class ActionFormat:
+
+@attr.s(frozen=True)
+class ActionFormat(ABC, Generic[MF]):
     """Provides an immutable definition of a
     `ROS Action <https://www.christimperley.co.uk/roswire/>`_.
 
@@ -25,26 +27,26 @@ class ActionFormat:
     definition: str
         The plaintext definition of this action (e.g., the contents of a
         .action file).
-    goal: MsgFormat
+    goal: MF
         The definition of the goal message for this action.
-    feedback: Optional[MsgFormat]
+    feedback: Optional[MF]
         The definition of the optional feedback message for this action, if
         it has one.
-    result: Optional[MsgFormat]
+    result: Optional[MF]
         The definition of the optional result message for this action, if
         it has one.
     """
 
-    package: str
-    name: str
-    definition: str
-    goal: MsgFormat
-    feedback: Optional[MsgFormat]
-    result: Optional[MsgFormat]
+    package: str = attr.ib()
+    name: str = attr.ib()
+    definition: str = attr.ib()
+    goal: MF = attr.ib()
+    feedback: Optional[MF] = attr.ib()
+    result: Optional[MF] = attr.ib()
 
-    @staticmethod
+    @classmethod
     def from_file(
-        package: str, filename: str, files: dockerblade.FileSystem
+        cls, package: str, filename: str, files: dockerblade.FileSystem
     ) -> "ActionFormat":
         """Constructs an action format from a .action file for a given package.
 
@@ -67,10 +69,11 @@ class ActionFormat:
         ), "action format files must end in .action"
         name: str = os.path.basename(filename[:-7])
         contents: str = files.read(filename)
-        return ActionFormat.from_string(package, name, contents)
+        return cls.from_string(package, name, contents)
 
-    @staticmethod
-    def from_string(package: str, name: str, s: str) -> "ActionFormat":
+    @classmethod
+    @abstractmethod
+    def from_string(cls, package: str, name: str, s: str) -> "ActionFormat":
         """Constructs an action format from its definition (i.e., the contents
         of a .action file).
 
@@ -79,52 +82,14 @@ class ActionFormat:
         ParsingError
             If the description cannot be parsed.
         """
-        goal: MsgFormat
-        feed: Optional[MsgFormat]
-        res: Optional[MsgFormat]
+        ...
 
-        name_goal = f"{name}Goal"
-        name_feed = f"{name}Feedback"
-        name_res = f"{name}Result"
-
-        sections: List[str] = [ss.strip() for ss in s.split("---")]
-        try:
-            s_goal, s_res, s_feed = sections
-        except ValueError:
-            m = "failed to parse action description: expected three sections."
-            raise exceptions.ParsingError(m)
-
-        goal = MsgFormat.from_string(package, name_goal, s_goal)
-        feed = MsgFormat.from_string(package, name_feed, s_feed)
-        res = MsgFormat.from_string(package, name_res, s_res)
-        return ActionFormat(package, name, s, goal, feed, res)
-
-    @staticmethod
+    @classmethod
+    @abstractmethod
     def from_dict(
-        d: Dict[str, Any], *, package: Optional[str] = None
+        cls, d: Dict[str, Any], *, package: Optional[str] = None
     ) -> "ActionFormat":
-        name: str = d["name"]
-        definition: str = d["definition"]
-        if package is None:
-            assert d["package"] is not None
-            package = d["package"]
-
-        res: Optional[MsgFormat] = None
-        feed: Optional[MsgFormat] = None
-        goal: MsgFormat = MsgFormat.from_dict(
-            d["goal"], package=package, name=f"{name}Goal"
-        )
-
-        if "result" in d:
-            res = MsgFormat.from_dict(
-                d["result"], package=package, name=f"{name}Result"
-            )
-        if "feedback" in d:
-            feed = MsgFormat.from_dict(
-                d["feedback"], package=package, name=f"{name}Feedback"
-            )
-
-        return ActionFormat(package, name, definition, goal, feed, res)
+        ...
 
     def to_dict(self) -> Dict[str, Any]:
         d = {

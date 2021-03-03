@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
-__all__ = ("ROS2MsgFormat", "ROS2Message")
-
-from typing import Any, Dict, List, Optional
+__all__ = ("ROS2Field")
 
 import re
+from typing import Any, Dict, Optional
 
 import attr
+import dockerblade
 
-from ..common import Constant, Field, Message, MsgFormat
-from ..common.msg import R_BLANK
-from ..exceptions import ParsingError
+from ..common import Field
+from ..common.msg import MsgFormat, R_COMMENT
 
 
 @attr.s(frozen=True, str=False, slots=True, auto_attribs=True)
@@ -66,17 +64,8 @@ class ROS2MsgFormat(MsgFormat[ROS2Field, Constant]):
         d: Dict[str, Any],
         *,
         package: Optional[str] = None,
-        name: Optional[str] = None,
+        name: Optional[str] = None
     ) -> "ROS2MsgFormat":
-        if not package:
-            package = d["package"]
-        if not name:
-            name = d["name"]
-        definition = d["definition"]
-        fields = [ROS2Field.from_dict(dd) for dd in d.get("fields", [])]
-        constants = [Constant.from_dict(dd) for dd in d.get("constants", [])]
-        return ROS2MsgFormat(package, name, definition, fields, constants)  # type: ignore  # noqa
-
-
-class ROS2Message(Message[ROS2MsgFormat]):
-    ...
+        mf = super().from_dict(d, package=package, name=name)
+        assert isinstance(mf, ROS2MsgFormat)
+        return mf

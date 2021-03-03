@@ -13,8 +13,8 @@ from loguru import logger
 
 from ..common import FormatDatabase, PackageDatabase, TypeDatabase
 from ..distribution import ROSDistribution, ROSVersion
-from ..ros1 import ROS1PackageDatabase
-from ..ros2 import ROS2PackageDatabase
+from ..ros1 import ROS1FormatDatabase, ROS1PackageDatabase
+from ..ros2 import ROS2FormatDatabase, ROS2PackageDatabase
 
 if typing.TYPE_CHECKING:
     from .app import App
@@ -53,11 +53,13 @@ class AppDescription:
     ) -> "AppDescription":
         distribution = ROSDistribution.with_name(d["distribution"])
         packages: PackageDatabase
+        formats: FormatDatabase
         if distribution.ros == ROSVersion.ROS1:
             packages = ROS1PackageDatabase.from_dict(d["packages"])
+            formats = ROS1FormatDatabase.from_packages(packages)
         else:
             packages = ROS2PackageDatabase.from_dict(d["packages"])
-        formats = FormatDatabase.build(packages)
+            formats = ROS2FormatDatabase.from_packages(packages)
         types = TypeDatabase.build(formats)
         return AppDescription(
             app=app,
@@ -126,11 +128,13 @@ class AppDescription:
             distribution_name = app_instance.shell.environ("ROS_DISTRO")
             distribution = ROSDistribution.with_name(distribution_name)
             db_package: PackageDatabase
+            db_format: FormatDatabase
             if distribution.ros == ROSVersion.ROS1:
                 db_package = ROS1PackageDatabase.build(app_instance)
+                db_format = ROS1FormatDatabase.from_packages(db_package)
             else:
                 db_package = ROS2PackageDatabase.build(app_instance)
-        db_format = FormatDatabase.build(db_package)
+                db_format = ROS2FormatDatabase.from_packages(db_package)
         db_type = TypeDatabase.build(db_format)
         return AppDescription(
             app=app,
