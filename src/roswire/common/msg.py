@@ -147,7 +147,7 @@ class Field:
         return None
 
     @classmethod
-    def _resolve_type(cls, package, typ):
+    def _resolve_type(cls, package: str, typ: str) -> str:
         # resolve the type of the field
         typ_resolved = typ
         base_typ = typ.partition("[")[0]

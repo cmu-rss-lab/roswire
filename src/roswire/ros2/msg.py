@@ -2,13 +2,13 @@
 __all__ = ("ROS2Field")
 
 import re
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import attr
-import dockerblade
 
 from ..common import Field
-from ..common.msg import MsgFormat, R_COMMENT
+from ..common.msg import Constant, MsgFormat, R_BLANK, R_COMMENT
+from ..exceptions import ParsingError
 
 
 @attr.s(frozen=True, str=False, slots=True, auto_attribs=True)
@@ -16,7 +16,7 @@ class ROS2Field(Field):
     R_DEFAULT_VALUE = r"[^#]*"
     R_FIELD = re.compile(f"^\s*(?P<type>{Field.R_TYPE})"
                          f"\s+(?P<name>{Field.R_NAME})(?:\s+)?"
-                         f"(?P<val>{R_DEFAULT_VALUE}){Field.R_COMMENT}")
+                         f"(?P<val>{R_DEFAULT_VALUE}){R_COMMENT}")
 
     val: Optional[str]
 
@@ -28,7 +28,7 @@ class ROS2Field(Field):
             name = m_field.group('name')
             typ = cls._resolve_type(package, typ)
             val = m_field.group('val')
-            field = ROS2Field(type, name, val if val and val != '' else None)
+            field = ROS2Field(typ, name, val if val and val != '' else None)
             return field
         return None
 
