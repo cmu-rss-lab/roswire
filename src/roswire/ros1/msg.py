@@ -3,7 +3,6 @@ __all__ = "ROS1MsgFormat"
 
 from typing import Any, Dict, List, Optional
 
-import attr
 import dockerblade
 
 from ..common import Constant, Field, MsgFormat
@@ -48,7 +47,7 @@ class ROS1MsgFormat(MsgFormat[Field, Constant]):
         cls, package: str, filename: str, files: dockerblade.FileSystem
     ) -> "ROS1MsgFormat":
         mf = super().from_file(package, filename, files)
-        assert isinstance(mf, "ROS1MsgFormat")
+        assert isinstance(mf, ROS1MsgFormat)
         return mf
 
     @classmethod
@@ -60,5 +59,5 @@ class ROS1MsgFormat(MsgFormat[Field, Constant]):
             name: Optional[str] = None
     ) -> "ROS1MsgFormat":
         mf = super().from_dict(d, package=package, name=name)
-        assert isinstance(mf, "ROS1MsgFormat")
+        assert isinstance(mf, ROS1MsgFormat)
         return mf

@@ -5,6 +5,7 @@ import re
 from typing import Any, Dict, List, Optional
 
 import attr
+import dockerblade
 
 from ..common import Field
 from ..common.msg import Constant, MsgFormat, R_BLANK, R_COMMENT
@@ -36,7 +37,9 @@ class ROS2Field(Field):
 class ROS2MsgFormat(MsgFormat[ROS2Field, Constant]):
 
     @classmethod
-    def from_string(cls, package: str, name: str, text: str) -> "MsgFormat":
+    def from_string(
+        cls, package: str, name: str, text: str
+    ) -> "ROS2MsgFormat":
         fields: List[ROS2Field] = []
         constants: List[Constant] = []
 
@@ -55,6 +58,22 @@ class ROS2MsgFormat(MsgFormat[ROS2Field, Constant]):
                 raise ParsingError(f"failed to parse line: {line}")
 
         return ROS2MsgFormat(package, name, text, fields, constants)  # type: ignore  # noqa
+
+    @classmethod
+    def _field_from_string(cls, package: str, line: str) -> Optional[Field]:
+        return ROS2Field.from_string(package, line)
+
+    @classmethod
+    def _field_from_dict(cls, dict: Dict[str, Any]) -> Field:
+        return ROS2Field.from_dict(dict)
+
+    @classmethod
+    def from_file(
+            cls, package: str, filename: str, files: dockerblade.FileSystem
+    ) -> "ROS2MsgFormat":
+        mf = super().from_file(package, filename, files)
+        assert isinstance(mf, ROS2MsgFormat)
+        return mf
 
     @classmethod
     def from_dict(

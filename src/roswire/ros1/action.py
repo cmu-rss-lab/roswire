@@ -24,9 +24,9 @@ class ROS1ActionFormat(ActionFormat[ROS1MsgFormat]):
     def from_string(
         cls, package: str, name: str, s: str
     ) -> "ROS1ActionFormat":
-        goal: MsgFormat
-        feed: Optional[MsgFormat]
-        res: Optional[MsgFormat]
+        goal: ROS1MsgFormat
+        feed: Optional[ROS1MsgFormat]
+        res: Optional[ROS1MsgFormat]
 
         name_goal = f"{name}Goal"
         name_feed = f"{name}Feedback"

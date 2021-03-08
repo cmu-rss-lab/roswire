@@ -18,10 +18,10 @@ import dockerblade
 from loguru import logger
 from typing_extensions import Final
 
+from .action import ROS2ActionFormat
+from .msg import ROS2MsgFormat
 from .srv import ROS2SrvFormat
-from ..common import (ActionFormat,
-                      MsgFormat,
-                      Package,
+from ..common import (Package,
                       PackageDatabase,
                       )
 from ..util import tuple_from_iterable
@@ -39,21 +39,23 @@ _COMMAND_ROS2_PKG_PREFIXES: Final[str] = (
 
 
 @attr.s(frozen=True, auto_attribs=True, slots=True)
-class ROS2Package(Package[MsgFormat, ROS2SrvFormat, ActionFormat]):
+class ROS2Package(Package[ROS2MsgFormat, ROS2SrvFormat, ROS2ActionFormat]):
     name: str
     path: str
-    messages: Collection[MsgFormat] = attr.ib(converter=tuple_from_iterable)
+    messages: Collection[ROS2MsgFormat] = \
+        attr.ib(converter=tuple_from_iterable)
     services: Collection[ROS2SrvFormat] = \
         attr.ib(converter=tuple_from_iterable)
-    actions: Collection[ActionFormat] = attr.ib(converter=tuple_from_iterable)
+    actions: Collection[ROS2ActionFormat] = \
+        attr.ib(converter=tuple_from_iterable)
 
     @classmethod
     def build(cls, path: str, app_instance: "AppInstance") -> "ROS2Package":
         """Constructs a description of a package at a given path."""
         name: str = os.path.basename(path)
-        messages: List[MsgFormat] = []
+        messages: List[ROS2MsgFormat] = []
         services: List[ROS2SrvFormat] = []
-        actions: List[ActionFormat] = []
+        actions: List[ROS2ActionFormat] = []
         files = app_instance.files
 
         if not files.isdir(path):
@@ -65,7 +67,7 @@ class ROS2Package(Package[MsgFormat, ROS2SrvFormat, ActionFormat]):
 
         if files.isdir(dir_msg):
             messages = [
-                MsgFormat.from_file(name, f, files)
+                ROS2MsgFormat.from_file(name, f, files)
                 for f in files.listdir(dir_msg, absolute=True)
                 if f.endswith(".msg")
             ]
@@ -77,7 +79,7 @@ class ROS2Package(Package[MsgFormat, ROS2SrvFormat, ActionFormat]):
             ]
         if files.isdir(dir_action):
             actions = [
-                ActionFormat.from_file(name, f, files)
+                ROS2ActionFormat.from_file(name, f, files)
                 for f in files.listdir(dir_action, absolute=True)
                 if f.endswith(".action")
             ]
@@ -87,16 +89,16 @@ class ROS2Package(Package[MsgFormat, ROS2SrvFormat, ActionFormat]):
     @classmethod
     def from_dict(cls, d: Dict[str, Any]) -> "ROS2Package":
         name: str = d["name"]
-        messages: List[MsgFormat] = [
-            MsgFormat.from_dict(dd, package=name)
+        messages: List[ROS2MsgFormat] = [
+            ROS2MsgFormat.from_dict(dd, package=name)
             for dd in d.get("messages", [])
         ]
         services: List[ROS2SrvFormat] = [
             ROS2SrvFormat.from_dict(dd, package=name)
             for dd in d.get("services", [])
         ]
-        actions: List[ActionFormat] = [
-            ActionFormat.from_dict(dd, package=name)
+        actions: List[ROS2ActionFormat] = [
+            ROS2ActionFormat.from_dict(dd, package=name)
             for dd in d.get("actions", [])
         ]
         return ROS2Package(d["name"], d["path"], messages, services, actions)

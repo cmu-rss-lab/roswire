@@ -278,7 +278,7 @@ class MsgFormat(ABC, Generic[FIELD, CONSTANT]):
         ), "message format files must end in .msg"
         name: str = os.path.basename(filename[:-4])
         contents: str = files.read(filename)
-        return MsgFormat.from_string(package, name, contents)
+        return cls.from_string(package, name, contents)
 
     @classmethod
     @abstractmethod
@@ -308,7 +308,14 @@ class MsgFormat(ABC, Generic[FIELD, CONSTANT]):
                   package: Optional[str] = None,
                   name: Optional[str] = None,
                   ) -> "MsgFormat":
-        ...
+        if not package:
+            package = d["package"]
+        if not name:
+            name = d["name"]
+        definition = d["definition"]
+        fields = [Field.from_dict(dd) for dd in d.get("fields", [])]
+        constants = [Constant.from_dict(dd) for dd in d.get("constants", [])]
+        return cls(package, name, definition, fields, constants)  # type: ignore  # noqa
 
     def to_dict(self) -> Dict[str, Any]:
         d: Dict[str, Any] = {

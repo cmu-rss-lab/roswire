@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-__all__ = ("ROS1SrvFormat", )
+__all__ = ("ROS1SrvFormat",)
 
 from typing import Any, Dict, List, Optional
 
 import dockerblade
 
-from ..common import  SrvFormat
 from .msg import ROS1MsgFormat
+from ..common import SrvFormat
 
 
 class ROS1SrvFormat(SrvFormat[ROS1MsgFormat]):

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from roswire.common import MsgFormat, SrvFormat, PackageDatabase
-from roswire.ros1 import ROS1Package, ROS1PackageDatabase
+from roswire.common import PackageDatabase
+from roswire.ros1 import ROS1MsgFormat, ROS1Package, ROS1PackageDatabase, ROS1SrvFormat
 
 def test_to_and_from_dict():
     pkg = "tf"
-    msg_tf = MsgFormat.from_dict(
+    msg_tf = ROS1MsgFormat.from_dict(
         {
             "package": pkg,
             "name": "tfMessage",
@@ -19,7 +19,7 @@ def test_to_and_from_dict():
             ],
         }
     )
-    srv_fg = SrvFormat.from_dict(
+    srv_fg = ROS1SrvFormat.from_dict(
         {
             "package": pkg,
             "name": "FrameGraph",

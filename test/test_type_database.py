@@ -4,11 +4,10 @@ import pytest
 import roswire
 from roswire.common import (
     TypeDatabase,
-    MsgFormat,
     Time,
 )
 
-from roswire.ros1 import ROS1FormatDatabase, ROS1PackageDatabase
+from roswire.ros1 import ROS1FormatDatabase, ROS1MsgFormat, ROS1PackageDatabase
 
 
 @pytest.mark.parametrize("sut", ["fetch"], indirect=True)
@@ -122,7 +121,7 @@ uint32 seq
 time stamp
 string frame_id
     """
-    fmt = MsgFormat.from_string("PkgName", "MessageName", s)
+    fmt = ROS1MsgFormat.from_string("PkgName", "MessageName", s)
     db_fmt = ROS1FormatDatabase({fmt}, {}, {})
     db_type = TypeDatabase.build(db_fmt)
 
