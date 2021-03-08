@@ -37,8 +37,6 @@ class ROS2MsgFormat(MsgFormat[ROS2Field, Constant]):
 
     @classmethod
     def from_string(cls, package: str, name: str, text: str) -> "MsgFormat":
-        typ: str
-        name_const: str
         fields: List[ROS2Field] = []
         constants: List[Constant] = []
 

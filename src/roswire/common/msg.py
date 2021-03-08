@@ -9,7 +9,6 @@ from io import BytesIO
 from typing import (
     Any,
     BinaryIO,
-    ClassVar,
     Collection,
     Dict,
     Generic, Iterator,
@@ -206,8 +205,8 @@ FIELD = TypeVar("FIELD", bound=Field)
 CONSTANT = TypeVar("CONSTANT", bound=Constant)
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class MsgFormat(Generic[FIELD, CONSTANT], ABC):
+@attr.s(frozen=True)
+class MsgFormat(ABC, Generic[FIELD, CONSTANT]):
     """Provides an immutable definition of a given ROS message format.
 
     Attributes
@@ -228,9 +227,9 @@ class MsgFormat(Generic[FIELD, CONSTANT], ABC):
     * http://wiki.ros.org/msg
     """
 
-    package: str
-    name: str
-    definition: str
+    package: str = attr.ib()
+    name: str = attr.ib()
+    definition: str = attr.ib()
     fields: Tuple[FIELD, ...] = attr.ib(converter=tuple)
     constants: Tuple[CONSTANT, ...] = attr.ib(converter=tuple)
 
@@ -365,7 +364,7 @@ class MsgFormat(Generic[FIELD, CONSTANT], ABC):
 MF = TypeVar("MF", bound='MsgFormat')
 
 
-class Message(Generic[MF]):
+class Message:
     """Each ROS message type has its own class that is dynamically generated
     by ROSWire at runtime. This is the base class that is used by all of those
     messages.
@@ -376,7 +375,7 @@ class Message(Generic[MF]):
         The format used by this message.
     """
 
-    format: ClassVar[MF]
+    format: MsgFormat
 
     @staticmethod
     def _to_dict_value(val: Any) -> Any:

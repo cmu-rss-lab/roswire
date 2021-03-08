@@ -7,9 +7,14 @@ import os
 from roswire.common import (
     Constant,
     Field,
-    MsgFormat,
 )
-from roswire.ros1 import ROS1ActionFormat, ROS1PackageDatabase, ROS1FormatDatabase, ROS1SrvFormat
+from roswire.ros1 import (
+    ROS1ActionFormat,
+    ROS1PackageDatabase,
+    ROS1FormatDatabase,
+    ROS1SrvFormat,
+    ROS1MsgFormat
+)
 
 import dockerblade
 
@@ -32,7 +37,7 @@ int32 Y=-123
 string FOO=foo
 string EXAMPLE="#comments" are ignored, and leading and trailing whitespace removed
     """
-    fmt = MsgFormat.from_string("PkgName", "MessageName", s)
+    fmt = ROS1MsgFormat.from_string("PkgName", "MessageName", s)
     assert fmt.name == "MessageName"
     assert fmt.package == "PkgName"
 
@@ -186,15 +191,15 @@ def test_msg_format_to_and_from_dict():
             {"type": "geometry_msgs/TransformStamped[]", "name": "transforms"}
         ],
     }
-    f = MsgFormat(
+    f = ROS1MsgFormat(
         package="tf",
         name="tfMessage",
         definition=definition,
         constants=[],
         fields=[Field("geometry_msgs/TransformStamped[]", "transforms")],
     )
-    assert MsgFormat.from_dict(d) == f
-    assert MsgFormat.from_dict(f.to_dict()) == f
+    assert ROS1MsgFormat.from_dict(d) == f
+    assert ROS1MsgFormat.from_dict(f.to_dict()) == f
 
 
 def test_srv_format_to_and_from_dict():
@@ -229,7 +234,7 @@ def test_srv_format_to_and_from_dict():
         package=pkg,
         name=name,
         definition=definition_service,
-        request=MsgFormat(
+        request=ROS1MsgFormat(
             package=pkg,
             definition=definition_request,
             name=name_request,
@@ -241,7 +246,7 @@ def test_srv_format_to_and_from_dict():
                 ),
             ],
         ),
-        response=MsgFormat(
+        response=ROS1MsgFormat(
             package=pkg,
             definition=definition_response,
             name=name_response,
@@ -282,7 +287,7 @@ def test_action_format_to_and_from_dict():
         package=pkg,
         name=name,
         definition=definition_action,
-        goal=MsgFormat(
+        goal=ROS1MsgFormat(
             definition=definition_goal,
             package=pkg,
             name=name_goal,
@@ -290,7 +295,7 @@ def test_action_format_to_and_from_dict():
             fields=[Field("int64", "a"), Field("int64", "b")],
         ),
         feedback=None,
-        result=MsgFormat(
+        result=ROS1MsgFormat(
             package=pkg,
             definition=definition_result,
             name=name_result,
@@ -315,7 +320,7 @@ def test_action_from_file(filesystem):
     assert fmt.name == "LookupTransform"
     assert fmt.fullname == "tf2_msgs/LookupTransform"
 
-    goal: MsgFormat = fmt.goal
+    goal: ROS1MsgFormat = fmt.goal
     assert not goal.constants
     assert len(goal.fields) == 7
     assert Field("string", "target_frame") in goal.fields
@@ -327,7 +332,7 @@ def test_action_from_file(filesystem):
     assert Field("bool", "advanced") in goal.fields
 
     assert fmt.result
-    res: MsgFormat = fmt.result
+    res: ROS1MsgFormat = fmt.result
     assert not res.constants
     assert len(res.fields) == 2
     assert Field("geometry_msgs/TransformStamped", "transform") in res.fields
@@ -355,7 +360,7 @@ def test_srv_from_file(filesystem):
     assert fmt.name == "SetMap"
     assert fmt.fullname == "nav_msgs/SetMap"
 
-    req: MsgFormat = fmt.request
+    req: ROS1MsgFormat = fmt.request
     assert not req.constants
     assert len(req.fields) == 2
     assert Field("nav_msgs/OccupancyGrid", "map") in req.fields
@@ -365,7 +370,7 @@ def test_srv_from_file(filesystem):
     )
 
     assert fmt.response
-    res: MsgFormat = fmt.response
+    res: ROS1MsgFormat = fmt.response
     assert not res.constants
     assert len(res.fields) == 1
     assert Field("bool", "success") in res.fields
@@ -387,7 +392,7 @@ def test_msg_from_file(filesystem):
     pkg = "tf2_msgs"
     pkg_dir = "/opt/ros/melodic/share/tf2_msgs/"
     fn = os.path.join(pkg_dir, "msg/TFMessage.msg")
-    fmt = MsgFormat.from_file(pkg, fn, filesystem)
+    fmt = ROS1MsgFormat.from_file(pkg, fn, filesystem)
     assert fmt.package == pkg
     assert fmt.name == "TFMessage"
     assert fmt.fullname == "tf2_msgs/TFMessage"
@@ -405,7 +410,7 @@ def test_msg_from_file(filesystem):
     # attempt to read non-existent file
     fn = os.path.join(pkg_dir, "msg/Spooky.msg")
     with pytest.raises(dockerblade.exceptions.ContainerFileNotFound):
-        MsgFormat.from_file(pkg, fn, filesystem)
+        ROS1MsgFormat.from_file(pkg, fn, filesystem)
 
 
 @pytest.mark.parametrize("sut", ["fetch"], indirect=True)
@@ -447,18 +452,18 @@ def test_msg_toposort(sut):
     db_format = ROS1FormatDatabase.from_packages(db_package)
 
     msgs = db_format.messages.values()
-    msgs = MsgFormat.toposort(msgs)
+    msgs = ROS1MsgFormat.toposort(msgs)
 
 
 def test_msg_flatten():
     register: Dict[str, MsgFormat] = {}
 
-    def mf(name: str, definition: str) -> MsgFormat:
-        f = MsgFormat.from_string("example_pkg", name, definition)
+    def mf(name: str, definition: str) -> ROS1MsgFormat:
+        f = ROS1MsgFormat.from_string("example_pkg", name, definition)
         register[f.fullname] = f
         return f
 
-    def names(fmt: MsgFormat) -> List[str]:
+    def names(fmt: ROS1MsgFormat) -> List[str]:
         buff = []
         for ctx, field in fmt.flatten(register):
             name = field.name
