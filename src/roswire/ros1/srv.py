@@ -5,10 +5,11 @@ from typing import Any, Dict, List, Optional
 
 import dockerblade
 
-from ..common import MsgFormat, SrvFormat
+from ..common import  SrvFormat
+from .msg import ROS1MsgFormat
 
 
-class ROS1SrvFormat(SrvFormat[MsgFormat]):
+class ROS1SrvFormat(SrvFormat[ROS1MsgFormat]):
 
     @classmethod
     def from_file(
@@ -20,8 +21,8 @@ class ROS1SrvFormat(SrvFormat[MsgFormat]):
 
     @classmethod
     def from_string(cls, package: str, name: str, s: str) -> "ROS1SrvFormat":
-        req: Optional[MsgFormat] = None
-        res: Optional[MsgFormat] = None
+        req: Optional[ROS1MsgFormat] = None
+        res: Optional[ROS1MsgFormat] = None
         name_req = f"{name}Request"
         name_res = f"{name}Response"
 
@@ -31,9 +32,9 @@ class ROS1SrvFormat(SrvFormat[MsgFormat]):
         s_res = sections[1] if len(sections) > 1 else ""
 
         if s_req:
-            req = MsgFormat.from_string(package, name_req, s_req)
+            req = ROS1MsgFormat.from_string(package, name_req, s_req)
         if s_res:
-            res = MsgFormat.from_string(package, name_res, s_res)
+            res = ROS1MsgFormat.from_string(package, name_res, s_res)
 
         return ROS1SrvFormat(package, name, s, req, res)
 
@@ -41,8 +42,8 @@ class ROS1SrvFormat(SrvFormat[MsgFormat]):
     def from_dict(
         cls, d: Dict[str, Any], *, package: Optional[str] = None
     ) -> "ROS1SrvFormat":
-        req: Optional[MsgFormat] = None
-        res: Optional[MsgFormat] = None
+        req: Optional[ROS1MsgFormat] = None
+        res: Optional[ROS1MsgFormat] = None
         name: str = d["name"]
         definition: str = d["definition"]
         if package is None:
@@ -50,11 +51,11 @@ class ROS1SrvFormat(SrvFormat[MsgFormat]):
             package = d["package"]
 
         if "request" in d:
-            req = MsgFormat.from_dict(
+            req = ROS1MsgFormat.from_dict(
                 d["request"], package=package, name=f"{name}Request"
             )
         if "response" in d:
-            res = MsgFormat.from_dict(
+            res = ROS1MsgFormat.from_dict(
                 d["response"], package=package, name=f"{name}Response"
             )
 
