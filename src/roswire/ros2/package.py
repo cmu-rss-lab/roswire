@@ -18,7 +18,7 @@ import dockerblade
 from loguru import logger
 from typing_extensions import Final
 
-from . import ROS2SrvFormat
+from .srv import ROS2SrvFormat
 from ..common import (ActionFormat,
                       MsgFormat,
                       Package,
