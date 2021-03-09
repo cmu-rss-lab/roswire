@@ -6,9 +6,7 @@ from typing import Any, Dict
 from .action import ROS1ActionFormat
 from .msg import ROS1MsgFormat
 from .srv import ROS1SrvFormat
-from ..common import (
-    FormatDatabase,
-)
+from ..common import FormatDatabase
 
 
 class ROS1FormatDatabase(FormatDatabase[ROS1MsgFormat,

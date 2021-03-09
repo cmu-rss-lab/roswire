@@ -11,7 +11,8 @@ from typing import (
     BinaryIO,
     Collection,
     Dict,
-    Generic, Iterator,
+    Generic,
+    Iterator,
     List,
     Mapping,
     Optional,
@@ -254,9 +255,12 @@ class MsgFormat(ABC, Generic[FIELD, CONSTANT]):
         return [fn_to_fmt[filename] for filename in toposorted]
 
     @classmethod
-    def from_file(cls,
-                  package: str, filename: str, files: dockerblade.FileSystem
-                  ) -> "MsgFormat":
+    def from_file(
+        cls,
+        package: str,
+        filename: str,
+        files: dockerblade.FileSystem
+    ) -> "MsgFormat":
         """Constructs a message format from a .msg file for a given package.
 
         Parameters
@@ -302,12 +306,13 @@ class MsgFormat(ABC, Generic[FIELD, CONSTANT]):
         ...
 
     @classmethod
-    def from_dict(cls,
-                  d: Dict[str, Any],
-                  *,
-                  package: Optional[str] = None,
-                  name: Optional[str] = None,
-                  ) -> "MsgFormat":
+    def from_dict(
+        cls,
+        d: Dict[str, Any],
+        *,
+        package: Optional[str] = None,
+        name: Optional[str] = None,
+    ) -> "MsgFormat":
         if not package:
             package = d["package"]
         if not name:
@@ -335,9 +340,9 @@ class MsgFormat(ABC, Generic[FIELD, CONSTANT]):
         return f"{self.package}/{self.name}"
 
     def flatten(
-            self,
-            name_to_format: Mapping[str, "MsgFormat"],
-            ctx: Tuple[str, ...] = (),
+        self,
+        name_to_format: Mapping[str, "MsgFormat"],
+        ctx: Tuple[str, ...] = (),
     ) -> Iterator[Tuple[Tuple[str, ...], FIELD]]:
         for field in self.fields:
             if field.is_array or is_builtin(field.typ):
@@ -366,9 +371,6 @@ class MsgFormat(ABC, Generic[FIELD, CONSTANT]):
         md5sum = hashlib.md5(txt.encode("utf-8")).hexdigest()
         logger.debug(f"generated md5sum [{self.fullname}]: {md5sum}")
         return md5sum
-
-
-MF = TypeVar("MF", bound='MsgFormat')
 
 
 class Message:

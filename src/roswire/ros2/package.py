@@ -21,9 +21,7 @@ from typing_extensions import Final
 from .action import ROS2ActionFormat
 from .msg import ROS2MsgFormat
 from .srv import ROS2SrvFormat
-from ..common import (Package,
-                      PackageDatabase,
-                      )
+from ..common import Package, PackageDatabase
 from ..util import tuple_from_iterable
 
 if typing.TYPE_CHECKING:

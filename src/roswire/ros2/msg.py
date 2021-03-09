@@ -29,7 +29,9 @@ class ROS2Field(Field):
             name = m_field.group('name')
             typ = cls._resolve_type(package, typ)
             val = m_field.group('val')
-            field = ROS2Field(typ, name, val if val and val != '' else None)
+            field = ROS2Field(typ,
+                              name,
+                              val if val is not None and val != '' else None)
             return field
         return None
 
@@ -69,7 +71,7 @@ class ROS2MsgFormat(MsgFormat[ROS2Field, Constant]):
 
     @classmethod
     def from_file(
-            cls, package: str, filename: str, files: dockerblade.FileSystem
+        cls, package: str, filename: str, files: dockerblade.FileSystem
     ) -> "ROS2MsgFormat":
         mf = super().from_file(package, filename, files)
         assert isinstance(mf, ROS2MsgFormat)
