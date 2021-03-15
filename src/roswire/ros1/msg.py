@@ -32,7 +32,11 @@ class ROS1MsgFormat(MsgFormat[Field, Constant]):
                 fields.append(field)
             else:
                 raise ParsingError(f"failed to parse line: {line}")
-        return cls(package, name, text, fields, constants)  # type: ignore  # noqa
+        return ROS1MsgFormat(package=package,
+                             name=name,
+                             definition=text,
+                             fields=fields,
+                             constants=constants)
 
     @classmethod
     def _field_from_string(cls, package: str, line: str) -> Optional[Field]:

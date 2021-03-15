@@ -21,6 +21,7 @@ from typing import (
     TypeVar,
     Union,
 )
+from typing import Iterable  # noqa  # This is a mypy workaround
 
 import attr
 import dockerblade
@@ -30,6 +31,7 @@ from toposort import toposort_flatten as toposort
 from .base import Duration, is_builtin, Time
 from .decode import is_simple
 from .. import exceptions as exc
+from ..util import tuple_from_iterable
 
 R_COMMENT = r"(#.*)?"
 R_BLANK = re.compile(f"^\s*{R_COMMENT}$")
@@ -231,8 +233,8 @@ class MsgFormat(ABC, Generic[FIELD, CONSTANT]):
     package: str = attr.ib()
     name: str = attr.ib()
     definition: str = attr.ib()
-    fields: Tuple[FIELD, ...] = attr.ib(converter=tuple)
-    constants: Tuple[CONSTANT, ...] = attr.ib(converter=tuple)
+    fields: Tuple[FIELD, ...] = attr.ib(converter=tuple_from_iterable)
+    constants: Tuple[CONSTANT, ...] = attr.ib(converter=tuple_from_iterable)
 
     @classmethod
     def toposort(cls, fmts: Collection["MsgFormat"]) -> List["MsgFormat"]:

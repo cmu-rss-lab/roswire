@@ -19,7 +19,7 @@ class ROS2Field(Field):
                          f"\s+(?P<name>{Field.R_NAME})(?:\s+)?"
                          f"(?P<val>{R_DEFAULT_VALUE}){R_COMMENT}")
 
-    val: Optional[str]
+    default_value: Optional[str]
 
     @classmethod
     def from_string(cls, package: str, line: str) -> Optional["ROS2Field"]:
@@ -28,10 +28,10 @@ class ROS2Field(Field):
             typ = m_field.group('type')
             name = m_field.group('name')
             typ = cls._resolve_type(package, typ)
-            val = m_field.group('val')
+            default_value = m_field.group('val')
             field = ROS2Field(typ,
                               name,
-                              val if val is not None and val != '' else None)
+                              default_value if default_value else None)
             return field
         return None
 
@@ -59,7 +59,11 @@ class ROS2MsgFormat(MsgFormat[ROS2Field, Constant]):
             else:
                 raise ParsingError(f"failed to parse line: {line}")
 
-        return ROS2MsgFormat(package, name, text, fields, constants)  # type: ignore  # noqa
+        return ROS2MsgFormat(package=package,
+                             name=name,
+                             definition=text,
+                             fields=fields,
+                             constants=constants)
 
     @classmethod
     def _field_from_string(cls, package: str, line: str) -> Optional[Field]:
