@@ -153,7 +153,7 @@ class Field:
         # resolve the type of the field
         typ_resolved = typ
         base_typ = typ.partition("[")[0]
-        typ = base_typ.partition("<")[0]  # Need to strip <=xxx to get base
+        base_typ = base_typ.partition("<")[0]  # Need to strip <=xxx to get base
         if typ == "Header":
             typ_resolved = "std_msgs/Header"
         elif "/" not in typ and not is_builtin(base_typ):
