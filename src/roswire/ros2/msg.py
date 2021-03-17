@@ -14,8 +14,9 @@ from ..exceptions import ParsingError
 
 @attr.s(frozen=True, str=False, slots=True, auto_attribs=True)
 class ROS2Field(Field):
+    R_TYPE = r"[a-zA-Z_/][a-zA-Z0-9_/]*(?:<=\d+)?(?:\[(?:<=)?\d*\])?"
     R_DEFAULT_VALUE = r"[^#]*"
-    R_FIELD = re.compile(f"^\s*(?P<type>{Field.R_TYPE})"
+    R_FIELD = re.compile(f"^\s*(?P<type>{R_TYPE})"
                          f"\s+(?P<name>{Field.R_NAME})(?:\s+)?"
                          f"(?P<val>{R_DEFAULT_VALUE}){R_COMMENT}")
 

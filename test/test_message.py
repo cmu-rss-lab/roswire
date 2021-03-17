@@ -2,6 +2,7 @@
 import pytest
 import roswire
 from roswire.common import Time
+from roswire.ros2 import ROS2MsgFormat
 
 
 @pytest.mark.parametrize("app", ["fetch"], indirect=True)
@@ -28,3 +29,12 @@ def test_to_and_from_dict(app: roswire.App):
         },
         "position": {"x": position.x, "y": position.y, "z": position.z},
     }
+
+
+def test_from_string_ros2():
+    msg_string = ("string<=256 node_namespace\n"
+                  "string<=256 node_name\n"
+                  "Gid[] reader_gid_seq\n"
+                  "Gid[] writer_gid_seq\n")
+    msg = ROS2MsgFormat.from_string("", "", msg_string)
+    assert len(msg.fields) == 4
