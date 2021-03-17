@@ -5,11 +5,12 @@ from typing import Any, Dict, List, Optional
 
 import dockerblade
 
+from .msg import ROS2MsgFormat
 from .. import exceptions
-from ..common import ActionFormat, MsgFormat
+from ..common import ActionFormat
 
 
-class ROS2ActionFormat(ActionFormat[MsgFormat]):
+class ROS2ActionFormat(ActionFormat[ROS2MsgFormat]):
 
     @classmethod
     def from_file(
@@ -23,9 +24,9 @@ class ROS2ActionFormat(ActionFormat[MsgFormat]):
     def from_string(
         cls, package: str, name: str, s: str
     ) -> "ROS2ActionFormat":
-        goal: MsgFormat
-        feed: Optional[MsgFormat]
-        res: Optional[MsgFormat]
+        goal: ROS2MsgFormat
+        feed: Optional[ROS2MsgFormat]
+        res: Optional[ROS2MsgFormat]
 
         name_goal = f"{name}Goal"
         name_feed = f"{name}Feedback"
@@ -38,9 +39,9 @@ class ROS2ActionFormat(ActionFormat[MsgFormat]):
             m = "failed to parse action description: expected three sections."
             raise exceptions.ParsingError(m)
 
-        goal = MsgFormat.from_string(package, name_goal, s_goal)
-        feed = MsgFormat.from_string(package, name_feed, s_feed)
-        res = MsgFormat.from_string(package, name_res, s_res)
+        goal = ROS2MsgFormat.from_string(package, name_goal, s_goal)
+        feed = ROS2MsgFormat.from_string(package, name_feed, s_feed)
+        res = ROS2MsgFormat.from_string(package, name_res, s_res)
         return ROS2ActionFormat(package, name, s, goal, feed, res)
 
     @classmethod
@@ -53,18 +54,18 @@ class ROS2ActionFormat(ActionFormat[MsgFormat]):
             assert d["package"] is not None
             package = d["package"]
 
-        res: Optional[MsgFormat] = None
-        feed: Optional[MsgFormat] = None
-        goal: MsgFormat = MsgFormat.from_dict(
+        res: Optional[ROS2MsgFormat] = None
+        feed: Optional[ROS2MsgFormat] = None
+        goal: ROS2MsgFormat = ROS2MsgFormat.from_dict(
             d["goal"], package=package, name=f"{name}Goal"
         )
 
         if "result" in d:
-            res = MsgFormat.from_dict(
+            res = ROS2MsgFormat.from_dict(
                 d["result"], package=package, name=f"{name}Result"
             )
         if "feedback" in d:
-            feed = MsgFormat.from_dict(
+            feed = ROS2MsgFormat.from_dict(
                 d["feedback"], package=package, name=f"{name}Feedback"
             )
 

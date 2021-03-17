@@ -1,16 +1,42 @@
 # -*- coding: utf-8 -*-
 __all__ = "ROS1MsgFormat"
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
-import attr
 import dockerblade
 
-from ..common import Field, MsgFormat
+from ..common import Constant, Field, MsgFormat
+from ..common.msg import R_BLANK
+from ..exceptions import ParsingError
 
 
-@attr.s(frozen=True)
-class ROS1MsgFormat(MsgFormat):
+class ROS1MsgFormat(MsgFormat[Field, Constant]):
+
+    @classmethod
+    def from_string(
+        cls, package: str, name: str, text: str
+    ) -> "ROS1MsgFormat":
+        fields: List[Field] = []
+        constants: List[Constant] = []
+
+        for line in text.split("\n"):
+            m_blank = R_BLANK.match(line)
+            if m_blank:
+                continue
+
+            constant = Constant.from_string(line)
+            field = Field.from_string(package, line)
+            if constant:
+                constants.append(constant)
+            elif field:
+                fields.append(field)
+            else:
+                raise ParsingError(f"failed to parse line: {line}")
+        return ROS1MsgFormat(package=package,
+                             name=name,
+                             definition=text,
+                             fields=fields,
+                             constants=constants)
 
     @classmethod
     def _field_from_string(cls, package: str, line: str) -> Optional[Field]:

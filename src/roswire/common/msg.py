@@ -4,21 +4,24 @@ __all__ = ("Constant", "ConstantValue", "Field", "MsgFormat", "Message")
 import hashlib
 import os
 import re
+from abc import ABC, abstractmethod
 from io import BytesIO
 from typing import (
     Any,
     BinaryIO,
-    ClassVar,
     Collection,
     Dict,
+    Generic,
     Iterator,
     List,
     Mapping,
     Optional,
     Set,
     Tuple,
+    TypeVar,
     Union,
 )
+from typing import Iterable  # noqa  # This is a mypy workaround
 
 import attr
 import dockerblade
@@ -28,7 +31,7 @@ from toposort import toposort_flatten as toposort
 from .base import Duration, is_builtin, Time
 from .decode import is_simple
 from .. import exceptions as exc
-
+from ..util import tuple_from_iterable
 
 R_COMMENT = r"(#.*)?"
 R_BLANK = re.compile(f"^\s*{R_COMMENT}$")
@@ -139,21 +142,25 @@ class Field:
         if m_field:
             typ, name_field = m_field.group(1, 2)
 
-            # resolve the type of the field
-            typ_resolved = typ
-            base_typ = typ.partition("[")[0]
-            if typ == "Header":
-                typ_resolved = "std_msgs/Header"
-            elif "/" not in typ and not is_builtin(base_typ):
-                typ_resolved = f"{package}/{typ}"
-
-            if typ != typ_resolved:
-                logger.debug(f"resolved type [{typ}]: {typ_resolved}")
-                typ = typ_resolved
+            typ = cls._resolve_type(package, typ)
 
             field: Field = Field(typ, name_field)
             return field
         return None
+
+    @classmethod
+    def _resolve_type(cls, package: str, typ: str) -> str:
+        # resolve the type of the field
+        typ_resolved = typ
+        base_typ = typ.partition("[")[0]
+        if typ == "Header":
+            typ_resolved = "std_msgs/Header"
+        elif "/" not in typ and not is_builtin(base_typ):
+            typ_resolved = f"{package}/{typ}"
+        if typ != typ_resolved:
+            logger.debug(f"resolved type [{typ}]: {typ_resolved}")
+            typ = typ_resolved
+        return typ
 
     @property
     def is_array(self) -> bool:
@@ -197,8 +204,12 @@ class Field:
         return f"{self.typ} {self.name}"
 
 
-@attr.s(frozen=True, slots=True, auto_attribs=True)
-class MsgFormat:
+FIELD = TypeVar("FIELD", bound=Field)
+CONSTANT = TypeVar("CONSTANT", bound=Constant)
+
+
+@attr.s(frozen=True)
+class MsgFormat(ABC, Generic[FIELD, CONSTANT]):
     """Provides an immutable definition of a given ROS message format.
 
     Attributes
@@ -209,9 +220,9 @@ class MsgFormat:
         The unqualified name of the message format.
     definition: str
         The plaintext contents of the associated .msg file.
-    fields: Sequence[Field]
+    fields: Sequence[FIELD]
         The fields that belong to this message format.
-    constants: Sequence[Constant]
+    constants: Sequence[CONSTANT]
         The named constants that belong to this message format.
 
     References
@@ -219,14 +230,14 @@ class MsgFormat:
     * http://wiki.ros.org/msg
     """
 
-    package: str
-    name: str
-    definition: str
-    fields: Tuple[Field, ...] = attr.ib(converter=tuple)
-    constants: Tuple[Constant, ...] = attr.ib(converter=tuple)
+    package: str = attr.ib()
+    name: str = attr.ib()
+    definition: str = attr.ib()
+    fields: Tuple[FIELD, ...] = attr.ib(converter=tuple_from_iterable)
+    constants: Tuple[CONSTANT, ...] = attr.ib(converter=tuple_from_iterable)
 
-    @staticmethod
-    def toposort(fmts: Collection["MsgFormat"]) -> List["MsgFormat"]:
+    @classmethod
+    def toposort(cls, fmts: Collection["MsgFormat"]) -> List["MsgFormat"]:
         fn_to_fmt: Dict[str, MsgFormat] = {fmt.fullname: fmt for fmt in fmts}
         fn_to_deps: Dict[str, Set[str]] = {
             filename: {
@@ -245,9 +256,12 @@ class MsgFormat:
             raise exc.PackageNotFound(missing_package_name)
         return [fn_to_fmt[filename] for filename in toposorted]
 
-    @staticmethod
+    @classmethod
     def from_file(
-        package: str, filename: str, files: dockerblade.FileSystem
+        cls,
+        package: str,
+        filename: str,
+        files: dockerblade.FileSystem
     ) -> "MsgFormat":
         """Constructs a message format from a .msg file for a given package.
 
@@ -270,10 +284,11 @@ class MsgFormat:
         ), "message format files must end in .msg"
         name: str = os.path.basename(filename[:-4])
         contents: str = files.read(filename)
-        return MsgFormat.from_string(package, name, contents)
+        return cls.from_string(package, name, contents)
 
-    @staticmethod
-    def from_string(package: str, name: str, text: str) -> "MsgFormat":
+    @classmethod
+    @abstractmethod
+    def from_string(cls, package: str, name: str, text: str) -> "MsgFormat":
         """Constructs a message format from its description.
 
         Parameters
@@ -290,29 +305,11 @@ class MsgFormat:
         ParsingError
             If the description cannot be parsed.
         """
-        typ: str
-        name_const: str
-        fields: List[Field] = []
-        constants: List[Constant] = []
+        ...
 
-        for line in text.split("\n"):
-            m_blank = R_BLANK.match(line)
-            if m_blank:
-                continue
-
-            constant = Constant.from_string(line)
-            field = Field.from_string(package, line)
-            if constant:
-                constants.append(constant)
-            elif field:
-                fields.append(field)
-            else:
-                raise exc.ParsingError(f"failed to parse line: {line}")
-
-        return MsgFormat(package, name, text, fields, constants)  # type: ignore  # noqa
-
-    @staticmethod
+    @classmethod
     def from_dict(
+        cls,
         d: Dict[str, Any],
         *,
         package: Optional[str] = None,
@@ -325,7 +322,7 @@ class MsgFormat:
         definition = d["definition"]
         fields = [Field.from_dict(dd) for dd in d.get("fields", [])]
         constants = [Constant.from_dict(dd) for dd in d.get("constants", [])]
-        return MsgFormat(package, name, definition, fields, constants)  # type: ignore  # noqa
+        return cls(package, name, definition, fields, constants)  # type: ignore  # noqa
 
     def to_dict(self) -> Dict[str, Any]:
         d: Dict[str, Any] = {
@@ -348,7 +345,7 @@ class MsgFormat:
         self,
         name_to_format: Mapping[str, "MsgFormat"],
         ctx: Tuple[str, ...] = (),
-    ) -> Iterator[Tuple[Tuple[str, ...], Field]]:
+    ) -> Iterator[Tuple[Tuple[str, ...], FIELD]]:
         for field in self.fields:
             if field.is_array or is_builtin(field.typ):
                 yield (ctx, field)
@@ -389,7 +386,7 @@ class Message:
         The format used by this message.
     """
 
-    format: ClassVar[MsgFormat]
+    format: MsgFormat
 
     @staticmethod
     def _to_dict_value(val: Any) -> Any:

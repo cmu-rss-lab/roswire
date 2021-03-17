@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
-__all__ = ("ROS2SrvFormat", )
+__all__ = ("ROS2SrvFormat",)
 
 from typing import Any, Dict, List, Optional
 
 import dockerblade
 
-from ..common import MsgFormat, SrvFormat
+from .msg import ROS2MsgFormat
+from ..common import SrvFormat
 
 
-class ROS2SrvFormat(SrvFormat[MsgFormat]):
+class ROS2SrvFormat(SrvFormat[ROS2MsgFormat]):
 
     @classmethod
     def from_file(
@@ -20,8 +21,8 @@ class ROS2SrvFormat(SrvFormat[MsgFormat]):
 
     @classmethod
     def from_string(cls, package: str, name: str, s: str) -> "ROS2SrvFormat":
-        req: Optional[MsgFormat] = None
-        res: Optional[MsgFormat] = None
+        req: Optional[ROS2MsgFormat] = None
+        res: Optional[ROS2MsgFormat] = None
         name_req = f"{name}Request"
         name_res = f"{name}Response"
 
@@ -31,9 +32,9 @@ class ROS2SrvFormat(SrvFormat[MsgFormat]):
         s_res = sections[1] if len(sections) > 1 else ""
 
         if s_req:
-            req = MsgFormat.from_string(package, name_req, s_req)
+            req = ROS2MsgFormat.from_string(package, name_req, s_req)
         if s_res:
-            res = MsgFormat.from_string(package, name_res, s_res)
+            res = ROS2MsgFormat.from_string(package, name_res, s_res)
 
         return ROS2SrvFormat(package, name, s, req, res)
 
@@ -41,8 +42,8 @@ class ROS2SrvFormat(SrvFormat[MsgFormat]):
     def from_dict(
         cls, d: Dict[str, Any], *, package: Optional[str] = None
     ) -> "ROS2SrvFormat":
-        req: Optional[MsgFormat] = None
-        res: Optional[MsgFormat] = None
+        req: Optional[ROS2MsgFormat] = None
+        res: Optional[ROS2MsgFormat] = None
         name: str = d["name"]
         definition: str = d["definition"]
         if package is None:
@@ -50,11 +51,11 @@ class ROS2SrvFormat(SrvFormat[MsgFormat]):
             package = d["package"]
 
         if "request" in d:
-            req = MsgFormat.from_dict(
+            req = ROS2MsgFormat.from_dict(
                 d["request"], package=package, name=f"{name}Request"
             )
         if "response" in d:
-            res = MsgFormat.from_dict(
+            res = ROS2MsgFormat.from_dict(
                 d["response"], package=package, name=f"{name}Response"
             )
 

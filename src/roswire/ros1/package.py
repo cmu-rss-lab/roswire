@@ -11,8 +11,9 @@ import dockerblade
 from loguru import logger
 
 from .action import ROS1ActionFormat
+from .msg import ROS1MsgFormat
 from .srv import ROS1SrvFormat
-from ..common import MsgFormat, Package, PackageDatabase
+from ..common import Package, PackageDatabase
 from ..util import tuple_from_iterable
 
 if typing.TYPE_CHECKING:
@@ -20,10 +21,11 @@ if typing.TYPE_CHECKING:
 
 
 @attr.s(frozen=True, auto_attribs=True, slots=True)
-class ROS1Package(Package[MsgFormat, ROS1SrvFormat, ROS1ActionFormat]):
+class ROS1Package(Package[ROS1MsgFormat, ROS1SrvFormat, ROS1ActionFormat]):
     name: str
     path: str
-    messages: Collection[MsgFormat] = attr.ib(converter=tuple_from_iterable)
+    messages: Collection[ROS1MsgFormat] = \
+        attr.ib(converter=tuple_from_iterable)
     services: Collection[ROS1SrvFormat] = \
         attr.ib(converter=tuple_from_iterable)
     actions: Collection[ROS1ActionFormat] = \
@@ -33,7 +35,7 @@ class ROS1Package(Package[MsgFormat, ROS1SrvFormat, ROS1ActionFormat]):
     def build(cls, path: str, app_instance: "AppInstance") -> "ROS1Package":
         """Constructs a description of a package at a given path."""
         name: str = os.path.basename(path)
-        messages: List[MsgFormat] = []
+        messages: List[ROS1MsgFormat] = []
         services: List[ROS1SrvFormat] = []
         actions: List[ROS1ActionFormat] = []
         files = app_instance.files
@@ -47,7 +49,7 @@ class ROS1Package(Package[MsgFormat, ROS1SrvFormat, ROS1ActionFormat]):
 
         if files.isdir(dir_msg):
             messages = [
-                MsgFormat.from_file(name, f, files)
+                ROS1MsgFormat.from_file(name, f, files)
                 for f in files.listdir(dir_msg, absolute=True)
                 if f.endswith(".msg")
             ]
@@ -69,8 +71,8 @@ class ROS1Package(Package[MsgFormat, ROS1SrvFormat, ROS1ActionFormat]):
     @classmethod
     def from_dict(cls, d: Dict[str, Any]) -> "ROS1Package":
         name: str = d["name"]
-        messages: List[MsgFormat] = [
-            MsgFormat.from_dict(dd, package=name)
+        messages: List[ROS1MsgFormat] = [
+            ROS1MsgFormat.from_dict(dd, package=name)
             for dd in d.get("messages", [])
         ]
         services: List[ROS1SrvFormat] = [
