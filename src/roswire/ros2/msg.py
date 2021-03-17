@@ -57,7 +57,7 @@ class ROS2MsgFormat(MsgFormat[ROS2Field, Constant]):
             elif field:
                 fields.append(field)
             else:
-                raise ParsingError(f"failed to parse line: {line}")
+                raise ParsingError(f"failed to parse line: {line}\nfrom message:\n{text}")
 
         return ROS2MsgFormat(package=package,
                              name=name,
