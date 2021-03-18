@@ -86,7 +86,7 @@ class TypeDatabase(Mapping[str, Type[Message]]):
                 return read_time
             if field.typ == "duration":
                 return read_duration
-            if field.typ == "string" or field.type == "wstring":
+            if field.typ == "string" or field.typ == "wstring":
                 return string_reader(field.length)
             if field.is_array and is_simple(field.base_type):
                 return simple_array_reader(field.base_type, field.length)
@@ -108,7 +108,7 @@ class TypeDatabase(Mapping[str, Type[Message]]):
                 return complex_array_reader(entry_factory, field.length)
             if field.typ in name_to_type:
                 return name_to_type[field.typ].read
-            m = "unable to find factory for field: {field.name} [{field.typ}]"
+            m = f"unable to find factory for field: {field.name} [{field.typ}]"
             raise Exception(m)
 
         fields: OrderedDict[str, Callable[[BinaryIO], Any]] = OrderedDict()
