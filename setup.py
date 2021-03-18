@@ -9,5 +9,5 @@ with open(path, "r") as f:
 
 
 setup(version=__version__,
-      package_data={'': ['src/roswire/resources/launch_extractor._py', '*._py']},
+      package_data={'roswire': ['resources/*._py']},
       inlcude_package_data=True)
