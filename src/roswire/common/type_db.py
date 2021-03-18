@@ -97,7 +97,8 @@ class TypeDatabase(Mapping[str, Type[Message]]):
                 elif field.base_type == "duration":
                     entry_factory = read_duration
                 # FIXME how about arrays of fixed-length strings?
-                elif field.base_type == "string" or field.base_type == "wstring":
+                elif field.base_type == "string" \
+                        or field.base_type == "wstring":
                     entry_factory = string_reader()
                 elif field.base_type in name_to_type:
                     entry_factory = name_to_type[field.base_type].read
@@ -147,7 +148,8 @@ class TypeDatabase(Mapping[str, Type[Message]]):
                 elif field.base_type == "duration":
                     entry_writer = write_duration
                 # FIXME how about arrays of fixed-length strings?
-                elif field.base_type == "string" or field.base_type == "wstring":
+                elif field.base_type == "string" \
+                        or field.base_type == "wstring":
                     entry_writer = string_writer()
                 elif field.base_type in name_to_type:
                     entry_writer = name_to_type[field.base_type].write

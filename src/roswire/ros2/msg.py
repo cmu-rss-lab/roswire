@@ -6,17 +6,16 @@ from typing import Any, Dict, List, Optional
 
 import attr
 import dockerblade
-from loguru import logger
 
 from ..common import Field
-from ..common.base import is_builtin
 from ..common.msg import Constant, MsgFormat, R_BLANK, R_COMMENT
 from ..exceptions import ParsingError
 
 
 @attr.s(frozen=True, str=False, slots=True, auto_attribs=True)
 class ROS2Field(Field):
-    R_TYPE = r"[a-zA-Z_/][a-zA-Z0-9_/]*(?P<strbounds><=\d+)?(?:\[(?:<=)?\d*\])?"
+    R_TYPE = (r"[a-zA-Z_/][a-zA-Z0-9_/]*"
+              r"(?P<strbounds><=\d+)?(?:\[(?:<=)?\d*\])?")
     R_DEFAULT_VALUE = r"[^#]*"
     R_FIELD = re.compile(f"^\s*(?P<type>{R_TYPE})"
                          f"\s+(?P<name>{Field.R_NAME})(?:\s+)?"
@@ -45,7 +44,7 @@ class ROS2Field(Field):
         # The string bounds (string<=123) will be removed to
         # help resolution of the type
         r_type = cls.REXP_TYPE.match(typ)
-        if r_type.group('strbounds'):
+        if r_type and r_type.group('strbounds'):
             typ = typ.replace(r_type.group('strbounds'), '')
         return Field._resolve_type(package, typ)
 
