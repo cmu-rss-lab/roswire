@@ -136,7 +136,7 @@ class TypeDatabase(Mapping[str, Type[Message]]):
                 return write_time
             if field.typ == "duration":
                 return write_duration
-            if field.typ == "string":
+            if field.typ == "string" or field.typ == "wstring":
                 return string_writer(field.length)
             if field.is_array and is_simple(field.base_type):
                 return simple_array_writer(field.base_type, field.length)
@@ -147,7 +147,7 @@ class TypeDatabase(Mapping[str, Type[Message]]):
                 elif field.base_type == "duration":
                     entry_writer = write_duration
                 # FIXME how about arrays of fixed-length strings?
-                elif field.base_type == "string":
+                elif field.base_type == "string" or field.base_type == "wstring":
                     entry_writer = string_writer()
                 elif field.base_type in name_to_type:
                     entry_writer = name_to_type[field.base_type].write
@@ -156,7 +156,7 @@ class TypeDatabase(Mapping[str, Type[Message]]):
                 return complex_array_writer(entry_writer, field.length)
             if field.typ in name_to_type:
                 return name_to_type[field.typ].write
-            m = "unable to find writer for field: {field.name} [{field.typ}]"
+            m = f"unable to find writer for field: {field.name} [{field.typ}]"
             raise Exception(m)
 
         field_writers: OrderedDict[
