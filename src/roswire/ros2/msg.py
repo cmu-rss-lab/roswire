@@ -48,18 +48,7 @@ class ROS2Field(Field):
         if r_type.group('strbounds'):
             typ = typ.replace(r_type.group('strbounds'), '')
         return Field._resolve_type(package, typ)
-        # base_typ = typ.partition("[")[0]
-        #
-        # # resolve the type of the field
-        # typ_resolved = typ
-        # if typ == "Header":
-        #     typ_resolved = "std_msgs/Header"
-        # elif "/" not in typ and not is_builtin(base_typ):
-        #     typ_resolved = f"{package}/{typ}"
-        # if typ != typ_resolved:
-        #     logger.debug(f"resolved type [{typ}]: {typ_resolved}")
-        #     typ = typ_resolved
-        # return typ
+
 
 class ROS2MsgFormat(MsgFormat[ROS2Field, Constant]):
 
