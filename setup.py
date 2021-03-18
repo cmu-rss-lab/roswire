@@ -9,4 +9,5 @@ with open(path, "r") as f:
 
 
 setup(version=__version__,
+      package_data={'': ['resources/launch_esxtractor._py']},
       inlcude_package_data=True)
