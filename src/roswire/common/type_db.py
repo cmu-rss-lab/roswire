@@ -86,7 +86,7 @@ class TypeDatabase(Mapping[str, Type[Message]]):
                 return read_time
             if field.typ == "duration":
                 return read_duration
-            if field.typ == "string":
+            if field.typ == "string" or field.type == "wstring":
                 return string_reader(field.length)
             if field.is_array and is_simple(field.base_type):
                 return simple_array_reader(field.base_type, field.length)
