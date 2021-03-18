@@ -8,4 +8,5 @@ with open(path, "r") as f:
     exec(f.read())
 
 
-setup(version=__version__)
+setup(version=__version__,
+      inlcude_package_data=True)
