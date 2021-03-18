@@ -6,19 +6,22 @@ from typing import Any, Dict, List, Optional
 
 import attr
 import dockerblade
+from loguru import logger
 
 from ..common import Field
+from ..common.base import is_builtin
 from ..common.msg import Constant, MsgFormat, R_BLANK, R_COMMENT
 from ..exceptions import ParsingError
 
 
 @attr.s(frozen=True, str=False, slots=True, auto_attribs=True)
 class ROS2Field(Field):
-    R_TYPE = r"[a-zA-Z_/][a-zA-Z0-9_/]*(?:<=\d+)?(?:\[(?:<=)?\d*\])?"
+    R_TYPE = r"[a-zA-Z_/][a-zA-Z0-9_/]*(?P<strbounds><=\d+)?(?:\[(?:<=)?\d*\])?"
     R_DEFAULT_VALUE = r"[^#]*"
     R_FIELD = re.compile(f"^\s*(?P<type>{R_TYPE})"
                          f"\s+(?P<name>{Field.R_NAME})(?:\s+)?"
                          f"(?P<val>{R_DEFAULT_VALUE}){R_COMMENT}")
+    REXP_TYPE = re.compile(R_TYPE)
 
     default_value: Optional[str]
 
@@ -36,6 +39,27 @@ class ROS2Field(Field):
             return field
         return None
 
+    @classmethod
+    def _resolve_type(cls, package: str, typ: str) -> str:
+
+        # The string bounds (string<=123) will be removed to
+        # help resolution of the type
+        r_type = cls.REXP_TYPE.match(typ)
+        if r_type.group('strbounds'):
+            typ = typ.replace(r_type.group('strbounds'), '')
+        return Field._resolve_type(package, typ)
+        # base_typ = typ.partition("[")[0]
+        #
+        # # resolve the type of the field
+        # typ_resolved = typ
+        # if typ == "Header":
+        #     typ_resolved = "std_msgs/Header"
+        # elif "/" not in typ and not is_builtin(base_typ):
+        #     typ_resolved = f"{package}/{typ}"
+        # if typ != typ_resolved:
+        #     logger.debug(f"resolved type [{typ}]: {typ_resolved}")
+        #     typ = typ_resolved
+        # return typ
 
 class ROS2MsgFormat(MsgFormat[ROS2Field, Constant]):
 
@@ -58,7 +82,8 @@ class ROS2MsgFormat(MsgFormat[ROS2Field, Constant]):
             elif field:
                 fields.append(field)
             else:
-                raise ParsingError(f"failed to parse line: {line}\nfrom message:\n{text}")
+                raise ParsingError(f"failed to parse line: {line}"
+                                   f"\nfrom message:\n{text}")
 
         return ROS2MsgFormat(package=package,
                              name=name,
