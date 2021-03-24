@@ -43,6 +43,9 @@ def test_from_string_ros2():
     msg = ROS2MsgFormat.from_string("apackage", "amsg", msg_string)
     assert len(msg.fields) == 4
     assert ROS2Field("string", "node_namespace", None) in msg.fields
+    assert ROS2Field("string", "node_name", None) in msg.fields
+    assert ROS2Field("Gid[]", "reader_gid_seq", None) in msg.fields
+    assert ROS2Field("Gid[]", "writer_gid_seq", None) in msg.fields
 
     # Ensure that non-string doesn't resolve as basetype
     msg_string = "strin<=256 field"
@@ -76,6 +79,9 @@ def test_from_wstring_ros2():
     msg = ROS2MsgFormat.from_string("apackage", "amsg", msg_string)
     assert len(msg.fields) == 4
     assert ROS2Field("wstring", "node_namespace", None) in msg.fields
+    assert ROS2Field("wstring", "node_name", None) in msg.fields
+    assert ROS2Field("Gid[]", "reader_gid_seq", None) in msg.fields
+    assert ROS2Field("Gid[]", "writer_gid_seq", None) in msg.fields
 
     # Ensure that non-string doesn't resolve as basetype
     msg_string = "wstrin<=256 field"
