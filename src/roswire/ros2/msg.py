@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ("ROS2Field")
+__all__ = ("ROS2Field", "ROS2MsgFormat")
 
 import re
 from typing import Any, Dict, List, Optional
@@ -43,10 +43,10 @@ class ROS2Field(Field):
 
         # The string bounds (string<=123) will be removed to
         # help resolution of the type
-        r_type = cls.REXP_TYPE.match(typ)
-        if r_type and r_type.group('strbounds'):
-            typ = typ.replace(r_type.group('strbounds'), '')
-        return Field._resolve_type(package, typ)
+        r_type_match = cls.REXP_TYPE.match(typ)
+        if r_type_match and r_type_match.group('strbounds'):
+            typ = typ.replace(r_type_match.group('strbounds'), '')
+        return super()._resolve_type(package, typ)
 
 
 class ROS2MsgFormat(MsgFormat[ROS2Field, Constant]):
