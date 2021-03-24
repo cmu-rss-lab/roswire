@@ -8,6 +8,4 @@ with open(path, "r") as f:
     exec(f.read())
 
 
-setup(version=__version__,
-      package_data={'roswire': ['resources/*._py']},
-      inlcude_package_data=True)
+setup(version=__version__)
