@@ -44,8 +44,8 @@ def test_from_string_ros2():
     assert len(msg.fields) == 4
     assert ROS2Field("string", "node_namespace", None) in msg.fields
     assert ROS2Field("string", "node_name", None) in msg.fields
-    assert ROS2Field("Gid[]", "reader_gid_seq", None) in msg.fields
-    assert ROS2Field("Gid[]", "writer_gid_seq", None) in msg.fields
+    assert ROS2Field("apackage/Gid[]", "reader_gid_seq", None) in msg.fields
+    assert ROS2Field("apackage/Gid[]", "writer_gid_seq", None) in msg.fields
 
     # Ensure that non-string doesn't resolve as basetype
     msg_string = "strin<=256 field"
@@ -67,7 +67,7 @@ def test_from_string_ros2():
     msg_string = 'string field "default"'
     msg = ROS2MsgFormat.from_string("apackage", "amsg", msg_string)
     assert len(msg.fields) == 1
-    assert ROS2Field("string", "node_namespace", "default") in msg.fields
+    assert ROS2Field("string", "field", '"default"') in msg.fields
 
 
 def test_from_wstring_ros2():
@@ -80,8 +80,8 @@ def test_from_wstring_ros2():
     assert len(msg.fields) == 4
     assert ROS2Field("wstring", "node_namespace", None) in msg.fields
     assert ROS2Field("wstring", "node_name", None) in msg.fields
-    assert ROS2Field("Gid[]", "reader_gid_seq", None) in msg.fields
-    assert ROS2Field("Gid[]", "writer_gid_seq", None) in msg.fields
+    assert ROS2Field("apackage/Gid[]", "reader_gid_seq", None) in msg.fields
+    assert ROS2Field("apackage/Gid[]", "writer_gid_seq", None) in msg.fields
 
     # Ensure that non-string doesn't resolve as basetype
     msg_string = "wstrin<=256 field"
@@ -103,4 +103,4 @@ def test_from_wstring_ros2():
     msg_string = 'wstring field "default"'
     msg = ROS2MsgFormat.from_string("apackage", "amsg", msg_string)
     assert len(msg.fields) == 1
-    assert ROS2Field("wstring", "node_namespace", "default") in msg.fields
+    assert ROS2Field("wstring", "field", '"default"') in msg.fields
