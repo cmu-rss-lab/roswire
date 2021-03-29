@@ -59,6 +59,7 @@ _BUILTIN_TYPES: Dict[str, Type] = {
     "float32": float,
     "float64": float,
     "string": str,
+    "wstring": str,
     "time": Time,
     "duration": Duration,
     "char": int,  # deprecated: alias for uint8

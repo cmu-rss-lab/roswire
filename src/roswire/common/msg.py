@@ -157,6 +157,7 @@ class Field:
             typ_resolved = "std_msgs/Header"
         elif "/" not in typ and not is_builtin(base_typ):
             typ_resolved = f"{package}/{typ}"
+
         if typ != typ_resolved:
             logger.debug(f"resolved type [{typ}]: {typ_resolved}")
             typ = typ_resolved

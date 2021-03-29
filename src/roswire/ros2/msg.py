@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ("ROS2Field")
+__all__ = ("ROS2Field", "ROS2MsgFormat")
 
 import re
 from typing import Any, Dict, List, Optional
@@ -14,10 +14,13 @@ from ..exceptions import ParsingError
 
 @attr.s(frozen=True, str=False, slots=True, auto_attribs=True)
 class ROS2Field(Field):
+    R_TYPE = (r"[a-zA-Z_/][a-zA-Z0-9_/]*"
+              r"(?P<strbounds><=\d+)?(?:\[(?:<=)?\d*\])?")
     R_DEFAULT_VALUE = r"[^#]*"
-    R_FIELD = re.compile(f"^\s*(?P<type>{Field.R_TYPE})"
+    R_FIELD = re.compile(f"^\s*(?P<type>{R_TYPE})"
                          f"\s+(?P<name>{Field.R_NAME})(?:\s+)?"
                          f"(?P<val>{R_DEFAULT_VALUE}){R_COMMENT}")
+    REXP_TYPE = re.compile(R_TYPE)
 
     default_value: Optional[str]
 
@@ -34,6 +37,16 @@ class ROS2Field(Field):
                               default_value if default_value else None)
             return field
         return None
+
+    @classmethod
+    def _resolve_type(cls, package: str, typ: str) -> str:
+
+        # The string bounds (string<=123) will be removed to
+        # help resolution of the type
+        r_type_match = cls.REXP_TYPE.match(typ)
+        if r_type_match and r_type_match.group('strbounds'):
+            typ = typ.replace(r_type_match.group('strbounds'), '')
+        return super()._resolve_type(package, typ)
 
 
 class ROS2MsgFormat(MsgFormat[ROS2Field, Constant]):
@@ -57,7 +70,8 @@ class ROS2MsgFormat(MsgFormat[ROS2Field, Constant]):
             elif field:
                 fields.append(field)
             else:
-                raise ParsingError(f"failed to parse line: {line}")
+                raise ParsingError(f"failed to parse line: {line}"
+                                   f"\nfrom message:\n{text}")
 
         return ROS2MsgFormat(package=package,
                              name=name,

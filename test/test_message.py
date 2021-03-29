@@ -2,6 +2,10 @@
 import pytest
 import roswire
 from roswire.common import Time
+from roswire.ros2 import ROS2MsgFormat
+from roswire.ros2.msg import ROS2Field
+
+from roswire.exceptions import ParsingError
 
 
 @pytest.mark.parametrize("app", ["fetch"], indirect=True)
@@ -28,3 +32,75 @@ def test_to_and_from_dict(app: roswire.App):
         },
         "position": {"x": position.x, "y": position.y, "z": position.z},
     }
+
+
+def test_from_string_ros2():
+    # Ensure that string is resolved as a base type
+    msg_string = ("string<=256 node_namespace\n"
+                  "string<=256 node_name\n"
+                  "Gid[] reader_gid_seq\n"
+                  "Gid[] writer_gid_seq\n")
+    msg = ROS2MsgFormat.from_string("apackage", "amsg", msg_string)
+    assert len(msg.fields) == 4
+    assert ROS2Field("string", "node_namespace", None) in msg.fields
+    assert ROS2Field("string", "node_name", None) in msg.fields
+    assert ROS2Field("apackage/Gid[]", "reader_gid_seq", None) in msg.fields
+    assert ROS2Field("apackage/Gid[]", "writer_gid_seq", None) in msg.fields
+
+    # Ensure that non-string doesn't resolve as basetype
+    msg_string = "strin<=256 field"
+    msg = ROS2MsgFormat.from_string("apackage", "amsg", msg_string)
+    # Strictly speaking, the bounds can only happen on string and wstring
+    # but we don't check that
+    assert ROS2Field("apackage/strin", "field", None) in msg.fields
+
+    # Ensure that <= NaN fails to parse
+    try:
+        msg_string = "string<=str"
+        msg = ROS2MsgFormat.from_string("apackage", "amsg", msg_string)
+        assert False
+    except ParsingError:
+        # ok
+        pass
+
+    # Ensure that default value works
+    msg_string = 'string field "default"'
+    msg = ROS2MsgFormat.from_string("apackage", "amsg", msg_string)
+    assert len(msg.fields) == 1
+    assert ROS2Field("string", "field", '"default"') in msg.fields
+
+
+def test_from_wstring_ros2():
+    # Ensure that string is resolved as a base type
+    msg_string = ("wstring<=256 node_namespace\n"
+                  "wstring<=256 node_name\n"
+                  "Gid[] reader_gid_seq\n"
+                  "Gid[] writer_gid_seq\n")
+    msg = ROS2MsgFormat.from_string("apackage", "amsg", msg_string)
+    assert len(msg.fields) == 4
+    assert ROS2Field("wstring", "node_namespace", None) in msg.fields
+    assert ROS2Field("wstring", "node_name", None) in msg.fields
+    assert ROS2Field("apackage/Gid[]", "reader_gid_seq", None) in msg.fields
+    assert ROS2Field("apackage/Gid[]", "writer_gid_seq", None) in msg.fields
+
+    # Ensure that non-string doesn't resolve as basetype
+    msg_string = "wstrin<=256 field"
+    msg = ROS2MsgFormat.from_string("apackage", "amsg", msg_string)
+    # Strictly speaking, the bounds can only happen on string and wstring
+    # but we don't check that
+    assert ROS2Field("apackage/wstrin", "field", None) in msg.fields
+
+    # Ensure that <= NaN fails to parse
+    try:
+        msg_string = "wstring<=str"
+        msg = ROS2MsgFormat.from_string("apackage", "amsg", msg_string)
+        assert False
+    except ParsingError:
+        # ok
+        pass
+
+    # Ensure that default value works
+    msg_string = 'wstring field "default"'
+    msg = ROS2MsgFormat.from_string("apackage", "amsg", msg_string)
+    assert len(msg.fields) == 1
+    assert ROS2Field("wstring", "field", '"default"') in msg.fields
