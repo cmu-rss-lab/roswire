@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>roswire.exceptions &#8212; roswire 2.0.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/solar.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /><link href='http://fonts.googleapis.com/css?family=Source+Code+Pro|Open+Sans:300italic,400italic,700italic,400,300,700' rel='stylesheet' type='text/css'>
+<link href="../../_static/solarized-dark.css" rel="stylesheet">
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">roswire 2.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><p>
+<iframe src="https://ghbtns.com/github-btn.html?user=ChrisTimperley&amp;repo=roswire&amp;type=star&amp;count=true&amp;size=large&amp;v=2" allowtransparency="true" scrolling="0" width="200px" height="35px" frameborder="0"></iframe>
+</p>
+<h3><a href="../../index.html">Table of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">roswire</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../recipes.html">Recipes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for roswire.exceptions</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">import</span> <span class="nn">typing</span> <span class="k">as</span> <span class="nn">_typing</span>
+
+<span class="kn">import</span> <span class="nn">attr</span> <span class="k">as</span> <span class="nn">_attr</span>
+
+<span class="k">if</span> <span class="n">_typing</span><span class="o">.</span><span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">App</span>
+
+
+<div class="viewcode-block" id="ROSWireException"><a class="viewcode-back" href="../../api.html#roswire.exceptions.ROSWireException">[docs]</a><span class="k">class</span> <span class="nc">ROSWireException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base class used by all ROSWire exceptions.&quot;&quot;&quot;</span></div>
+
+
+<span class="k">class</span> <span class="nc">TimeoutExpiredError</span><span class="p">(</span><span class="ne">TimeoutError</span><span class="p">,</span> <span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A timeout expired during an operation.&quot;&quot;&quot;</span>
+
+
+<span class="nd">@_attr</span><span class="o">.</span><span class="n">s</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">auto_exc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">auto_attribs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">str</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">PackageNotFound</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;No package was found with a given name.&quot;&quot;&quot;</span>
+
+    <span class="n">package</span><span class="p">:</span> <span class="nb">str</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Could not find package with name: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">package</span><span class="si">}</span><span class="s2">&quot;</span>
+
+
+<span class="nd">@_attr</span><span class="o">.</span><span class="n">s</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">auto_exc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">auto_attribs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">str</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">ImageNotFound</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;No Docker image was found with a given name.&quot;&quot;&quot;</span>
+
+    <span class="n">image</span><span class="p">:</span> <span class="nb">str</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Could not find Docker image with name: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="si">}</span><span class="s2">&quot;</span>
+
+
+<span class="nd">@_attr</span><span class="o">.</span><span class="n">s</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">auto_exc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">auto_attribs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">str</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">LaunchFileNotFound</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;No launch file was found at the given path.&quot;&quot;&quot;</span>
+
+    <span class="n">path</span><span class="p">:</span> <span class="nb">str</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Could not find launch file at path: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span>
+
+
+<div class="viewcode-block" id="FailedToParseLaunchFile"><a class="viewcode-back" href="../../api.html#roswire.exceptions.FailedToParseLaunchFile">[docs]</a><span class="k">class</span> <span class="nc">FailedToParseLaunchFile</span><span class="p">(</span><span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;An attempt to parse a launch file failed.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="EnvNotFoundError"><a class="viewcode-back" href="../../api.html#roswire.exceptions.EnvNotFoundError">[docs]</a><span class="k">class</span> <span class="nc">EnvNotFoundError</span><span class="p">(</span><span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A given environment variable could not be found.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;could not find enviroment variable: </span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">m</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SubstitutionError"><a class="viewcode-back" href="../../api.html#roswire.exceptions.SubstitutionError">[docs]</a><span class="k">class</span> <span class="nc">SubstitutionError</span><span class="p">(</span><span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;An error occurred during substitution argument handling.&quot;&quot;&quot;</span></div>
+
+
+<span class="k">class</span> <span class="nc">IllegalOperation</span><span class="p">(</span><span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Attempted to perform an illegal operation.&quot;&quot;&quot;</span>
+
+
+<span class="k">class</span> <span class="nc">NotConnectedError</span><span class="p">(</span><span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;There is no connection to a given service.&quot;&quot;&quot;</span>
+
+
+<span class="k">class</span> <span class="nc">AlreadyConnectedError</span><span class="p">(</span><span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;There is already a connection to a given service.&quot;&quot;&quot;</span>
+
+
+<span class="nd">@_attr</span><span class="o">.</span><span class="n">s</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">auto_exc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">auto_attribs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">str</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">ROSCoreAlreadyRunningError</span><span class="p">(</span><span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;ROSCore is already running on a given port.&quot;&quot;&quot;</span>
+
+    <span class="n">url</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">port</span><span class="p">:</span> <span class="nb">int</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;ROSCore is already running at: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="si">}</span><span class="s2">&quot;</span>
+
+
+<span class="nd">@_attr</span><span class="o">.</span><span class="n">s</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">auto_exc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">auto_attribs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">str</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">ROSCoreNotRunningError</span><span class="p">(</span><span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;ROSCore is not running on a given port.&quot;&quot;&quot;</span>
+
+    <span class="n">url</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">port</span><span class="p">:</span> <span class="nb">int</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;ROSCore is not running at: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="si">}</span><span class="s2">&quot;</span>
+
+
+<div class="viewcode-block" id="CatkinException"><a class="viewcode-back" href="../../api.html#roswire.exceptions.CatkinException">[docs]</a><span class="k">class</span> <span class="nc">CatkinException</span><span class="p">(</span><span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base class used by all Catkin-related exceptions.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="CatkinBuildFailed"><a class="viewcode-back" href="../../api.html#roswire.exceptions.CatkinBuildFailed">[docs]</a><span class="k">class</span> <span class="nc">CatkinBuildFailed</span><span class="p">(</span><span class="n">CatkinException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The attempt to build via catkin failed.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">retcode</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;catkin build failed [retcode: </span><span class="si">{</span><span class="n">retcode</span><span class="si">}</span><span class="s2">]: </span><span class="si">{</span><span class="n">reason</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CatkinCleanFailed"><a class="viewcode-back" href="../../api.html#roswire.exceptions.CatkinCleanFailed">[docs]</a><span class="k">class</span> <span class="nc">CatkinCleanFailed</span><span class="p">(</span><span class="n">CatkinException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;An attempt to clean the catkin workspace failed.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">retcode</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;catkin clean failed [retcode: </span><span class="si">{</span><span class="n">retcode</span><span class="si">}</span><span class="s2">]: </span><span class="si">{</span><span class="n">reason</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PlayerNotStarted"><a class="viewcode-back" href="../../api.html#roswire.exceptions.PlayerNotStarted">[docs]</a><span class="k">class</span> <span class="nc">PlayerNotStarted</span><span class="p">(</span><span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Playback has not begun.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="PlayerAlreadyStarted"><a class="viewcode-back" href="../../api.html#roswire.exceptions.PlayerAlreadyStarted">[docs]</a><span class="k">class</span> <span class="nc">PlayerAlreadyStarted</span><span class="p">(</span><span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Playback has already started.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="PlayerAlreadyStopped"><a class="viewcode-back" href="../../api.html#roswire.exceptions.PlayerAlreadyStopped">[docs]</a><span class="k">class</span> <span class="nc">PlayerAlreadyStopped</span><span class="p">(</span><span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Playback has already stopped.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="PlayerFailure"><a class="viewcode-back" href="../../api.html#roswire.exceptions.PlayerFailure">[docs]</a><span class="k">class</span> <span class="nc">PlayerFailure</span><span class="p">(</span><span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;An unexpected error occurred during playback.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">retcode</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">stdout</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">retcode</span> <span class="o">=</span> <span class="n">retcode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">stdout</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;unexpected failure during bag playback [return code: </span><span class="si">{}</span><span class="s2">]:</span><span class="se">\n</span><span class="si">{}</span><span class="s2">&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">retcode</span><span class="p">,</span> <span class="n">stdout</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PlayerTimeout"><a class="viewcode-back" href="../../api.html#roswire.exceptions.PlayerTimeout">[docs]</a><span class="k">class</span> <span class="nc">PlayerTimeout</span><span class="p">(</span><span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Playback did not complete within the specified timeout.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="RecorderAlreadyStarted"><a class="viewcode-back" href="../../api.html#roswire.exceptions.RecorderAlreadyStarted">[docs]</a><span class="k">class</span> <span class="nc">RecorderAlreadyStarted</span><span class="p">(</span><span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Recording has already started.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="RecorderNotStarted"><a class="viewcode-back" href="../../api.html#roswire.exceptions.RecorderNotStarted">[docs]</a><span class="k">class</span> <span class="nc">RecorderNotStarted</span><span class="p">(</span><span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Recording has not begun.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="RecorderAlreadyStopped"><a class="viewcode-back" href="../../api.html#roswire.exceptions.RecorderAlreadyStopped">[docs]</a><span class="k">class</span> <span class="nc">RecorderAlreadyStopped</span><span class="p">(</span><span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Recording has already stopped.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="ParsingError"><a class="viewcode-back" href="../../api.html#roswire.exceptions.ParsingError">[docs]</a><span class="k">class</span> <span class="nc">ParsingError</span><span class="p">(</span><span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;ROSWire failed to parse a given file/string.&quot;&quot;&quot;</span></div>
+
+
+<span class="nd">@_attr</span><span class="o">.</span><span class="n">s</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">auto_exc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">auto_attribs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">str</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">ConflictingTypes</span><span class="p">(</span><span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;ROSWire found two or more types for a service, topic, or action.&quot;&quot;&quot;</span>
+
+    <span class="n">entity</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">existing</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">conflicting</span><span class="p">:</span> <span class="nb">str</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;error declaring type </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">conflicting</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">entity</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;It already has type </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">existing</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<span class="nd">@_attr</span><span class="o">.</span><span class="n">s</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">auto_exc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">auto_attribs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">str</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">NoDescriptionError</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">,</span> <span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;No description has been generated for an application.&quot;&quot;&quot;</span>
+
+    <span class="n">app</span><span class="p">:</span> <span class="s2">&quot;App&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;no description for application: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="si">}</span><span class="s2">&quot;</span>
+
+
+<div class="viewcode-block" id="NodeNotFoundError"><a class="viewcode-back" href="../../api.html#roswire.exceptions.NodeNotFoundError">[docs]</a><span class="k">class</span> <span class="nc">NodeNotFoundError</span><span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;No node was found with the given name.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;node not found: </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ServiceNotFoundError"><a class="viewcode-back" href="../../api.html#roswire.exceptions.ServiceNotFoundError">[docs]</a><span class="k">class</span> <span class="nc">ServiceNotFoundError</span><span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;No service was found with the given name.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;service not found: </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ParameterNotFoundError"><a class="viewcode-back" href="../../api.html#roswire.exceptions.ParameterNotFoundError">[docs]</a><span class="k">class</span> <span class="nc">ParameterNotFoundError</span><span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;No parameter was found with the given name.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;parameter not found: </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<span class="nd">@_attr</span><span class="o">.</span><span class="n">s</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">auto_exc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">auto_attribs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">PatchFailedError</span><span class="p">(</span><span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;An error occurred during the application of a patch.&quot;&quot;&quot;</span>
+
+    <span class="n">retcode</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">output</span><span class="p">:</span> <span class="nb">str</span>
+
+
+<span class="nd">@_attr</span><span class="o">.</span><span class="n">s</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">auto_exc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">auto_attribs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">str</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">SourceNotFoundError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A given source could not be found inside the container.&quot;&quot;&quot;</span>
+
+    <span class="n">source</span><span class="p">:</span> <span class="nb">str</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;source not found in container: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="si">}</span><span class="s2">&quot;</span>
+
+
+<span class="k">class</span> <span class="nc">NodeShutdownError</span><span class="p">(</span><span class="n">ROSWireException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;ROS2 node could not be killed&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;could not shut down node: </span><span class="si">{</span><span class="n">node</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">roswire 2.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2020, Christopher Steven Timperley.
+    </div>
+  </body>
+</html>

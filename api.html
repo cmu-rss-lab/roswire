@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>API Reference &#8212; roswire 2.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/solar.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Recipes" href="recipes.html" /><link href='http://fonts.googleapis.com/css?family=Source+Code+Pro|Open+Sans:300italic,400italic,700italic,400,300,700' rel='stylesheet' type='text/css'>
+<link href="_static/solarized-dark.css" rel="stylesheet">
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="recipes.html" title="Recipes"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">roswire 2.0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><p>
+<iframe src="https://ghbtns.com/github-btn.html?user=ChrisTimperley&amp;repo=roswire&amp;type=star&amp;count=true&amp;size=large&amp;v=2" allowtransparency="true" scrolling="0" width="200px" height="35px" frameborder="0"></iframe>
+</p>
+<h3><a href="index.html">Table of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">roswire</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="index.html#features">Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#installation">Installation</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#contents">Contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="recipes.html">Recipes</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#system">System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-roswire.proxy">ROS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ros-launch">ROS Launch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#nodes">Nodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#services">Services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-roswire.description">Descriptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#messages">Messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-roswire.exceptions">Exceptions</a></li>
+</ul>
+</li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="api-reference">
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h1>
+<p>This section of the documentation provides a reference to the public API for
+the roswire library.</p>
+<span class="target" id="module-roswire"></span><dl class="class">
+<dt id="roswire.ROSWire">
+<em class="property">class </em><code class="sig-prename descclassname">roswire.</code><code class="sig-name descname">ROSWire</code><span class="sig-paren">(</span><em class="sig-param">*</em>, <em class="sig-param">workspace=None</em>, <em class="sig-param">docker_url='unix://var/run/docker.sock'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roswire/roswire.html#ROSWire"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roswire.ROSWire" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provides an interface for building, analysing, and interacting with
+containerised ROS applications.</p>
+<dl class="attribute">
+<dt id="roswire.ROSWire.workspace">
+<code class="sig-name descname">workspace</code><a class="headerlink" href="#roswire.ROSWire.workspace" title="Permalink to this definition">¶</a></dt>
+<dd><p>The absolute path of the workspace directory for this session. The
+workspace is used to store cache data and to store shared temporary
+directories between the host machine and containerised ROS
+applications.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="roswire.ROSWire.app">
+<code class="sig-name descname">app</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">sources</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roswire/roswire.html#ROSWire.app"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roswire.ROSWire.app" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a ROS application.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">App</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="roswire.ROSWire.launch">
+<code class="sig-name descname">launch</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">sources</em>, <em class="sig-param">description=None</em>, <em class="sig-param">*</em>, <em class="sig-param">ports=None</em>, <em class="sig-param">environment=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roswire/roswire.html#ROSWire.launch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roswire.ROSWire.launch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Launches a ROS application using a provided Docker image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – the name of the Docker image.</p></li>
+<li><p><strong>sources</strong> (<em>Sequence</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – The sequence of setup files that should be used to load the ROS
+workspace.</p></li>
+<li><p><strong>description</strong> (<em>Optional</em><em>[</em><em>AppDescription</em><em>]</em>) – an optional static description of the ROS application.
+If no description is provided, ROSWire will attempt to load one
+from the cache or else build one.</p></li>
+<li><p><strong>ports</strong> (<em>Dict</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>]</em><em>, </em><em>optional</em>) – an optional dictionary specifying port mappings between the host
+and container, where keys represent container ports and values
+represent host ports.</p></li>
+<li><p><strong>environment</strong> (<em>Mapping</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) – an optional set of additional environment variables, indexed by
+name, that should be used by the system.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterator" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterator</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">AppInstance</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="roswire.ROSWire.load">
+<code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param">filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roswire/roswire.html#ROSWire.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roswire.ROSWire.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads a ROS application from a given file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">App</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<div class="section" id="system">
+<h2>System<a class="headerlink" href="#system" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="#roswire.System" title="roswire.System"><code class="xref py py-class docutils literal notranslate"><span class="pre">System</span></code></a> class is used to provide access to a ROS application that
+has been launched by <a class="reference internal" href="#roswire.ROSWire.launch" title="roswire.ROSWire.launch"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ROSWire.launch()</span></code></a>. This class is the main entry
+point for users wishing to interact with an ROS application.
+The <a class="reference internal" href="#roswire.System" title="roswire.System"><code class="xref py py-class docutils literal notranslate"><span class="pre">System</span></code></a> class facilitates interaction with the ROS application
+through a number of loosely-coupled proxies that are represented as
+attributes. For example, <code class="xref py py-attr docutils literal notranslate"><span class="pre">System.shell</span></code> exposes a proxy for interacting
+with a <code class="code docutils literal notranslate"><span class="pre">bash</span></code> shell inside the application container.</p>
+<dl class="attribute">
+<dt id="roswire.System">
+<code class="sig-prename descclassname">roswire.</code><code class="sig-name descname">System</code><a class="headerlink" href="#roswire.System" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">roswire.app.instance.AppInstance</span></code></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-roswire.proxy">
+<span id="ros"></span><h2>ROS<a class="headerlink" href="#module-roswire.proxy" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="ros-launch">
+<h2>ROS Launch<a class="headerlink" href="#ros-launch" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="nodes">
+<h2>Nodes<a class="headerlink" href="#nodes" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="services">
+<h2>Services<a class="headerlink" href="#services" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-roswire.description">
+<span id="descriptions"></span><h2>Descriptions<a class="headerlink" href="#module-roswire.description" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-roswire.definitions"></span></div>
+<div class="section" id="messages">
+<h2>Messages<a class="headerlink" href="#messages" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-roswire.exceptions">
+<span id="exceptions"></span><h2>Exceptions<a class="headerlink" href="#module-roswire.exceptions" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="roswire.exceptions.ROSWireException">
+<em class="property">class </em><code class="sig-prename descclassname">roswire.exceptions.</code><code class="sig-name descname">ROSWireException</code><a class="reference internal" href="_modules/roswire/exceptions.html#ROSWireException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roswire.exceptions.ROSWireException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class used by all ROSWire exceptions.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="roswire.exceptions.CatkinException">
+<em class="property">class </em><code class="sig-prename descclassname">roswire.exceptions.</code><code class="sig-name descname">CatkinException</code><a class="reference internal" href="_modules/roswire/exceptions.html#CatkinException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roswire.exceptions.CatkinException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class used by all Catkin-related exceptions.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="roswire.exceptions.FailedToParseLaunchFile">
+<em class="property">class </em><code class="sig-prename descclassname">roswire.exceptions.</code><code class="sig-name descname">FailedToParseLaunchFile</code><a class="reference internal" href="_modules/roswire/exceptions.html#FailedToParseLaunchFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roswire.exceptions.FailedToParseLaunchFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>An attempt to parse a launch file failed.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="roswire.exceptions.EnvNotFoundError">
+<em class="property">class </em><code class="sig-prename descclassname">roswire.exceptions.</code><code class="sig-name descname">EnvNotFoundError</code><span class="sig-paren">(</span><em class="sig-param">var</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roswire/exceptions.html#EnvNotFoundError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roswire.exceptions.EnvNotFoundError" title="Permalink to this definition">¶</a></dt>
+<dd><p>A given environment variable could not be found.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="roswire.exceptions.SubstitutionError">
+<em class="property">class </em><code class="sig-prename descclassname">roswire.exceptions.</code><code class="sig-name descname">SubstitutionError</code><a class="reference internal" href="_modules/roswire/exceptions.html#SubstitutionError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roswire.exceptions.SubstitutionError" title="Permalink to this definition">¶</a></dt>
+<dd><p>An error occurred during substitution argument handling.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="roswire.exceptions.CatkinBuildFailed">
+<em class="property">class </em><code class="sig-prename descclassname">roswire.exceptions.</code><code class="sig-name descname">CatkinBuildFailed</code><span class="sig-paren">(</span><em class="sig-param">retcode</em>, <em class="sig-param">reason</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roswire/exceptions.html#CatkinBuildFailed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roswire.exceptions.CatkinBuildFailed" title="Permalink to this definition">¶</a></dt>
+<dd><p>The attempt to build via catkin failed.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="roswire.exceptions.CatkinCleanFailed">
+<em class="property">class </em><code class="sig-prename descclassname">roswire.exceptions.</code><code class="sig-name descname">CatkinCleanFailed</code><span class="sig-paren">(</span><em class="sig-param">retcode</em>, <em class="sig-param">reason</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roswire/exceptions.html#CatkinCleanFailed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roswire.exceptions.CatkinCleanFailed" title="Permalink to this definition">¶</a></dt>
+<dd><p>An attempt to clean the catkin workspace failed.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="roswire.exceptions.PlayerNotStarted">
+<em class="property">class </em><code class="sig-prename descclassname">roswire.exceptions.</code><code class="sig-name descname">PlayerNotStarted</code><a class="reference internal" href="_modules/roswire/exceptions.html#PlayerNotStarted"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roswire.exceptions.PlayerNotStarted" title="Permalink to this definition">¶</a></dt>
+<dd><p>Playback has not begun.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="roswire.exceptions.PlayerAlreadyStarted">
+<em class="property">class </em><code class="sig-prename descclassname">roswire.exceptions.</code><code class="sig-name descname">PlayerAlreadyStarted</code><a class="reference internal" href="_modules/roswire/exceptions.html#PlayerAlreadyStarted"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roswire.exceptions.PlayerAlreadyStarted" title="Permalink to this definition">¶</a></dt>
+<dd><p>Playback has already started.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="roswire.exceptions.PlayerAlreadyStopped">
+<em class="property">class </em><code class="sig-prename descclassname">roswire.exceptions.</code><code class="sig-name descname">PlayerAlreadyStopped</code><a class="reference internal" href="_modules/roswire/exceptions.html#PlayerAlreadyStopped"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roswire.exceptions.PlayerAlreadyStopped" title="Permalink to this definition">¶</a></dt>
+<dd><p>Playback has already stopped.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="roswire.exceptions.PlayerFailure">
+<em class="property">class </em><code class="sig-prename descclassname">roswire.exceptions.</code><code class="sig-name descname">PlayerFailure</code><span class="sig-paren">(</span><em class="sig-param">retcode</em>, <em class="sig-param">stdout</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roswire/exceptions.html#PlayerFailure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roswire.exceptions.PlayerFailure" title="Permalink to this definition">¶</a></dt>
+<dd><p>An unexpected error occurred during playback.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="roswire.exceptions.PlayerTimeout">
+<em class="property">class </em><code class="sig-prename descclassname">roswire.exceptions.</code><code class="sig-name descname">PlayerTimeout</code><a class="reference internal" href="_modules/roswire/exceptions.html#PlayerTimeout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roswire.exceptions.PlayerTimeout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Playback did not complete within the specified timeout.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="roswire.exceptions.RecorderAlreadyStarted">
+<em class="property">class </em><code class="sig-prename descclassname">roswire.exceptions.</code><code class="sig-name descname">RecorderAlreadyStarted</code><a class="reference internal" href="_modules/roswire/exceptions.html#RecorderAlreadyStarted"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roswire.exceptions.RecorderAlreadyStarted" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recording has already started.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="roswire.exceptions.RecorderNotStarted">
+<em class="property">class </em><code class="sig-prename descclassname">roswire.exceptions.</code><code class="sig-name descname">RecorderNotStarted</code><a class="reference internal" href="_modules/roswire/exceptions.html#RecorderNotStarted"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roswire.exceptions.RecorderNotStarted" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recording has not begun.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="roswire.exceptions.RecorderAlreadyStopped">
+<em class="property">class </em><code class="sig-prename descclassname">roswire.exceptions.</code><code class="sig-name descname">RecorderAlreadyStopped</code><a class="reference internal" href="_modules/roswire/exceptions.html#RecorderAlreadyStopped"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roswire.exceptions.RecorderAlreadyStopped" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recording has already stopped.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="roswire.exceptions.ParsingError">
+<em class="property">class </em><code class="sig-prename descclassname">roswire.exceptions.</code><code class="sig-name descname">ParsingError</code><a class="reference internal" href="_modules/roswire/exceptions.html#ParsingError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roswire.exceptions.ParsingError" title="Permalink to this definition">¶</a></dt>
+<dd><p>ROSWire failed to parse a given file/string.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="roswire.exceptions.NodeNotFoundError">
+<em class="property">class </em><code class="sig-prename descclassname">roswire.exceptions.</code><code class="sig-name descname">NodeNotFoundError</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roswire/exceptions.html#NodeNotFoundError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roswire.exceptions.NodeNotFoundError" title="Permalink to this definition">¶</a></dt>
+<dd><p>No node was found with the given name.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="roswire.exceptions.ServiceNotFoundError">
+<em class="property">class </em><code class="sig-prename descclassname">roswire.exceptions.</code><code class="sig-name descname">ServiceNotFoundError</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roswire/exceptions.html#ServiceNotFoundError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roswire.exceptions.ServiceNotFoundError" title="Permalink to this definition">¶</a></dt>
+<dd><p>No service was found with the given name.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="roswire.exceptions.ParameterNotFoundError">
+<em class="property">class </em><code class="sig-prename descclassname">roswire.exceptions.</code><code class="sig-name descname">ParameterNotFoundError</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roswire/exceptions.html#ParameterNotFoundError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roswire.exceptions.ParameterNotFoundError" title="Permalink to this definition">¶</a></dt>
+<dd><p>No parameter was found with the given name.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="recipes.html" title="Recipes"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">roswire 2.0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2020, Christopher Steven Timperley.
+    </div>
+  </body>
+</html>

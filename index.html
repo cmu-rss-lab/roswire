@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>roswire &#8212; roswire 2.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/solar.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Recipes" href="recipes.html" /><link href='http://fonts.googleapis.com/css?family=Source+Code+Pro|Open+Sans:300italic,400italic,700italic,400,300,700' rel='stylesheet' type='text/css'>
+<link href="_static/solarized-dark.css" rel="stylesheet">
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="recipes.html" title="Recipes"
+             accesskey="N">next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">roswire 2.0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><p>
+<iframe src="https://ghbtns.com/github-btn.html?user=ChrisTimperley&amp;repo=roswire&amp;type=star&amp;count=true&amp;size=large&amp;v=2" allowtransparency="true" scrolling="0" width="200px" height="35px" frameborder="0"></iframe>
+</p>
+<h3><a href="#">Table of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">roswire</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#features">Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contents">Contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="recipes.html">Recipes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="roswire">
+<h1>roswire<a class="headerlink" href="#roswire" title="Permalink to this headline">¶</a></h1>
+<a class="reference external image-reference" href="https://travis-ci.org/ChrisTimperley/roswire"><img alt="https://travis-ci.org/ChrisTimperley/roswire.svg?branch=master" src="https://travis-ci.org/ChrisTimperley/roswire.svg?branch=master" /></a>
+<a class="reference external image-reference" href="https://badge.fury.io/py/roswire"><img alt="https://badge.fury.io/py/roswire.svg" src="https://badge.fury.io/py/roswire.svg" /></a>
+<a class="reference external image-reference" href="https://pypi.org/project/roswire"><img alt="https://img.shields.io/pypi/pyversions/roswire.svg" src="https://img.shields.io/pypi/pyversions/roswire.svg" /></a>
+<a class="reference external image-reference" href="https://gitq.com/ChrisTimperley/roswire"><img alt="https://gitq.com/badge.svg" src="https://gitq.com/badge.svg" /></a>
+<p>ROSWire is a Python library for performing static and dynamic analysis of
+containerised <a class="reference external" href="https://ros.org">Robot Operating System (ROS)</a>
+applications.
+Given a ROS application in the form of a <a class="reference external" href="https://docker.org">Docker</a>
+image, ROSWire provides an interface for statically querying the application
+(e.g., by automatically discovering its types, packages, messages, service,
+actions, etc.), as well as an interface for dynamically generating and
+interacting with instances of that application in the form of Docker
+containers (e.g., service calls, bag recording, topic publishing and
+subscribing, catkin builds, etc.).</p>
+<div class="section" id="features">
+<h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p><strong>Does not require ROS to be installed on your machine.</strong></p></li>
+<li><p><strong>Supports most ROS distributions out of the box (e.g., Groovy, Indigo, Kinetic, Melodic).</strong></p></li>
+<li><p><strong>Package Discovery:</strong> finds all ROS packages within a Docker image.</p></li>
+<li><p><strong>Definition Discovery:</strong> finds and parses all message, service and
+action formats into readable data structures.</p></li>
+<li><p><strong>Message Serialisation:</strong> converts ROS messages from YAML or binary
+to readable data structures and vice versa.</p></li>
+<li><p><strong>Bag Manipulation:</strong> efficiently parses
+<a class="reference external" href="http://wiki.ros.org/rosbag">rosbag</a> files, which can then be inspected,
+manipulated, and saved to disk.</p></li>
+<li><p><strong>Bag Playback:</strong> safely replay bag files inside containers.</p></li>
+</ul>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>To avoid interfering with the rest of your system (i.e., to avoid Python’s
+equivalent of DLL hell), we strongly recommend that
+ROSWire is installed within a
+<a class="reference external" href="https://virtualenv.pypa.io/en/latest/">virtualenv</a> or
+<a class="reference external" href="https://pipenv.readthedocs.io/en/latest/">pipenv</a> (pipenv is preferred).</p>
+<p>From within the virtual environment (i.e., the <cite>virtualenv</cite> or <cite>pipenv</cite>),
+the latest stable release of ROSWire on <a class="reference external" href="https://pypi.org">PyPI</a>
+can be installed via:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="o">(</span>roswire<span class="o">)</span> $ pip install roswire
+</pre></div>
+</div>
+<p>ROSWire can also be installed from source:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ git clone git@github.com:ChrisTimperley/roswire roswire
+$ <span class="nb">cd</span> roswire
+$ pipenv shell
+<span class="o">(</span>roswire<span class="o">)</span> $ pip install .
+</pre></div>
+</div>
+</div>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">roswire</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#features">Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contents">Contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="recipes.html">Recipes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="recipes.html#list-all-ros-packages-within-a-docker-image">List all ROS packages within a Docker image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="recipes.html#produce-a-description-of-a-given-ros-package">Produce a description of a given ROS package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="recipes.html#call-a-ros-service">Call a ROS service</a></li>
+<li class="toctree-l2"><a class="reference internal" href="recipes.html#apply-a-source-code-patch-and-rebuild-the-application">Apply a source code patch and rebuild the application</a></li>
+<li class="toctree-l2"><a class="reference internal" href="recipes.html#record-ros-topic-data-to-a-ros-bag">Record ROS topic data to a ROS bag</a></li>
+<li class="toctree-l2"><a class="reference internal" href="recipes.html#observe-the-state-of-a-running-ros-system">Observe the state of a running ROS system</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#system">System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-roswire.proxy">ROS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#ros-launch">ROS Launch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#nodes">Nodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#services">Services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-roswire.description">Descriptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#messages">Messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-roswire.exceptions">Exceptions</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="recipes.html" title="Recipes"
+             >next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">roswire 2.0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2020, Christopher Steven Timperley.
+    </div>
+  </body>
+</html>
