@@ -3,8 +3,8 @@
 roswire
 =======
 
-.. image:: https://travis-ci.org/ChrisTimperley/roswire.svg?branch=master
-    :target: https://travis-ci.org/ChrisTimperley/roswire
+.. image:: https://github.com/rosqual/roswire/actions/workflows/mypy-flake8.yml/badge.svg
+    :target: https://github.com/rosqual/roswire/actions/workflows/mypy-flake8.yml
 .. image:: https://badge.fury.io/py/roswire.svg
     :target: https://badge.fury.io/py/roswire
 .. image:: https://img.shields.io/pypi/pyversions/roswire.svg
