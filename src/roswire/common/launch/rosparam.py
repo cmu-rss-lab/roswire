@@ -25,7 +25,9 @@ def __load_radians(loader: YAMLLoader, node: yaml.YAMLObject) -> float:
     ----
     This does not support evaluation of expressions.
     """
-    expr_s = loader.construct_scalar(node).strip()
+    expr_s = loader.construct_scalar(node)  # type: ignore
+    assert isinstance(expr_s, str)
+    expr_s = expr_s.strip()
     if expr_s.startswith("rad("):
         expr_s = expr_s[4:-1]
 
@@ -35,7 +37,9 @@ def __load_radians(loader: YAMLLoader, node: yaml.YAMLObject) -> float:
 
 def __load_degrees(loader: YAMLLoader, node: yaml.YAMLObject) -> float:
     """Safely converts deg(num) to a float value."""
-    expr_s = loader.construct_scalar(node).strip()
+    expr_s = loader.construct_scalar(node)  # type: ignore
+    assert isinstance(expr_s, str)
+    expr_s = expr_s.strip()
     if expr_s.startswith("def("):
         expr_s = expr_s[4:-1]
     return float(expr_s) * math.pi / 180.0
