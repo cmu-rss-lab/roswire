@@ -124,5 +124,9 @@ class ROSWire:
             app = description.app
         else:
             app = self.app(image=image, sources=sources)
-        with app.launch(ports=ports, environment=environment) as app_instance:
+        with app.launch(
+            ports=ports,
+            environment=environment,
+            volumes=volumes,
+        ) as app_instance:
             yield app_instance
