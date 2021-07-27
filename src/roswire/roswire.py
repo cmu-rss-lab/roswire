@@ -89,6 +89,7 @@ class ROSWire:
         *,
         ports: Optional[Dict[int, int]] = None,
         environment: Optional[Mapping[str, str]] = None,
+        volumes: Optional[Mapping[str, Any]] = None,
     ) -> Iterator[AppInstance]:
         """Launches a ROS application using a provided Docker image.
 
@@ -110,6 +111,13 @@ class ROSWire:
         environment: Mapping[str, str], optional
             an optional set of additional environment variables, indexed by
             name, that should be used by the system.
+        volumes: Mapping[str, Any], optional
+            an optional set of volumes that should be mounted inside the
+            container, specified as a dictionary where keys represent a host
+            path or volume name, and values are a dictionary containing
+            the following keys: :code:`bind`, the path to mount the volume
+            inside the container, and :code:`mode`, specifies whether the
+            mount should be read-write :code:`rw` or read-only :code:`ro`.
         """
         app: App
         if description:
