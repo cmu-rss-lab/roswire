@@ -142,6 +142,7 @@ class App:
             self.describe()
 
         environment = dict(environment) if environment else {}
+        volumes = dict(volumes) if volumes else {}
 
         # generate a temporary shared directory
         dir_containers = os.path.join(self._roswire.workspace, "containers")
@@ -155,12 +156,17 @@ class App:
             name=name,
             entrypoint="/bin/sh -c",
             environment=environment,
-            volumes={host_workspace: {"bind": "/.roswire", "mode": "rw"}},
+            volumes={
+                host_workspace: {"bind": "/.roswire", "mode": "rw"},
+                **volumes,
+            },
             ports=ports,
         )
 
         instance = AppInstance(
-            app=self, dockerblade=container, host_workspace=host_workspace
+            app=self,
+            dockerblade=container,
+            host_workspace=host_workspace,
         )
         return instance
 
