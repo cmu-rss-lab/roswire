@@ -1,2 +1,3 @@
 graft src/roswire/resources
+include src/roswire/py.typed
 
