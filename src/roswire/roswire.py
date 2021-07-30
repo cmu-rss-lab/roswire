@@ -4,7 +4,7 @@ __all__ = ("ROSWire",)
 
 import contextlib
 import os
-from typing import Dict, Iterator, Mapping, Optional, Sequence
+import typing as t
 
 import dockerblade
 import yaml
@@ -33,7 +33,7 @@ class ROSWire:
     def __init__(
         self,
         *,
-        workspace: Optional[str] = None,
+        workspace: t.Optional[str] = None,
         docker_url: str = _DEFAULT_URL,
     ) -> None:
         if not workspace:
@@ -60,7 +60,7 @@ class ROSWire:
     def workspace(self) -> str:
         return self.__workspace
 
-    def app(self, image: str, sources: Sequence[str]) -> App:
+    def app(self, image: str, sources: t.Sequence[str]) -> App:
         """Constructs a ROS application."""
         return App(image=image, sources=sources, roswire=self)
 
@@ -69,7 +69,7 @@ class ROSWire:
         with open(filename, "r") as f:
             contents = yaml.safe_load(f)
         image: str = contents["image"]
-        sources: Sequence[str] = contents["sources"]
+        sources: t.Sequence[str] = contents["sources"]
         app = self.app(image=image, sources=sources)
 
         if "description" in contents:
@@ -84,12 +84,13 @@ class ROSWire:
     def launch(
         self,
         image: str,
-        sources: Sequence[str],
-        description: Optional[AppDescription] = None,
+        sources: t.Sequence[str],
+        description: t.Optional[AppDescription] = None,
         *,
-        ports: Optional[Dict[int, int]] = None,
-        environment: Optional[Mapping[str, str]] = None,
-    ) -> Iterator[AppInstance]:
+        ports: t.Optional[t.Dict[int, int]] = None,
+        environment: t.Optional[t.Mapping[str, str]] = None,
+        volumes: t.Optional[t.Mapping[str, t.Any]] = None,
+    ) -> t.Iterator[AppInstance]:
         """Launches a ROS application using a provided Docker image.
 
         Parameters
@@ -99,22 +100,33 @@ class ROSWire:
         sources: Sequence[str]
             The sequence of setup files that should be used to load the ROS
             workspace.
-        description: Optional[AppDescription]
+        description: t.Optional[AppDescription]
             an optional static description of the ROS application.
             If no description is provided, ROSWire will attempt to load one
             from the cache or else build one.
-        ports: Dict[int, int], optional
+        ports: t.Dict[int, int], optional
             an optional dictionary specifying port mappings between the host
             and container, where keys represent container ports and values
             represent host ports.
-        environment: Mapping[str, str], optional
+        environment: t.Mapping[str, str], optional
             an optional set of additional environment variables, indexed by
             name, that should be used by the system.
+        volumes: t.Mapping[str, t.Any], optional
+            an optional set of volumes that should be mounted inside the
+            container, specified as a dictionary where keys represent a host
+            path or volume name, and values are a dictionary containing
+            the following keys: :code:`bind`, the path to mount the volume
+            inside the container, and :code:`mode`, specifies whether the
+            mount should be read-write :code:`rw` or read-only :code:`ro`.
         """
         app: App
         if description:
             app = description.app
         else:
             app = self.app(image=image, sources=sources)
-        with app.launch(ports=ports, environment=environment) as app_instance:
+        with app.launch(
+            ports=ports,
+            environment=environment,
+            volumes=volumes,
+        ) as app_instance:
             yield app_instance

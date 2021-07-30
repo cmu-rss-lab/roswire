@@ -4,7 +4,7 @@ __all__ = ("App",)
 import os
 import tempfile
 import typing
-from typing import Mapping, Optional, Sequence
+from typing import Any, Mapping, Optional, Sequence
 
 import attr
 import docker
@@ -104,6 +104,7 @@ class App:
         name: Optional[str] = None,
         ports: Optional[Mapping[int, int]] = None,
         environment: Optional[Mapping[str, str]] = None,
+        volumes: Optional[Mapping[str, Any]] = None,
         require_description: bool = True
     ) -> AppInstance:
         """Launches an instance of this application.
@@ -119,6 +120,13 @@ class App:
         environment: Mapping[str, str], optional
             An optional set of additional environment variables, indexed by
             name, that should be used by the system.
+        volumes: t.Mapping[str, t.Any], optional
+            an optional set of volumes that should be mounted inside the
+            container, specified as a dictionary where keys represent a host
+            path or volume name, and values are a dictionary containing
+            the following keys: :code:`bind`, the path to mount the volume
+            inside the container, and :code:`mode`, specifies whether the
+            mount should be read-write :code:`rw` or read-only :code:`ro`.
         require_description: bool
             If :code:`True`, this method call will ensure that there is a
             description of the application before launching. If :code:`False`,
@@ -134,6 +142,7 @@ class App:
             self.describe()
 
         environment = dict(environment) if environment else {}
+        volumes = dict(volumes) if volumes else {}
 
         # generate a temporary shared directory
         dir_containers = os.path.join(self._roswire.workspace, "containers")
@@ -147,12 +156,17 @@ class App:
             name=name,
             entrypoint="/bin/sh -c",
             environment=environment,
-            volumes={host_workspace: {"bind": "/.roswire", "mode": "rw"}},
+            volumes={
+                host_workspace: {"bind": "/.roswire", "mode": "rw"},
+                **volumes,
+            },
             ports=ports,
         )
 
         instance = AppInstance(
-            app=self, dockerblade=container, host_workspace=host_workspace
+            app=self,
+            dockerblade=container,
+            host_workspace=host_workspace,
         )
         return instance
 
