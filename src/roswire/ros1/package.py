@@ -3,7 +3,7 @@ __all__ = ("ROS1Package", "ROS1PackageDatabase",)
 
 import os
 import typing
-from typing import Any, Collection, Dict, List
+from typing import Any, Collection, Dict, List, Mapping
 from typing import Iterable  # noqa: F401 # Needed for tuple_from_iterable
 
 import attr
@@ -14,6 +14,7 @@ from .action import ROS1ActionFormat
 from .msg import ROS1MsgFormat
 from .srv import ROS1SrvFormat
 from ..common import Package, PackageDatabase
+from ..common.package import NodeSourceInfo
 from ..util import tuple_from_iterable
 
 if typing.TYPE_CHECKING:
@@ -30,6 +31,7 @@ class ROS1Package(Package[ROS1MsgFormat, ROS1SrvFormat, ROS1ActionFormat]):
         attr.ib(converter=tuple_from_iterable)
     actions: Collection[ROS1ActionFormat] = \
         attr.ib(converter=tuple_from_iterable)
+    node_sources: Mapping[str, NodeSourceInfo] = attr.ib(converter=dict)
 
     @classmethod
     def build(cls, path: str, app_instance: "AppInstance") -> "ROS1Package":
@@ -46,6 +48,7 @@ class ROS1Package(Package[ROS1MsgFormat, ROS1SrvFormat, ROS1ActionFormat]):
         dir_msg = os.path.join(path, "msg")
         dir_srv = os.path.join(path, "srv")
         dir_action = os.path.join(path, "action")
+        file_cmakelists = os.path.join(path, "CMakelists.txt")
 
         if files.isdir(dir_msg):
             messages = [
@@ -66,7 +69,12 @@ class ROS1Package(Package[ROS1MsgFormat, ROS1SrvFormat, ROS1ActionFormat]):
                 if f.endswith(".action")
             ]
 
-        return ROS1Package(name, path, messages, services, actions)
+        if files.isfile(file_cmakelists):
+            with open(file_cmakelists, 'r') as cmake:
+                nodes = NodeSourceInfo.from_cmake("\n".join(cmake.readlines()))
+            node_source_map = {n.name : n for n in nodes}
+
+        return ROS1Package(name, path, messages, services, actions, node_source_map)
 
     @classmethod
     def from_dict(cls, d: Dict[str, Any]) -> "ROS1Package":
