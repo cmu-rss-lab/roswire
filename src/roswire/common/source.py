@@ -9,9 +9,8 @@ import abc
 import enum
 import re
 import typing as t
-from typing import Any, Iterable  # noqa: F401 # Needed for tuple_from_iterable and argparse
-
 from pathlib import Path
+from typing import Any, Iterable  # noqa: F401, #501 # Needed for tuple_from_iterable and argparse
 
 import attr
 
