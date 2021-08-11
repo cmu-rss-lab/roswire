@@ -3,7 +3,7 @@ __all__ = ("ROS1Package", "ROS1PackageDatabase",)
 
 import os
 import typing
-from typing import Any, Collection, Dict, List, Mapping
+from typing import Any, Collection, Dict, List
 from typing import Iterable  # noqa: F401 # Needed for tuple_from_iterable
 
 import attr
@@ -46,7 +46,6 @@ class ROS1Package(Package[ROS1MsgFormat, ROS1SrvFormat, ROS1ActionFormat]):
         dir_msg = os.path.join(path, "msg")
         dir_srv = os.path.join(path, "srv")
         dir_action = os.path.join(path, "action")
-        file_cmakelists = os.path.join(path, "CMakelists.txt")
 
         if files.isdir(dir_msg):
             messages = [

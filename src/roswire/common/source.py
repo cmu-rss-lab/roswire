@@ -4,6 +4,7 @@ __all__ = (
     "NodeSourceInfo",
     "PackageSourceExtractor",
     "SourceLanguage",)
+
 import abc
 import enum
 import re
@@ -12,8 +13,11 @@ from pathlib import Path
 
 import attr
 
+from .cmake import (
+    argparse as cmake_argparse,
+    ParserContext as CMakeParserContext,
+)
 from ..util import tuple_from_iterable
-from .cmake import ParserContext as CMakeParserContext, argparse as cmake_argparse
 
 if t.TYPECHECKING:
     from ... import AppInstance
@@ -31,22 +35,28 @@ class NodeSourceInfo:
     sources: t.Collection[str] = attr.ib(converter=tuple_from_iterable)
 
     def to_dict(self) -> t.Dict[str, t.Any]:
-        return {"name" : self.node_name,
+        return {"name": self.node_name,
                 "language": self.language.value,
-                "sources" : list(self.sources),
+                "sources": list(self.sources),
                 }
 
     @classmethod
     def from_dict(cls, info: t.Dict[str, t.Any]) -> "NodeSourceInfo":
-        return NodeSourceInfo(info["name"], SourceLanguage(info["language"]), info["sources"])
+        return NodeSourceInfo(
+            info["name"],
+            SourceLanguage(info["language"]),
+            info["sources"]
+        )
 
 
-def extract_sources_from_cmake(file_contents: str) -> t.Collection['NodeSourceInfo']:
+def extract_sources_from_cmake(
+        file_contents: str
+) -> t.Collection['NodeSourceInfo']:
     """
     Extracts NodeSource information about nodes in a CMakefilesList.txt.
 
-    Note, ROS2 uses both CMakeLists.txt and setup.py for package information, so we factor
-    this method into common.
+    Note, ROS2 uses both CMakeLists.txt and setup.py for package information,
+    so we factor this method into common.
 
     Parameters
     ----------
@@ -58,12 +68,16 @@ def extract_sources_from_cmake(file_contents: str) -> t.Collection['NodeSourceIn
     Collection[NodeSourceInfo]
         A collection of NodeSourceInfo, one for each node defined in the file
     """
-    source_infos: t.Set['NodeSourceInfo'] = set()
+    src_info: t.Set['NodeSourceInfo'] = set()
     cmake_env: t.Dict[str, str] = {}
 
-    for cmd, args, arg_tokens, (fname, line, column) in CMakeParserContext().parse(file_contents):
+    for cmd, args, arg_tokens, (_fname, _line, _column) \
+            in CMakeParserContext().parse(file_contents):
         if cmd == "set":
-            opts, args = cmake_argparse(args, {"PARENT_SCOPE": "-", "FORCE": "-", "CACHE" : "*"})
+            opts, args = cmake_argparse(
+                args,
+                {"PARENT_SCOPE": "-", "FORCE": "-", "CACHE": "*"}
+            )
             cmake_env[args[0]] = ";".join(args[1:])
         elif cmd == "unset":
             opts, args = cmake_argparse(args, {"CACHE": "-"})
@@ -71,37 +85,54 @@ def extract_sources_from_cmake(file_contents: str) -> t.Collection['NodeSourceIn
         elif cmd == "add_executable":
             name = args[0]
             sources: t.List[str] = []
-            for token_type, token_val in arg_tokens[1:]:
+            for _token_type, token_val in arg_tokens[1:]:
                 if not token_val.startswith("$"):
                     sources.append(token_val)
                 else:
                     matches = re.match(r'\${(.*)}', token_val)
                     if matches and matches.group(1) in cmake_env:
                         sources.extend(cmake_env[matches.group(1)].split(";"))
-            source_infos.add(NodeSourceInfo(node_name=name, language=SourceLanguage.CXX, sources=sources))
+            src_info.add(NodeSourceInfo(name, SourceLanguage.CXX, sources))
         elif cmd == "catkin_install_python":
-            opts, args = cmake_argparse(args, {"PROGRAMS": "*", "DESTINATION": "*"})
+            opts, args = cmake_argparse(
+                args,
+                {"PROGRAMS": "*", "DESTINATION": "*"}
+            )
             if 'PROGRAMS' in opts:
                 program_opts = opts['PROGRAMS']
                 for i in range(len(program_opts)):
-                    # http://docs.ros.org/en/jade/api/catkin/html/howto/format2/installing_python.html
-                    # Convention is that ros python nodes are in nodes/ directory. All others are in
-                    # scripts/. So just include python installs that are in nodes/
+                    # http://docs.ros.org/en/jade/api/catkin/html/howto/format2/installing_python.html  # noqa: E501
+                    # Convention is that ros python nodes are in nodes/
+                    # directory. All others are in scripts/. So just
+                    # include python installs that are in nodes/
                     program = program_opts[i]
                     if program.startswith("nodes/"):
                         name = Path(program[0]).stem
                         sources = [program]
-                        source_infos.add(NodeSourceInfo(name, SourceLanguage.PYTHON, sources))
+                        src_info.add(
+                            NodeSourceInfo(
+                                name,
+                                SourceLanguage.PYTHON,
+                                sources))
             else:
-                raise ValueError("PROGRAMS not specified in catkin_install_python")
-    return source_infos
+                raise ValueError(
+                    "PROGRAMS not specified in catkin_install_python"
+                )
+    return src_info
+
 
 class PackageSourceExtractor(abc.ABC):
     @classmethod
     @abc.abstractmethod
-    def for_app_instance(cls, app_instance: "AppInstance") -> "PackageSourceExtractor":
+    def for_app_instance(
+        cls,
+        app_instance: "AppInstance"
+    ) -> "PackageSourceExtractor":
         ...
 
     @abc.abstractmethod
-    def extract_source_for_package(self, path_to_package: str) -> t.Mapping[str, NodeSourceInfo]:
+    def extract_source_for_package(
+        self,
+        path_to_package: str
+    ) -> t.Mapping[str, NodeSourceInfo]:
         ...
