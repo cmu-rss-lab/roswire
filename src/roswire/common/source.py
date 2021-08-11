@@ -10,7 +10,7 @@ import enum
 import re
 import typing as t
 from pathlib import Path
-from typing import Any, Iterable  # noqa: F401, #501 # Needed for tuple_from_iterable and argparse
+from typing import Any, Iterable  # noqa: F401, E501 # Needed for tuple_from_iterable and argparse
 
 import attr
 
