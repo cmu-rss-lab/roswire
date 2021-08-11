@@ -7,6 +7,7 @@ from .msg import Constant, Field, Message, MsgFormat
 from .node import Node
 from .node_manager import NodeManager
 from .package import Package, PackageDatabase
+from .source import extract_sources_from_cmake, NodeSourceInfo, PackageSourceExtractor, SourceLanguage
 from .srv import SrvFormat
 from .state import SystemState
 from .type_db import TypeDatabase
