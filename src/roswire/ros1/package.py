@@ -14,7 +14,6 @@ from .action import ROS1ActionFormat
 from .msg import ROS1MsgFormat
 from .srv import ROS1SrvFormat
 from ..common import Package, PackageDatabase
-from ..common.package import NodeSourceInfo
 from ..util import tuple_from_iterable
 
 if typing.TYPE_CHECKING:
@@ -31,7 +30,6 @@ class ROS1Package(Package[ROS1MsgFormat, ROS1SrvFormat, ROS1ActionFormat]):
         attr.ib(converter=tuple_from_iterable)
     actions: Collection[ROS1ActionFormat] = \
         attr.ib(converter=tuple_from_iterable)
-    node_sources: Mapping[str, NodeSourceInfo] = attr.ib(converter=dict)
 
     @classmethod
     def build(cls, path: str, app_instance: "AppInstance") -> "ROS1Package":
@@ -69,12 +67,7 @@ class ROS1Package(Package[ROS1MsgFormat, ROS1SrvFormat, ROS1ActionFormat]):
                 if f.endswith(".action")
             ]
 
-        if files.isfile(file_cmakelists):
-            with open(file_cmakelists, 'r') as cmake:
-                nodes = NodeSourceInfo.from_cmake("\n".join(cmake.readlines()))
-            node_source_map = {n.name : n for n in nodes}
-
-        return ROS1Package(name, path, messages, services, actions, node_source_map)
+        return ROS1Package(name, path, messages, services, actions)
 
     @classmethod
     def from_dict(cls, d: Dict[str, Any]) -> "ROS1Package":
