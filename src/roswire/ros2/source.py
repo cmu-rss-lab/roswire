@@ -36,7 +36,7 @@ class ROS2PackageSourceExtractor(PackageSourceExtractor):
         if self._files.isfile(cmakelists_path):
             contents = self._files.read(cmakelists_path)
             source_infos = extract_sources_from_cmake(contents)
-            return {n.name: n for n in source_infos}
+            return {n.node_name: n for n in source_infos}
 
         setuppy_path = os.path.join(path_to_package, "setup.py")
         if self._files.isfile(setuppy_path):

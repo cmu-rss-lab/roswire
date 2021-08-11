@@ -38,4 +38,4 @@ class ROS1PackageSourceExtractor(PackageSourceExtractor):
 
         contents = self._files.read(cmakelists_path)
         source_infos = extract_sources_from_cmake(contents)
-        return {n.name: n for n in source_infos}
+        return {n.node_name: n for n in source_infos}

@@ -9,6 +9,8 @@ import abc
 import enum
 import re
 import typing as t
+from typing import Any, Iterable  # noqa: F401 # Needed for tuple_from_iterable and argparse
+
 from pathlib import Path
 
 import attr
@@ -19,8 +21,8 @@ from .cmake import (
 )
 from ..util import tuple_from_iterable
 
-if t.TYPECHECKING:
-    from ... import AppInstance
+if t.TYPE_CHECKING:
+    from .. import AppInstance
 
 
 class SourceLanguage(enum.Enum):
