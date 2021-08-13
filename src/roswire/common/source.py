@@ -51,7 +51,7 @@ class NodeSourceInfo:
 
 
 def extract_sources_from_cmake(
-        file_contents: str
+    file_contents: str
 ) -> t.Collection['NodeSourceInfo']:
     """
     Extracts NodeSource information about nodes in a CMakefilesList.txt.

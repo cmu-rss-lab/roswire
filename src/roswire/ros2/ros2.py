@@ -25,7 +25,7 @@ class ROS2:
     services: ROS2ServiceManager = attr.ib(init=False)
     launch: ROS2LaunchManager = attr.ib(init=False)
     _state_probe: ROS2StateProbe = attr.ib(init=False)
-    __package_source_extractor: ROS2PackageSourceExtractor = \
+    _package_source_extractor: ROS2PackageSourceExtractor = \
         attr.ib(init=False)
 
     def __attrs_post_init__(self) -> None:
@@ -52,7 +52,7 @@ class ROS2:
     def state(self) -> ROS2SystemState:
         return self._state_probe.probe()
 
-    def get_node_sources_for_source_package(
+    def package_node_sources(
         self,
         package_path: str
     ) -> typing.Mapping[str, NodeSourceInfo]:
@@ -72,6 +72,6 @@ class ROS2:
             A (possibly empty) mapping between node names provided by the
             package and their source information
         """
-        return self.__package_source_extractor.extract_source_for_package(
+        return self._package_source_extractor.extract_source_for_package(
             package_path
         )

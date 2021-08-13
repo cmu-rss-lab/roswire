@@ -406,7 +406,7 @@ class ROS1:
             delete_file_after_use=delete_file_after_use,
         )
 
-    def get_node_sources_for_source_package(
+    def package_node_sources(
         self,
         package_path: str
     ) -> Mapping[str, NodeSourceInfo]:
