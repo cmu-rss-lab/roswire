@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ("Package", "PackageDatabase")
+__all__ = ("Package", "PackageDatabase",)
 
 import typing
 from abc import ABC, abstractmethod
@@ -23,6 +23,7 @@ from .srv import SrvFormat
 
 if typing.TYPE_CHECKING:
     from .. import AppInstance
+
 
 MF = typing.TypeVar("MF", bound=MsgFormat)
 SF = typing.TypeVar("SF", bound=SrvFormat)

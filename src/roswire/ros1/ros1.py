@@ -8,6 +8,7 @@ import xmlrpc.client
 from types import TracebackType
 from typing import (
     Dict,
+    Mapping,
     Optional,
     Sequence,
     Tuple,
@@ -22,9 +23,15 @@ from .launch import ROS1LaunchManager
 from .node_manager import ROS1NodeManager
 from .parameter import ParameterServer
 from .service import ServiceManager
+from .source import ROS1PackageSourceExtractor
 from .state import SystemStateProbe
 from .. import exceptions as exc
-from ..common import NodeManager, ROSLaunchManager, SystemState
+from ..common import (
+    NodeManager,
+    NodeSourceInfo,
+    ROSLaunchManager,
+    SystemState,
+)
 from ..exceptions import ROSWireException
 from ..util import is_port_open, Stopwatch, wait_till_open
 
@@ -194,6 +201,10 @@ class ROS1:
         )
         self.roslaunch: ROSLaunchManager = ROS1LaunchManager(
             self.__shell, self.__files
+        )
+
+        self.__package_source_extractor = ROS1PackageSourceExtractor(
+            self.__files
         )
 
         logger.debug("waiting for /rosout to be online")
@@ -393,4 +404,29 @@ class ROS1:
             shell=self.__shell,
             files=self.__files,
             delete_file_after_use=delete_file_after_use,
+        )
+
+    def package_node_sources(
+        self,
+        package_path: str
+    ) -> Mapping[str, NodeSourceInfo]:
+        """
+        Extracts the node -> source files mapping for the package with the
+        source in ``package_path''
+
+        Parameters
+        ----------
+        package_path: str
+            The path on the container filesystem that contains the package
+            source
+
+        Returns
+        -------
+        Mapping[str, NodeSourceInfo]
+            A (possibly empty) mapping between node names provided by the
+            package and their source information
+        """
+        self.must_be_connected()
+        return self.__package_source_extractor.extract_source_for_package(
+            package_path
         )
