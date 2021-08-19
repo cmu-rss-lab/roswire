@@ -8,12 +8,14 @@ import attr
 import dockerblade
 from loguru import logger
 
-from .. import AppInstance
 from ..common.source import (
     extract_sources_from_cmake,
     NodeSourceInfo,
     PackageSourceExtractor,
 )
+
+if t.TYPE_CHECKING:
+    from ..app.instance import AppInstance
 
 
 @attr.s(auto_attribs=True)
