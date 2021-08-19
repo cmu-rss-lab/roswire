@@ -4,6 +4,7 @@ import os
 import shlex
 import subprocess
 import typing
+import typing as t
 import xml.etree.ElementTree as ET
 from typing import (
     Any,
@@ -55,14 +56,11 @@ def _read_contents(tag: ET.Element) -> str:
 
 def _parse_bool(attr: str, val: str) -> bool:
     """Parses a boolean value from an XML attribute."""
-    val = val.lower()
-    if val == "true":
-        return True
-    if val == "false":
-        return False
-
-    m = f"illegal boolean attribute [{attr}]: {val}"
-    raise FailedToParseLaunchFile(m)
+    try:
+        return convert_str_to_type(val, "bool")
+    except ValueError:
+        m = f"illegal boolean attribute [{attr}]: {val}"
+        raise FailedToParseLaunchFile(m)
 
 
 def _parse_float(attr: str, val: str) -> float:
@@ -75,6 +73,41 @@ def _parse_float(attr: str, val: str) -> float:
     except ValueError:
         m = f"failed to parse attribute [{attr}] to float: {val}"
         raise FailedToParseLaunchFile(m)
+
+
+@typing.overload
+def convert_str_to_type(s: str, typ: t.Literal["bool"]) -> bool:
+    ...
+
+
+@typing.overload
+def convert_str_to_type(s: str, typ: t.Literal["boolean"]) -> bool:
+    ...
+
+
+@typing.overload
+def convert_str_to_type(s: str, typ: t.Literal["int"]) -> int:
+    ...
+
+
+@typing.overload
+def convert_str_to_type(s: str, typ: t.Literal["double"]) -> float:
+    ...
+
+
+@typing.overload
+def convert_str_to_type(s: str, typ: t.Literal["str"]) -> str:
+    ...
+
+
+@typing.overload
+def convert_str_to_type(s: str, typ: t.Literal["string"]) -> str:
+    ...
+
+
+@typing.overload
+def convert_str_to_type(s: str, typ: str) -> Union[bool, int, str, float]:
+    ...
 
 
 def convert_str_to_type(s: str, typ: str) -> Union[bool, int, str, float]:
