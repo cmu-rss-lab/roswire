@@ -25,7 +25,7 @@ class ROS1PackageSourceExtractor(PackageSourceExtractor):
     @classmethod
     def for_app_instance(
         cls,
-        app_instance: AppInstance
+        app_instance: "AppInstance",
     ) -> "ROS1PackageSourceExtractor":
         return ROS1PackageSourceExtractor(files=app_instance.files)
 
