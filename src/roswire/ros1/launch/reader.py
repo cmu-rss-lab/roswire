@@ -337,6 +337,7 @@ class ROS1LaunchFileReader(LaunchFileReader):
             "args",
             "ns",
             "launch-prefix",
+            "machine",
         ],
     )
     def _load_node_tag(
@@ -424,6 +425,16 @@ class ROS1LaunchFileReader(LaunchFileReader):
         cfg = cfg.with_env(name, value)
         ctx = ctx.with_env_arg(name, value)
         return ctx, cfg
+
+    @tag("machine", ["name", "address", "default"])
+    def _load_machine_tag(
+        self,
+        ctx: LaunchContext,
+        cfg: LaunchConfig,
+        tag: ET.Element,
+    ) -> Tuple[LaunchContext, LaunchConfig]:
+        logger.debug("ignoring machine tag")
+        return (ctx, cfg)
 
     @tag("include", ["file", "pass_all_args", "ns", "clear_params"])
     def _load_include_tag(
