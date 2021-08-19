@@ -8,12 +8,14 @@ import attr
 import dockerblade
 from loguru import logger
 
-from .. import AppInstance
 from ..common.source import (
     extract_sources_from_cmake,
     NodeSourceInfo,
     PackageSourceExtractor
 )
+
+if t.TYPE_CHECKING:
+    from .. import AppInstance
 
 
 @attr.s(auto_attribs=True)
@@ -23,7 +25,7 @@ class ROS2PackageSourceExtractor(PackageSourceExtractor):
     @classmethod
     def for_app_instance(
         cls,
-        app_instance: AppInstance
+        app_instance: "AppInstance",
     ) -> "ROS2PackageSourceExtractor":
         return ROS2PackageSourceExtractor(files=app_instance.files)
 
