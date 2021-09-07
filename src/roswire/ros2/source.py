@@ -49,7 +49,7 @@ class ROS2PackageSourceExtractor(CMakeExtractor):
                      f"{path_to_package}. Is it a package soure directory?")
         raise ValueError(f"No pacakge information for {path_to_package}.")
 
-    def package_paths(self, package: Package) -> t.Collection[str]:
+    def package_paths(self, package: Package) -> t.Set[str]:
         # TODO Do this properly
         include: str = os.path.normpath(
             os.path.join(package.path, f'../../include/{package.name}')

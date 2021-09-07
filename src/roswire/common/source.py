@@ -107,7 +107,7 @@ class CMakeExtractor(abc.ABC):
         ...
 
     @abc.abstractmethod
-    def package_paths(self, package: Package) -> t.Collection[str]:
+    def package_paths(self, package: Package) -> t.Set[str]:
         ...
 
     def _process_cmake_contents(

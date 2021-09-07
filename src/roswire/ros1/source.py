@@ -37,7 +37,7 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
         contents = self._files.read(cmakelists_path)
         return self._process_cmake_contents(contents, package, {})
 
-    def package_paths(self, package: Package) -> t.Collection[str]:
+    def package_paths(self, package: Package) -> t.Set[str]:
         # TODO Do this properly
         include: str = os.path.normpath(
             os.path.join(package.path, f'../../include/{package.name}')
