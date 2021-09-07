@@ -65,7 +65,7 @@ class CMakeBinaryTarget(CMakeTarget):
 
 
 @attr.s(auto_attribs=True, slots=True)
-class CMakeLibraryTarget(CMakeTarget):
+class CMakeLibraryTarget(CMakeBinaryTarget):
 
     _entrypoint: t.Optional[str] = attr.ib(init=False)
 
