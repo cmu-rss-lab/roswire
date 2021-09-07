@@ -66,7 +66,14 @@ class CMakeBinaryTarget(CMakeTarget):
 
 @attr.s(auto_attribs=True, slots=True)
 class CMakeLibraryTarget(CMakeTarget):
-    entrypoint: str
+    _entrypoint: str = attr.ib(init=False)
+
+    def set_entrypoint(self, entrypoint: str):
+        self._entrypoint = entrypoint
+
+    @property
+    def entrypoint(self) -> t.Optional[str]:
+        return self._entrypoint
 
     def to_dict(self) -> t.Dict[str, t.Any]:
         d = super().to_dict()
