@@ -9,10 +9,7 @@ import dockerblade
 from loguru import logger
 
 from ..common import Package
-from ..common.source import (
-    CMakeInfo,
-    CMakeExtractor,
-)
+from ..common.source import CMakeExtractor, CMakeInfo
 
 if t.TYPE_CHECKING:
     from .. import AppInstance
