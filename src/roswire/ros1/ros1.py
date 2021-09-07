@@ -27,7 +27,7 @@ from .source import ROS1PackageSourceExtractor
 from .state import SystemStateProbe
 from .. import exceptions as exc
 from ..common import (
-    ExecutableInfo,
+    CMakeTarget,
     NodeManager,
     Package, ROSLaunchManager,
     SystemState,
@@ -409,7 +409,7 @@ class ROS1:
     def package_node_sources(
         self,
         package: Package,
-    ) -> Mapping[str, ExecutableInfo]:
+    ) -> Mapping[str, CMakeTarget]:
         """
         Extracts the node -> source files mapping for the package with the
         source in ``package_path''
@@ -427,6 +427,6 @@ class ROS1:
             package and their source information
         """
         self.must_be_connected()
-        return self.__package_source_extractor.extract_source_for_package(
+        return self.__package_source_extractor.get_cmake_info(
             package
-        ).executables
+        ).targets

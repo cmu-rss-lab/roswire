@@ -8,14 +8,14 @@ import attr
 from loguru import logger
 
 from ..common import Package
-from ..common.source import (CMakeInfo, PackageSourceExtractor)
+from ..common.source import (CMakeInfo, CMakeExtractor)
 
 if t.TYPE_CHECKING:
     from ..app.instance import AppInstance
 
 
 @attr.s(slots=True)
-class ROS1PackageSourceExtractor(PackageSourceExtractor):
+class ROS1PackageSourceExtractor(CMakeExtractor):
 
     @classmethod
     def for_app_instance(
@@ -24,7 +24,7 @@ class ROS1PackageSourceExtractor(PackageSourceExtractor):
     ) -> "ROS1PackageSourceExtractor":
         return ROS1PackageSourceExtractor(files=app_instance.files)
 
-    def extract_source_for_package(
+    def get_cmake_info(
         self,
         package: Package
     ) -> CMakeInfo:
@@ -35,7 +35,7 @@ class ROS1PackageSourceExtractor(PackageSourceExtractor):
             raise ValueError(f"No `CMakeLists.txt' in {path_to_package}")
 
         contents = self._files.read(cmakelists_path)
-        return self.process_cmake_contents(contents, package, {})
+        return self._process_cmake_contents(contents, package, {})
 
     def package_paths(self, package: Package) -> t.Collection[str]:
         # TODO Do this properly

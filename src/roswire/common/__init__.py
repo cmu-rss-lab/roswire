@@ -9,9 +9,9 @@ from .node_manager import NodeManager
 from .package import Package, PackageDatabase
 from .source import (
     CMakeInfo,
-    ExecutableInfo,
+    CMakeTarget,
     ExecutableKind,
-    PackageSourceExtractor,
+    CMakeExtractor,
     SourceLanguage,
 )
 from .srv import SrvFormat

@@ -7,7 +7,7 @@ from . import name
 from .app import App, AppDescription, AppInstance
 from .common import (
     CMakeInfo,
-    ExecutableInfo,
+    CMakeTarget,
     Node,
     NodeManager,
     SourceLanguage,

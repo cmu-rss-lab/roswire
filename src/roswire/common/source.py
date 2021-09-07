@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 __all__ = (
     "CMakeInfo",
-    "ExecutableInfo",
-    "ExecutableKind",
-    "PackageSourceExtractor",
+    "CMakeTarget",
+    "CMakeExtractor",
     "SourceLanguage",
 )
 
@@ -33,33 +32,29 @@ class SourceLanguage(enum.Enum):
     PYTHON = "python"
 
 
-class ExecutableKind(enum.Enum):
-    NODE = "node"
-    LIBRARY = "library"
-
-
 @attr.s(auto_attribs=True, slots=True)
-class ExecutableInfo:
+class CMakeTarget:
     name: t.Optional[str]
     language: SourceLanguage
-    kind: ExecutableKind
     sources: t.Set[str]
-    restrict_to_paths: t.Collection[str]
+    restrict_to_paths: t.Set[str]
 
     def to_dict(self) -> t.Dict[str, t.Any]:
         return {"name": self.name,
                 "language": self.language.value,
-                "kind": self.kind.value,
                 "sources": list(self.sources),
                 "path_restrictions": list(self.restrict_to_paths)}
 
     @classmethod
-    def from_dict(cls, info: t.Dict[str, t.Any]) -> "ExecutableInfo":
-        return ExecutableInfo(info["name"],
-                              SourceLanguage(info["language"]),
-                              ExecutableKind(info["kind"]),
-                              set(info["sources"]),
-                              set(info["path_restrictions"]))
+    def from_dict(cls, info: t.Dict[str, t.Any]) -> "CMakeTarget":
+        return CMakeTarget(info["name"],
+                           SourceLanguage(info["language"]),
+                           set(info["sources"]),
+                           set(info["path_restrictions"]))
+
+
+@attr.s(auto_attribs=True, slots=True)
+class CMakeBinaryTarget(CMakeTarget):
 
     @property
     def entrypoint(self) -> t.Optional[str]:
@@ -70,7 +65,7 @@ class ExecutableInfo:
 
 
 @attr.s(auto_attribs=True, slots=True)
-class NodeletExecutableInfo(ExecutableInfo):
+class CMakeLibraryTarget(CMakeTarget):
     entrypoint: str
 
     def to_dict(self) -> t.Dict[str, t.Any]:
@@ -79,22 +74,21 @@ class NodeletExecutableInfo(ExecutableInfo):
         return d
 
     @classmethod
-    def from_dict(cls, info: t.Dict[str, t.Any]) -> 'NodeletExecutableInfo':
-        return NodeletExecutableInfo(info["name"],
-                                     SourceLanguage(info["language"]),
-                                     ExecutableKind(info["kind"]),
-                                     set(info["sources"]),
-                                     set(info["path_restrictions"]),
-                                     info['entrypoint'])
+    def from_dict(cls, info: t.Dict[str, t.Any]) -> 'CMakeLibraryTarget':
+        return CMakeLibraryTarget(info["name"],
+                                  SourceLanguage(info["language"]),
+                                  set(info["sources"]),
+                                  set(info["path_restrictions"]),
+                                  info['entrypoint'])
 
 
 @attr.s(auto_attribs=True, slots=True, frozen=True)
 class CMakeInfo:
-    executables: t.Mapping[str, ExecutableInfo]
+    targets: t.Mapping[str, CMakeTarget]
 
 
 @attr.s(auto_attribs=True)
-class PackageSourceExtractor(abc.ABC):
+class CMakeExtractor(abc.ABC):
     _files: dockerblade.FileSystem
 
     @classmethod
@@ -102,11 +96,11 @@ class PackageSourceExtractor(abc.ABC):
     def for_app_instance(
         cls,
         app_instance: "AppInstance"
-    ) -> "PackageSourceExtractor":
+    ) -> "CMakeExtractor":
         ...
 
     @abc.abstractmethod
-    def extract_source_for_package(
+    def get_cmake_info(
         self,
         package: Package
     ) -> CMakeInfo:
@@ -116,7 +110,7 @@ class PackageSourceExtractor(abc.ABC):
     def package_paths(self, package: Package) -> t.Collection[str]:
         ...
 
-    def process_cmake_contents(
+    def _process_cmake_contents(
         self,
         file_contents: str,
         package: Package,
@@ -139,10 +133,10 @@ class PackageSourceExtractor(abc.ABC):
 
         Returns
         -------
-        t.Mapping[str, ExecutableInfo]
+        t.Mapping[str, CMakeTarget]
             A mapping from executable names to information about the executable
         """
-        executables: t.Dict[str, ExecutableInfo] = {}
+        executables: t.Dict[str, CMakeTarget] = {}
         context = ParserContext().parse(file_contents, skip_callable=False)
         for cmd, args, _arg_tokens, (_fname, _line, _column) in context:
             if cmd == "set":
@@ -183,23 +177,23 @@ class PackageSourceExtractor(abc.ABC):
         self,
         args: t.List[str],
         cmake_env: t.Dict[str, str],
-        executables: t.Dict[str, ExecutableInfo],
+        executables: t.Dict[str, CMakeTarget],
         package: Package
-    ) -> t.Dict[str, ExecutableInfo]:
+    ) -> t.Dict[str, CMakeTarget]:
         new_env = cmake_env.copy()
         new_env['cwd'] = os.path.join(cmake_env.get('cwd', '.'), args[0])
         join = os.path.join(package.path, new_env['cwd'])
         cmakelists_path = os.path.join(join, 'CMakeLists.txt')
         logger.debug(f"Processing {cmakelists_path}")
-        included_package_info = self.process_cmake_contents(
+        included_package_info = self._process_cmake_contents(
             self._files.read(cmakelists_path),
             package,
             new_env,
         )
         executables = {
             **executables,
-            **{s: included_package_info.executables[s]
-               for s in included_package_info.executables}
+            **{s: included_package_info.targets[s]
+               for s in included_package_info.targets}
         }
         return executables
 
@@ -207,7 +201,7 @@ class PackageSourceExtractor(abc.ABC):
         self,
         args: t.List[str],
         cmake_env: t.Dict[str, str],
-        executables: t.Dict[str, ExecutableInfo],
+        executables: t.Dict[str, CMakeTarget],
         package: Package
     ) -> None:
         name = args[0]
@@ -218,10 +212,9 @@ class PackageSourceExtractor(abc.ABC):
             else:
                 sources.add(source)
         logger.debug(f"Adding C++ sources for {name}")
-        executables[name] = ExecutableInfo(
+        executables[name] = CMakeBinaryTarget(
             name=name,
             language=SourceLanguage.CXX,
-            kind=ExecutableKind.NODE,
             sources=sources,
             restrict_to_paths=self.package_paths(package))
 
@@ -229,7 +222,7 @@ class PackageSourceExtractor(abc.ABC):
         self,
         args: t.List[str],
         cmake_env: t.Dict[str, str],
-        executables: t.Dict[str, ExecutableInfo],
+        executables: t.Dict[str, CMakeTarget],
         package: Package
     ) -> None:
         name = args[0]
@@ -238,10 +231,9 @@ class PackageSourceExtractor(abc.ABC):
         else:
             sources = set(args[1:])
         logger.debug(f"Adding C++ library {name}")
-        executables[name] = ExecutableInfo(
+        executables[name] = CMakeLibraryTarget(
             name,
             SourceLanguage.CXX,
-            ExecutableKind.LIBRARY,
             sources,
             self.package_paths(package))
 
@@ -249,7 +241,7 @@ class PackageSourceExtractor(abc.ABC):
         self,
         args: t.List[str],
         cmake_env: t.Dict[str, str],
-        executables: t.Dict[str, ExecutableInfo]
+        executables: t.Dict[str, CMakeTarget]
     ) -> None:
         opts, args = cmake_argparse(
             args,
@@ -268,10 +260,9 @@ class PackageSourceExtractor(abc.ABC):
                     if 'cwd' in cmake_env:
                         sources = set(os.path.join(cmake_env['cwd'], program))
                     logger.debug(f"Adding Python sources for {name}")
-                    executables[name] = ExecutableInfo(name,
-                                                       SourceLanguage.PYTHON,
-                                                       ExecutableKind.NODE,
-                                                       sources,
-                                                       set())
+                    executables[name] = CMakeTarget(name,
+                                                    SourceLanguage.PYTHON,
+                                                    sources,
+                                                    set())
         else:
             raise ValueError('PROGRAMS not specified in catin_install_python')

@@ -10,7 +10,7 @@ from .node_manager import ROS2NodeManager
 from .service_manager import ROS2ServiceManager
 from .source import ROS2PackageSourceExtractor
 from .state import ROS2StateProbe, ROS2SystemState
-from ..common import ExecutableInfo, Package
+from ..common import CMakeTarget, Package
 
 if typing.TYPE_CHECKING:
     from .. import AppInstance
@@ -55,7 +55,7 @@ class ROS2:
     def package_node_sources(
         self,
         package: Package,
-    ) -> typing.Mapping[str, ExecutableInfo]:
+    ) -> typing.Mapping[str, CMakeTarget]:
         """
         Extracts the node -> source files mapping for the package with the
         source in ``package_path''
@@ -72,6 +72,6 @@ class ROS2:
             A (possibly empty) mapping between node names provided by the
             package and their source information
         """
-        return self._package_source_extractor.extract_source_for_package(
+        return self._package_source_extractor.get_cmake_info(
             package
-        ).executables
+        ).targets

@@ -11,7 +11,7 @@ from loguru import logger
 from ..common import Package
 from ..common.source import (
     CMakeInfo,
-    PackageSourceExtractor,
+    CMakeExtractor,
 )
 
 if t.TYPE_CHECKING:
@@ -19,7 +19,7 @@ if t.TYPE_CHECKING:
 
 
 @attr.s(auto_attribs=True)
-class ROS2PackageSourceExtractor(PackageSourceExtractor):
+class ROS2PackageSourceExtractor(CMakeExtractor):
     _files: dockerblade.FileSystem
 
     @classmethod
@@ -29,7 +29,7 @@ class ROS2PackageSourceExtractor(PackageSourceExtractor):
     ) -> "ROS2PackageSourceExtractor":
         return ROS2PackageSourceExtractor(files=app_instance.files)
 
-    def extract_source_for_package(
+    def get_cmake_info(
         self,
         package: Package,
     ) -> CMakeInfo:
@@ -38,7 +38,7 @@ class ROS2PackageSourceExtractor(PackageSourceExtractor):
 
         if self._files.isfile(cmakelists_path):
             contents = self._files.read(cmakelists_path)
-            return self.process_cmake_contents(contents, package, {})
+            return self._process_cmake_contents(contents, package, {})
 
         setuppy_path = os.path.join(path_to_package, "setup.py")
         if self._files.isfile(setuppy_path):
