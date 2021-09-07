@@ -10,7 +10,7 @@ from loguru import logger
 
 from ..common import Package
 from ..common.source import (
-    ExecutableInfo,
+    CMakeInfo,
     PackageSourceExtractor,
     process_cmake_contents,
 )
@@ -33,7 +33,7 @@ class ROS2PackageSourceExtractor(PackageSourceExtractor):
     def extract_source_for_package(
         self,
         package: Package,
-    ) -> t.Mapping[str, ExecutableInfo]:
+    ) -> CMakeInfo:
         path_to_package = package.path
         cmakelists_path = os.path.join(path_to_package, "CMakeLists.txt")
 

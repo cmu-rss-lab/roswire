@@ -10,7 +10,7 @@ from .node_manager import ROS2NodeManager
 from .service_manager import ROS2ServiceManager
 from .source import ROS2PackageSourceExtractor
 from .state import ROS2StateProbe, ROS2SystemState
-from ..common import NodeSourceInfo, Package
+from ..common import ExecutableInfo, Package
 
 if typing.TYPE_CHECKING:
     from .. import AppInstance
@@ -55,7 +55,7 @@ class ROS2:
     def package_node_sources(
         self,
         package: Package,
-    ) -> typing.Mapping[str, NodeSourceInfo]:
+    ) -> typing.Mapping[str, ExecutableInfo]:
         """
         Extracts the node -> source files mapping for the package with the
         source in ``package_path''
@@ -73,5 +73,5 @@ class ROS2:
             package and their source information
         """
         return self._package_source_extractor.extract_source_for_package(
-            package_path
-        )
+            package
+        ).executables

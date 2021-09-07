@@ -27,8 +27,8 @@ from .source import ROS1PackageSourceExtractor
 from .state import SystemStateProbe
 from .. import exceptions as exc
 from ..common import (
+    ExecutableInfo,
     NodeManager,
-    NodeSourceInfo,
     Package, ROSLaunchManager,
     SystemState,
 )
@@ -409,7 +409,7 @@ class ROS1:
     def package_node_sources(
         self,
         package: Package,
-    ) -> Mapping[str, NodeSourceInfo]:
+    ) -> Mapping[str, ExecutableInfo]:
         """
         Extracts the node -> source files mapping for the package with the
         source in ``package_path''
@@ -429,4 +429,4 @@ class ROS1:
         self.must_be_connected()
         return self.__package_source_extractor.extract_source_for_package(
             package
-        )
+        ).executables

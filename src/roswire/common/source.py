@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__ = (
     "process_cmake_contents",
+    "CMakeInfo",
     "ExecutableInfo",
     "ExecutableKind",
     "PackageSourceExtractor",
@@ -90,6 +91,10 @@ class NodeletExecutableInfo(ExecutableInfo):
     def entrypoint(self):
         return self.entrypoint
 
+@attr.s(auto_attribs=True, slots=True, frozen=True)
+class CMakeInfo:
+    executables: t.Mapping[str, ExecutableInfo]
+
 
 def process_cmake_contents(
     file_contents: str,
@@ -97,7 +102,7 @@ def process_cmake_contents(
     package: Package,
     cmake_env: t.Dict[str, str],
     source_extractor: 'PackageSourceExtractor',
-) -> t.Mapping[str, ExecutableInfo]:
+) -> CMakeInfo:
     """
     Processes the contents of a CMakeLists.txt file for information about executables. Recursively
     includes other CMakeLists.txt files that may be included.
@@ -184,8 +189,8 @@ def process_cmake_contents(
             logger.debug(f"Processing {cmakelists_path}")
             included_package_info = process_cmake_contents(files.read(cmakelists_path),
                                                            files, package, new_env, source_extractor)
-            executables = executables | included_package_info
-    return executables
+            executables = {**executables, **{s.name: s for s in included_package_info.executables}}
+    return CMakeInfo(executables)
 
 
 class PackageSourceExtractor(abc.ABC):
@@ -201,7 +206,7 @@ class PackageSourceExtractor(abc.ABC):
     def extract_source_for_package(
         self,
         package: Package
-    ) -> t.Mapping[str, ExecutableInfo]:
+    ) -> CMakeInfo:
         ...
 
     @abc.abstractmethod
