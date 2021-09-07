@@ -8,6 +8,21 @@ from loguru import logger
 
 @attr.s(frozen=True, auto_attribs=True)
 class NodeletLibrary:
+    """
+    This data class represents a piece of information found in the nodelet_plygin.xml
+    file:
+
+    path: str
+        The path to the library containing the nodelet
+    class_name: str
+        The class name of the main entrypoint for the nodelet
+    class_type: str
+        The type of the class
+    base_name: str
+        The name of the base class that the class inherits from
+    description: str
+        A description of the nodelet
+    """
     path: str = attr.ib()
     class_name: str = attr.ib()
     class_type: str = attr.ib()

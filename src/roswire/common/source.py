@@ -124,7 +124,7 @@ class CMakeExtractor(abc.ABC):
     def package_paths(self, package: Package) -> t.Set[str]:
         ...
 
-    def get_entrypoints(self, package: Package) -> t.Mapping[str, str]:
+    def get_nodelet_entrypoints(self, package: Package) -> t.Mapping[str, str]:
         entrypoints: t.Dict[str, str] = {}
         workspace = package.path
         nodelets_xml_path = os.path.join(workspace, 'nodelet_plugins.xml')
@@ -159,12 +159,11 @@ class CMakeExtractor(abc.ABC):
             The package where the CMakeLists.txt file is defined
         cmake_env: t.Dict[str, str]
             Any context variables for processing the contents
-        source_extractor
 
         Returns
         -------
-        t.Mapping[str, CMakeTarget]
-            A mapping from executable names to information about the executable
+        CMakeInfo:
+            Information about the targets in CMakeLists.txt
         """
         executables: t.Dict[str, CMakeTarget] = {}
         context = ParserContext().parse(file_contents, skip_callable=False)
