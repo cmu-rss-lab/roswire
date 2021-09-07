@@ -12,7 +12,6 @@ from ..common import Package
 from ..common.source import (
     CMakeInfo,
     PackageSourceExtractor,
-    process_cmake_contents,
 )
 
 if t.TYPE_CHECKING:
@@ -39,8 +38,7 @@ class ROS2PackageSourceExtractor(PackageSourceExtractor):
 
         if self._files.isfile(cmakelists_path):
             contents = self._files.read(cmakelists_path)
-            return process_cmake_contents(contents, self._files, package, {}, self)
-
+            return self.process_cmake_contents(contents, package, {})
 
         setuppy_path = os.path.join(path_to_package, "setup.py")
         if self._files.isfile(setuppy_path):

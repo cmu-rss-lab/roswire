@@ -9,7 +9,7 @@ import dockerblade
 from loguru import logger
 
 from ..common import Package
-from ..common.source import (CMakeInfo, PackageSourceExtractor, process_cmake_contents)
+from ..common.source import (CMakeInfo, PackageSourceExtractor)
 
 if t.TYPE_CHECKING:
     from ..app.instance import AppInstance
@@ -37,4 +37,4 @@ class ROS1PackageSourceExtractor(PackageSourceExtractor):
             return {}
 
         contents = self._files.read(cmakelists_path)
-        return process_cmake_contents(contents, self._files, package, {}, self)
+        return self.process_cmake_contents(contents, package, {})
