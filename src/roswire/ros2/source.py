@@ -45,11 +45,12 @@ class ROS2PackageSourceExtractor(PackageSourceExtractor):
             logger.error(
                 "Do not know how to process ROS2 packages with setup.py yet."
             )
-            return {}
+            raise NotImplementedError("Do not know how to process ROS2 "
+                                      "packages with setup.py yet.")
 
         logger.error(f"There is no package information inside "
                      f"{path_to_package}. Is it a package soure directory?")
-        return {}
+        raise ValueError(f"No pacakge information for {path_to_package}.")
 
     def package_paths(self, package: Package) -> t.Collection[str]:
         # TODO Do this properly

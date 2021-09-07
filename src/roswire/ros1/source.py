@@ -32,7 +32,7 @@ class ROS1PackageSourceExtractor(PackageSourceExtractor):
         cmakelists_path = os.path.join(path_to_package, "CMakeLists.txt")
         if not self._files.isfile(cmakelists_path):
             logger.warning(f"No `CMakeLists.txt' in {path_to_package}")
-            return {}
+            raise ValueError(f"No `CMakeLists.txt' in {path_to_package}")
 
         contents = self._files.read(cmakelists_path)
         return self.process_cmake_contents(contents, package, {})

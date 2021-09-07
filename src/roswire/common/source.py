@@ -42,7 +42,7 @@ class ExecutableInfo:
     name: t.Optional[str]
     language: SourceLanguage
     kind: ExecutableKind
-    sources: t.Collection[str] = attr.ib(converter=frozenset)
+    sources: t.Set[str] = attr.ib(converter=frozenset)
     restrict_to_paths: t.Collection[str] = attr.ib(converter=frozenset)
 
     def to_dict(self) -> t.Dict[str, t.Any]:
@@ -184,7 +184,7 @@ class PackageSourceExtractor(abc.ABC):
         cmake_env: t.Dict[str, str],
         executables: t.Dict[str, ExecutableInfo],
         package: Package
-    ) -> t.Mapping[str, ExecutableInfo]:
+    ) -> t.Dict[str, ExecutableInfo]:
         new_env = cmake_env.copy()
         new_env['cwd'] = os.path.join(cmake_env.get('cwd', '.'), args[0])
         join = os.path.join(package.path, new_env['cwd'])
@@ -197,7 +197,8 @@ class PackageSourceExtractor(abc.ABC):
         )
         executables = {
             **executables,
-            **{s.name: s for s in included_package_info.executables.values()}
+            **{s: included_package_info.executables[s]
+               for s in included_package_info.executables}
         }
         return executables
 
@@ -217,11 +218,11 @@ class PackageSourceExtractor(abc.ABC):
                 sources.add(source)
         logger.debug(f"Adding C++ sources for {name}")
         executables[name] = ExecutableInfo(
-            name,
-            SourceLanguage.CXX,
-            ExecutableKind.NODE,
-            sources,
-            self.package_paths(package))
+            name=name,
+            language=SourceLanguage.CXX,
+            kind=ExecutableKind.NODE,
+            sources=sources,
+            restrict_to_paths=self.package_paths(package))
 
     def __process_add_library(
         self,
