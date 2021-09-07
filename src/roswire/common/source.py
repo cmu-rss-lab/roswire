@@ -66,27 +66,32 @@ class CMakeBinaryTarget(CMakeTarget):
 
 @attr.s(auto_attribs=True, slots=True)
 class CMakeLibraryTarget(CMakeTarget):
-    _entrypoint: str = attr.ib(init=False)
 
-    def set_entrypoint(self, entrypoint: str):
-        self._entrypoint = entrypoint
+    _entrypoint: t.Optional[str] = attr.ib(init=False)
 
     @property
     def entrypoint(self) -> t.Optional[str]:
         return self._entrypoint
 
+    @entrypoint.setter
+    def entrypoint(self, entrypoint: str) -> None:
+        self._entrypoint = entrypoint
+
     def to_dict(self) -> t.Dict[str, t.Any]:
         d = super().to_dict()
-        d['entrypoint'] = self.entrypoint
+        if self.entrypoint:
+            d['entrypoint'] = self.entrypoint
         return d
 
     @classmethod
     def from_dict(cls, info: t.Dict[str, t.Any]) -> 'CMakeLibraryTarget':
-        return CMakeLibraryTarget(info["name"],
-                                  SourceLanguage(info["language"]),
-                                  set(info["sources"]),
-                                  set(info["path_restrictions"]),
-                                  info['entrypoint'])
+        target = CMakeLibraryTarget(info["name"],
+                                    SourceLanguage(info["language"]),
+                                    set(info["sources"]),
+                                    set(info["path_restrictions"]),
+                                    )
+        if 'entrypoint' in info:
+            target.entrypoint = info['entrypoint']
 
 
 @attr.s(auto_attribs=True, slots=True, frozen=True)
