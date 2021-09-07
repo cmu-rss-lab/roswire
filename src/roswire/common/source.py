@@ -1,24 +1,27 @@
 # -*- coding: utf-8 -*-
 __all__ = (
-    "extract_sources_from_cmake",
-    "NodeSourceInfo",
+    "process_cmake_contents",
+    "ExecutableInfo",
+    "ExecutableKind",
     "PackageSourceExtractor",
     "SourceLanguage",)
 
 import abc
 import enum
-import re
+import os
 import typing as t
 from pathlib import Path
 from typing import Any, Iterable  # noqa: F401, E501 # Needed for tuple_from_iterable and argparse
 
 import attr
+from dockerblade import FileSystem
+from loguru import logger
 
+from . import Package
 from .cmake import (
     argparse as cmake_argparse,
-    ParserContext as CMakeParserContext,
+    ParserContext,
 )
-from ..util import tuple_from_iterable
 
 if t.TYPE_CHECKING:
     from .. import AppInstance
@@ -29,97 +32,160 @@ class SourceLanguage(enum.Enum):
     PYTHON = "python"
 
 
-@attr.s(frozen=True, auto_attribs=True, slots=True)
-class NodeSourceInfo:
-    node_name: str
+class ExecutableKind(enum.Enum):
+    NODE = "node"
+    LIBRARY = "library"
+
+
+@attr.s(auto_attribs=True, slots=True)
+class ExecutableInfo:
+    name: t.Optional[str]
     language: SourceLanguage
-    sources: t.Collection[str] = attr.ib(converter=tuple_from_iterable)
+    kind: ExecutableKind
+    sources: t.Collection[str] = attr.ib(converter=frozenset)
+    restrict_to_paths: t.Collection[str] = attr.ib(converter=frozenset)
 
     def to_dict(self) -> t.Dict[str, t.Any]:
-        return {"name": self.node_name,
+        return {"name": self.name,
                 "language": self.language.value,
+                "kind": self.kind.value,
                 "sources": list(self.sources),
-                }
+                "path_restrictions": list(self.restrict_to_paths)}
 
     @classmethod
-    def from_dict(cls, info: t.Dict[str, t.Any]) -> "NodeSourceInfo":
-        return NodeSourceInfo(
-            info["name"],
-            SourceLanguage(info["language"]),
-            info["sources"]
-        )
+    def from_dict(cls, info: t.Dict[str, t.Any]) -> "ExecutableInfo":
+        return ExecutableInfo(info["name"],
+                              SourceLanguage(info["language"]),
+                              ExecutableKind(info["kind"]),
+                              set(info["sources"]),
+                              set(info["path_restrictions"]))
+
+    @property
+    def entrypoint(self) -> t.Optional[str]:
+        if self.language == SourceLanguage.CXX:
+            return "main"
+        else:
+            return None
 
 
-def extract_sources_from_cmake(
-    file_contents: str
-) -> t.Collection['NodeSourceInfo']:
+@attr.s(auto_attribs=True, slots=True)
+class NodeletExecutableInfo(ExecutableInfo):
+    entrypoint: str
+
+    def to_dict(self) -> t.Dict[str, t.Any]:
+        d = super().to_dict()
+        d['entrypoint'] = self.entrypoint
+        return d
+
+    @classmethod
+    def from_dict(cls, info: t.Dict[str, t.Any]) -> 'NodeletExecutableInfo':
+        return NodeletExecutableInfo(info["name"],
+                                     SourceLanguage(info["language"]),
+                                     ExecutableKind(info["kind"]),
+                                     set(info["sources"]),
+                                     set(info["path_restrictions"]),
+                                     info['entrypoint'])
+
+    @property
+    def entrypoint(self):
+        return self.entrypoint
+
+
+def process_cmake_contents(
+    file_contents: str,
+    files: FileSystem,
+    package: Package,
+    cmake_env: t.Dict[str, str],
+    source_extractor: 'PackageSourceExtractor',
+) -> t.Mapping[str, ExecutableInfo]:
     """
-    Extracts NodeSource information about nodes in a CMakefilesList.txt.
-
-    Note, ROS2 uses both CMakeLists.txt and setup.py for package information,
-    so we factor this method into common.
+    Processes the contents of a CMakeLists.txt file for information about executables. Recursively
+    includes other CMakeLists.txt files that may be included.
 
     Parameters
     ----------
     file_contents: str
         The contents of the CMakeLists.txt file
+    files: FileSystem
+        The place to find other files that may be included in the contents.
+    package: Package
+        The package where the CMakeLists.txt file is defined
+    cmake_env: t.Dict[str, str]
+        Any context variables for processing the contents
+    source_extractor
 
     Returns
     -------
-    Collection[NodeSourceInfo]
-        A collection of NodeSourceInfo, one for each node defined in the file
+    t.Mapping[str, ExecutableInfo]
+        A mapping from executable names to information about the executable
     """
-    src_info: t.Set['NodeSourceInfo'] = set()
-    cmake_env: t.Dict[str, str] = {}
-
-    for cmd, args, arg_tokens, (_fname, _line, _column) \
-            in CMakeParserContext().parse(file_contents):
+    executables: t.Dict[str, ExecutableInfo] = dict()
+    for cmd, args, arg_tokens, (fname, line, column) in ParserContext().parse(file_contents, skip_callable=False):
         if cmd == "set":
-            opts, args = cmake_argparse(
-                args,
-                {"PARENT_SCOPE": "-", "FORCE": "-", "CACHE": "*"}
-            )
+            opts, args = cmake_argparse(args, {"PARENT_SCOPE": "-", "FORCE": "-", "CACHE": "*"})
             cmake_env[args[0]] = ";".join(args[1:])
-        elif cmd == "unset":
+        if cmd == "unset":
             opts, args = cmake_argparse(args, {"CACHE": "-"})
-            del cmake_env[args[0]]
-        elif cmd == "add_executable":
+            cmake_env[args[0]] = ""
+        if cmd == "add_executable":
             name = args[0]
-            sources: t.List[str] = []
-            for _token_type, token_val in arg_tokens[1:]:
-                if not token_val.startswith("$"):
-                    sources.append(token_val)
+            sources: t.Set[str] = set()
+            for source in args[1:]:
+                if 'cwd' in cmake_env:
+                    sources.add(os.path.join(cmake_env['cwd'], source))
                 else:
-                    matches = re.match(r'\${(.*)}', token_val)
-                    if matches and matches.group(1) in cmake_env:
-                        sources.extend(cmake_env[matches.group(1)].split(";"))
-            src_info.add(NodeSourceInfo(name, SourceLanguage.CXX, sources))
-        elif cmd == "catkin_install_python":
-            opts, args = cmake_argparse(
-                args,
-                {"PROGRAMS": "*", "DESTINATION": "*"}
-            )
+                    sources.add(source)
+            logger.debug(f"Adding C++ sources for {name}")
+            executables[name] = ExecutableInfo(
+                name,
+                SourceLanguage.CXX,
+                ExecutableKind.NODE,
+                sources,
+                source_extractor.package_paths(package))
+        if cmd == "catkin_install_python":
+            opts, args = cmake_argparse(args, {"PROGRAMS": "*", "DESTINATION": "*"})
             if 'PROGRAMS' in opts:
-                program_opts = opts['PROGRAMS']
-                for i in range(len(program_opts)):
-                    # http://docs.ros.org/en/jade/api/catkin/html/howto/format2/installing_python.html  # noqa: E501
-                    # Convention is that ros python nodes are in nodes/
-                    # directory. All others are in scripts/. So just
-                    # include python installs that are in nodes/
-                    program = program_opts[i]
+                for i in range(len(opts['PROGRAMS'])):
+                    # http://docs.ros.org/en/jade/api/catkin/html/howto/format2/installing_python.html
+                    # Convention is that ros python nodes are in nodes/ directory. All others are in
+                    # scripts/. So just include python installs that are in nodes/
+                    program = opts['PROGRAMS'][i]
                     if program.startswith("nodes/"):
                         name = Path(program[0]).stem
-                        sources = [program]
-                        src_info.add(
-                            NodeSourceInfo(
-                                name,
-                                SourceLanguage.PYTHON,
-                                sources))
+                        sources = set(program)
+                        if 'cwd' in cmake_env:
+                            sources = set(os.path.join(cmake_env['cwd'], program))
+                        logger.debug(f"Adding Python sources for {name}")
+                        executables[name] = ExecutableInfo(name,
+                                                           SourceLanguage.PYTHON,
+                                                           ExecutableKind.NODE,
+                                                           sources,
+                                                           set())
             else:
-                raise ValueError(
-                    "PROGRAMS not specified in catkin_install_python"
-                )
-    return src_info
+                raise ValueError('PROGRAMS not specified in catin_install_python')
+        if cmd == 'add_library':
+            name = args[0]
+            if 'cwd' in cmake_env:
+                sources = {os.path.join(cmake_env['cwd'], s) for s in args[1:]}
+            else:
+                sources = set(args[1:])
+            logger.debug(f"Adding C++ library {name}")
+            executables[name] = ExecutableInfo(
+                name,
+                SourceLanguage.CXX,
+                ExecutableKind.LIBRARY,
+                sources,
+                source_extractor.package_paths(package))
+        if cmd == "add_subdirectory":
+            new_env = cmake_env.copy()
+            new_env['cwd'] = os.path.join(cmake_env.get('cwd', '.'), args[0])
+            join = os.path.join(package.path, new_env['cwd'])
+            cmakelists_path = os.path.join(join, 'CMakeLists.txt')
+            logger.debug(f"Processing {cmakelists_path}")
+            included_package_info = process_cmake_contents(files.read(cmakelists_path),
+                                                           files, package, new_env, source_extractor)
+            executables = executables | included_package_info
+    return executables
 
 
 class PackageSourceExtractor(abc.ABC):
@@ -134,6 +200,10 @@ class PackageSourceExtractor(abc.ABC):
     @abc.abstractmethod
     def extract_source_for_package(
         self,
-        path_to_package: str
-    ) -> t.Mapping[str, NodeSourceInfo]:
+        package: Package
+    ) -> t.Mapping[str, ExecutableInfo]:
+        ...
+
+    @abc.abstractmethod
+    def package_paths(self, package: Package) -> t.Collection[str]:
         ...

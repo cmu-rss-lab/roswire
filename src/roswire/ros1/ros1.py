@@ -29,7 +29,7 @@ from .. import exceptions as exc
 from ..common import (
     NodeManager,
     NodeSourceInfo,
-    ROSLaunchManager,
+    Package, ROSLaunchManager,
     SystemState,
 )
 from ..exceptions import ROSWireException
@@ -408,7 +408,7 @@ class ROS1:
 
     def package_node_sources(
         self,
-        package_path: str
+        package: Package,
     ) -> Mapping[str, NodeSourceInfo]:
         """
         Extracts the node -> source files mapping for the package with the
@@ -416,8 +416,8 @@ class ROS1:
 
         Parameters
         ----------
-        package_path: str
-            The path on the container filesystem that contains the package
+        package: Package
+            The package in the container filesystem that contains the package
             source
 
         Returns
@@ -428,5 +428,5 @@ class ROS1:
         """
         self.must_be_connected()
         return self.__package_source_extractor.extract_source_for_package(
-            package_path
+            package
         )
