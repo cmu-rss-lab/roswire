@@ -9,7 +9,7 @@ import dockerblade
 from loguru import logger
 
 from ..common import Package
-from ..common.source import CMakeExtractor, CMakeInfo
+from ..common.source import CMakeExtractor, CMakeInfo, CMakeLibraryTarget
 
 if t.TYPE_CHECKING:
     from .. import AppInstance
@@ -35,7 +35,17 @@ class ROS2PackageSourceExtractor(CMakeExtractor):
 
         if self._files.isfile(cmakelists_path):
             contents = self._files.read(cmakelists_path)
-            return self._process_cmake_contents(contents, package, {})
+            info = self._process_cmake_contents(contents, package, {})
+            nodelets = self.get_nodelet_entrypoints(package)
+            for nodelet, entrypoint in nodelets.items():
+                if nodelet not in info:
+                    logger.error(f"'{nodelet}' is referenced in "
+                                 f"nodelet_plugins.xml but not in "
+                                 f"CMakeLists.txt")
+                else:
+                    target = info[nodelet]
+                    assert isinstance(target, CMakeLibraryTarget)
+                    target.entrypoint = entrypoint
 
         setuppy_path = os.path.join(path_to_package, "setup.py")
         if self._files.isfile(setuppy_path):
