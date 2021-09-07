@@ -24,12 +24,12 @@ class NodeletInfo:
         libraries: t.Set['NodeletLibrary'] = set()
         contents = "<root>\n" + contents + "\n</root>"
         tree = dom.parseString(contents)
-        root = NodeletInfo.get_xml_nodes_by_name('root', tree)[0]
+        root = get_xml_nodes_by_name('root', tree)[0]
         libraries_dom = NodeletInfo.get_xml_nodes_by_name('library', root)
         logger.debug(f"{len(libraries_dom)}")
         for library_dom in libraries_dom:
             path = library_dom.getAttribute('path')
-            class_doms = NodeletInfo.get_xml_nodes_by_name(
+            class_doms = get_xml_nodes_by_name(
                 'class',
                 library_dom
             )
@@ -38,7 +38,7 @@ class NodeletInfo:
             class_name = class_dom.getAttribute('name')
             class_type = class_dom.getAttribute('type')
             base_class = class_dom.getAttribute('base_class_type')
-            description_dom = NodeletInfo.get_xml_nodes_by_name(
+            description_dom = get_xml_nodes_by_name(
                 'description',
                 class_dom
             )
@@ -54,7 +54,7 @@ class NodeletInfo:
                                          description=description))
         return NodeletInfo(libraries=libraries)
 
-    @classmethod
-    def get_xml_nodes_by_name(cls, tag_name, tree):
-        return [n for n in tree.childNodes
-                if n.nodeType == n.ELEMENT_NODE and n.tagName == tag_name]
+
+def get_xml_nodes_by_name(tag_name: str, tree: dom.Node) -> t.List[dom.Node]:
+    return [n for n in tree.childNodes
+            if n.nodeType == n.ELEMENT_NODE and n.tagName == tag_name]
