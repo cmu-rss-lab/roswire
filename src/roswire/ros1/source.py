@@ -43,4 +43,3 @@ class ROS1PackageSourceExtractor(PackageSourceExtractor):
             os.path.join(package.path, f'../../include/{package.name}')
         )
         return {package.path, include}
-

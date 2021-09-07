@@ -91,6 +91,7 @@ class NodeletExecutableInfo(ExecutableInfo):
 class CMakeInfo:
     executables: t.Mapping[str, ExecutableInfo]
 
+
 @attr.s(auto_attribs=True)
 class PackageSourceExtractor(abc.ABC):
     _files: dockerblade.FileSystem
