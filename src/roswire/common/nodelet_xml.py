@@ -9,8 +9,8 @@ from loguru import logger
 @attr.s(frozen=True, auto_attribs=True)
 class NodeletLibrary:
     """
-    This data class represents a piece of information found in the nodelet_plygin.xml
-    file:
+    This data class represents a piece of information found in the
+    nodelet_plygin.xml file:
 
     path: str
         The path to the library containing the nodelet
@@ -23,6 +23,7 @@ class NodeletLibrary:
     description: str
         A description of the nodelet
     """
+
     path: str = attr.ib()
     class_name: str = attr.ib()
     class_type: str = attr.ib()
