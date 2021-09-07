@@ -22,6 +22,7 @@ from .cmake import (
     argparse as cmake_argparse,
     ParserContext,
 )
+from .nodelet_xml import NodeletInfo
 
 if t.TYPE_CHECKING:
     from .. import AppInstance
@@ -122,6 +123,20 @@ class CMakeExtractor(abc.ABC):
     @abc.abstractmethod
     def package_paths(self, package: Package) -> t.Set[str]:
         ...
+
+    def get_entrypoints(self, package: Package) -> t.Mapping[str, str]:
+        entrypoints: t.Dict[str, str] = dict()
+        workspace = package.path
+        nodelets_xml_path = os.path.join(workspace, 'nodelet_plugins.xml')
+        if self._files.exists(nodelets_xml_path):
+            nodelet_info = NodeletInfo.from_nodelet_xml(self._files.read(nodelets_xml_path))
+            for info in nodelet_info.libraries:
+                package_and_name = info.class_name.split('/')
+                # TODO can package in XML nodelet be different to package.name?
+                name = package_and_name[1]
+                entrypoint = info.class_type + "::onInit"
+                entrypoints[name] = entrypoint
+        return entrypoints
 
     def _process_cmake_contents(
         self,
