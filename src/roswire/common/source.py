@@ -142,8 +142,8 @@ class PackageSourceExtractor(abc.ABC):
             A mapping from executable names to information about the executable
         """
         executables: t.Dict[str, ExecutableInfo] = {}
-        for cmd, args, _arg_tokens, (_fname, _line, _column) \
-            in ParserContext().parse(file_contents, skip_callable=False):
+        context = ParserContext().parse(file_contents, skip_callable=False)
+        for cmd, args, _arg_tokens, (_fname, _line, _column) in context:
             if cmd == "set":
                 opts, args = cmake_argparse(
                     args,
@@ -256,7 +256,7 @@ class PackageSourceExtractor(abc.ABC):
         )
         if 'PROGRAMS' in opts:
             for i in range(len(opts['PROGRAMS'])):
-                # http://docs.ros.org/en/jade/api/catkin/html/howto/format2/installing_python.html  #noqa: E501
+                # http://docs.ros.org/en/jade/api/catkin/html/howto/format2/installing_python.html  # noqa: F401, E501
                 # Convention is that ros python nodes are in nodes/ directory.
                 # All others are in scripts/. So just include python installs
                 # that are in nodes/
