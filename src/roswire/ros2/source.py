@@ -38,12 +38,12 @@ class ROS2PackageSourceExtractor(CMakeExtractor):
             info = self._process_cmake_contents(contents, package, {})
             nodelets = self.get_nodelet_entrypoints(package)
             for nodelet, entrypoint in nodelets.items():
-                if nodelet not in info:
+                if nodelet not in info.targets:
                     logger.error(f"'{nodelet}' is referenced in "
                                  f"nodelet_plugins.xml but not in "
                                  f"CMakeLists.txt")
                 else:
-                    target = info[nodelet]
+                    target = info.targets[nodelet]
                     assert isinstance(target, CMakeLibraryTarget)
                     target.entrypoint = entrypoint
 
