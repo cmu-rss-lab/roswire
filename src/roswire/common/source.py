@@ -247,22 +247,24 @@ class CMakeExtractor(abc.ABC):
             args,
             {"PROGRAMS": "*", "DESTINATION": "*"}
         )
-        if 'PROGRAMS' in opts:
-            for i in range(len(opts['PROGRAMS'])):
-                # http://docs.ros.org/en/jade/api/catkin/html/howto/format2/installing_python.html  # noqa: F401, E501
-                # Convention is that ros python nodes are in nodes/ directory.
-                # All others are in scripts/. So just include python installs
-                # that are in nodes/
-                program = opts['PROGRAMS'][i]
-                if program.startswith("nodes/"):
-                    name = Path(program[0]).stem
-                    sources = set(program)
-                    if 'cwd' in cmake_env:
-                        sources = set(os.path.join(cmake_env['cwd'], program))
-                    logger.debug(f"Adding Python sources for {name}")
-                    executables[name] = CMakeTarget(name,
-                                                    SourceLanguage.PYTHON,
-                                                    sources,
-                                                    set())
-        else:
+        if 'PROGRAMS' not in opts:
             raise ValueError('PROGRAMS not specified in catin_install_python')
+
+        for program in opts['PROGRAMS']:
+            # http://docs.ros.org/en/jade/api/catkin/html/howto/format2/installing_python.html  # noqa: F401, E501
+            # Convention is that ros python nodes are in nodes/ directory.
+            # All others are in scripts/. So just include python installs
+            # that are in nodes/
+            if program.startswith("nodes/"):
+                name = Path(program[0]).stem
+                sources = set()
+                if 'cwd' in cmake_env:
+                    sources = set()
+                    sources.add(os.path.join(cmake_env['cwd'], program))
+                else:
+                    sources.add(program)
+                logger.debug(f"Adding Python sources for {name}")
+                executables[name] = CMakeTarget(name,
+                                                SourceLanguage.PYTHON,
+                                                sources,
+                                                set())
