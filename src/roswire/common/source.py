@@ -125,7 +125,7 @@ class CMakeExtractor(abc.ABC):
         ...
 
     def get_entrypoints(self, package: Package) -> t.Mapping[str, str]:
-        entrypoints: t.Dict[str, str] = dict()
+        entrypoints: t.Dict[str, str] = {}
         workspace = package.path
         nodelets_xml_path = os.path.join(workspace, 'nodelet_plugins.xml')
         if self._files.exists(nodelets_xml_path):
