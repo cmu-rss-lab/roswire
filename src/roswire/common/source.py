@@ -92,6 +92,7 @@ class CMakeLibraryTarget(CMakeTarget):
                                     )
         if 'entrypoint' in info:
             target.entrypoint = info['entrypoint']
+        return target
 
 
 @attr.s(auto_attribs=True, slots=True, frozen=True)
@@ -269,7 +270,7 @@ class CMakeExtractor(abc.ABC):
             # that are in nodes/
             if program.startswith("nodes/"):
                 name = Path(program[0]).stem
-                sources = set()
+                sources: t.Set[str] = set()
                 if 'cwd' in cmake_env:
                     sources = set()
                     sources.add(os.path.join(cmake_env['cwd'], program))
