@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any, Iterable  # noqa: F401, E501 # Needed for tuple_from_iterable and argparse
 
 import attr
+import dockerblade
 from loguru import logger
 
 from . import Package
@@ -85,17 +86,15 @@ class NodeletExecutableInfo(ExecutableInfo):
                                      set(info["path_restrictions"]),
                                      info['entrypoint'])
 
-    @property
-    def entrypoint(self):
-        return self.entrypoint
-
 
 @attr.s(auto_attribs=True, slots=True, frozen=True)
 class CMakeInfo:
     executables: t.Mapping[str, ExecutableInfo]
 
-
+@attr.s(auto_attribs=True)
 class PackageSourceExtractor(abc.ABC):
+    _files: dockerblade.FileSystem
+
     @classmethod
     @abc.abstractmethod
     def for_app_instance(
@@ -182,7 +181,7 @@ class PackageSourceExtractor(abc.ABC):
         self,
         args: t.List[str],
         cmake_env: t.Dict[str, str],
-        executables: t.Mapping[str, ExecutableInfo],
+        executables: t.Dict[str, ExecutableInfo],
         package: Package
     ) -> t.Mapping[str, ExecutableInfo]:
         new_env = cmake_env.copy()
@@ -192,13 +191,12 @@ class PackageSourceExtractor(abc.ABC):
         logger.debug(f"Processing {cmakelists_path}")
         included_package_info = self.process_cmake_contents(
             self._files.read(cmakelists_path),
-            self._files,
             package,
             new_env,
         )
         executables = {
             **executables,
-            **{s.name: s for s in included_package_info.executables}
+            **{s.name: s for s in included_package_info.executables.values()}
         }
         return executables
 

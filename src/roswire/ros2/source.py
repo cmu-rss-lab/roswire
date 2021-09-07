@@ -50,3 +50,10 @@ class ROS2PackageSourceExtractor(PackageSourceExtractor):
         logger.error(f"There is no package information inside "
                      f"{path_to_package}. Is it a package soure directory?")
         return {}
+
+    def package_paths(self, package: Package) -> t.Collection[str]:
+        # TODO Do this properly
+        include: str = os.path.normpath(
+            os.path.join(package.path, f'../../include/{package.name}')
+        )
+        return {package.path, include}

@@ -5,7 +5,6 @@ import os.path
 import typing as t
 
 import attr
-import dockerblade
 from loguru import logger
 
 from ..common import Package
@@ -15,9 +14,8 @@ if t.TYPE_CHECKING:
     from ..app.instance import AppInstance
 
 
-@attr.s(auto_attribs=True)
+@attr.s(slots=True)
 class ROS1PackageSourceExtractor(PackageSourceExtractor):
-    _files: dockerblade.FileSystem
 
     @classmethod
     def for_app_instance(
@@ -38,3 +36,11 @@ class ROS1PackageSourceExtractor(PackageSourceExtractor):
 
         contents = self._files.read(cmakelists_path)
         return self.process_cmake_contents(contents, package, {})
+
+    def package_paths(self, package: Package) -> t.Collection[str]:
+        # TODO Do this properly
+        include: str = os.path.normpath(
+            os.path.join(package.path, f'../../include/{package.name}')
+        )
+        return {package.path, include}
+
