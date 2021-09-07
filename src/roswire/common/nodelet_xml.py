@@ -29,16 +29,24 @@ class NodeletInfo:
         logger.debug(f"{len(libraries_dom)}")
         for library_dom in libraries_dom:
             path = library_dom.getAttribute('path')
-            class_doms = NodeletInfo.get_xml_nodes_by_name('class', library_dom)
+            class_doms = NodeletInfo.get_xml_nodes_by_name(
+                'class',
+                library_dom
+            )
             assert len(class_doms) == 1
             class_dom = class_doms[0]
             class_name = class_dom.getAttribute('name')
             class_type = class_dom.getAttribute('type')
             base_class = class_dom.getAttribute('base_class_type')
-            description_dom = NodeletInfo.get_xml_nodes_by_name('description', class_dom)
+            description_dom = NodeletInfo.get_xml_nodes_by_name(
+                'description',
+                class_dom
+            )
             description = None
             if len(description_dom) == 1:
-                description = "\n".join(n.data for n in description_dom[0].childNodes if n.nodeType == n.TEXT_NODE)
+                description = "\n".join(n.data
+                                        for n in description_dom[0].childNodes
+                                        if n.nodeType == n.TEXT_NODE)
             libraries.add(NodeletLibrary(path=path,
                                          class_name=class_name,
                                          class_type=class_type,
@@ -48,4 +56,5 @@ class NodeletInfo:
 
     @classmethod
     def get_xml_nodes_by_name(cls, tag_name, tree):
-        return [n for n in tree.childNodes if n.nodeType == n.ELEMENT_NODE and n.tagName == tag_name]
+        return [n for n in tree.childNodes
+                if n.nodeType == n.ELEMENT_NODE and n.tagName == tag_name]

@@ -129,10 +129,12 @@ class CMakeExtractor(abc.ABC):
         workspace = package.path
         nodelets_xml_path = os.path.join(workspace, 'nodelet_plugins.xml')
         if self._files.exists(nodelets_xml_path):
-            nodelet_info = NodeletInfo.from_nodelet_xml(self._files.read(nodelets_xml_path))
+            nodelet_info = NodeletInfo.from_nodelet_xml(
+                self._files.read(nodelets_xml_path)
+            )
             for info in nodelet_info.libraries:
                 package_and_name = info.class_name.split('/')
-                # TODO can package in XML nodelet be different to package.name?
+                # TODO can package in XML nodelet differ from package.name?
                 name = package_and_name[1]
                 entrypoint = info.class_type + "::onInit"
                 entrypoints[name] = entrypoint
