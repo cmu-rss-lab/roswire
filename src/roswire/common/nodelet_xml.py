@@ -28,6 +28,7 @@ class NodeletInfo:
         libraries_dom = get_xml_nodes_by_name('library', root)
         logger.debug(f"{len(libraries_dom)}")
         for library_dom in libraries_dom:
+            assert isinstance(library_dom, dom.Element)
             path = library_dom.getAttribute('path')
             class_doms = get_xml_nodes_by_name(
                 'class',
