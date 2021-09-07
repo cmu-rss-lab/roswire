@@ -42,8 +42,8 @@ class ExecutableInfo:
     name: t.Optional[str]
     language: SourceLanguage
     kind: ExecutableKind
-    sources: t.Set[str] = attr.ib(converter=frozenset)
-    restrict_to_paths: t.Collection[str] = attr.ib(converter=frozenset)
+    sources: t.Set[str]
+    restrict_to_paths: t.Collection[str]
 
     def to_dict(self) -> t.Dict[str, t.Any]:
         return {"name": self.name,
