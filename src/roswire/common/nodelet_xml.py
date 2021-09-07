@@ -25,7 +25,7 @@ class NodeletInfo:
         contents = "<root>\n" + contents + "\n</root>"
         tree = dom.parseString(contents)
         root = get_xml_nodes_by_name('root', tree)[0]
-        libraries_dom = NodeletInfo.get_xml_nodes_by_name('library', root)
+        libraries_dom = get_xml_nodes_by_name('library', root)
         logger.debug(f"{len(libraries_dom)}")
         for library_dom in libraries_dom:
             path = library_dom.getAttribute('path')
