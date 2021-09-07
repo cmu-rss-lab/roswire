@@ -14,7 +14,6 @@ from pathlib import Path
 from typing import Any, Iterable  # noqa: F401, E501 # Needed for tuple_from_iterable and argparse
 
 import attr
-from dockerblade import FileSystem
 from loguru import logger
 
 from . import Package
@@ -90,6 +89,7 @@ class NodeletExecutableInfo(ExecutableInfo):
     def entrypoint(self):
         return self.entrypoint
 
+
 @attr.s(auto_attribs=True, slots=True, frozen=True)
 class CMakeInfo:
     executables: t.Mapping[str, ExecutableInfo]
@@ -140,10 +140,14 @@ class PackageSourceExtractor(abc.ABC):
         t.Mapping[str, ExecutableInfo]
             A mapping from executable names to information about the executable
         """
-        executables: t.Dict[str, ExecutableInfo] = dict()
-        for cmd, args, arg_tokens, (fname, line, column) in ParserContext().parse(file_contents, skip_callable=False):
+        executables: t.Dict[str, ExecutableInfo] = {}
+        for cmd, args, _arg_tokens, (_fname, _line, _column) \
+            in ParserContext().parse(file_contents, skip_callable=False):
             if cmd == "set":
-                opts, args = cmake_argparse(args, {"PARENT_SCOPE": "-", "FORCE": "-", "CACHE": "*"})
+                opts, args = cmake_argparse\
+                    (args,
+                     {"PARENT_SCOPE": "-", "FORCE": "-", "CACHE": "*"}
+                    )
                 cmake_env[args[0]] = ";".join(args[1:])
             if cmd == "unset":
                 opts, args = cmake_argparse(args, {"CACHE": "-"})
@@ -164,12 +168,16 @@ class PackageSourceExtractor(abc.ABC):
                     sources,
                     self.package_paths(package))
             if cmd == "catkin_install_python":
-                opts, args = cmake_argparse(args, {"PROGRAMS": "*", "DESTINATION": "*"})
+                opts, args = cmake_argparse(
+                    args,
+                    {"PROGRAMS": "*", "DESTINATION": "*"}
+                )
                 if 'PROGRAMS' in opts:
                     for i in range(len(opts['PROGRAMS'])):
                         # http://docs.ros.org/en/jade/api/catkin/html/howto/format2/installing_python.html
-                        # Convention is that ros python nodes are in nodes/ directory. All others are in
-                        # scripts/. So just include python installs that are in nodes/
+                        # Convention is that ros python nodes are in nodes/ directory.
+                        # All others are in scripts/. So just include python installs
+                        # that are in nodes/
                         program = opts['PROGRAMS'][i]
                         if program.startswith("nodes/"):
                             name = Path(program[0]).stem
@@ -209,5 +217,8 @@ class PackageSourceExtractor(abc.ABC):
                     package,
                     new_env,
                 )
-                executables = {**executables, **{s.name: s for s in included_package_info.executables}}
+                executables = {
+                    **executables,
+                    **{s.name: s for s in included_package_info.executables}
+                }
         return CMakeInfo(executables)

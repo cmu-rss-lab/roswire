@@ -13,7 +13,6 @@ from .source import (
     ExecutableKind,
     PackageSourceExtractor,
     SourceLanguage,
-
 )
 from .srv import SrvFormat
 from .state import SystemState
