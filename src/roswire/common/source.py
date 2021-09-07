@@ -122,8 +122,9 @@ class PackageSourceExtractor(abc.ABC):
         cmake_env: t.Dict[str, str],
     ) -> CMakeInfo:
         """
-        Processes the contents of a CMakeLists.txt file for information about executables. Recursively
-        includes other CMakeLists.txt files that may be included.
+        Processes the contents of a CMakeLists.txt file for information about
+        executables. Recursively includes other CMakeLists.txt files that may
+        be included.
 
         Parameters
         ----------
@@ -141,8 +142,8 @@ class PackageSourceExtractor(abc.ABC):
             A mapping from executable names to information about the executable
         """
         executables: t.Dict[str, ExecutableInfo] = {}
-        for cmd, args, _arg_tokens, (_fname, _line, _column) \
-            in ParserContext().parse(file_contents, skip_callable=False):
+        for cmd, args, _arg_tokens, (_fname, _line, _column)\
+                in ParserContext().parse(file_contents, skip_callable=False):
             if cmd == "set":
                 opts, args = cmake_argparse\
                     (args,
@@ -153,72 +154,123 @@ class PackageSourceExtractor(abc.ABC):
                 opts, args = cmake_argparse(args, {"CACHE": "-"})
                 cmake_env[args[0]] = ""
             if cmd == "add_executable":
-                name = args[0]
-                sources: t.Set[str] = set()
-                for source in args[1:]:
-                    if 'cwd' in cmake_env:
-                        sources.add(os.path.join(cmake_env['cwd'], source))
-                    else:
-                        sources.add(source)
-                logger.debug(f"Adding C++ sources for {name}")
-                executables[name] = ExecutableInfo(
-                    name,
-                    SourceLanguage.CXX,
-                    ExecutableKind.NODE,
-                    sources,
-                    self.package_paths(package))
-            if cmd == "catkin_install_python":
-                opts, args = cmake_argparse(
+                self.__process_add_executable(
                     args,
-                    {"PROGRAMS": "*", "DESTINATION": "*"}
-                )
-                if 'PROGRAMS' in opts:
-                    for i in range(len(opts['PROGRAMS'])):
-                        # http://docs.ros.org/en/jade/api/catkin/html/howto/format2/installing_python.html
-                        # Convention is that ros python nodes are in nodes/ directory.
-                        # All others are in scripts/. So just include python installs
-                        # that are in nodes/
-                        program = opts['PROGRAMS'][i]
-                        if program.startswith("nodes/"):
-                            name = Path(program[0]).stem
-                            sources = set(program)
-                            if 'cwd' in cmake_env:
-                                sources = set(os.path.join(cmake_env['cwd'], program))
-                            logger.debug(f"Adding Python sources for {name}")
-                            executables[name] = ExecutableInfo(name,
-                                                               SourceLanguage.PYTHON,
-                                                               ExecutableKind.NODE,
-                                                               sources,
-                                                               set())
-                else:
-                    raise ValueError('PROGRAMS not specified in catin_install_python')
+                    cmake_env,
+                    executables,
+                    package)
+            if cmd == "catkin_install_python":
+                self.__process_python_executables(
+                    args,
+                    cmake_env,
+                    executables)
             if cmd == 'add_library':
-                name = args[0]
-                if 'cwd' in cmake_env:
-                    sources = {os.path.join(cmake_env['cwd'], s) for s in args[1:]}
-                else:
-                    sources = set(args[1:])
-                logger.debug(f"Adding C++ library {name}")
-                executables[name] = ExecutableInfo(
-                    name,
-                    SourceLanguage.CXX,
-                    ExecutableKind.LIBRARY,
-                    sources,
-                    self.package_paths(package))
+                self.__process_add_library(
+                    args,
+                    cmake_env,
+                    executables,
+                    package)
             if cmd == "add_subdirectory":
-                new_env = cmake_env.copy()
-                new_env['cwd'] = os.path.join(cmake_env.get('cwd', '.'), args[0])
-                join = os.path.join(package.path, new_env['cwd'])
-                cmakelists_path = os.path.join(join, 'CMakeLists.txt')
-                logger.debug(f"Processing {cmakelists_path}")
-                included_package_info = self.process_cmake_contents(
-                    self._files.read(cmakelists_path),
-                    self._files,
-                    package,
-                    new_env,
-                )
-                executables = {
-                    **executables,
-                    **{s.name: s for s in included_package_info.executables}
-                }
+                executables = self.__process_add_subdirectory(
+                    args,
+                    cmake_env,
+                    executables,
+                    package)
         return CMakeInfo(executables)
+
+    def __process_add_subdirectory(
+        self,
+        args: t.List[str],
+        cmake_env: t.Dict[str, str],
+        executables: t.Mapping[str, ExecutableInfo],
+        package: Package
+    ) -> t.Mapping[str, ExecutableInfo]:
+        new_env = cmake_env.copy()
+        new_env['cwd'] = os.path.join(cmake_env.get('cwd', '.'), args[0])
+        join = os.path.join(package.path, new_env['cwd'])
+        cmakelists_path = os.path.join(join, 'CMakeLists.txt')
+        logger.debug(f"Processing {cmakelists_path}")
+        included_package_info = self.process_cmake_contents(
+            self._files.read(cmakelists_path),
+            self._files,
+            package,
+            new_env,
+        )
+        executables = {
+            **executables,
+            **{s.name: s for s in included_package_info.executables}
+        }
+        return executables
+
+    def __process_add_executable(
+        self,
+        args: t.List[str],
+        cmake_env: t.Dict[str, str],
+        executables: t.Dict[str, ExecutableInfo],
+        package: Package
+    ) -> None:
+        name = args[0]
+        sources: t.Set[str] = set()
+        for source in args[1:]:
+            if 'cwd' in cmake_env:
+                sources.add(os.path.join(cmake_env['cwd'], source))
+            else:
+                sources.add(source)
+        logger.debug(f"Adding C++ sources for {name}")
+        executables[name] = ExecutableInfo(
+            name,
+            SourceLanguage.CXX,
+            ExecutableKind.NODE,
+            sources,
+            self.package_paths(package))
+
+    def __process_add_library(
+        self,
+        args: t.List[str],
+        cmake_env: t.Dict[str, str],
+        executables: t.Dict[str, ExecutableInfo],
+        package: Package
+    ) -> None:
+        name = args[0]
+        if 'cwd' in cmake_env:
+            sources = {os.path.join(cmake_env['cwd'], s) for s in args[1:]}
+        else:
+            sources = set(args[1:])
+        logger.debug(f"Adding C++ library {name}")
+        executables[name] = ExecutableInfo(
+            name,
+            SourceLanguage.CXX,
+            ExecutableKind.LIBRARY,
+            sources,
+            self.package_paths(package))
+
+    def __process_python_executables(
+        self,
+        args: t.List[str],
+        cmake_env: t.Dict[str, str],
+        executables: t.Dict[str, ExecutableInfo]
+    ) -> None:
+        opts, args = cmake_argparse(
+            args,
+            {"PROGRAMS": "*", "DESTINATION": "*"}
+        )
+        if 'PROGRAMS' in opts:
+            for i in range(len(opts['PROGRAMS'])):
+                # http://docs.ros.org/en/jade/api/catkin/html/howto/format2/installing_python.html  #noqa E501
+                # Convention is that ros python nodes are in nodes/ directory.
+                # All others are in scripts/. So just include python installs
+                # that are in nodes/
+                program = opts['PROGRAMS'][i]
+                if program.startswith("nodes/"):
+                    name = Path(program[0]).stem
+                    sources = set(program)
+                    if 'cwd' in cmake_env:
+                        sources = set(os.path.join(cmake_env['cwd'], program))
+                    logger.debug(f"Adding Python sources for {name}")
+                    executables[name] = ExecutableInfo(name,
+                                                       SourceLanguage.PYTHON,
+                                                       ExecutableKind.NODE,
+                                                       sources,
+                                                       set())
+        else:
+            raise ValueError('PROGRAMS not specified in catin_install_python')
