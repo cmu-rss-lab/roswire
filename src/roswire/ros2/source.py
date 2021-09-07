@@ -46,7 +46,7 @@ class ROS2PackageSourceExtractor(CMakeExtractor):
                     target = info.targets[nodelet]
                     assert isinstance(target, CMakeLibraryTarget)
                     target.entrypoint = entrypoint
-
+            return info
         setuppy_path = os.path.join(path_to_package, "setup.py")
         if self._files.isfile(setuppy_path):
             logger.error(

@@ -46,6 +46,7 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
                 target = info.targets[nodelet]
                 assert isinstance(target, CMakeLibraryTarget)
                 target.entrypoint = entrypoint
+        return info
 
     def package_paths(self, package: Package) -> t.Set[str]:
         # TODO Do this properly
