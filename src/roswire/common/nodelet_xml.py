@@ -35,6 +35,7 @@ class NodeletInfo:
             )
             assert len(class_doms) == 1
             class_dom = class_doms[0]
+            assert isinstance(class_dom, dom.Element)
             class_name = class_dom.getAttribute('name')
             class_type = class_dom.getAttribute('type')
             base_class = class_dom.getAttribute('base_class_type')
