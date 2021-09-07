@@ -4,7 +4,8 @@ __all__ = (
     "ExecutableInfo",
     "ExecutableKind",
     "PackageSourceExtractor",
-    "SourceLanguage",)
+    "SourceLanguage",
+)
 
 import abc
 import enum
