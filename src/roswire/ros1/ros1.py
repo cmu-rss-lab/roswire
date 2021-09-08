@@ -27,9 +27,9 @@ from .source import ROS1PackageSourceExtractor
 from .state import SystemStateProbe
 from .. import exceptions as exc
 from ..common import (
+    CMakeTarget,
     NodeManager,
-    NodeSourceInfo,
-    ROSLaunchManager,
+    Package, ROSLaunchManager,
     SystemState,
 )
 from ..exceptions import ROSWireException
@@ -408,16 +408,16 @@ class ROS1:
 
     def package_node_sources(
         self,
-        package_path: str
-    ) -> Mapping[str, NodeSourceInfo]:
+        package: Package,
+    ) -> Mapping[str, CMakeTarget]:
         """
         Extracts the node -> source files mapping for the package with the
         source in ``package_path''
 
         Parameters
         ----------
-        package_path: str
-            The path on the container filesystem that contains the package
+        package: Package
+            The package in the container filesystem that contains the package
             source
 
         Returns
@@ -427,6 +427,6 @@ class ROS1:
             package and their source information
         """
         self.must_be_connected()
-        return self.__package_source_extractor.extract_source_for_package(
-            package_path
-        )
+        return self.__package_source_extractor.get_cmake_info(
+            package
+        ).targets

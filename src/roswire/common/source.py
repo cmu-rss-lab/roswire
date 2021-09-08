@@ -1,24 +1,28 @@
 # -*- coding: utf-8 -*-
 __all__ = (
-    "extract_sources_from_cmake",
-    "NodeSourceInfo",
-    "PackageSourceExtractor",
-    "SourceLanguage",)
+    "CMakeInfo",
+    "CMakeTarget",
+    "CMakeExtractor",
+    "SourceLanguage",
+)
 
 import abc
 import enum
-import re
+import os
 import typing as t
 from pathlib import Path
 from typing import Any, Iterable  # noqa: F401, E501 # Needed for tuple_from_iterable and argparse
 
 import attr
+import dockerblade
+from loguru import logger
 
+from . import Package
 from .cmake import (
     argparse as cmake_argparse,
-    ParserContext as CMakeParserContext,
+    ParserContext,
 )
-from ..util import tuple_from_iterable
+from .nodelet_xml import NodeletInfo
 
 if t.TYPE_CHECKING:
     from .. import AppInstance
@@ -29,111 +33,267 @@ class SourceLanguage(enum.Enum):
     PYTHON = "python"
 
 
-@attr.s(frozen=True, auto_attribs=True, slots=True)
-class NodeSourceInfo:
-    node_name: str
+@attr.s(auto_attribs=True, slots=True)
+class CMakeTarget:
+    name: t.Optional[str]
     language: SourceLanguage
-    sources: t.Collection[str] = attr.ib(converter=tuple_from_iterable)
+    sources: t.Set[str]
+    restrict_to_paths: t.Set[str]
 
     def to_dict(self) -> t.Dict[str, t.Any]:
-        return {"name": self.node_name,
+        return {"name": self.name,
                 "language": self.language.value,
                 "sources": list(self.sources),
-                }
+                "path_restrictions": list(self.restrict_to_paths)}
 
     @classmethod
-    def from_dict(cls, info: t.Dict[str, t.Any]) -> "NodeSourceInfo":
-        return NodeSourceInfo(
-            info["name"],
-            SourceLanguage(info["language"]),
-            info["sources"]
-        )
+    def from_dict(cls, info: t.Dict[str, t.Any]) -> "CMakeTarget":
+        return CMakeTarget(info["name"],
+                           SourceLanguage(info["language"]),
+                           set(info["sources"]),
+                           set(info["path_restrictions"]))
 
 
-def extract_sources_from_cmake(
-    file_contents: str
-) -> t.Collection['NodeSourceInfo']:
-    """
-    Extracts NodeSource information about nodes in a CMakefilesList.txt.
+@attr.s(auto_attribs=True, slots=True)
+class CMakeBinaryTarget(CMakeTarget):
 
-    Note, ROS2 uses both CMakeLists.txt and setup.py for package information,
-    so we factor this method into common.
-
-    Parameters
-    ----------
-    file_contents: str
-        The contents of the CMakeLists.txt file
-
-    Returns
-    -------
-    Collection[NodeSourceInfo]
-        A collection of NodeSourceInfo, one for each node defined in the file
-    """
-    src_info: t.Set['NodeSourceInfo'] = set()
-    cmake_env: t.Dict[str, str] = {}
-
-    for cmd, args, arg_tokens, (_fname, _line, _column) \
-            in CMakeParserContext().parse(file_contents):
-        if cmd == "set":
-            opts, args = cmake_argparse(
-                args,
-                {"PARENT_SCOPE": "-", "FORCE": "-", "CACHE": "*"}
-            )
-            cmake_env[args[0]] = ";".join(args[1:])
-        elif cmd == "unset":
-            opts, args = cmake_argparse(args, {"CACHE": "-"})
-            del cmake_env[args[0]]
-        elif cmd == "add_executable":
-            name = args[0]
-            sources: t.List[str] = []
-            for _token_type, token_val in arg_tokens[1:]:
-                if not token_val.startswith("$"):
-                    sources.append(token_val)
-                else:
-                    matches = re.match(r'\${(.*)}', token_val)
-                    if matches and matches.group(1) in cmake_env:
-                        sources.extend(cmake_env[matches.group(1)].split(";"))
-            src_info.add(NodeSourceInfo(name, SourceLanguage.CXX, sources))
-        elif cmd == "catkin_install_python":
-            opts, args = cmake_argparse(
-                args,
-                {"PROGRAMS": "*", "DESTINATION": "*"}
-            )
-            if 'PROGRAMS' in opts:
-                program_opts = opts['PROGRAMS']
-                for i in range(len(program_opts)):
-                    # http://docs.ros.org/en/jade/api/catkin/html/howto/format2/installing_python.html  # noqa: E501
-                    # Convention is that ros python nodes are in nodes/
-                    # directory. All others are in scripts/. So just
-                    # include python installs that are in nodes/
-                    program = program_opts[i]
-                    if program.startswith("nodes/"):
-                        name = Path(program[0]).stem
-                        sources = [program]
-                        src_info.add(
-                            NodeSourceInfo(
-                                name,
-                                SourceLanguage.PYTHON,
-                                sources))
-            else:
-                raise ValueError(
-                    "PROGRAMS not specified in catkin_install_python"
-                )
-    return src_info
+    @property
+    def entrypoint(self) -> t.Optional[str]:
+        if self.language == SourceLanguage.CXX:
+            return "main"
+        else:
+            return None
 
 
-class PackageSourceExtractor(abc.ABC):
+@attr.s(auto_attribs=True, slots=True)
+class CMakeLibraryTarget(CMakeBinaryTarget):
+
+    _entrypoint: t.Optional[str] = attr.ib(init=False)
+
+    @property
+    def entrypoint(self) -> t.Optional[str]:
+        return self._entrypoint
+
+    @entrypoint.setter
+    def entrypoint(self, entrypoint: str) -> None:
+        self._entrypoint = entrypoint
+
+    def to_dict(self) -> t.Dict[str, t.Any]:
+        d = super().to_dict()
+        if self.entrypoint:
+            d['entrypoint'] = self.entrypoint
+        return d
+
+    @classmethod
+    def from_dict(cls, info: t.Dict[str, t.Any]) -> 'CMakeLibraryTarget':
+        target = CMakeLibraryTarget(info["name"],
+                                    SourceLanguage(info["language"]),
+                                    set(info["sources"]),
+                                    set(info["path_restrictions"]),
+                                    )
+        if 'entrypoint' in info:
+            target.entrypoint = info['entrypoint']
+        return target
+
+
+@attr.s(auto_attribs=True, slots=True, frozen=True)
+class CMakeInfo:
+    targets: t.Mapping[str, CMakeTarget]
+
+
+@attr.s(auto_attribs=True)
+class CMakeExtractor(abc.ABC):
+    _files: dockerblade.FileSystem
+
     @classmethod
     @abc.abstractmethod
     def for_app_instance(
         cls,
         app_instance: "AppInstance"
-    ) -> "PackageSourceExtractor":
+    ) -> "CMakeExtractor":
         ...
 
     @abc.abstractmethod
-    def extract_source_for_package(
+    def get_cmake_info(
         self,
-        path_to_package: str
-    ) -> t.Mapping[str, NodeSourceInfo]:
+        package: Package
+    ) -> CMakeInfo:
         ...
+
+    @abc.abstractmethod
+    def package_paths(self, package: Package) -> t.Set[str]:
+        ...
+
+    def get_nodelet_entrypoints(self, package: Package) -> t.Mapping[str, str]:
+        entrypoints: t.Dict[str, str] = {}
+        workspace = package.path
+        nodelets_xml_path = os.path.join(workspace, 'nodelet_plugins.xml')
+        if self._files.exists(nodelets_xml_path):
+            nodelet_info = NodeletInfo.from_nodelet_xml(
+                self._files.read(nodelets_xml_path)
+            )
+            for info in nodelet_info.libraries:
+                package_and_name = info.class_name.split('/')
+                # TODO can package in XML nodelet differ from package.name?
+                name = package_and_name[1]
+                entrypoint = info.class_type + "::onInit"
+                entrypoints[name] = entrypoint
+        return entrypoints
+
+    def _process_cmake_contents(
+        self,
+        file_contents: str,
+        package: Package,
+        cmake_env: t.Dict[str, str],
+    ) -> CMakeInfo:
+        """
+        Processes the contents of a CMakeLists.txt file for information about
+        executables. Recursively includes other CMakeLists.txt files that may
+        be included.
+
+        Parameters
+        ----------
+        file_contents: str
+            The contents of the CMakeLists.txt file
+        package: Package
+            The package where the CMakeLists.txt file is defined
+        cmake_env: t.Dict[str, str]
+            Any context variables for processing the contents
+
+        Returns
+        -------
+        CMakeInfo:
+            Information about the targets in CMakeLists.txt
+        """
+        executables: t.Dict[str, CMakeTarget] = {}
+        context = ParserContext().parse(file_contents, skip_callable=False)
+        for cmd, args, _arg_tokens, (_fname, _line, _column) in context:
+            if cmd == "set":
+                opts, args = cmake_argparse(
+                    args,
+                    {"PARENT_SCOPE": "-", "FORCE": "-", "CACHE": "*"}
+                )
+                cmake_env[args[0]] = ";".join(args[1:])
+            if cmd == "unset":
+                opts, args = cmake_argparse(args, {"CACHE": "-"})
+                cmake_env[args[0]] = ""
+            if cmd == "add_executable":
+                self.__process_add_executable(
+                    args,
+                    cmake_env,
+                    executables,
+                    package)
+            if cmd == "catkin_install_python":
+                self.__process_python_executables(
+                    args,
+                    cmake_env,
+                    executables)
+            if cmd == 'add_library':
+                self.__process_add_library(
+                    args,
+                    cmake_env,
+                    executables,
+                    package)
+            if cmd == "add_subdirectory":
+                executables = self.__process_add_subdirectory(
+                    args,
+                    cmake_env,
+                    executables,
+                    package)
+        return CMakeInfo(executables)
+
+    def __process_add_subdirectory(
+        self,
+        args: t.List[str],
+        cmake_env: t.Dict[str, str],
+        executables: t.Dict[str, CMakeTarget],
+        package: Package
+    ) -> t.Dict[str, CMakeTarget]:
+        new_env = cmake_env.copy()
+        new_env['cwd'] = os.path.join(cmake_env.get('cwd', '.'), args[0])
+        join = os.path.join(package.path, new_env['cwd'])
+        cmakelists_path = os.path.join(join, 'CMakeLists.txt')
+        logger.debug(f"Processing {cmakelists_path}")
+        included_package_info = self._process_cmake_contents(
+            self._files.read(cmakelists_path),
+            package,
+            new_env,
+        )
+        executables = {
+            **executables,
+            **{s: included_package_info.targets[s]
+               for s in included_package_info.targets}
+        }
+        return executables
+
+    def __process_add_executable(
+        self,
+        args: t.List[str],
+        cmake_env: t.Dict[str, str],
+        executables: t.Dict[str, CMakeTarget],
+        package: Package
+    ) -> None:
+        name = args[0]
+        sources: t.Set[str] = set()
+        for source in args[1:]:
+            if 'cwd' in cmake_env:
+                sources.add(os.path.join(cmake_env['cwd'], source))
+            else:
+                sources.add(source)
+        logger.debug(f"Adding C++ sources for {name}")
+        executables[name] = CMakeBinaryTarget(
+            name=name,
+            language=SourceLanguage.CXX,
+            sources=sources,
+            restrict_to_paths=self.package_paths(package))
+
+    def __process_add_library(
+        self,
+        args: t.List[str],
+        cmake_env: t.Dict[str, str],
+        executables: t.Dict[str, CMakeTarget],
+        package: Package
+    ) -> None:
+        name = args[0]
+        if 'cwd' in cmake_env:
+            sources = {os.path.join(cmake_env['cwd'], s) for s in args[1:]}
+        else:
+            sources = set(args[1:])
+        logger.debug(f"Adding C++ library {name}")
+        executables[name] = CMakeLibraryTarget(
+            name,
+            SourceLanguage.CXX,
+            sources,
+            self.package_paths(package))
+
+    def __process_python_executables(
+        self,
+        args: t.List[str],
+        cmake_env: t.Dict[str, str],
+        executables: t.Dict[str, CMakeTarget]
+    ) -> None:
+        opts, args = cmake_argparse(
+            args,
+            {"PROGRAMS": "*", "DESTINATION": "*"}
+        )
+        if 'PROGRAMS' not in opts:
+            raise ValueError('PROGRAMS not specified in catin_install_python')
+
+        for program in opts['PROGRAMS']:
+            # http://docs.ros.org/en/jade/api/catkin/html/howto/format2/installing_python.html  # noqa: F401, E501
+            # Convention is that ros python nodes are in nodes/ directory.
+            # All others are in scripts/. So just include python installs
+            # that are in nodes/
+            if program.startswith("nodes/"):
+                name = Path(program[0]).stem
+                sources: t.Set[str] = set()
+                if 'cwd' in cmake_env:
+                    sources = set()
+                    sources.add(os.path.join(cmake_env['cwd'], program))
+                else:
+                    sources.add(program)
+                logger.debug(f"Adding Python sources for {name}")
+                executables[name] = CMakeTarget(name,
+                                                SourceLanguage.PYTHON,
+                                                sources,
+                                                set())
