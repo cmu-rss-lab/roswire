@@ -5,6 +5,7 @@ import os.path
 import typing as t
 
 import attr
+import dockerblade
 from loguru import logger
 
 from ..common import Package
@@ -23,6 +24,13 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
         app_instance: "AppInstance",
     ) -> "ROS1PackageSourceExtractor":
         return ROS1PackageSourceExtractor(files=app_instance.files)
+
+    @classmethod
+    def for_filesystem(
+        cls,
+        files: dockerblade.FileSystem
+    ) -> "ROS1PackageSourceExtractor":
+        return ROS1PackageSourceExtractor(files)
 
     def get_cmake_info(
         self,
