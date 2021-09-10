@@ -177,7 +177,7 @@ class CMakeExtractor(abc.ABC):
             if cmd == "unset":
                 opts, args = cmake_argparse(args, {"CACHE": "-"})
                 cmake_env[args[0]] = ""
-            if cmd == "add_executable":
+            if cmd == "add_executable" or cmd == 'cuda_add_executable':
                 self.__process_add_executable(
                     args,
                     cmake_env,
@@ -188,7 +188,7 @@ class CMakeExtractor(abc.ABC):
                     args,
                     cmake_env,
                     executables)
-            if cmd == 'add_library':
+            if cmd == 'add_library' or cmd == 'cuda_add_library':
                 self.__process_add_library(
                     args,
                     cmake_env,
