@@ -47,7 +47,8 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
         nodelets = self.get_nodelet_entrypoints(package)
         for nodelet, entrypoint in nodelets.items():
             if nodelet not in info.targets:
-                logger.error(f"'{nodelet}' is referenced in "
+                logger.error(f"Package {package.name}: '{nodelet}' "
+                             f"is referenced in "
                              f"nodelet_plugins.xml but not in "
                              f"CMakeLists.txt")
             else:
