@@ -57,9 +57,45 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
                 target.entrypoint = entrypoint
         return info
 
+    def _find_package_workspace(self, package: Package) -> str:
+        """Determines the absolute path of the workspace to which a given
+        package belongs.
+
+        Raises
+        ------
+        ValueError
+            if the workspace for the given package could not be determined
+        """
+        workspace_path = os.path.dirname(package.path)
+        while workspace_path != "/":
+
+            catkin_marker_path = \
+                os.path.join(workspace_path, ".catkin_workspace")
+            logger.debug(f"looking for workspace marker: {catkin_marker_path}")
+            if self._files.exists(catkin_marker_path):
+                return workspace_path
+
+            catkin_tools_dir = os.path.join(workspace_path, ".catkin_tools")
+            logger.debug(f"looking for workspace marker: {catkin_tools_dir}")
+            if self._files.exists(catkin_tools_dir):
+                return workspace_path
+
+            workspace_path = os.path.dirname(workspace_path)
+
+        raise ValueError(f"unable to determine workspace for package: "
+                         f"{package}")
+
     def package_paths(self, package: Package) -> t.Set[str]:
-        # TODO Do this properly
-        include: str = os.path.normpath(
-            os.path.join(package.path, f'../../include/{package.name}')
-        )
-        return {package.path, include}
+        paths = {package.path}
+        workspace = self._find_package_workspace(package)
+
+        for contender in ('devel/include',
+                          'devel_isolated/include',
+                          'install/include',
+                          ):
+            workspace_contender = \
+                os.path.join(workspace, contender, package.name)
+            if self._files.exists(workspace_contender):
+                paths.add(workspace_contender)
+
+        return paths
