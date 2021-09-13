@@ -57,7 +57,7 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
                 target.entrypoint = entrypoint
         return info
 
-    def _find_package_devel_workspace(self, package: Package) -> str:
+    def _find_package_devel_workspaces(self, package: Package) -> t.Set[str]:
         """Determines the absolute path of the workspace to which a given package belongs.
         Raises
         ------
@@ -66,21 +66,29 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
         """
 
         workspace_path = os.path.dirname(package.path)
-        while workspace_path != "/":
+        result = None
+        while workspace_path != "/" and result is None:
 
             catkin_marker_path = os.path.join(workspace_path, ".catkin_workspace")
             logger.debug(f"looking for workspace marker: {catkin_marker_path}")
             if self._files.exists(catkin_marker_path):
-                return os.join(workspace_path, "devel")
+                result = workspace_path
 
             catkin_tools_dir = os.path.join(workspace_path, ".catkin_tools")
             logger.debug(f"looking for workspace marker: {catkin_tools_dir}")
             if self._files.exists(catkin_tools_dir):
-                return os.join(workspace_path, "devel")
+                result = workspace_path
 
             workspace_path = os.path.dirname(workspace_path)
 
-        raise ValueError(f"unable to determine workspace for package: {package}")
+        if result is None:
+            raise ValueError(f"unable to determine workspace for package: {package}")
+
+        return {os.path.join(result, 'devel/include'),
+                os.path.join(result, 'install/include'),
+                os.path.join(result, 'devel_isolated/include')}
 
     def package_paths(self, package: Package) -> t.Set[str]:
-        return {package.path, os.path.join(self._find_package_devel_workspace(package), "include")}
+        paths = {package.path}
+        paths.update(self._find_package_devel_workspaces(package))
+        return paths
