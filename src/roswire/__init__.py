@@ -6,6 +6,7 @@ _logger.disable("roswire")
 from . import name
 from .app import App, AppDescription, AppInstance
 from .common import (
+    CMakeBinaryTarget,
     CMakeInfo,
     CMakeTarget,
     Node,
