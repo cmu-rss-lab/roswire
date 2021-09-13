@@ -81,6 +81,8 @@ class ROS1:
         self.__uri = f"http://{ip_address}:{port}"
         self.__connection: Optional[xmlrpc.client.ServerProxy] = None
         self.__roscore_process: Optional[dockerblade.popen.Popen] = None
+        self.__package_source_extractor = \
+            ROS1PackageSourceExtractor.for_filesystem(self.__files)
 
     def __enter__(self) -> "ROS1":
         """
@@ -426,7 +428,6 @@ class ROS1:
             A (possibly empty) mapping between node names provided by the
             package and their source information
         """
-        self.must_be_connected()
         return self.__package_source_extractor.get_cmake_info(
             package
         ).targets

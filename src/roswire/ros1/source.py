@@ -5,6 +5,7 @@ import os.path
 import typing as t
 
 import attr
+import dockerblade
 from loguru import logger
 
 from ..common import Package
@@ -24,6 +25,13 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
     ) -> "ROS1PackageSourceExtractor":
         return ROS1PackageSourceExtractor(files=app_instance.files)
 
+    @classmethod
+    def for_filesystem(
+        cls,
+        files: dockerblade.FileSystem
+    ) -> "ROS1PackageSourceExtractor":
+        return ROS1PackageSourceExtractor(files)
+
     def get_cmake_info(
         self,
         package: Package
@@ -39,7 +47,8 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
         nodelets = self.get_nodelet_entrypoints(package)
         for nodelet, entrypoint in nodelets.items():
             if nodelet not in info.targets:
-                logger.error(f"'{nodelet}' is referenced in "
+                logger.error(f"Package {package.name}: '{nodelet}' "
+                             f"is referenced in "
                              f"nodelet_plugins.xml but not in "
                              f"CMakeLists.txt")
             else:
