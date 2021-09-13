@@ -58,7 +58,9 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
         return info
 
     def _find_package_workspace(self, package: Package) -> str:
-        """Determines the absolute path of the workspace to which a given package belongs.
+        """Determines the absolute path of the workspace to which a given
+        package belongs.
+
         Raises
         ------
         ValueError
@@ -68,7 +70,8 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
         workspace_path = os.path.dirname(package.path)
         while workspace_path != "/":
 
-            catkin_marker_path = os.path.join(workspace_path, ".catkin_workspace")
+            catkin_marker_path = \
+                os.path.join(workspace_path, ".catkin_workspace")
             logger.debug(f"looking for workspace marker: {catkin_marker_path}")
             if self._files.exists(catkin_marker_path):
                 return workspace_path
@@ -90,10 +93,7 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
                           'devel_isolated/include',
                           'install/include',
                           ):
-            workspace_contender = os.path.join(workspace, contender)
-            if self._files.exists(workspace_contender):
-                paths.add(workspace_contender)
-            workspace_contender = os.path.join(workspace_contender, package.name)
+            workspace_contender = os.path.join(workspace, contender, package.name)
             if self._files.exists(workspace_contender):
                 paths.add(workspace_contender)
 
