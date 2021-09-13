@@ -8,6 +8,7 @@ from .node import Node
 from .node_manager import NodeManager
 from .package import Package, PackageDatabase
 from .source import (
+    CMakeBinaryTarget,
     CMakeExtractor,
     CMakeInfo,
     CMakeTarget,
