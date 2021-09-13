@@ -66,7 +66,6 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
         ValueError
             if the workspace for the given package could not be determined
         """
-
         workspace_path = os.path.dirname(package.path)
         while workspace_path != "/":
 
@@ -83,7 +82,8 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
 
             workspace_path = os.path.dirname(workspace_path)
 
-        raise ValueError(f"unable to determine workspace for package: {package}")
+        raise ValueError(f"unable to determine workspace for package: "
+                         f"{package}")
 
     def package_paths(self, package: Package) -> t.Set[str]:
         paths = {package.path}
@@ -93,7 +93,8 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
                           'devel_isolated/include',
                           'install/include',
                           ):
-            workspace_contender = os.path.join(workspace, contender, package.name)
+            workspace_contender = \
+                os.path.join(workspace, contender, package.name)
             if self._files.exists(workspace_contender):
                 paths.add(workspace_contender)
 
