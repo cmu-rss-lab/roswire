@@ -57,9 +57,8 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
                 target.entrypoint = entrypoint
         return info
 
-    def _find_package_devel_workspaces(self, package: Package) -> t.Set[str]:
-        """Determines the absolute path of the workspace to which a given
-        package belongs.
+    def _find_package_workspace(self, package: Package) -> str:
+        """Determines the absolute path of the workspace to which a given package belongs.
         Raises
         ------
         ValueError
@@ -67,31 +66,35 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
         """
 
         workspace_path = os.path.dirname(package.path)
-        result = None
-        while workspace_path != "/" and result is None:
+        while workspace_path != "/":
 
-            catkin_marker_path = \
-                os.path.join(workspace_path, ".catkin_workspace")
+            catkin_marker_path = os.path.join(workspace_path, ".catkin_workspace")
             logger.debug(f"looking for workspace marker: {catkin_marker_path}")
             if self._files.exists(catkin_marker_path):
-                result = workspace_path
+                return workspace_path
 
             catkin_tools_dir = os.path.join(workspace_path, ".catkin_tools")
             logger.debug(f"looking for workspace marker: {catkin_tools_dir}")
             if self._files.exists(catkin_tools_dir):
-                result = workspace_path
+                return workspace_path
 
             workspace_path = os.path.dirname(workspace_path)
 
-        if result is None:
-            raise ValueError(f"unable to determine workspace for package: "
-                             f"{package}")
-
-        return {os.path.join(result, 'devel/include'),
-                os.path.join(result, 'install/include'),
-                os.path.join(result, 'devel_isolated/include')}
+        raise ValueError(f"unable to determine workspace for package: {package}")
 
     def package_paths(self, package: Package) -> t.Set[str]:
         paths = {package.path}
-        paths.update(self._find_package_devel_workspaces(package))
+        workspace = self._find_package_workspace(package)
+
+        for contender in ('devel/include',
+                          'devel_isolated/include',
+                          'install/include',
+                          ):
+            workspace_contender = os.path.join(workspace, contender)
+            if self._files.exists(workspace_contender):
+                paths.add(workspace_contender)
+            workspace_contender = os.path.join(workspace_contender, package.name)
+            if self._files.exists(workspace_contender):
+                paths.add(workspace_contender)
+
         return paths
