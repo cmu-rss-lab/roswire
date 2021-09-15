@@ -440,4 +440,17 @@ class ROS1:
         """Obtains a description of the CMake targets for all packages within
         this application.
         """
-        raise NotImplementedError
+        output: t.List[PackageCMakeTargets] = []
+
+        for package in self.__description.packages.values():
+
+            # ignore any packages without a CMakeLists.txt
+            cmake_filename = os.path.join(package.path, "CMakeLists.txt")
+            if not self.__files.exists(cmake_filename):
+                continue
+
+            target_to_info = self.package_node_sources(package)
+            package_cmake_targets = PackageCMakeTargets(package, target_to_info.values())
+            output.append(package_cmake_targets)
+
+        return output
