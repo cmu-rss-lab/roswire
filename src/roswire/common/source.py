@@ -168,6 +168,7 @@ class CMakeExtractor(abc.ABC):
         executables: t.Dict[str, CMakeTarget] = {}
         context = ParserContext().parse(file_contents, skip_callable=False)
         for cmd, args, _arg_tokens, (_fname, _line, _column) in context:
+            cmd = cmd.lower()
             if cmd == "set":
                 opts, args = cmake_argparse(
                     args,
