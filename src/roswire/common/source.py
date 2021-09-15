@@ -3,6 +3,7 @@ __all__ = (
     "CMakeInfo",
     "CMakeTarget",
     "CMakeExtractor",
+    "PackageCMakeTargets",
     "SourceLanguage",
 )
 
@@ -55,8 +56,23 @@ class CMakeTarget:
 
 
 @attr.s(auto_attribs=True, slots=True)
-class CMakeBinaryTarget(CMakeTarget):
+class PackageCMakeTargets:
+    """Describes the CMake build targets for a given package
 
+    Attributes
+    ----------
+    package: Package
+        the package to which these sources belong
+    targets: t.Collection[CMakeTarget]
+        the build targets that are contained within this package
+    """
+
+    package: Package
+    targets: t.Collection[CMakeTarget]
+
+
+@attr.s(auto_attribs=True, slots=True)
+class CMakeBinaryTarget(CMakeTarget):
     @property
     def entrypoint(self) -> t.Optional[str]:
         if self.language == SourceLanguage.CXX:
@@ -67,7 +83,6 @@ class CMakeBinaryTarget(CMakeTarget):
 
 @attr.s(auto_attribs=True, slots=True)
 class CMakeLibraryTarget(CMakeBinaryTarget):
-
     _entrypoint: t.Optional[str] = attr.ib(init=False)
 
     @property

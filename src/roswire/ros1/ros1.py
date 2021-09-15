@@ -3,7 +3,7 @@ __all__ = ("ROS1",)
 
 import os
 import time
-import typing
+import typing as t
 import xmlrpc.client
 from types import TracebackType
 from typing import (
@@ -29,13 +29,15 @@ from .. import exceptions as exc
 from ..common import (
     CMakeTarget,
     NodeManager,
-    Package, ROSLaunchManager,
+    Package,
+    PackageCMakeTargets,
+    ROSLaunchManager,
     SystemState,
 )
 from ..exceptions import ROSWireException
 from ..util import is_port_open, Stopwatch, wait_till_open
 
-if typing.TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from .. import AppDescription
 
 
@@ -431,3 +433,24 @@ class ROS1:
         return self.__package_source_extractor.get_cmake_info(
             package
         ).targets
+
+    def cmake_targets_for_all_packages(
+        self
+    ) -> t.Collection[PackageCMakeTargets]:
+        """Obtains a description of the CMake targets for all packages within
+        this application.
+        """
+        output: t.List[PackageCMakeTargets] = []
+
+        for package in self.__description.packages.values():
+
+            # ignore any packages without a CMakeLists.txt
+            cmake_filename = os.path.join(package.path, "CMakeLists.txt")
+            if not self.__files.exists(cmake_filename):
+                continue
+
+            target_to_info = self.package_node_sources(package)
+            package_cmake_targets = PackageCMakeTargets(package, target_to_info.values())
+            output.append(package_cmake_targets)
+
+        return output
