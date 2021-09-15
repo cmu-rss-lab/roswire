@@ -12,6 +12,7 @@ from .source import (
     CMakeExtractor,
     CMakeInfo,
     CMakeTarget,
+    PackageCMakeTargets,
     SourceLanguage,
 )
 from .srv import SrvFormat
