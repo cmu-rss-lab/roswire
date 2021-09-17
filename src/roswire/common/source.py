@@ -34,7 +34,7 @@ class SourceLanguage(enum.Enum):
     PYTHON = "python"
 
 
-@attr.s(auto_attribs=True, slots=True)
+@attr.s(auto_attribs=True)
 class CMakeTarget:
     name: str
     language: SourceLanguage
@@ -55,7 +55,7 @@ class CMakeTarget:
                            set(info["path_restrictions"]))
 
 
-@attr.s(auto_attribs=True, slots=True)
+@attr.s(auto_attribs=True)
 class PackageCMakeTargets:
     """Describes the CMake build targets for a given package
 
@@ -71,7 +71,7 @@ class PackageCMakeTargets:
     targets: t.Collection[CMakeTarget]
 
 
-@attr.s(auto_attribs=True, slots=True)
+@attr.s(auto_attribs=True)
 class CMakeBinaryTarget(CMakeTarget):
     @property
     def entrypoint(self) -> t.Optional[str]:
@@ -81,7 +81,7 @@ class CMakeBinaryTarget(CMakeTarget):
             return None
 
 
-@attr.s(auto_attribs=True, slots=True)
+@attr.s(auto_attribs=True)
 class CMakeLibraryTarget(CMakeBinaryTarget):
     _entrypoint: t.Optional[str] = attr.ib(init=False)
 
