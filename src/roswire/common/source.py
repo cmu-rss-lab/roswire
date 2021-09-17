@@ -83,7 +83,7 @@ class CMakeBinaryTarget(CMakeTarget):
 
 @attr.s(auto_attribs=True)
 class CMakeLibraryTarget(CMakeBinaryTarget):
-    _entrypoint: t.Optional[str] = attr.ib(init=False)
+    _entrypoint: t.Optional[str] = attr.ib(default=None)
 
     @property
     def entrypoint(self) -> t.Optional[str]:
