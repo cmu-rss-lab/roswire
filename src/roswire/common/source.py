@@ -36,7 +36,7 @@ class SourceLanguage(enum.Enum):
 
 @attr.s(auto_attribs=True, slots=True)
 class CMakeTarget:
-    name: t.Optional[str]
+    name: str
     language: SourceLanguage
     sources: t.Set[str]
     restrict_to_paths: t.Set[str]
