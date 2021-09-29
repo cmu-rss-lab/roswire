@@ -263,7 +263,7 @@ class CMakeExtractor(abc.ABC):
         name = args[0]
         sources: t.Set[str] = set()
         for source in args[1:]:
-            real_src = self.get_real_name(source, package, cmake_env)
+            real_src = self._resolve_to_real_file(source, package, cmake_env)
             sources.add(real_src)
         logger.debug(f"Adding C++ sources for {name}")
         executables[name] = CMakeBinaryTarget(
@@ -272,21 +272,25 @@ class CMakeExtractor(abc.ABC):
             sources=sources,
             restrict_to_paths=self.package_paths(package))
 
-    def get_real_name(self, source, package, cmake_env):
-        real_src = source
+    def _resolve_to_real_file(
+        self,
+        filename: str,
+        package: Package,
+        cmake_env: t.Dict[str, str],
+    ) -> str:
+        real_filename = filename
         if 'cwd' in cmake_env:
-            real_src = os.path.join(cmake_env['cwd'], source)
-        if not self._files.isfile(os.path.join(package.path, real_src)):
-            path = Path(real_src)
+            real_filename = os.path.join(cmake_env['cwd'], filename)
+        if not self._files.isfile(os.path.join(package.path, real_filename)):
+            path = Path(real_filename)
             parent = str(path.parent)
-            name = path.name
             all_files = self._files.listdir(os.path.join(package.path, parent))
-            matching_files = [f for f in all_files if f.startswith(name)]
+            matching_files = [f for f in all_files if f.startswith(path.name)]
             if len(matching_files) != 1:
-                raise ValueError(f"Only one file should match '{real_src}'. "
+                raise ValueError(f"Only one file should match '{real_filename}'. "
                                  f"Currently {len(matching_files)} files do: {matching_files}")
-            real_src = os.path.join(parent, matching_files[0])
-        return real_src
+            real_filename = os.path.join(parent, matching_files[0])
+        return real_filename
 
     def __process_add_library(
         self,
@@ -298,7 +302,7 @@ class CMakeExtractor(abc.ABC):
         name = args[0]
         sources: t.Set[str] = set()
         for source in args[1:]:
-            real_src = self.get_real_name(source, package, cmake_env)
+            real_src = self._resolve_to_real_file(source, package, cmake_env)
             sources.add(real_src)
         logger.debug(f"Adding C++ library {name}")
         executables[name] = CMakeLibraryTarget(
@@ -329,7 +333,7 @@ class CMakeExtractor(abc.ABC):
             if program.startswith("nodes/"):
                 name = Path(program[0]).stem
                 sources: t.Set[str] = set()
-                source = self.get_real_name(program, package, cmake_env)
+                source = self._resolve_to_real_file(program, package, cmake_env)
                 sources.add(source)
                 logger.debug(f"Adding Python sources for {name}")
                 executables[name] = CMakeTarget(name,
