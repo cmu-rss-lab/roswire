@@ -280,7 +280,7 @@ class CMakeExtractor(abc.ABC):
             path = Path(real_src)
             parent = str(path.parent)
             name = path.name
-            all_files = self._files.listdir(parent)
+            all_files = self._files.listdir(os.path.join(package.path, parent))
             matching_files = [f for f in all_files if f.startswith(name)]
             if len(matching_files) != 1:
                 raise ValueError(f"Only one file should match '{real_src}'. "
