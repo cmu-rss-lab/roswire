@@ -184,6 +184,9 @@ class CMakeExtractor(abc.ABC):
         context = ParserContext().parse(file_contents, skip_callable=False)
         for cmd, args, _arg_tokens, (_fname, _line, _column) in context:
             cmd = cmd.lower()
+            if cmd == "project":
+                opts, args = cmake_argparse(args, {})
+                cmake_env["PROJECT_NAME"] = args[0]
             if cmd == "set":
                 opts, args = cmake_argparse(
                     args,
