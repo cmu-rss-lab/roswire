@@ -181,7 +181,7 @@ class CMakeExtractor(abc.ABC):
             Information about the targets in CMakeLists.txt
         """
         executables: t.Dict[str, CMakeTarget] = {}
-        context = ParserContext().parse(file_contents, skip_callable=False)
+        context = ParserContext().parse(file_contents, skip_callable=False, var=cmake_env)
         for cmd, args, _arg_tokens, (_fname, _line, _column) in context:
             cmd = cmd.lower()
             if cmd == "project":
@@ -258,19 +258,34 @@ class CMakeExtractor(abc.ABC):
         executables: t.Dict[str, CMakeTarget],
         package: Package
     ) -> None:
+        cmake_argparse()
         name = args[0]
         sources: t.Set[str] = set()
         for source in args[1:]:
-            if 'cwd' in cmake_env:
-                sources.add(os.path.join(cmake_env['cwd'], source))
-            else:
-                sources.add(source)
+            real_src = self.get_real_name(source, cmake_env)
+            sources.add(real_src)
         logger.debug(f"Adding C++ sources for {name}")
         executables[name] = CMakeBinaryTarget(
             name=name,
             language=SourceLanguage.CXX,
             sources=sources,
             restrict_to_paths=self.package_paths(package))
+
+    def get_real_name(self, source, cmake_env):
+        real_src = source
+        if 'cwd' in cmake_env:
+            real_src = os.path.join(cmake_env['cwd'], source)
+        if not self._files.isfile(real_src):
+            path = Path(real_src)
+            parent = str(path.parent)
+            name = path.name
+            all_files = self._files.listdir(parent)
+            matching_files = [f for f in all_files if f.startswith(name)]
+            if len(matching_files) != 1:
+                raise ValueError(f"Only one file should match '{real_src}'. "
+                                 f"Currently {len(matching_files)} files do: {matching_files}")
+            real_src = matching_files[0]
+        return real_src
 
     def __process_add_library(
         self,
@@ -280,10 +295,10 @@ class CMakeExtractor(abc.ABC):
         package: Package
     ) -> None:
         name = args[0]
-        if 'cwd' in cmake_env:
-            sources = {os.path.join(cmake_env['cwd'], s) for s in args[1:]}
-        else:
-            sources = set(args[1:])
+        sources: t.Set[str] = set()
+        for source in args[1:]:
+            real_src = self.get_real_name(source, cmake_env)
+            sources.add(real_src)
         logger.debug(f"Adding C++ library {name}")
         executables[name] = CMakeLibraryTarget(
             name,
@@ -312,11 +327,8 @@ class CMakeExtractor(abc.ABC):
             if program.startswith("nodes/"):
                 name = Path(program[0]).stem
                 sources: t.Set[str] = set()
-                if 'cwd' in cmake_env:
-                    sources = set()
-                    sources.add(os.path.join(cmake_env['cwd'], program))
-                else:
-                    sources.add(program)
+                source = self.get_real_name(program, cmake_env)
+                sources.add(source)
                 logger.debug(f"Adding Python sources for {name}")
                 executables[name] = CMakeTarget(name,
                                                 SourceLanguage.PYTHON,
