@@ -4,6 +4,7 @@ __all__ = ("ROS2PackageDatabase",)
 import json
 import os
 import typing
+import typing as t  # noqa  # This is a mypy workaround
 from typing import (
     Any,
     Collection,
@@ -11,7 +12,6 @@ from typing import (
     List,
     Mapping,
 )
-from typing import Iterable  # noqa: F401 # Needed for tuple_from_iterable
 
 import attr
 import dockerblade

@@ -4,6 +4,7 @@ __all__ = ("Constant", "ConstantValue", "Field", "MsgFormat", "Message")
 import hashlib
 import os
 import re
+import typing as t  # noqa  # This is a mypy workaround
 from abc import ABC, abstractmethod
 from io import BytesIO
 from typing import (
@@ -21,7 +22,6 @@ from typing import (
     TypeVar,
     Union,
 )
-from typing import Iterable  # noqa  # This is a mypy workaround
 
 import attr
 import dockerblade
