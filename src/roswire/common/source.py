@@ -24,6 +24,7 @@ from .cmake import (
     ParserContext,
 )
 from .nodelet_xml import NodeletInfo
+from ..util import key_val_list_to_dict
 
 if t.TYPE_CHECKING:
     from .. import AppInstance
@@ -189,7 +190,7 @@ class CMakeExtractor(abc.ABC):
                 cmake_env["PROJECT_NAME"] = args[0]
             if cmd == "set_target_properties":
                 opts, args = cmake_argparse(args, {"PROPERTIES": "*"})
-                properties = self._list_to_dict(opts.get("PROPERTIES", []))
+                properties = key_val_list_to_dict(opts.get("PROPERTIES", []))
                 if 'OUTPUT_NAME' in properties:
                     executables[properties['OUTPUT_NAME']] = executables[cmake_env["PROJECT_NAME"]]
                     del executables[cmake_env["PROJECT_NAME"]]
@@ -340,8 +341,3 @@ class CMakeExtractor(abc.ABC):
                                                 SourceLanguage.PYTHON,
                                                 sources,
                                                 set())
-
-    def _list_to_dict(self, values: t.List[str]) -> t.Dict[str, str]:
-        key_list = values[::2]
-        value_list = values[1::2]
-        return dict(zip(key_list, value_list))

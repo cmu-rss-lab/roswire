@@ -9,20 +9,40 @@ __all__ = (
 import contextlib
 import socket
 import time
+import typing as t
 import warnings
 from timeit import default_timer as timer
-from typing import Any, Iterable, Tuple
 
 from . import exceptions as exc
 
 
-def tuple_from_iterable(val: Iterable[Any]) -> Tuple[Any, ...]:
+def tuple_from_iterable(val: t.Iterable[t.Any]) -> t.Tuple[t.Any, ...]:
     """
     Builds a tuple from an iterable.
 
     Workaround for https://github.com/python-attrs/attrs/issues/519
     """
     return tuple(val)
+
+
+def key_val_list_to_dict(key_values: t.List[str]) -> t.Dict[str, str]:
+    """
+    Converts a list of key, val pairs into a dict.
+    
+    Parameters
+    ----------
+    key_values: List[str]
+        List of alternating key, value pairs in a list
+
+    Returns
+    -------
+    Dict[str, str]
+        A dictionary of key, value entries
+    """
+    assert len(key_values) % 2 == 0
+    key_list = key_values[::2]
+    value_list = key_values[1::2]
+    return dict(zip(key_list, value_list))
 
 
 class Stopwatch:
