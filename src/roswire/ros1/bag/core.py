@@ -11,6 +11,7 @@ __all__ = (
     "Index",
 )
 
+import typing as t  # noqa  # This is a mypy workaround
 from enum import Enum
 from typing import (  # noqa: F401  # prevents a mypy false positive
     Any, Dict, Iterable, List, Optional, Sequence

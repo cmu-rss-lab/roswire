@@ -3,8 +3,8 @@ __all__ = ("ROS1Package", "ROS1PackageDatabase",)
 
 import os
 import typing
+import typing as t  # noqa  # This is a mypy workaround
 from typing import Any, Collection, Dict, List
-from typing import Iterable  # noqa: F401 # Needed for tuple_from_iterable
 
 import attr
 import dockerblade
