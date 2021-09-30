@@ -26,9 +26,8 @@ def tuple_from_iterable(val: t.Iterable[t.Any]) -> t.Tuple[t.Any, ...]:
 
 
 def key_val_list_to_dict(key_values: t.List[str]) -> t.Dict[str, str]:
-    """
-    Converts a list of key, val pairs into a dict.
-    
+    """Converts a list of key, val pairs into a dict.
+
     Parameters
     ----------
     key_values: List[str]
