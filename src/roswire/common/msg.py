@@ -317,6 +317,8 @@ class MsgFormat(ABC, Generic[FIELD, CONSTANT]):
                 section_index += 1
             else:
                 if len(sections) < section_index + 1:
+                    if len(sections) < section_index:
+                        sections.append("")
                     sections.append("")
                 sections[section_index] += f"{line}\n"
         return sections
