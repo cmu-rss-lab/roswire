@@ -7,6 +7,7 @@ import dockerblade
 
 from .msg import ROS1MsgFormat
 from ..common import SrvFormat
+from ..exceptions import ParsingError
 
 
 class ROS1SrvFormat(SrvFormat[ROS1MsgFormat]):
@@ -26,10 +27,19 @@ class ROS1SrvFormat(SrvFormat[ROS1MsgFormat]):
         name_req = f"{name}Request"
         name_res = f"{name}Response"
 
-        sections: List[str] = [ss.strip() for ss in s.split("---")]
-        assert len(sections) < 3
+        sections = ["", ""]
+        section_index = 0  # process request first
+        for line in [ss.strip() for ss in s.split['\n']]:
+            if line.startswith("---"):
+                if section_index == 0:
+                    section_index = 1
+                else:
+                    raise ParsingError(f"Should only be one --- in {name} svc for {package}")
+            else:
+                sections[section_index] += f"{line}\n"
+
         s_req = sections[0]
-        s_res = sections[1] if len(sections) > 1 else ""
+        s_res = sections[1] 
 
         if s_req:
             req = ROS1MsgFormat.from_string(package, name_req, s_req)
