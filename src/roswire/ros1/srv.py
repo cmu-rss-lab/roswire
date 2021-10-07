@@ -29,7 +29,7 @@ class ROS1SrvFormat(SrvFormat[ROS1MsgFormat]):
 
         sections = ["", ""]
         section_index = 0  # process request first
-        for line in [ss.strip() for ss in s.split['\n']]:
+        for line in [ss.strip() for ss in s.split('\n')]:
             if line.startswith("---"):
                 if section_index == 0:
                     section_index = 1
