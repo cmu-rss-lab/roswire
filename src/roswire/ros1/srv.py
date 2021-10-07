@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 __all__ = ("ROS1SrvFormat",)
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 import dockerblade
 
 from .msg import ROS1MsgFormat
-from ..common import SrvFormat
+from ..common import MsgFormat, SrvFormat
+from ..exceptions import ParsingError
 
 
 class ROS1SrvFormat(SrvFormat[ROS1MsgFormat]):
@@ -26,10 +27,12 @@ class ROS1SrvFormat(SrvFormat[ROS1MsgFormat]):
         name_req = f"{name}Request"
         name_res = f"{name}Response"
 
-        sections: List[str] = [ss.strip() for ss in s.split("---")]
-        assert len(sections) < 3
+        sections = MsgFormat.sections_from_string(s)
+        if len(sections) < 1 or len(sections) > 2:
+            raise ParsingError(f"Should be one or two sectios for {name} svc for {package}")
+
         s_req = sections[0]
-        s_res = sections[1] if len(sections) > 1 else ""
+        s_res = sections[1]
 
         if s_req:
             req = ROS1MsgFormat.from_string(package, name_req, s_req)

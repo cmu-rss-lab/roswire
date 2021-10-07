@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 __all__ = ("ROS1ActionFormat",)
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 import dockerblade
 
 from .msg import ROS1MsgFormat
 from .. import exceptions
 from ..common import ActionFormat
+from ..exceptions import ParsingError
 
 
 class ROS1ActionFormat(ActionFormat[ROS1MsgFormat]):
@@ -32,7 +33,9 @@ class ROS1ActionFormat(ActionFormat[ROS1MsgFormat]):
         name_feed = f"{name}Feedback"
         name_res = f"{name}Result"
 
-        sections: List[str] = [ss.strip() for ss in s.split("---")]
+        sections = ROS1MsgFormat.sections_from_string(s)
+        if len(sections) != 3:
+            raise ParsingError(f"Action parsing should have three sections: {s}")
         try:
             s_goal, s_res, s_feed = sections
         except ValueError:
