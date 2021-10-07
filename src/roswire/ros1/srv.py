@@ -32,7 +32,7 @@ class ROS1SrvFormat(SrvFormat[ROS1MsgFormat]):
             raise ParsingError(f"Should be one or two sectios for {name} svc for {package}")
 
         s_req = sections[0]
-        s_res = sections[1]
+        s_res = sections[1] if len(sections) == 2 else ""
 
         if s_req:
             req = ROS1MsgFormat.from_string(package, name_req, s_req)
