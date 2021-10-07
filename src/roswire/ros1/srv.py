@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__ = ("ROS1SrvFormat",)
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 import dockerblade
 
@@ -39,7 +39,7 @@ class ROS1SrvFormat(SrvFormat[ROS1MsgFormat]):
                 sections[section_index] += f"{line}\n"
 
         s_req = sections[0]
-        s_res = sections[1] 
+        s_res = sections[1]
 
         if s_req:
             req = ROS1MsgFormat.from_string(package, name_req, s_req)

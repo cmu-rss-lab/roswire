@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __all__ = ("ROS1ActionFormat",)
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 import dockerblade
 
