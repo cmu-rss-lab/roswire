@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional
 import dockerblade
 
 from .msg import ROS2MsgFormat
-from ..common import SrvFormat
+from ..common import MsgFormat, SrvFormat
 from ..exceptions import ParsingError
 
 
@@ -27,16 +27,9 @@ class ROS2SrvFormat(SrvFormat[ROS2MsgFormat]):
         name_req = f"{name}Request"
         name_res = f"{name}Response"
 
-        sections = ["", ""]
-        section_index = 0  # process request first
-        for line in [ss.strip() for ss in s.split('\n')]:
-            if line.startswith("---"):
-                if section_index == 0:
-                    section_index = 1
-                else:
-                    raise ParsingError(f"Should only be one --- in {name} svc for {package}")
-            else:
-                sections[section_index] += f"{line}\n"
+        sections = MsgFormat.sections_from_string(s)
+        if len(sections) < 1 or len(sections) > 2:
+            raise ParsingError(f"Should be one or two sectios for {name} svc for {package}")
 
         s_req = sections[0]
         s_res = sections[1]

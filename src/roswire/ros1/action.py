@@ -33,18 +33,9 @@ class ROS1ActionFormat(ActionFormat[ROS1MsgFormat]):
         name_feed = f"{name}Feedback"
         name_res = f"{name}Result"
 
-        sections = ["", "", ""]
-        section_index = 0
-        for line in [ss.strip() for ss in s.split("\n")]:
-            if line.startswith("---"):
-                if section_index < 2:
-                    section_index += 1
-                else:
-                    raise ParsingError(f"Action parsing should only have three sections: {s}")
-            else:
-                sections[section_index] += f"{line}\n"
-        if section_index > 2:
-            raise ParsingError(f"Action parsing should only have three sections: {s}")
+        sections = ROS1MsgFormat.sections_from_string(s)
+        if len(sections) != 3:
+            raise ParsingError(f"Action parsing should have three sections: {s}")
         try:
             s_goal, s_res, s_feed = sections
         except ValueError:
