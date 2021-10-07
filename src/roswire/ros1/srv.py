@@ -28,10 +28,10 @@ class ROS1SrvFormat(SrvFormat[ROS1MsgFormat]):
         name_res = f"{name}Response"
 
         sections = MsgFormat.sections_from_string(s)
-        if len(sections) < 1 or len(sections) > 2:
-            raise ParsingError(f"Should be one or two sectios for {name} svc for {package}")
+        if len(sections) > 2:
+            raise ParsingError(f"Can only be up to two sections for {name} svc for {package}")
 
-        s_req = sections[0]
+        s_req = sections[0] if len(sections) == 1 else ""
         s_res = sections[1] if len(sections) == 2 else ""
 
         if s_req:
