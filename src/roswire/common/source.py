@@ -147,7 +147,7 @@ class CMakeExtractor(abc.ABC):
         if not self._app_instance.files.isfile(nodelets_xml_path):
             # Read from the package database
             logger.info("Is nodelet plugin defined in package.xml?")
-            defn = self._app_instance.description.packages.get_package_definition(package)
+            defn = self._app_instance.description.packages.get_package_definition(package, self._app_instance)
             for export in defn.exports:
                 try:
                     xml = safer_xml_from_string(export, 'nodelet')
