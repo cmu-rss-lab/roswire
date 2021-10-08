@@ -151,7 +151,7 @@ class CMakeExtractor(abc.ABC):
             for export in defn.exports:
                 logger.debug("Looking in export of package.xml")
                 logger.debug(str(export))
-                logger.debug(export.tagName)
+                logger.debug(export.tagname)
                 logger.debug(export.attributes)
                 try:
                     xml = safer_xml_from_string(str(export), 'nodelet')
