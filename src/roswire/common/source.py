@@ -150,9 +150,9 @@ class CMakeExtractor(abc.ABC):
             defn = self._app_instance.description.packages.get_package_definition(package, self._app_instance)
             for export in defn.exports:
                 logger.debug("Looking in export of package.xml")
-                logger.debug(export)
+                logger.debug(export.contents)
                 try:
-                    xml = safer_xml_from_string(export, 'nodelet')
+                    xml = safer_xml_from_string(export.contents, 'nodelet')
                     plugin = xml.getAttribute('plugin') if xml.hasAttribute('plugin') else None
                     logger.info(f"Plugins file is {plugin}")
                     if plugin:
