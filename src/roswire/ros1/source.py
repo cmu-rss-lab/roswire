@@ -23,14 +23,7 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
         cls,
         app_instance: "AppInstance",
     ) -> "ROS1PackageSourceExtractor":
-        return ROS1PackageSourceExtractor(files=app_instance.files)
-
-    @classmethod
-    def for_filesystem(
-        cls,
-        files: dockerblade.FileSystem
-    ) -> "ROS1PackageSourceExtractor":
-        return ROS1PackageSourceExtractor(files)
+        return ROS1PackageSourceExtractor(app_instance=app_instance)
 
     def get_cmake_info(
         self,

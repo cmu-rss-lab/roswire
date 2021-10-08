@@ -35,11 +35,12 @@
 
 from __future__ import print_function
 
-from copy import deepcopy
 import os
 import re
 import sys
+import typing as t
 import xml.dom.minidom as dom
+from copy import deepcopy
 
 from .condition import evaluate_condition
 
@@ -51,7 +52,7 @@ PACKAGE_MANIFEST_SCHEMA_URLS = [
 ]
 
 
-class Package(object):
+class PackageDefinition(object):
     """Object representation of a package manifest file."""
 
     __slots__ = [
@@ -598,7 +599,7 @@ def parse_package_string(data, filename=None, warnings=None):
     except Exception as ex:
         raise InvalidPackage('The manifest contains invalid XML:\n%s' % ex, filename)
 
-    pkg = Package(filename)
+    pkg = PackageDefinition(filename)
 
     # verify unique root node
     nodes = _get_nodes(root, 'package')
@@ -804,7 +805,7 @@ def _get_node_value(node, allow_xml=False, apply_str=True):
     return value
 
 
-def _get_node_attr(node, attr, default=False):
+def _get_node_attr(node, attr, default: t.Any=False):
     """:param default: False means value is required."""
     if node.hasAttribute(attr):
         return str(node.getAttribute(attr))

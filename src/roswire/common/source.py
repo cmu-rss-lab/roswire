@@ -24,7 +24,7 @@ from .cmake import (
     ParserContext,
 )
 from .nodelet_xml import NodeletInfo
-from ..util import key_val_list_to_dict
+from ..util import key_val_list_to_dict, safer_xml_from_string
 
 if t.TYPE_CHECKING:
     from .. import AppInstance
@@ -119,7 +119,7 @@ class CMakeInfo:
 
 @attr.s(auto_attribs=True)
 class CMakeExtractor(abc.ABC):
-    _files: dockerblade.FileSystem
+    _app_instance: AppInstance
 
     @classmethod
     @abc.abstractmethod
@@ -144,9 +144,25 @@ class CMakeExtractor(abc.ABC):
         entrypoints: t.Dict[str, str] = {}
         workspace = package.path
         nodelets_xml_path = os.path.join(workspace, 'nodelet_plugins.xml')
-        if self._files.exists(nodelets_xml_path):
+        if not self._app_instance.files.isfile(nodelets_xml_path.path):
+            # Read from the package database
+            logger.info("Is nodelet plugin defined in package.xml?")
+            defn = self._app_instance.description.packages.get_package_definition(package)
+            for export in defn.exports:
+                try:
+                    xml = safer_xml_from_string(export, 'nodelet')
+                    plugin = xml.getAttribute('plugin') if xml.hasAttribute('plugin') else None
+                    logger.info(f"Plugins file is {plugin}")
+                    if plugin:
+                        plugin = plugin.replace(r'\${prefix}/', '')
+                        nodelets_xml_path = os.path.join(package.path, plugin)
+                except:
+                    pass
+
+        if self._app_instance.files.exists(nodelets_xml_path):
+            logger.debug(f"Reading plugin informatino from {nodelets_xml_path}")
             nodelet_info = NodeletInfo.from_nodelet_xml(
-                self._files.read(nodelets_xml_path)
+                self._app_instance.files.read(nodelets_xml_path)
             )
             for info in nodelet_info.libraries:
                 package_and_name = info.class_name.split('/')

@@ -33,8 +33,8 @@ class ROS2:
         services = ROS2ServiceManager.for_app_instance(self.app_instance)
         state_probe = ROS2StateProbe.for_app_instance(self.app_instance)
         launch = ROS2LaunchManager.for_app_instance(self.app_instance)
-        package_source_extractor = ROS2PackageSourceExtractor(
-            self.app_instance.files
+        package_source_extractor = ROS2PackageSourceExtractor.for_app_instance(
+            self.app_instance
         )
         object.__setattr__(self, "nodes", nodes)
         object.__setattr__(self, "services", services)

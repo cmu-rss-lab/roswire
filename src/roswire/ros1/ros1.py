@@ -64,8 +64,21 @@ class ROS1:
         A mapping from topic names to the names of their message types.
     """
 
+    @classmethod
+    def for_app_instance(cls, instance: "AppInstance", port: int):
+        return ROS1(description=instance.app.description,
+                    shell=instance.shell,
+                    files=instance.files,
+                    ws_host=instance._host_workspace,
+                    ip_address=instance.ip_address,
+                    instance=instance,
+                    port=port,
+
+                    )
+
     def __init__(
         self,
+        instance: "AppInstance",
         description: "AppDescription",
         shell: dockerblade.Shell,
         files: dockerblade.FileSystem,
@@ -73,6 +86,7 @@ class ROS1:
         ip_address: str,
         port: int = 11311,
     ) -> None:
+        self.__instance = instance
         self.__description = description
         self.__shell = shell
         self.__files = files
@@ -84,7 +98,7 @@ class ROS1:
         self.__connection: Optional[xmlrpc.client.ServerProxy] = None
         self.__roscore_process: Optional[dockerblade.popen.Popen] = None
         self.__package_source_extractor = \
-            ROS1PackageSourceExtractor.for_filesystem(self.__files)
+            ROS1PackageSourceExtractor.for_app_instance(app_instance=self.__instance)
 
     def __enter__(self) -> "ROS1":
         """

@@ -1,27 +1,20 @@
 # -*- coding: utf-8 -*-
 __all__ = ("Package", "PackageDatabase",)
 
+import os
 import typing
 from abc import ABC, abstractmethod
-from typing import (
-    Any,
-    Collection,
-    Dict,
-    Generic,
-    Iterator,
-    List,
-    Mapping,
-    Optional,
-)
+import typing as t
 
 import attr
 from loguru import logger
 
 from .action import ActionFormat
 from .msg import MsgFormat
+from .package_xml.package import PackageDefinition, parse_package_string
 from .srv import SrvFormat
 
-if typing.TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from .. import AppInstance
 
 
@@ -30,19 +23,19 @@ SF = typing.TypeVar("SF", bound=SrvFormat)
 AF = typing.TypeVar("AF", bound=ActionFormat)
 
 
-class Package(Generic[MF, SF, AF], ABC):
+class Package(t.Generic[MF, SF, AF], ABC):
     name: str
     path: str
-    messages: Collection[MF]
-    services: Collection[SF]
-    actions: Collection[AF]
+    messages: t.Collection[MF]
+    services: t.Collection[SF]
+    actions: t.Collection[AF]
 
     @classmethod
     @abstractmethod
-    def from_dict(cls, dict: Dict[str, Any]) -> "Package":
+    def from_dict(cls, dict: t.Dict[str, t.Any]) -> "Package":
         ...
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> t.Dict[str, t.Any]:
         d = {
             "name": self.name,
             "path": self.path,
@@ -57,7 +50,7 @@ PT = typing.TypeVar("PT", bound=Package)
 
 
 @attr.s(frozen=True)
-class PackageDatabase(Generic[PT], ABC, Mapping[str, PT]):
+class PackageDatabase(t.Generic[PT], ABC, t.Mapping[str, PT]):
     """
     An immutable database of packages, represented as :class:`Package`
     instances, indexed by their names, given as :class:`str`.
@@ -73,7 +66,8 @@ class PackageDatabase(Generic[PT], ABC, Mapping[str, PT]):
         and `db['foo'] = bar`).
     """
 
-    _contents: Mapping[str, PT] = attr.ib()
+    _contents: t.Mapping[str, PT] = attr.ib()
+    _definitions: t.Mapping[str, PackageDefinition] = attr.ib()
 
     @classmethod
     def from_packages(cls,
@@ -84,7 +78,7 @@ class PackageDatabase(Generic[PT], ABC, Mapping[str, PT]):
     @classmethod
     def from_paths(cls,
                    app_instance: "AppInstance",
-                   paths: List[str],
+                   paths: t.List[str],
                    ignore_bad_paths: bool = True,
                    ) -> "PackageDatabase[PT]":
         """
@@ -107,7 +101,7 @@ class PackageDatabase(Generic[PT], ABC, Mapping[str, PT]):
         FileNotFoundError
             if no package is found at a given path.
         """
-        packages: List[PT] = []
+        packages: t.List[PT] = []
         for p in paths:
             try:
                 package = cls._build_package(app_instance, p)
@@ -127,7 +121,7 @@ class PackageDatabase(Generic[PT], ABC, Mapping[str, PT]):
     @classmethod
     def build(cls,
               app_instance: "AppInstance",
-              paths: Optional[List[str]] = None
+              paths: t.Optional[t.List[str]] = None
               ) -> "PackageDatabase[PT]":
         if paths is None:
             paths = cls._determine_paths(app_instance)
@@ -136,15 +130,15 @@ class PackageDatabase(Generic[PT], ABC, Mapping[str, PT]):
 
     @classmethod
     @abstractmethod
-    def _determine_paths(cls, app_instance: "AppInstance") -> List[str]:
+    def _determine_paths(cls, app_instance: "AppInstance") -> t.List[str]:
         ...
 
     @classmethod
     @abstractmethod
-    def from_dict(cls, d: List[Dict[str, Any]]) -> "PackageDatabase[PT]":
+    def from_dict(cls, d: t.List[t.Dict[str, t.Any]]) -> "PackageDatabase[PT]":
         ...
 
-    def to_dict(self) -> List[Dict[str, Any]]:
+    def to_dict(self) -> t.List[t.Dict[str, t.Any]]:
         return [p.to_dict() for p in self.values()]
 
     def __len__(self) -> int:
@@ -161,9 +155,24 @@ class PackageDatabase(Generic[PT], ABC, Mapping[str, PT]):
         """
         return self._contents[name]
 
-    def __iter__(self) -> Iterator[str]:
+    def __iter__(self) -> t.Iterator[str]:
         """
         Returns an iterator over the names of the packages contained within
         this database.
         """
         yield from self._contents
+
+    def get_package_definition(self, package: Package, app_instance: AppInstance) -> PackageDefinition:
+        if package.name in self._definitions:
+            return self._definitions[package]
+
+        package_xml = os.path.join(package.path, "package.xml")
+        if not app_instance.files.isfile(package_xml):
+            raise ValueError(f'No package.xml for package "{package.name}" in "{package.path}')
+
+        contents = app_instance.files.read(package_xml)
+        defn = parse_package_string(contents, filename=package_xml)
+        self._definitions.add(package.name, defn)
+        return defn
+
+
