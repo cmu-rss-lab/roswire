@@ -7,10 +7,12 @@ __all__ = (
 )
 
 import contextlib
+import re
 import socket
 import time
 import typing as t
 import warnings
+import xml.etree.ElementTree as ET  # noqa
 from timeit import default_timer as timer
 
 from . import exceptions as exc
@@ -127,3 +129,41 @@ def is_port_open(host: str, port: int) -> bool:
         socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     ) as s:
         return s.connect_ex((host, port)) == 0
+
+def safer_xml_from_string(contents: str,
+                          root_tag: str) -> ET.Element:
+    """
+    Tries to safely parse an XML string. To avoid some of
+    the idiosyncracies of ROS, we strip out everything before the
+    root tag and after.
+
+    Parameters
+    ----------
+    contents: str
+        The string containing an XML document
+    root_tag: str
+        The root tag that should be in the document
+
+    Returns
+    -------
+    ET.Element
+        The XML Element starting with the root tag
+    """
+    tag_to_use = root_tag
+    if root_tag.startswith("<"):
+        tag = re.search(r"<([^\s]*).*>", root_tag)
+        if tag:
+            tag_to_use = tag
+        else:
+            raise ValueError(f"Invalid root tag: {root_tag}")
+
+    begin_tag_starts_at = contents.find(f"<{tag_to_use}")
+    if begin_tag_starts_at == -1:
+        raise ValueError(f"<{tag_to_use}> does not seem to appear in the document")
+    contents = contents[begin_tag_starts_at:]
+
+    end_tag = f"</{tag_to_use}>"
+    end_tag_starts_at = contents.rfind(end_tag)
+    end_tag_ends_at = end_tag_starts_at + len(tag_to_use) + 3
+    contents = contents[:end_tag_ends_at]
+    return ET.fromstring(contents)
