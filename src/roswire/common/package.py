@@ -67,7 +67,7 @@ class PackageDatabase(t.Generic[PT], ABC, t.Mapping[str, PT]):
     """
 
     _contents: t.Mapping[str, PT] = attr.ib()
-    _definitions: t.Mapping[str, PackageDefinition] = attr.ib()
+    _definitions: t.Mapping[str, PackageDefinition] = attr.ib(factory=dict)
 
     @classmethod
     def from_packages(cls,
