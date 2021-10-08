@@ -43,6 +43,8 @@ class NodeletInfo:
         root = get_xml_nodes_by_name('root', tree)[0]
         libraries_dom = get_xml_nodes_by_name('library', root)
         logger.debug(f"{len(libraries_dom)}")
+        if len(libraries_dom) < 1:
+            logger.debug(contents)
         for library_dom in libraries_dom:
             assert isinstance(library_dom, dom.Element)
             path = library_dom.getAttribute('path')
