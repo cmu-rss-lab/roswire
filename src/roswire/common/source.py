@@ -159,6 +159,8 @@ class CMakeExtractor(abc.ABC):
                         plugin = plugin.replace(r'\${prefix}/', '')
                         nodelets_xml_path = os.path.join(package.path, plugin)
                 except:
+                    logger.error("Something went wrong processing export")
+                    logger.exception()
                     pass
 
         if self._app_instance.files.exists(nodelets_xml_path):
