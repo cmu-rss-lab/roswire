@@ -153,7 +153,7 @@ class CMakeExtractor(abc.ABC):
                 if export.tagname == 'nodelet' and 'plugin' in export.attributes:
                     logger.debug("Found nodelet tag and plugin attribute")
                     plugin = export.attributes['plugin']
-                    plugin = plugin.replace(r'\${prefix}/', '')
+                    plugin = plugin.replace('${prefix}/', '')
                     nodelets_xml_path = os.path.join(package.path, plugin)
 
         logger.debug(f"Looking for nodelet plugin file: {nodelets_xml_path}")
