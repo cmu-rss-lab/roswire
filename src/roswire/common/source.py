@@ -119,7 +119,7 @@ class CMakeInfo:
 
 @attr.s(auto_attribs=True)
 class CMakeExtractor(abc.ABC):
-    _app_instance: AppInstance
+    _app_instance: "AppInstance"
 
     @classmethod
     @abc.abstractmethod
