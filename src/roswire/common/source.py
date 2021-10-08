@@ -144,7 +144,7 @@ class CMakeExtractor(abc.ABC):
         entrypoints: t.Dict[str, str] = {}
         workspace = package.path
         nodelets_xml_path = os.path.join(workspace, 'nodelet_plugins.xml')
-        if not self._app_instance.files.isfile(nodelets_xml_path.path):
+        if not self._app_instance.files.isfile(nodelets_xml_path):
             # Read from the package database
             logger.info("Is nodelet plugin defined in package.xml?")
             defn = self._app_instance.description.packages.get_package_definition(package)
