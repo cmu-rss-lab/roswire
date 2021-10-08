@@ -17,14 +17,13 @@ if t.TYPE_CHECKING:
 
 @attr.s(auto_attribs=True)
 class ROS2PackageSourceExtractor(CMakeExtractor):
-    _files: dockerblade.FileSystem
 
     @classmethod
     def for_app_instance(
         cls,
         app_instance: "AppInstance",
     ) -> "ROS2PackageSourceExtractor":
-        return ROS2PackageSourceExtractor(files=app_instance.files)
+        return ROS2PackageSourceExtractor(app_instance=app_instance)
 
     def get_cmake_info(
         self,
@@ -33,8 +32,8 @@ class ROS2PackageSourceExtractor(CMakeExtractor):
         path_to_package = package.path
         cmakelists_path = os.path.join(path_to_package, "CMakeLists.txt")
 
-        if self._files.isfile(cmakelists_path):
-            contents = self._files.read(cmakelists_path)
+        if self._app_instance.files.isfile(cmakelists_path):
+            contents = self._app_instance.files.read(cmakelists_path)
             info = self._process_cmake_contents(contents, package, {})
             nodelets = self.get_nodelet_entrypoints(package)
             for nodelet, entrypoint in nodelets.items():
@@ -48,7 +47,7 @@ class ROS2PackageSourceExtractor(CMakeExtractor):
                     target.entrypoint = entrypoint
             return info
         setuppy_path = os.path.join(path_to_package, "setup.py")
-        if self._files.isfile(setuppy_path):
+        if self._app_instance.files.isfile(setuppy_path):
             logger.error(
                 "Do not know how to process ROS2 packages with setup.py yet."
             )
