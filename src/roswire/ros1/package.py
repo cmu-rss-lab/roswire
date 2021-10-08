@@ -30,6 +30,7 @@ class ROS1Package(Package[ROS1MsgFormat, ROS1SrvFormat, ROS1ActionFormat]):
         attr.ib(converter=tuple_from_iterable)
     actions: Collection[ROS1ActionFormat] = \
         attr.ib(converter=tuple_from_iterable)
+    _package_xml_contents: str
 
     @classmethod
     def build(cls, path: str, app_instance: "AppInstance") -> "ROS1Package":
@@ -65,6 +66,9 @@ class ROS1Package(Package[ROS1MsgFormat, ROS1SrvFormat, ROS1ActionFormat]):
                 for f in files.listdir(dir_action, absolute=True)
                 if f.endswith(".action")
             ]
+        package_xml_path = os.path.join(path, "package.xml")
+        if files.isfile(package_xml_path):
+            pass
 
         return ROS1Package(name, path, messages, services, actions)
 
