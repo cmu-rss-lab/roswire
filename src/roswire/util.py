@@ -149,7 +149,7 @@ def safer_xml_from_string(contents: str,
     Returns
     -------
     ET.Element
-        The XML Element starting with the root tag
+        The XML Element corresponding to the root tag
     """
     tag_to_use = root_tag
     if root_tag.startswith("<"):
