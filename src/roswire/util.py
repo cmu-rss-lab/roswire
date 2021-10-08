@@ -130,6 +130,7 @@ def is_port_open(host: str, port: int) -> bool:
     ) as s:
         return s.connect_ex((host, port)) == 0
 
+
 def safer_xml_from_string(contents: str,
                           root_tag: str) -> ET.Element:
     """
