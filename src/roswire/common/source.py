@@ -259,7 +259,7 @@ class CMakeExtractor(abc.ABC):
         cmakelists_path = os.path.join(join, 'CMakeLists.txt')
         logger.debug(f"Processing {cmakelists_path}")
         included_package_info = self._process_cmake_contents(
-            self._files.read(cmakelists_path),
+            self._app_instance.files.read(cmakelists_path),
             package,
             new_env,
         )
@@ -298,10 +298,10 @@ class CMakeExtractor(abc.ABC):
         real_filename = filename
         if 'cwd' in cmake_env:
             real_filename = os.path.join(cmake_env['cwd'], filename)
-        if not self._files.isfile(os.path.join(package.path, real_filename)):
+        if not self._app_instance.files.isfile(os.path.join(package.path, real_filename)):
             path = Path(real_filename)
             parent = str(path.parent)
-            all_files = self._files.listdir(os.path.join(package.path, parent))
+            all_files = self._app_instance.files.listdir(os.path.join(package.path, parent))
             matching_files = [f for f in all_files if f.startswith(path.name)]
             if len(matching_files) != 1:
                 raise ValueError(f"Only one file should match '{real_filename}'. "
