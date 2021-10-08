@@ -172,7 +172,7 @@ class PackageDatabase(t.Generic[PT], ABC, t.Mapping[str, PT]):
 
         contents = app_instance.files.read(package_xml)
         defn = parse_package_string(contents, filename=package_xml)
-        self._definitions.add(package.name, defn)
+        self._definitions[package.name] = defn
         return defn
 
 
