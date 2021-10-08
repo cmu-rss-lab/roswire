@@ -162,7 +162,7 @@ class PackageDatabase(t.Generic[PT], ABC, t.Mapping[str, PT]):
         """
         yield from self._contents
 
-    def get_package_definition(self, package: Package, app_instance: AppInstance) -> PackageDefinition:
+    def get_package_definition(self, package: Package, app_instance: "AppInstance") -> PackageDefinition:
         if package.name in self._definitions:
             return self._definitions[package]
 
