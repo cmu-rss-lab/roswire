@@ -3,8 +3,8 @@ __all__ = ("Package", "PackageDatabase",)
 
 import os
 import typing
-import typing as t
 from abc import ABC, abstractmethod
+import typing as t
 
 import attr
 from loguru import logger
@@ -13,7 +13,10 @@ from .action import ActionFormat
 from .msg import MsgFormat
 from .package_xml.package import PackageDefinition, parse_package_string
 from .srv import SrvFormat
-from .. import AppInstance
+
+if t.TYPE_CHECKING:
+    from .. import AppInstance
+
 
 MF = typing.TypeVar("MF", bound=MsgFormat)
 SF = typing.TypeVar("SF", bound=SrvFormat)
