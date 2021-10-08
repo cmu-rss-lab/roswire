@@ -144,6 +144,7 @@ def safer_xml_from_string(contents: str,
         The string containing an XML document
     root_tag: str
         The root tag that should be in the document
+        root_tag can be either "<tag>" or "tag".
 
     Returns
     -------
@@ -152,9 +153,10 @@ def safer_xml_from_string(contents: str,
     """
     tag_to_use = root_tag
     if root_tag.startswith("<"):
+        # root tag could be <tag> or <tag attrs> so search for <tag
         tag = re.search(r"<([^\s]*).*>", root_tag)
         if tag:
-            tag_to_use = tag
+            tag_to_use = tag.group(1)
         else:
             raise ValueError(f"Invalid root tag: {root_tag}")
 
