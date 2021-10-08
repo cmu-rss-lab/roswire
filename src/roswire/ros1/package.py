@@ -30,7 +30,6 @@ class ROS1Package(Package[ROS1MsgFormat, ROS1SrvFormat, ROS1ActionFormat]):
         attr.ib(converter=tuple_from_iterable)
     actions: Collection[ROS1ActionFormat] = \
         attr.ib(converter=tuple_from_iterable)
-    _package_xml_contents: str
 
     @classmethod
     def build(cls, path: str, app_instance: "AppInstance") -> "ROS1Package":
