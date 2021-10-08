@@ -150,20 +150,11 @@ class CMakeExtractor(abc.ABC):
             defn = self._app_instance.description.packages.get_package_definition(package, self._app_instance)
             for export in defn.exports:
                 logger.debug("Looking in export of package.xml")
-                logger.debug(str(export))
-                logger.debug(export.tagname)
-                logger.debug(export.attributes)
-                try:
-                    xml = safer_xml_from_string(str(export), 'nodelet')
-                    plugin = xml.getAttribute('plugin') if xml.hasAttribute('plugin') else None
-                    logger.info(f"Plugins file is {plugin}")
-                    if plugin:
-                        plugin = plugin.replace(r'\${prefix}/', '')
-                        nodelets_xml_path = os.path.join(package.path, plugin)
-                except Exception as e:
-                    logger.error("Something went wrong processing export")
-                    logger.exception(e)
-                    pass
+                if export.tagname == 'nodelet' and 'plugin' in export.attributes:
+                    plugin = export.attributes['plugin']
+                    plugin = plugin.replace(r'\${prefix}/', '')
+                    nodelets_xml_path = os.path.join(package.path, plugin)
+
 
         if self._app_instance.files.exists(nodelets_xml_path):
             logger.debug(f"Reading plugin informatino from {nodelets_xml_path}")
