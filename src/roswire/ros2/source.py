@@ -5,7 +5,6 @@ import os.path
 import typing as t
 
 import attr
-import dockerblade
 from loguru import logger
 
 from ..common import Package

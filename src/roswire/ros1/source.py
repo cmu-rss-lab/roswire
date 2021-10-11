@@ -5,7 +5,6 @@ import os.path
 import typing as t
 
 import attr
-import dockerblade
 from loguru import logger
 
 from ..common import Package
@@ -47,8 +46,8 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
             if nodelet not in info.targets and nodelet not in alternative_names.values():
                 logger.warning(f"info.targets={info.targets}")
                 logger.warning(f"Package {package.name}: '{nodelet}' "
-                             f"is referenced in nodelet_plugins.xml but not in "
-                             f"CMakeLists.txt.")
+                               f"is referenced in nodelet_plugins.xml but not in "
+                               f"CMakeLists.txt.")
             else:
                 target = info.targets[nodelet]
                 assert isinstance(target, CMakeLibraryTarget)

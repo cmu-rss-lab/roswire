@@ -38,7 +38,7 @@ from ..exceptions import ROSWireException
 from ..util import is_port_open, Stopwatch, wait_till_open
 
 if t.TYPE_CHECKING:
-    from .. import AppDescription
+    from .. import AppDescription, AppInstance
 
 
 class ROS1:
