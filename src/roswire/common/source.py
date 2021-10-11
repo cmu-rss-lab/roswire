@@ -158,7 +158,7 @@ class CMakeExtractor(abc.ABC):
 
         logger.debug(f"Looking for nodelet plugin file: {nodelets_xml_path}")
         if self._app_instance.files.exists(nodelets_xml_path):
-            logger.debug(f"Reading plugin informatino from {nodelets_xml_path}")
+            logger.debug(f"Reading plugin information from {nodelets_xml_path}")
             contents = self._app_instance.files.read(nodelets_xml_path)
             logger.debug(f"Contents of that file: {contents}")
             nodelet_info = NodeletInfo.from_nodelet_xml(
