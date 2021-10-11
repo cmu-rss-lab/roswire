@@ -174,5 +174,3 @@ class PackageDatabase(t.Generic[PT], ABC, t.Mapping[str, PT]):
         defn = parse_package_string(contents, filename=package_xml)
         self._definitions[package.name] = defn
         return defn
-
-

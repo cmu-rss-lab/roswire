@@ -15,7 +15,6 @@ from pathlib import Path
 from typing import Any, Iterable  # noqa: F401, E501 # Needed for tuple_from_iterable and argparse
 
 import attr
-import dockerblade
 from loguru import logger
 
 from . import Package
@@ -24,7 +23,7 @@ from .cmake import (
     ParserContext,
 )
 from .nodelet_xml import NodeletInfo
-from ..util import key_val_list_to_dict, safer_xml_from_string
+from ..util import key_val_list_to_dict
 
 if t.TYPE_CHECKING:
     from .. import AppInstance
