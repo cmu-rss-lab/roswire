@@ -3,8 +3,8 @@ __all__ = ("Package", "PackageDatabase",)
 
 import os
 import typing
-from abc import ABC, abstractmethod
 import typing as t
+from abc import ABC, abstractmethod
 
 import attr
 from loguru import logger
