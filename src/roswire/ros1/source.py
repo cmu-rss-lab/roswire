@@ -37,7 +37,7 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
 
         contents = self._app_instance.files.read(cmakelists_path)
         info = self._process_cmake_contents(contents, package, {})
-        nodelets = self.get_nodelet_entrypoints(package)
+        nodelets, alternative_names = self.get_nodelet_entrypoints(package)
         for nodelet, entrypoint in nodelets.items():
             if nodelet not in info.targets:
                 logger.error(f"info.targets={info.targets}")
@@ -49,6 +49,12 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
                 target = info.targets[nodelet]
                 assert isinstance(target, CMakeLibraryTarget)
                 target.entrypoint = entrypoint
+
+        # Add in classname as alternative name that is referenced in loading nodelets
+        for nodelet, altname in alternative_names.items():
+            if nodelet in info.targets:
+                info.targets[altname] = info.targets[nodelet]
+
         return info
 
     def _find_package_workspace(self, package: Package) -> str:

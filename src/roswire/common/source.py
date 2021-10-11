@@ -140,8 +140,9 @@ class CMakeExtractor(abc.ABC):
     def package_paths(self, package: Package) -> t.Set[str]:
         ...
 
-    def get_nodelet_entrypoints(self, package: Package) -> t.Mapping[str, str]:
+    def get_nodelet_entrypoints(self, package: Package) -> t.Tuple[t.Mapping[str, str], t.Mapping[str, str]]:
         entrypoints: t.Dict[str, str] = {}
+        classnames: t.Dict[str, str] = {}
         workspace = package.path
         nodelets_xml_path = os.path.join(workspace, 'nodelet_plugins.xml')
         if not self._app_instance.files.isfile(nodelets_xml_path):
@@ -169,12 +170,11 @@ class CMakeExtractor(abc.ABC):
                 # TODO can package in XML nodelet differ from package.name?
                 name = package_and_name[1]
                 entrypoint = info.class_type + "::onInit"
-                logger.debug(f"---> Adding {name}, {info.class_name} with entrypoint: {entrypoint}")
+                logger.debug(f"---> Adding {name} ({info.class_name}) with entrypoint: {entrypoint}")
                 entrypoints[name] = entrypoint
-                # TODO class_name can also be used as entrypoint. Check if name by itself is ever used
-                # For now, just add both
+                classnames[name] = info.class_name
                 entrypoints[info.class_name] = entrypoint
-        return entrypoints
+        return entrypoints, classnames
 
     def _process_cmake_contents(
         self,
