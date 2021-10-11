@@ -170,6 +170,9 @@ class CMakeExtractor(abc.ABC):
                 name = package_and_name[1]
                 entrypoint = info.class_type + "::onInit"
                 entrypoints[name] = entrypoint
+                # TODO package_and_name can also be used as entrypoint. Check if name by itself is ever used
+                # For now, just add both
+                entrypoints[package_and_name] = entrypoint
         return entrypoints
 
     def _process_cmake_contents(
