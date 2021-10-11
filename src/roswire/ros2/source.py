@@ -36,22 +36,20 @@ class ROS2PackageSourceExtractor(CMakeExtractor):
             contents = self._app_instance.files.read(cmakelists_path)
             info = self._process_cmake_contents(contents, package, {})
             nodelets, alternative_names = self.get_nodelet_entrypoints(package)
+            for nodelet, altname in alternative_names.items():
+                if nodelet in info.targets:
+                    info.targets[altname] = info.targets[nodelet]
+
             for nodelet, entrypoint in nodelets.items():
-                if nodelet not in info.targets:
-                    logger.error(f"info.targets={info.targets}")
-                    logger.error(f"Package {package.name}: '{nodelet}' "
-                                 f"is referenced in "
-                                 f"nodelet_plugins.xml but not in "
-                                 f"CMakeLists.txt")
+                if nodelet not in info.targets and nodelet not in alternative_names.values():
+                    logger.warning(f"info.targets={info.targets}")
+                    logger.warning(f"Package {package.name}: '{nodelet}' "
+                                   f"is referenced in nodelet_plugins.xml but not in "
+                                   f"CMakeLists.txt.")
                 else:
                     target = info.targets[nodelet]
                     assert isinstance(target, CMakeLibraryTarget)
                     target.entrypoint = entrypoint
-
-            # Add in classname as alternative name that is referenced in loading nodelets
-            for nodelet, altname in alternative_names.items():
-                if nodelet in info.targets:
-                    info.targets[altname] = info.targets[nodelet]
 
             return info
         setuppy_path = os.path.join(path_to_package, "setup.py")

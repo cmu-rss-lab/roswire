@@ -173,7 +173,6 @@ class CMakeExtractor(abc.ABC):
                 logger.debug(f"---> Adding {name} ({info.class_name}) with entrypoint: {entrypoint}")
                 entrypoints[name] = entrypoint
                 classnames[name] = info.class_name
-                entrypoints[info.class_name] = entrypoint
         return entrypoints, classnames
 
     def _process_cmake_contents(
