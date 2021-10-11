@@ -169,10 +169,11 @@ class CMakeExtractor(abc.ABC):
                 # TODO can package in XML nodelet differ from package.name?
                 name = package_and_name[1]
                 entrypoint = info.class_type + "::onInit"
+                logger.debug(f"---> Adding {name}, {info.class_name} with entrypoint: {entrypoint}")
                 entrypoints[name] = entrypoint
-                # TODO package_and_name can also be used as entrypoint. Check if name by itself is ever used
+                # TODO class_name can also be used as entrypoint. Check if name by itself is ever used
                 # For now, just add both
-                entrypoints[package_and_name] = entrypoint
+                entrypoints[info.class_name] = entrypoint
         return entrypoints
 
     def _process_cmake_contents(
