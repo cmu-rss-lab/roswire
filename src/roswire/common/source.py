@@ -223,11 +223,16 @@ class CMakeExtractor(abc.ABC):
                 opts, args = cmake_argparse(args, {"CACHE": "-"})
                 cmake_env[args[0]] = ""
             if cmd == "add_executable" or cmd == 'cuda_add_executable':
-                self.__process_add_executable(
+                opts, args = cmake_argparse(
                     args,
-                    cmake_env,
-                    executables,
-                    package)
+                    {"EXCLUDE_FROM_ALL": "-"}
+                )
+                if not opts['EXCLUDE_FROM_ALL']:
+                    self.__process_add_executable(
+                        args,
+                        cmake_env,
+                        executables,
+                        package)
             if cmd == "catkin_install_python":
                 self.__process_python_executables(
                     args,
