@@ -22,7 +22,7 @@ from .cmake import (
     argparse as cmake_argparse,
     ParserContext,
 )
-from .nodelet_xml import NodeletInfo, NodeletLibrary
+from .nodelet_xml import NodeletsInfo, NodeletLibrary
 from ..util import key_val_list_to_dict
 
 if t.TYPE_CHECKING:
@@ -172,9 +172,9 @@ class CMakeExtractor(abc.ABC):
             logger.debug(f"Reading plugin information from {nodelets_xml_path}")
             contents = self._app_instance.files.read(nodelets_xml_path)
             logger.debug(f"Contents of that file: {contents}")
-            nodelet_info = NodeletInfo.from_nodelet_xml(contents)
-            return {info.class_name.split('/')[1] : info for info in nodelet_info.libraries}
-        logger.warning(f"'{nodelets_xml_path}' does not contain any library definitions.")
+            nodelet_info = NodeletsInfo.from_nodelet_xml(contents)
+            return {info.name.split('/')[1] : info for info in nodelet_info.libraries}
+        logger.warning(f"The specified '{nodelets_xml_path}' does not exist.")
         return {}
 
     def _info_from_cmakelists(self, cmakelists_path: str, package: Package) -> CMakeInfo:
@@ -184,7 +184,7 @@ class CMakeExtractor(abc.ABC):
         # Add in classname as a name that can be referenced in loading nodelets
         for nodelet, library in nodelet_libraries.items():
             if nodelet in info.targets:
-                info.targets[library.class_name] = info.targets[nodelet]
+                info.targets[library.name] = info.targets[nodelet]
         for nodelet, library in nodelet_libraries.items():
             if nodelet not in info.targets:
                 logger.warning(f"info.targets={info.targets}")
