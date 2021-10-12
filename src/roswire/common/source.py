@@ -22,7 +22,7 @@ from .cmake import (
     argparse as cmake_argparse,
     ParserContext,
 )
-from .nodelet_xml import NodeletInfo
+from .nodelet_xml import NodeletInfo, NodeletLibrary
 from ..util import key_val_list_to_dict
 
 if t.TYPE_CHECKING:
@@ -139,7 +139,7 @@ class CMakeExtractor(abc.ABC):
     def package_paths(self, package: Package) -> t.Set[str]:
         ...
 
-    def get_nodelet_entrypoints(self, package: Package) -> t.Mapping[str, NodeletInfo]:
+    def get_nodelet_entrypoints(self, package: Package) -> t.Mapping[str, NodeletLibrary]:
         """
         Returns the potential nodelet entrypoints and classname for the package.
 
@@ -150,7 +150,7 @@ class CMakeExtractor(abc.ABC):
 
         Returns
         -------
-        Mapping[str, NodeletInfo]
+        Mapping[str, NodeletLibrary]
             A mapping of nodelet names to NodeletInfo
         """
         workspace = package.path
@@ -177,7 +177,7 @@ class CMakeExtractor(abc.ABC):
         logger.warning(f"'{nodelets_xml_path}' does not contain any library definitions.")
         return {}
 
-    def _info_from_cmakelists(self, cmakelists_path, package):
+    def _info_from_cmakelists(self, cmakelists_path: str, package: Package) -> CMakeInfo:
         contents = self._app_instance.files.read(cmakelists_path)
         info = self._process_cmake_contents(contents, package, {})
         nodelet_libraries = self.get_nodelet_entrypoints(package)

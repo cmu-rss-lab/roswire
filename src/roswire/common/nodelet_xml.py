@@ -31,7 +31,7 @@ class NodeletLibrary:
     description: t.Optional[str] = attr.ib()
 
     @property
-    def entrypoint(self):
+    def entrypoint(self) -> str:
         return self.class_type + "::OnInit"
 
 
