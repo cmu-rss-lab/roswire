@@ -182,7 +182,7 @@ class CMakeExtractor(abc.ABC):
         info = self._process_cmake_contents(contents, package, {})
         nodelet_libraries = self.get_nodelet_entrypoints(package)
         # Add in classname as alternative name that is referenced in loading nodelets
-        for nodelet, library in nodelet_libraries:
+        for nodelet, library in nodelet_libraries.items():
             if nodelet in info.targets:
                 info.targets[library.class_name] = info.targets[nodelet]
         for nodelet, library in nodelet_libraries.items():
