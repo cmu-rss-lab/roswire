@@ -113,7 +113,7 @@ class CMakeLibraryTarget(CMakeBinaryTarget):
 
 @attr.s(auto_attribs=True, slots=True, frozen=True)
 class CMakeInfo:
-    targets: t.Mapping[str, CMakeTarget]
+    targets: t.Dict[str, CMakeTarget]
 
 
 @attr.s(auto_attribs=True)

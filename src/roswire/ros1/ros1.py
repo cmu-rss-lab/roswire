@@ -65,7 +65,7 @@ class ROS1:
     """
 
     @classmethod
-    def for_app_instance(cls, instance: "AppInstance", port: int):
+    def for_app_instance(cls, instance: "AppInstance", port: int) -> "ROS1":
         return ROS1(description=instance.app.description,
                     shell=instance.shell,
                     files=instance.files,
@@ -73,7 +73,6 @@ class ROS1:
                     ip_address=instance.ip_address,
                     instance=instance,
                     port=port,
-
                     )
 
     def __init__(
@@ -222,7 +221,7 @@ class ROS1:
         )
 
         self.__package_source_extractor = ROS1PackageSourceExtractor(
-            self.__files
+            self.__instance
         )
 
         logger.debug("waiting for /rosout to be online")

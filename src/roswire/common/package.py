@@ -67,7 +67,7 @@ class PackageDatabase(t.Generic[PT], ABC, t.Mapping[str, PT]):
     """
 
     _contents: t.Mapping[str, PT] = attr.ib()
-    _definitions: t.Mapping[str, PackageDefinition] = attr.ib(factory=dict)
+    _definitions: t.Dict[str, PackageDefinition] = attr.ib(factory=dict)
 
     @classmethod
     def from_packages(cls,
@@ -164,7 +164,7 @@ class PackageDatabase(t.Generic[PT], ABC, t.Mapping[str, PT]):
 
     def get_package_definition(self, package: Package, app_instance: "AppInstance") -> PackageDefinition:
         if package.name in self._definitions:
-            return self._definitions[package]
+            return self._definitions[package.name]
 
         package_xml = os.path.join(package.path, "package.xml")
         if not app_instance.files.isfile(package_xml):
