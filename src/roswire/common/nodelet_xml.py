@@ -43,7 +43,7 @@ class NodeletInfo:
         root = get_xml_nodes_by_name('root', tree)[0]
         libraries_dom = get_xml_nodes_by_name('library', root)
         if len(libraries_dom) < 1:
-            logger.warn(f"Expected there to be <library/> elements in nodelet_plugins.xml, but there are none.")
+            logger.warning(f"Expected there to be <library/> elements in nodelet_plugins.xml, but there are none.")
             logger.debug(contents)
         for library_dom in libraries_dom:
             assert isinstance(library_dom, dom.Element)
