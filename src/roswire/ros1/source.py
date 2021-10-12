@@ -34,26 +34,7 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
             logger.warning(f"No `CMakeLists.txt' in {path_to_package}")
             raise ValueError(f"No `CMakeLists.txt' in {path_to_package}")
 
-        contents = self._app_instance.files.read(cmakelists_path)
-        info = self._process_cmake_contents(contents, package, {})
-        nodelets, alternative_names = self.get_nodelet_entrypoints(package)
-        # Add in classname as alternative name that is referenced in loading nodelets
-        for nodelet, altname in alternative_names.items():
-            if nodelet in info.targets:
-                info.targets[altname] = info.targets[nodelet]
-
-        for nodelet, entrypoint in nodelets.items():
-            if nodelet not in info.targets and nodelet not in alternative_names.values():
-                logger.warning(f"info.targets={info.targets}")
-                logger.warning(f"Package {package.name}: '{nodelet}' "
-                               f"is referenced in nodelet_plugins.xml but not in "
-                               f"CMakeLists.txt.")
-            else:
-                target = info.targets[nodelet]
-                assert isinstance(target, CMakeLibraryTarget)
-                target.entrypoint = entrypoint
-
-        return info
+        return self._info_from_cmakelists(cmakelists_path, package)
 
     def _find_package_workspace(self, package: Package) -> str:
         """Determines the absolute path of the workspace to which a given

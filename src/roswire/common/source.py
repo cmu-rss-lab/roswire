@@ -139,7 +139,18 @@ class CMakeExtractor(abc.ABC):
     def package_paths(self, package: Package) -> t.Set[str]:
         ...
 
-    def get_nodelet_entrypoints(self, package: Package) -> t.Tuple[t.Mapping[str, str], t.Mapping[str, str]]:
+    def get_nodelet_entrypoints(self, package: Package) -> t.Mapping[str, NodeletInfo]:
+        """
+        Returns the potential nodelet entrypoints and classname for the package.
+
+        Parameters
+        ----------
+        package: Package
+
+        Returns
+        -------
+
+        """
         entrypoints: t.Dict[str, str] = {}
         classnames: t.Dict[str, str] = {}
         workspace = package.path
@@ -164,14 +175,29 @@ class CMakeExtractor(abc.ABC):
             nodelet_info = NodeletInfo.from_nodelet_xml(
                 contents
             )
-            for info in nodelet_info.libraries:
-                package_and_name = info.class_name.split('/')
-                # TODO can package in XML nodelet differ from package.name?
-                name = package_and_name[1]
-                entrypoint = info.class_type + "::onInit"
-                entrypoints[name] = entrypoint
-                classnames[name] = info.class_name
-        return entrypoints, classnames
+            return {info.class_name.split('/')[1] : info for info in nodelet_info.libraries}
+        logger.warning(f"'{nodelets_xml_path}' does not contain any library definitions.")
+        return {}
+
+    def _info_from_cmakelists(self, cmakelists_path, package):
+        contents = self._app_instance.files.read(cmakelists_path)
+        info = self._process_cmake_contents(contents, package, {})
+        nodelet_libraries = self.get_nodelet_entrypoints(package)
+        # Add in classname as alternative name that is referenced in loading nodelets
+        for nodelet, library in nodelet_libraries:
+            if nodelet in info.targets:
+                info.targets[library.class_name] = info.targets[nodelet]
+        for nodelet, library in nodelet_libraries.items():
+            if nodelet not in info.targets:
+                logger.warning(f"info.targets={info.targets}")
+                logger.warning(f"Package {package.name}: '{nodelet}' "
+                               f"is referenced in nodelet_plugins.xml but not in "
+                               f"CMakeLists.txt.")
+            else:
+                target = info.targets[nodelet]
+                assert isinstance(target, CMakeLibraryTarget)
+                target.entrypoint = library.entrypoint
+        return info
 
     def _process_cmake_contents(
         self,

@@ -163,6 +163,23 @@ class PackageDatabase(t.Generic[PT], ABC, t.Mapping[str, PT]):
         yield from self._contents
 
     def get_package_definition(self, package: Package, app_instance: "AppInstance") -> PackageDefinition:
+        """
+        Return the contents of the package.xml file associated with the package.
+
+        This function reads the package.xml on-demand, and then returns a cached copy thereafter.
+
+        Parameters
+        ----------
+        package: Package
+            The package to get the definition of
+        app_instance: AppInstance
+            The AppInstance that contains the defintion
+
+        Returns
+        -------
+        PackageDefinition
+            The definition of the pacakge as defined in package.xml
+        """
         if package.name in self._definitions:
             return self._definitions[package.name]
 

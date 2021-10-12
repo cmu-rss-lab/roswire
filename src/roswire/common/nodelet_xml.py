@@ -30,6 +30,10 @@ class NodeletLibrary:
     base_class: str = attr.ib()
     description: t.Optional[str] = attr.ib()
 
+    @property
+    def entrypoint(self):
+        return self.class_type + "::OnInit"
+
 
 @attr.s(frozen=True, auto_attribs=True)
 class NodeletInfo:
@@ -42,7 +46,7 @@ class NodeletInfo:
         tree = dom.parseString(contents)
         root = get_xml_nodes_by_name('root', tree)[0]
         libraries_dom = get_xml_nodes_by_name('library', root)
-        if len(libraries_dom) < 1:
+        if not libraries_dom:
             logger.warning(f"Expected there to be <library/> elements in nodelet_plugins.xml, but there are none.")
             logger.debug(contents)
         for library_dom in libraries_dom:
