@@ -8,7 +8,7 @@ import attr
 from loguru import logger
 
 from ..common import Package
-from ..common.source import CMakeExtractor, CMakeInfo, CMakeLibraryTarget
+from ..common.source import CMakeExtractor, CMakeInfo
 
 if t.TYPE_CHECKING:
     from .. import AppInstance

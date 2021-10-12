@@ -146,13 +146,13 @@ class CMakeExtractor(abc.ABC):
         Parameters
         ----------
         package: Package
+            The package to get nodelet info from
 
         Returns
         -------
-
+        Mapping[str, NodeletInfo]
+            A mapping of nodelet names to NodeletInfo
         """
-        entrypoints: t.Dict[str, str] = {}
-        classnames: t.Dict[str, str] = {}
         workspace = package.path
         nodelets_xml_path = os.path.join(workspace, 'nodelet_plugins.xml')
         if not self._app_instance.files.isfile(nodelets_xml_path):
@@ -172,9 +172,7 @@ class CMakeExtractor(abc.ABC):
             logger.debug(f"Reading plugin information from {nodelets_xml_path}")
             contents = self._app_instance.files.read(nodelets_xml_path)
             logger.debug(f"Contents of that file: {contents}")
-            nodelet_info = NodeletInfo.from_nodelet_xml(
-                contents
-            )
+            nodelet_info = NodeletInfo.from_nodelet_xml(contents)
             return {info.class_name.split('/')[1] : info for info in nodelet_info.libraries}
         logger.warning(f"'{nodelets_xml_path}' does not contain any library definitions.")
         return {}
