@@ -134,14 +134,7 @@ class AppInstance:
         port: int, optional
             The port that should be used by the ROS Master.
         """
-        return ROS1(
-            description=self.app.description,
-            shell=self.shell,
-            files=self.files,
-            ws_host=self._host_workspace,
-            ip_address=self.ip_address,
-            port=port,
-        )
+        return ROS1.for_app_instance(self, port)
 
     @property
     def ros2(self) -> ROS2:

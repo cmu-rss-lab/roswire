@@ -7,6 +7,7 @@ from .msg import Constant, Field, Message, MsgFormat
 from .node import Node
 from .node_manager import NodeManager
 from .package import Package, PackageDatabase
+from .package_xml import PackageDefinition
 from .source import (
     CMakeBinaryTarget,
     CMakeExtractor,

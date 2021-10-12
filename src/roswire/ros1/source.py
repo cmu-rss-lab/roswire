@@ -5,11 +5,10 @@ import os.path
 import typing as t
 
 import attr
-import dockerblade
 from loguru import logger
 
 from ..common import Package
-from ..common.source import CMakeExtractor, CMakeInfo, CMakeLibraryTarget
+from ..common.source import CMakeExtractor, CMakeInfo
 
 if t.TYPE_CHECKING:
     from ..app.instance import AppInstance
@@ -23,14 +22,7 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
         cls,
         app_instance: "AppInstance",
     ) -> "ROS1PackageSourceExtractor":
-        return ROS1PackageSourceExtractor(files=app_instance.files)
-
-    @classmethod
-    def for_filesystem(
-        cls,
-        files: dockerblade.FileSystem
-    ) -> "ROS1PackageSourceExtractor":
-        return ROS1PackageSourceExtractor(files)
+        return ROS1PackageSourceExtractor(app_instance=app_instance)
 
     def get_cmake_info(
         self,
@@ -38,24 +30,11 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
     ) -> CMakeInfo:
         path_to_package = package.path
         cmakelists_path = os.path.join(path_to_package, "CMakeLists.txt")
-        if not self._files.isfile(cmakelists_path):
+        if not self._app_instance.files.isfile(cmakelists_path):
             logger.warning(f"No `CMakeLists.txt' in {path_to_package}")
             raise ValueError(f"No `CMakeLists.txt' in {path_to_package}")
 
-        contents = self._files.read(cmakelists_path)
-        info = self._process_cmake_contents(contents, package, {})
-        nodelets = self.get_nodelet_entrypoints(package)
-        for nodelet, entrypoint in nodelets.items():
-            if nodelet not in info.targets:
-                logger.error(f"Package {package.name}: '{nodelet}' "
-                             f"is referenced in "
-                             f"nodelet_plugins.xml but not in "
-                             f"CMakeLists.txt")
-            else:
-                target = info.targets[nodelet]
-                assert isinstance(target, CMakeLibraryTarget)
-                target.entrypoint = entrypoint
-        return info
+        return self._info_from_cmakelists(cmakelists_path, package)
 
     def _find_package_workspace(self, package: Package) -> str:
         """Determines the absolute path of the workspace to which a given
@@ -72,12 +51,12 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
             catkin_marker_path = \
                 os.path.join(workspace_path, ".catkin_workspace")
             logger.debug(f"looking for workspace marker: {catkin_marker_path}")
-            if self._files.exists(catkin_marker_path):
+            if self._app_instance.files.exists(catkin_marker_path):
                 return workspace_path
 
             catkin_tools_dir = os.path.join(workspace_path, ".catkin_tools")
             logger.debug(f"looking for workspace marker: {catkin_tools_dir}")
-            if self._files.exists(catkin_tools_dir):
+            if self._app_instance.files.exists(catkin_tools_dir):
                 return workspace_path
 
             workspace_path = os.path.dirname(workspace_path)
@@ -95,7 +74,7 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
                           ):
             workspace_contender = \
                 os.path.join(workspace, contender, package.name)
-            if self._files.exists(workspace_contender):
+            if self._app_instance.files.exists(workspace_contender):
                 paths.add(workspace_contender)
 
         return paths

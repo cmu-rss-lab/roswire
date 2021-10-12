@@ -15,7 +15,6 @@ from pathlib import Path
 from typing import Any, Iterable  # noqa: F401, E501 # Needed for tuple_from_iterable and argparse
 
 import attr
-import dockerblade
 from loguru import logger
 
 from . import Package
@@ -23,7 +22,7 @@ from .cmake import (
     argparse as cmake_argparse,
     ParserContext,
 )
-from .nodelet_xml import NodeletInfo
+from .nodelet_xml import NodeletLibrary, NodeletsInfo
 from ..util import key_val_list_to_dict
 
 if t.TYPE_CHECKING:
@@ -114,12 +113,12 @@ class CMakeLibraryTarget(CMakeBinaryTarget):
 
 @attr.s(auto_attribs=True, slots=True, frozen=True)
 class CMakeInfo:
-    targets: t.Mapping[str, CMakeTarget]
+    targets: t.Dict[str, CMakeTarget]
 
 
 @attr.s(auto_attribs=True)
 class CMakeExtractor(abc.ABC):
-    _files: dockerblade.FileSystem
+    _app_instance: "AppInstance"
 
     @classmethod
     @abc.abstractmethod
@@ -140,21 +139,63 @@ class CMakeExtractor(abc.ABC):
     def package_paths(self, package: Package) -> t.Set[str]:
         ...
 
-    def get_nodelet_entrypoints(self, package: Package) -> t.Mapping[str, str]:
-        entrypoints: t.Dict[str, str] = {}
+    def get_nodelet_entrypoints(self, package: Package) -> t.Mapping[str, NodeletLibrary]:
+        """
+        Returns the potential nodelet entrypoints and classname for the package.
+
+        Parameters
+        ----------
+        package: Package
+            The package to get nodelet info from
+
+        Returns
+        -------
+        Mapping[str, NodeletLibrary]
+            A mapping of nodelet names to NodeletInfo
+        """
         workspace = package.path
         nodelets_xml_path = os.path.join(workspace, 'nodelet_plugins.xml')
-        if self._files.exists(nodelets_xml_path):
-            nodelet_info = NodeletInfo.from_nodelet_xml(
-                self._files.read(nodelets_xml_path)
-            )
-            for info in nodelet_info.libraries:
-                package_and_name = info.class_name.split('/')
-                # TODO can package in XML nodelet differ from package.name?
-                name = package_and_name[1]
-                entrypoint = info.class_type + "::onInit"
-                entrypoints[name] = entrypoint
-        return entrypoints
+        if not self._app_instance.files.isfile(nodelets_xml_path):
+            # Read from the package database
+            logger.info("Is nodelet plugin defined in package.xml?")
+            defn = self._app_instance.description.packages.get_package_definition(package, self._app_instance)
+            for export in defn.exports:
+                logger.debug("Looking in export of package.xml")
+                if export.tagname == 'nodelet' and 'plugin' in export.attributes:
+                    logger.debug("Found nodelet tag and plugin attribute")
+                    plugin = export.attributes['plugin']
+                    plugin = plugin.replace('${prefix}/', '')
+                    nodelets_xml_path = os.path.join(package.path, plugin)
+
+        logger.debug(f"Looking for nodelet plugin file: {nodelets_xml_path}")
+        if self._app_instance.files.exists(nodelets_xml_path):
+            logger.debug(f"Reading plugin information from {nodelets_xml_path}")
+            contents = self._app_instance.files.read(nodelets_xml_path)
+            logger.debug(f"Contents of that file: {contents}")
+            nodelet_info = NodeletsInfo.from_nodelet_xml(contents)
+            return {info.name.split('/')[1] : info for info in nodelet_info.libraries}
+        logger.warning(f"The specified '{nodelets_xml_path}' does not exist.")
+        return {}
+
+    def _info_from_cmakelists(self, cmakelists_path: str, package: Package) -> CMakeInfo:
+        contents = self._app_instance.files.read(cmakelists_path)
+        info = self._process_cmake_contents(contents, package, {})
+        nodelet_libraries = self.get_nodelet_entrypoints(package)
+        # Add in classname as a name that can be referenced in loading nodelets
+        for nodelet, library in nodelet_libraries.items():
+            if nodelet in info.targets:
+                info.targets[library.name] = info.targets[nodelet]
+        for nodelet, library in nodelet_libraries.items():
+            if nodelet not in info.targets:
+                logger.warning(f"info.targets={info.targets}")
+                logger.warning(f"Package {package.name}: '{nodelet}' "
+                               f"is referenced in nodelet_plugins.xml but not in "
+                               f"CMakeLists.txt.")
+            else:
+                target = info.targets[nodelet]
+                assert isinstance(target, CMakeLibraryTarget)
+                target.entrypoint = library.entrypoint
+        return info
 
     def _process_cmake_contents(
         self,
@@ -204,11 +245,16 @@ class CMakeExtractor(abc.ABC):
                 opts, args = cmake_argparse(args, {"CACHE": "-"})
                 cmake_env[args[0]] = ""
             if cmd == "add_executable" or cmd == 'cuda_add_executable':
-                self.__process_add_executable(
+                opts, args = cmake_argparse(
                     args,
-                    cmake_env,
-                    executables,
-                    package)
+                    {"EXCLUDE_FROM_ALL": "-"}
+                )
+                if not opts['EXCLUDE_FROM_ALL']:
+                    self.__process_add_executable(
+                        args,
+                        cmake_env,
+                        executables,
+                        package)
             if cmd == "catkin_install_python":
                 self.__process_python_executables(
                     args,
@@ -243,7 +289,7 @@ class CMakeExtractor(abc.ABC):
         cmakelists_path = os.path.join(join, 'CMakeLists.txt')
         logger.debug(f"Processing {cmakelists_path}")
         included_package_info = self._process_cmake_contents(
-            self._files.read(cmakelists_path),
+            self._app_instance.files.read(cmakelists_path),
             package,
             new_env,
         )
@@ -282,10 +328,10 @@ class CMakeExtractor(abc.ABC):
         real_filename = filename
         if 'cwd' in cmake_env:
             real_filename = os.path.join(cmake_env['cwd'], filename)
-        if not self._files.isfile(os.path.join(package.path, real_filename)):
+        if not self._app_instance.files.isfile(os.path.join(package.path, real_filename)):
             path = Path(real_filename)
             parent = str(path.parent)
-            all_files = self._files.listdir(os.path.join(package.path, parent))
+            all_files = self._app_instance.files.listdir(os.path.join(package.path, parent))
             matching_files = [f for f in all_files if f.startswith(path.name)]
             if len(matching_files) != 1:
                 raise ValueError(f"Only one file should match '{real_filename}'. "
