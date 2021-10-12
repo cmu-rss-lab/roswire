@@ -22,7 +22,7 @@ from .cmake import (
     argparse as cmake_argparse,
     ParserContext,
 )
-from .nodelet_xml import NodeletsInfo, NodeletLibrary
+from .nodelet_xml import NodeletLibrary, NodeletsInfo
 from ..util import key_val_list_to_dict
 
 if t.TYPE_CHECKING:

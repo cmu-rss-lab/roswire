@@ -58,7 +58,7 @@ class NodeletsInfo:
             libraries.add(NodeletLibrary(path=path,
                                          name=name,
                                          type_=type_,
-                                        ))
+                                         ))
         return NodeletsInfo(libraries=libraries)
 
 
