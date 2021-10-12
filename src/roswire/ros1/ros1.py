@@ -65,7 +65,7 @@ class ROS1:
     """
 
     @classmethod
-    def for_app_instance(cls, instance: "AppInstance", port: int) -> "ROS1":
+    def for_app_instance(cls, instance: "AppInstance", port: int = 11311) -> "ROS1":
         return ROS1(description=instance.app.description,
                     shell=instance.shell,
                     files=instance.files,
