@@ -310,16 +310,13 @@ class MsgFormat(ABC, Generic[FIELD, CONSTANT]):
 
     @staticmethod
     def sections_from_string(text: str) -> t.List[str]:
-        sections: t.List[str] = []
+        sections: t.List[str] = [""]
         section_index = 0
         for line in (ss.strip() for ss in text.split("\n")):
             if line.startswith("---"):
                 section_index += 1
+                sections.append("")
             else:
-                if len(sections) < section_index + 1:
-                    if len(sections) < section_index:
-                        sections.append("")
-                    sections.append("")
                 sections[section_index] += f"{line}\n"
         return sections
 
