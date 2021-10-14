@@ -103,7 +103,7 @@ class BagPlayer:
             if self.__started:
                 raise exceptions.PlayerAlreadyStarted
             self.__started = True
-            command: str = f"rosbag play -q {self.__fn_container}"
+            command: str = f"rosbag play -q {self.__fn_container} --clock"
             self._process = self.__shell.popen(
                 command, stdout=False, stderr=False
             )
