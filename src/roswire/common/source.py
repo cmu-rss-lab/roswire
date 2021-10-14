@@ -183,8 +183,7 @@ class CMakeExtractor(abc.ABC):
         nodelet_libraries = self.get_nodelet_entrypoints(package)
         # Add in classname as a name that can be referenced in loading nodelets
         for nodelet, library in nodelet_libraries.items():
-            if nodelet in info.targets:
-                info.targets[library.name] = info.targets[nodelet]
+            info.targets[library.name] = info.targets[nodelet]
         for nodelet, library in nodelet_libraries.items():
             if nodelet not in info.targets:
                 logger.warning(f"info.targets={info.targets}")
@@ -263,6 +262,10 @@ class CMakeExtractor(abc.ABC):
                     package,
                 )
             if cmd == 'add_library' or cmd == 'cuda_add_library':
+                opts, args = cmake_argparse(
+                    args,
+                    {"SHARED": "-"}
+                )
                 self.__process_add_library(
                     args,
                     cmake_env,
