@@ -10,6 +10,7 @@ __all__ = (
 import abc
 import enum
 import os
+import re
 import typing as t
 from pathlib import Path
 from typing import Any, Iterable  # noqa: F401, E501 # Needed for tuple_from_iterable and argparse
@@ -236,8 +237,15 @@ class CMakeExtractor(abc.ABC):
                 opts, args = cmake_argparse(args, {"PROPERTIES": "*"})
                 properties = key_val_list_to_dict(opts.get("PROPERTIES", []))
                 if 'OUTPUT_NAME' in properties:
-                    executables[properties['OUTPUT_NAME']] = executables[cmake_env["PROJECT_NAME"]]
-                    del executables[cmake_env["PROJECT_NAME"]]
+                    var_pattern = re.compile(r"([^$]*)\${([^}]*)}(.*)")
+                    var_match = var_pattern.match(args[0])
+                    if var_match:
+                        args[0] = var_match.group(1) + cmake_env[var_match.group(2)] + var_match.group(3)
+                    if args[0] in executables:
+                        executables[properties['OUTPUT_NAME']] = executables[args[0]]
+                        del executables[args[0]]
+                    else:
+                        logger.error(f"{args[0]} is not in the list of targets")
             if cmd == "set":
                 opts, args = cmake_argparse(
                     args,
