@@ -10,6 +10,7 @@ __all__ = (
 import abc
 import enum
 import os
+import re
 import typing as t
 from pathlib import Path
 from typing import Any, Iterable  # noqa: F401, E501 # Needed for tuple_from_iterable and argparse
@@ -23,6 +24,7 @@ from .cmake import (
     ParserContext,
 )
 from .nodelet_xml import NodeletLibrary, NodeletsInfo
+from .package_xml.package import InvalidPackage
 from ..util import key_val_list_to_dict
 
 if t.TYPE_CHECKING:
@@ -158,14 +160,17 @@ class CMakeExtractor(abc.ABC):
         if not self._app_instance.files.isfile(nodelets_xml_path):
             # Read from the package database
             logger.info("Is nodelet plugin defined in package.xml?")
-            defn = self._app_instance.description.packages.get_package_definition(package, self._app_instance)
-            for export in defn.exports:
-                logger.debug("Looking in export of package.xml")
-                if export.tagname == 'nodelet' and 'plugin' in export.attributes:
-                    logger.debug("Found nodelet tag and plugin attribute")
-                    plugin = export.attributes['plugin']
-                    plugin = plugin.replace('${prefix}/', '')
-                    nodelets_xml_path = os.path.join(package.path, plugin)
+            try:
+                defn = self._app_instance.description.packages.get_package_definition(package, self._app_instance)
+                for export in defn.exports:
+                    logger.debug("Looking in export of package.xml")
+                    if export.tagname == 'nodelet' and 'plugin' in export.attributes:
+                        logger.debug("Found nodelet tag and plugin attribute")
+                        plugin = export.attributes['plugin']
+                        plugin = plugin.replace('${prefix}/', '')
+                        nodelets_xml_path = os.path.join(package.path, plugin)
+            except InvalidPackage:
+                logger.warning("Failed to parse package.xml")
 
         logger.debug(f"Looking for nodelet plugin file: {nodelets_xml_path}")
         if self._app_instance.files.exists(nodelets_xml_path):
@@ -233,8 +238,15 @@ class CMakeExtractor(abc.ABC):
                 opts, args = cmake_argparse(args, {"PROPERTIES": "*"})
                 properties = key_val_list_to_dict(opts.get("PROPERTIES", []))
                 if 'OUTPUT_NAME' in properties:
-                    executables[properties['OUTPUT_NAME']] = executables[cmake_env["PROJECT_NAME"]]
-                    del executables[cmake_env["PROJECT_NAME"]]
+                    var_pattern = re.compile(r"([^$]*)\${([^}]*)}(.*)")
+                    var_match = var_pattern.match(args[0])
+                    if var_match:
+                        args[0] = var_match.group(1) + cmake_env[var_match.group(2)] + var_match.group(3)
+                    if args[0] in executables:
+                        executables[properties['OUTPUT_NAME']] = executables[args[0]]
+                        del executables[args[0]]
+                    else:
+                        logger.error(f"{args[0]} is not in the list of targets")
             if cmd == "set":
                 opts, args = cmake_argparse(
                     args,
@@ -263,6 +275,10 @@ class CMakeExtractor(abc.ABC):
                     package,
                 )
             if cmd == 'add_library' or cmd == 'cuda_add_library':
+                opts, args = cmake_argparse(
+                    args,
+                    {"SHARED": "-"}
+                )
                 self.__process_add_library(
                     args,
                     cmake_env,
