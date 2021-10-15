@@ -26,7 +26,7 @@ class NodeletLibrary:
 
     @property
     def entrypoint(self) -> str:
-        return self.type_ + "::OnInit"
+        return self.type_ + "::onInit"
 
 
 @attr.s(frozen=True, auto_attribs=True)
