@@ -188,12 +188,8 @@ class CMakeExtractor(abc.ABC):
         nodelet_libraries = self.get_nodelet_entrypoints(package)
         # Add in classname as a name that can be referenced in loading nodelets
         for nodelet, library in nodelet_libraries.items():
-            try:
+            if nodelet in info.targets:
                 info.targets[library.name] = info.targets[nodelet]
-            except KeyError:
-                logger.error(f"Can't find {nodelet} in info targets for `{cmakelists_path}")
-                logger.debug(f"{info.targets.keys()}")
-                raise
         for nodelet, library in nodelet_libraries.items():
             if nodelet not in info.targets:
                 logger.warning(f"info.targets={info.targets}")
