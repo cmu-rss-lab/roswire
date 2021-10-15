@@ -132,7 +132,7 @@ class ROS1:
         else:
             self._disconnect()
 
-    def _shutdown(self) -> None:
+    def _shutdown(self, *, log_output: bool = False) -> None:
         if self.__roscore_process is None:
             raise exc.IllegalOperation("No associated roscore process.")
 
@@ -140,6 +140,12 @@ class ROS1:
         self.__roscore_process.terminate()
         self.__roscore_process.wait(2.0)
         self.__roscore_process.kill()
+
+        if log_output:
+            stream: t.Iterator[str] = self.__roscore_process.stream  # type: ignore
+            output = "\n".join(stream)
+            logger.debug(f"roscore output:\n{output}")
+
         self.__roscore_process = None
         logger.debug("shutdown roscore")
 
@@ -174,7 +180,11 @@ class ROS1:
         if self._is_rosmaster_online():
             self.connect()
         else:
-            self.launch()
+            try:
+                self.launch()
+            except exc.TimeoutExpiredError:
+                self._shutdown(log_output=True)
+                raise
 
     def connect(self, *, timeout: float = 30.0) -> None:
         """Establishes a connection to an already running ROS Master.
