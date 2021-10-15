@@ -21,6 +21,7 @@ class BagPlayer:
         files: dockerblade.FileSystem,
         *,
         delete_file_after_use: bool = False,
+        args: str = ""
     ) -> None:
         self.__lock = threading.Lock()
         self.__fn_container = fn_container
@@ -29,6 +30,7 @@ class BagPlayer:
         self.__delete_file_after_use = delete_file_after_use
         self.__started = False
         self.__stopped = False
+        self.__args = args
         self._process: Optional[dockerblade.popen.Popen] = None
 
     @property
@@ -103,7 +105,7 @@ class BagPlayer:
             if self.__started:
                 raise exceptions.PlayerAlreadyStarted
             self.__started = True
-            command: str = f"rosbag play -q {self.__fn_container} --clock"
+            command: str = f"rosbag play -q {self.__fn_container} {self.__args}"
             self._process = self.__shell.popen(
                 command, stdout=False, stderr=False
             )

@@ -363,7 +363,8 @@ class ROS1:
         self,
         filename: str,
         *,
-        file_on_host: bool = True
+        args: str = "",
+        file_on_host: bool = True,        
     ) -> BagPlayer:
         """Provides an interface to rosbag for replaying bag files from disk.
 
@@ -408,6 +409,7 @@ class ROS1:
             shell=self.__shell,
             files=self.__files,
             delete_file_after_use=delete_file_after_use,
+            args=args,
         )
 
     def package_node_sources(
