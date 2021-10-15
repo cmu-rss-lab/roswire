@@ -23,6 +23,7 @@ from .cmake import (
     ParserContext,
 )
 from .nodelet_xml import NodeletLibrary, NodeletsInfo
+from .package_xml.package import InvalidPackage
 from ..util import key_val_list_to_dict
 
 if t.TYPE_CHECKING:
@@ -158,14 +159,17 @@ class CMakeExtractor(abc.ABC):
         if not self._app_instance.files.isfile(nodelets_xml_path):
             # Read from the package database
             logger.info("Is nodelet plugin defined in package.xml?")
-            defn = self._app_instance.description.packages.get_package_definition(package, self._app_instance)
-            for export in defn.exports:
-                logger.debug("Looking in export of package.xml")
-                if export.tagname == 'nodelet' and 'plugin' in export.attributes:
-                    logger.debug("Found nodelet tag and plugin attribute")
-                    plugin = export.attributes['plugin']
-                    plugin = plugin.replace('${prefix}/', '')
-                    nodelets_xml_path = os.path.join(package.path, plugin)
+            try:
+                defn = self._app_instance.description.packages.get_package_definition(package, self._app_instance)
+                for export in defn.exports:
+                    logger.debug("Looking in export of package.xml")
+                    if export.tagname == 'nodelet' and 'plugin' in export.attributes:
+                        logger.debug("Found nodelet tag and plugin attribute")
+                        plugin = export.attributes['plugin']
+                        plugin = plugin.replace('${prefix}/', '')
+                        nodelets_xml_path = os.path.join(package.path, plugin)
+            except InvalidPackage:
+                logger.warning("Failed to parse package.xml")
 
         logger.debug(f"Looking for nodelet plugin file: {nodelets_xml_path}")
         if self._app_instance.files.exists(nodelets_xml_path):
