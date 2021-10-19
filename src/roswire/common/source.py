@@ -10,7 +10,6 @@ __all__ = (
 import abc
 import enum
 import os
-import pathlib
 import re
 import typing as t
 from pathlib import Path
@@ -322,7 +321,7 @@ class CMakeExtractor(abc.ABC):
             if opts['RELATIVE']:
                 path = os.path.join(package.path, opts['RELATIVE'])
             # remove . and .. from the path by resolving them
-            path = str(pathlib.Path(path).resolve())
+            path = os.path.normpath(path)
             logger.debug(f"Finding files matching {args[1:]} in {path}")
             matches = []
             for arg in args[1:]:
