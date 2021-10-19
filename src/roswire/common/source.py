@@ -271,26 +271,7 @@ class CMakeExtractor(abc.ABC):
                                                    'GLOB_RECURSE': '-',
                                                    'GLOB': '-',
                                                    })
-                if not opts['GLOB_RECURSE'] and not opts['GLOB']:
-                    logger.warning(f"Cannot process file({args[0]} ...")
-                else:
-                    path = package.path
-                    if opts['RELATIVE']:
-                        path = os.path.join(package.path, opts['RELATIVE'])
-                    path = str(pathlib.Path(path).resolve())
-                    logger.debug(f"Finding files matching {args[1:]} in {path}")
-                    matches = []
-                    for arg in args[1:]:
-                        finds = self._app_instance.files.find(path, arg)
-                        logger.debug(f"Found the following matches to {arg} in {path}: {finds}")
-                        matches.extend(finds)
-                    if opts['RELATIVE']:
-                        # convert path to be relative
-                        for i in range(0, len(matches)):
-                            matches[i] = os.path.relpath(matches[i], path)
-
-                    cmake_env[args[0]] = ';'.join(matches)
-                    logger.debug(f"Set {args[0]} to {cmake_env[args[0]]}")
+                self.__process_file_directive(args, cmake_env, opts, package)
             if cmd == "add_executable" or cmd == 'cuda_add_executable':
                 opts, args = cmake_argparse(
                     args,
@@ -326,6 +307,34 @@ class CMakeExtractor(abc.ABC):
                     executables,
                     package)
         return CMakeInfo(executables)
+
+    def __process_file_directive(
+        self,
+        args: t.List[str],
+        cmake_env: t.Dict[str, t.Any],
+        opts: t.Dict[str, t.Any],
+        package: Package,
+    ) -> None:
+        if not opts['GLOB_RECURSE'] and not opts['GLOB']:
+            logger.warning(f"Cannot process file({args[0]} ...")
+        else:
+            path = package.path
+            if opts['RELATIVE']:
+                path = os.path.join(package.path, opts['RELATIVE'])
+            path = str(pathlib.Path(path).resolve())
+            logger.debug(f"Finding files matching {args[1:]} in {path}")
+            matches = []
+            for arg in args[1:]:
+                finds = self._app_instance.files.find(path, arg)
+                logger.debug(f"Found the following matches to {arg} in {path}: {finds}")
+                matches.extend(finds)
+            if opts['RELATIVE']:
+                # convert path to be relative
+                for i in range(0, len(matches)):
+                    matches[i] = os.path.relpath(matches[i], path)
+
+            cmake_env[args[0]] = ';'.join(matches)
+            logger.debug(f"Set {args[0]} to {cmake_env[args[0]]}")
 
     def __process_add_subdirectory(
         self,
