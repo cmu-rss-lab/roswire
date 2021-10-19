@@ -321,6 +321,7 @@ class CMakeExtractor(abc.ABC):
             path = package.path
             if opts['RELATIVE']:
                 path = os.path.join(package.path, opts['RELATIVE'])
+            # remove . and .. from the path by resolving them
             path = str(pathlib.Path(path).resolve())
             logger.debug(f"Finding files matching {args[1:]} in {path}")
             matches = []
@@ -330,8 +331,7 @@ class CMakeExtractor(abc.ABC):
                 matches.extend(finds)
             if opts['RELATIVE']:
                 # convert path to be relative
-                for i in range(0, len(matches)):
-                    matches[i] = os.path.relpath(matches[i], path)
+                matches = [os.path.relpath(m, path) for m in matches]
 
             cmake_env[args[0]] = ';'.join(matches)
             logger.debug(f"Set {args[0]} to {cmake_env[args[0]]}")
