@@ -184,7 +184,13 @@ class CMakeExtractor(abc.ABC):
 
     def _info_from_cmakelists(self, cmakelists_path: str, package: Package) -> CMakeInfo:
         contents = self._app_instance.files.read(cmakelists_path)
-        info = self._process_cmake_contents(contents, package, {})
+        env = {
+            'CMAKE_SOURCE_DIR' : './',
+            'CMAKE_CURRENT_SOURCE_DIR': './',
+            'CMAKE_CURRENT_BINARY_DIR': './',
+            'CMAKE_BINARY_DIR': './'
+        }
+        info = self._process_cmake_contents(contents, package, env)
         nodelet_libraries = self.get_nodelet_entrypoints(package)
         # Add in classname as a name that can be referenced in loading nodelets
         for nodelet, library in nodelet_libraries.items():
@@ -256,6 +262,15 @@ class CMakeExtractor(abc.ABC):
             if cmd == "unset":
                 opts, args = cmake_argparse(args, {"CACHE": "-"})
                 cmake_env[args[0]] = ""
+            if cmd == "file":
+                logger.warning(f'Processing file directive: {args}')
+                opts, args = cmake_argparse(args, {'FOLLOW_SYMLINKS': '-',
+                                                   'LIST_DIRECTORIES': '?',
+                                                   'RELATIVE': '?',
+                                                   'GLOB_RECURSE': '-',
+                                                   'GLOB': '-',
+                                                   })
+                self.__process_file_directive(args, cmake_env, opts, package)
             if cmd == "add_executable" or cmd == 'cuda_add_executable':
                 opts, args = cmake_argparse(
                     args,
@@ -292,6 +307,34 @@ class CMakeExtractor(abc.ABC):
                     package)
         return CMakeInfo(executables)
 
+    def __process_file_directive(
+        self,
+        args: t.List[str],
+        cmake_env: t.Dict[str, t.Any],
+        opts: t.Dict[str, t.Any],
+        package: Package,
+    ) -> None:
+        if not opts['GLOB_RECURSE'] and not opts['GLOB']:
+            logger.warning(f"Cannot process file({args[0]} ...")
+        else:
+            path = package.path
+            if opts['RELATIVE']:
+                path = os.path.join(package.path, opts['RELATIVE'])
+            # remove . and .. from the path by resolving them
+            path = os.path.normpath(path)
+            logger.debug(f"Finding files matching {args[1:]} in {path}")
+            matches = []
+            for arg in args[1:]:
+                finds = self._app_instance.files.find(path, arg)
+                logger.debug(f"Found the following matches to {arg} in {path}: {finds}")
+                matches.extend(finds)
+            if opts['RELATIVE']:
+                # convert path to be relative
+                matches = [os.path.relpath(m, path) for m in matches]
+
+            cmake_env[args[0]] = ';'.join(matches)
+            logger.debug(f"Set {args[0]} to {cmake_env[args[0]]}")
+
     def __process_add_subdirectory(
         self,
         args: t.List[str],
@@ -300,6 +343,10 @@ class CMakeExtractor(abc.ABC):
         package: Package,
     ) -> t.Dict[str, CMakeTarget]:
         new_env = cmake_env.copy()
+        new_env['CMAKE_SOURCE_DIR'] = os.path.join(cmake_env.get('CMAKE_SOURCE_DIR', '.'), args[0])
+        new_env['CMAKE_CURRENT_SOURCE_DIR'] = new_env['CMAKE_SOURCE_DIR']
+        new_env['CMAKE_CURRENT_BINARY_DIR'] = new_env['CMAKE_SOURCE_DIR']
+        new_env['CMAKE_BINARY_DIR'] = new_env['CMAKE_SOURCE_DIR']
         new_env['cwd'] = os.path.join(cmake_env.get('cwd', '.'), args[0])
         join = os.path.join(package.path, new_env['cwd'])
         cmakelists_path = os.path.join(join, 'CMakeLists.txt')
