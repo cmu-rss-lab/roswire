@@ -256,6 +256,14 @@ class CMakeExtractor(abc.ABC):
             if cmd == "unset":
                 opts, args = cmake_argparse(args, {"CACHE": "-"})
                 cmake_env[args[0]] = ""
+            if cmd == "file":
+                logger.debug('Processing file')
+                opts, args = cmake_argparse(args, {'FOLLOW_SYMLINKS': '-',
+                                                   'LIST_DIRECTORIES': '?',
+                                                   'RELATIVE': '+',
+                                                   })
+                logger.debug(f"opts={opts}, args={args}")
+
             if cmd == "add_executable" or cmd == 'cuda_add_executable':
                 opts, args = cmake_argparse(
                     args,
