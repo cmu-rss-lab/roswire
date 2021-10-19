@@ -321,7 +321,8 @@ class CMakeExtractor(abc.ABC):
         new_env['CMAKE_CURRENT_SOURCE_DIR'] = new_env['CMAKE_SOURCE_DIR']
         new_env['CMAKE_CURRENT_BINARY_DIR'] = new_env['CMAKE_SOURCE_DIR']
         new_env['CMAKE_BINARY_DIR'] = new_env['CMAKE_SOURCE_DIR']
-        join = os.path.join(package.path, new_env['CMAKE_SOURCE_DIR'])
+        new_env['cwd'] = os.path.join(cmake_env.get('cwd', '.'), args[0])
+        join = os.path.join(package.path, new_env['cwd'])
         cmakelists_path = os.path.join(join, 'CMakeLists.txt')
         logger.debug(f"Processing {cmakelists_path}")
         included_package_info = self._process_cmake_contents(
@@ -362,8 +363,8 @@ class CMakeExtractor(abc.ABC):
         cmake_env: t.Dict[str, str],
     ) -> str:
         real_filename = filename
-        if 'CURRENT_SOURCE_DIR' in cmake_env:
-            real_filename = os.path.join(cmake_env['CURRENT_SOURCE_DIR'], filename)
+        if 'cwd' in cmake_env:
+            real_filename = os.path.join(cmake_env['cwd'], filename)
         if not self._app_instance.files.isfile(os.path.join(package.path, real_filename)):
             path = Path(real_filename)
             parent = str(path.parent)
