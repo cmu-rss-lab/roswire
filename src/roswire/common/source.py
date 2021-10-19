@@ -257,13 +257,14 @@ class CMakeExtractor(abc.ABC):
                 opts, args = cmake_argparse(args, {"CACHE": "-"})
                 cmake_env[args[0]] = ""
             if cmd == "file":
-                logger.debug('Processing file')
+                logger.debug('Processing file directive')
                 opts, args = cmake_argparse(args, {'FOLLOW_SYMLINKS': '-',
                                                    'LIST_DIRECTORIES': '?',
                                                    'RELATIVE': '*',
                                                    'GLOB_RECURSE': '-'
                                                    })
                 logger.debug(f"opts={opts}, args={args}")
+                raise NotImplementedError('Processing file - not implemented yet')
 
             if cmd == "add_executable" or cmd == 'cuda_add_executable':
                 opts, args = cmake_argparse(
