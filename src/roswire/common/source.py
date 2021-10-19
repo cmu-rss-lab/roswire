@@ -36,7 +36,7 @@ class SourceLanguage(enum.Enum):
     PYTHON = "python"
 
 
-DUMMY_VALUE="__dummy_property_value__"  # A dummy value used as a stand in for properties we don't need
+DUMMY_VALUE = "__dummy_property_value__"  # A dummy value used as a stand in for properties we don't need
 
 
 @attr.s(auto_attribs=True)
