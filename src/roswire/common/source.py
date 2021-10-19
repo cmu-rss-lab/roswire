@@ -36,6 +36,9 @@ class SourceLanguage(enum.Enum):
     PYTHON = "python"
 
 
+DUMMY_VALUE="__dummy_property_value__"  # A dummy value used as a stand in for properties we don't need
+
+
 @attr.s(auto_attribs=True)
 class CMakeTarget:
     name: str
@@ -188,7 +191,8 @@ class CMakeExtractor(abc.ABC):
             'CMAKE_SOURCE_DIR' : './',
             'CMAKE_CURRENT_SOURCE_DIR': './',
             'CMAKE_CURRENT_BINARY_DIR': './',
-            'CMAKE_BINARY_DIR': './'
+            'CMAKE_BINARY_DIR': './',
+            'PROJECT_VERSION': DUMMY_VALUE,
         }
         info = self._process_cmake_contents(contents, package, env)
         nodelet_libraries = self.get_nodelet_entrypoints(package)
