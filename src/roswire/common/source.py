@@ -10,6 +10,7 @@ __all__ = (
 import abc
 import enum
 import os
+import pathlib
 import re
 import typing as t
 from pathlib import Path
@@ -270,6 +271,18 @@ class CMakeExtractor(abc.ABC):
                                                    'GLOB_RECURSE': '-'
                                                    })
                 logger.debug(f"opts={opts}, args={args}")
+                path = package.path
+                if 'RELATIVE' in opts:
+                    path = os.path.join(package.path, opts['RELATIVE'])
+                path = str(pathlib.Path(path).resolve())
+                logger.debug(f"Finding files matching {args[1:]} in {path}")
+                matches = []
+                for arg in args[1:]:
+                    finds = self._app_instance.files.find(path, arg)
+                    logger.debug(f"Found the following matches to {arg} in {path}: {finds}")
+                    matches.extend(finds)
+                cmake_env[args[0]] = ';'.join(matches)
+
                 if args[0] == 'QT_SOURCES':
                     raise NotImplementedError('Processing file for ocs - not implemented yet')
 
