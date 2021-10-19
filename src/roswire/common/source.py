@@ -184,7 +184,13 @@ class CMakeExtractor(abc.ABC):
 
     def _info_from_cmakelists(self, cmakelists_path: str, package: Package) -> CMakeInfo:
         contents = self._app_instance.files.read(cmakelists_path)
-        info = self._process_cmake_contents(contents, package, {})
+        env = {
+            'CMAKE_SOURCE_DIR' : './',
+            'CMAKE_CURRENT_SOURCE_DIR': './',
+            'CMAKE_CURRENT_BINARY_DIR': './',
+            'CMAKE_BINARY_DIR': './'
+        }
+        info = self._process_cmake_contents(contents, package, env)
         nodelet_libraries = self.get_nodelet_entrypoints(package)
         # Add in classname as a name that can be referenced in loading nodelets
         for nodelet, library in nodelet_libraries.items():
@@ -257,14 +263,15 @@ class CMakeExtractor(abc.ABC):
                 opts, args = cmake_argparse(args, {"CACHE": "-"})
                 cmake_env[args[0]] = ""
             if cmd == "file":
-                logger.debug('Processing file directive')
+                logger.warning(f'Processing file directive: {args}')
                 opts, args = cmake_argparse(args, {'FOLLOW_SYMLINKS': '-',
                                                    'LIST_DIRECTORIES': '?',
-                                                   'RELATIVE': '*',
+                                                   'RELATIVE': '?',
                                                    'GLOB_RECURSE': '-'
                                                    })
                 logger.debug(f"opts={opts}, args={args}")
-                raise NotImplementedError('Processing file - not implemented yet')
+                if args[0] == 'QT_SOURCES':
+                    raise NotImplementedError('Processing file for ocs - not implemented yet')
 
             if cmd == "add_executable" or cmd == 'cuda_add_executable':
                 opts, args = cmake_argparse(
@@ -310,8 +317,11 @@ class CMakeExtractor(abc.ABC):
         package: Package,
     ) -> t.Dict[str, CMakeTarget]:
         new_env = cmake_env.copy()
-        new_env['cwd'] = os.path.join(cmake_env.get('cwd', '.'), args[0])
-        join = os.path.join(package.path, new_env['cwd'])
+        new_env['CMAKE_SOURCE_DIR'] = os.path.join(cmake_env.get('CMAKE_SOURCE_DIR', '.'), args[0])
+        new_env['CMAKE_CURRENT_SOURCE_DIR'] = new_env['CMAKE_SOURCE_DIR']
+        new_env['CMAKE_CURRENT_BINARY_DIR'] = new_env['CMAKE_SOURCE_DIR']
+        new_env['CMAKE_BINARY_DIR'] = new_env['CMAKE_SOURCE_DIR']
+        join = os.path.join(package.path, new_env['CMAKE_SOURCE_DIR'])
         cmakelists_path = os.path.join(join, 'CMakeLists.txt')
         logger.debug(f"Processing {cmakelists_path}")
         included_package_info = self._process_cmake_contents(
@@ -352,8 +362,8 @@ class CMakeExtractor(abc.ABC):
         cmake_env: t.Dict[str, str],
     ) -> str:
         real_filename = filename
-        if 'cwd' in cmake_env:
-            real_filename = os.path.join(cmake_env['cwd'], filename)
+        if 'CURRENT_SOURCE_DIR' in cmake_env:
+            real_filename = os.path.join(cmake_env['CURRENT_SOURCE_DIR'], filename)
         if not self._app_instance.files.isfile(os.path.join(package.path, real_filename)):
             path = Path(real_filename)
             parent = str(path.parent)
