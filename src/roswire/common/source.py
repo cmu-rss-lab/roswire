@@ -260,7 +260,8 @@ class CMakeExtractor(abc.ABC):
                 logger.debug('Processing file')
                 opts, args = cmake_argparse(args, {'FOLLOW_SYMLINKS': '-',
                                                    'LIST_DIRECTORIES': '?',
-                                                   'RELATIVE': '+',
+                                                   'RELATIVE': '*',
+                                                   'GLOB_RECURSE': '-'
                                                    })
                 logger.debug(f"opts={opts}, args={args}")
 
