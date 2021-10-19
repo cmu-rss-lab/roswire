@@ -286,8 +286,8 @@ class CMakeExtractor(abc.ABC):
                         matches.extend(finds)
                     if opts['RELATIVE']:
                         # convert path to be relative
-                        for i in range(0, len(matches) - 1):
-                            matches[i] = os.path.relpath(path, matches[i])
+                        for i in range(0, len(matches)):
+                            matches[i] = os.path.relpath(matches[i], path)
 
                     cmake_env[args[0]] = ';'.join(matches)
                     logger.debug(f"Set {args[0]} to {cmake_env[args[0]]}")
