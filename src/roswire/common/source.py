@@ -272,7 +272,7 @@ class CMakeExtractor(abc.ABC):
                                                    })
                 logger.debug(f"opts={opts}, args={args}")
                 path = package.path
-                if 'RELATIVE' in opts:
+                if opts['RELATIVE']:
                     path = os.path.join(package.path, opts['RELATIVE'])
                 path = str(pathlib.Path(path).resolve())
                 logger.debug(f"Finding files matching {args[1:]} in {path}")
