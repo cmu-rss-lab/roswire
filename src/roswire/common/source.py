@@ -241,91 +241,95 @@ class CMakeExtractor(abc.ABC):
         """
         executables: t.Dict[str, CMakeTarget] = {}
         context = ParserContext().parse(file_contents, skip_callable=False, var=cmake_env)
-        for cmd, args, _arg_tokens, (_fname, _line, _column) in context:
-            cmd = cmd.lower()
-            if cmd == "project":
-                opts, args = cmake_argparse(args, {})
-                cmake_env["PROJECT_NAME"] = args[0]
-            if cmd == "set_target_properties":
-                opts, args = cmake_argparse(args, {"PROPERTIES": "*"})
-                properties = key_val_list_to_dict(opts.get("PROPERTIES", []))
-                if 'OUTPUT_NAME' in properties:
-                    var_pattern = re.compile(r"([^$]*)\${([^}]*)}(.*)")
-                    var_match = var_pattern.match(args[0])
-                    if var_match:
-                        args[0] = var_match.group(1) + cmake_env[var_match.group(2)] + var_match.group(3)
-                    if args[0] in executables:
-                        executables[properties['OUTPUT_NAME']] = executables[args[0]]
-                        del executables[args[0]]
-                    else:
-                        logger.error(f"{args[0]} is not in the list of targets")
-            if cmd == "set":
-                opts, args = cmake_argparse(
-                    args,
-                    {"PARENT_SCOPE": "-", "FORCE": "-", "CACHE": "*"}
-                )
-                cmake_env[args[0]] = ";".join(args[1:])
-            if cmd == "unset":
-                opts, args = cmake_argparse(args, {"CACHE": "-"})
-                cmake_env[args[0]] = ""
-            if cmd == "file":
-                logger.warning(f'Processing file directive: {args}')
-                opts, args = cmake_argparse(args, {'FOLLOW_SYMLINKS': '-',
-                                                   'LIST_DIRECTORIES': '?',
-                                                   'RELATIVE': '?',
-                                                   'GLOB_RECURSE': '-',
-                                                   'GLOB': '-',
-                                                   })
-                self.__process_file_directive(args, cmake_env, opts, package)
-            if cmd == "list":
-                pass
-                # logger.info(f"Processing list directive: {args}")
-                # opts, args = cmake_argparse(args, {'APPEND': '-'})
-                # self.__process_list_directive(args, cmake_env, opts, package)
-            if cmd == "add_executable" or cmd == 'cuda_add_executable':
-                opts, args = cmake_argparse(
-                    args,
-                    {"EXCLUDE_FROM_ALL": "-"}
-                )
-                if not opts['EXCLUDE_FROM_ALL']:
-                    self.__process_add_executable(
-                        args,
+        for cmd, raw_args, _arg_tokens, (_fname, _line, _column) in context:
+            try:
+                cmd = cmd.lower()
+                if cmd == "project":
+                    opts, args = cmake_argparse(raw_args, {})
+                    cmake_env["PROJECT_NAME"] = args[0]
+                if cmd == "set_target_properties":
+                    opts, args = cmake_argparse(raw_args, {"PROPERTIES": "*"})
+                    properties = key_val_list_to_dict(opts.get("PROPERTIES", []))
+                    if 'OUTPUT_NAME' in properties:
+                        var_pattern = re.compile(r"([^$]*)\${([^}]*)}(.*)")
+                        var_match = var_pattern.match(args[0])
+                        if var_match:
+                            args[0] = var_match.group(1) + cmake_env[var_match.group(2)] + var_match.group(3)
+                        if args[0] in executables:
+                            executables[properties['OUTPUT_NAME']] = executables[args[0]]
+                            del executables[args[0]]
+                        else:
+                            logger.error(f"{args[0]} is not in the list of targets")
+                if cmd == "set":
+                    opts, args = cmake_argparse(
+                        raw_args,
+                        {"PARENT_SCOPE": "-", "FORCE": "-", "CACHE": "*"}
+                    )
+                    cmake_env[args[0]] = ";".join(args[1:])
+                if cmd == "unset":
+                    opts, args = cmake_argparse(raw_args, {"CACHE": "-"})
+                    cmake_env[args[0]] = ""
+                if cmd == "file":
+                    logger.warning(f'Processing file directive: {raw_args}')
+                    opts, args = cmake_argparse(raw_args, {'FOLLOW_SYMLINKS': '-',
+                                                       'LIST_DIRECTORIES': '?',
+                                                       'RELATIVE': '?',
+                                                       'GLOB_RECURSE': '-',
+                                                       'GLOB': '-',
+                                                       })
+                    self.__process_file_directive(args, cmake_env, opts, package)
+                if cmd == "list":
+                    pass
+                    # logger.info(f"Processing list directive: {args}")
+                    # opts, args = cmake_argparse(args, {'APPEND': '-'})
+                    # self.__process_list_directive(args, cmake_env, opts, package)
+                if cmd == "add_executable" or cmd == 'cuda_add_executable':
+                    opts, args = cmake_argparse(
+                        raw_args,
+                        {"EXCLUDE_FROM_ALL": "-"}
+                    )
+                    if not opts['EXCLUDE_FROM_ALL']:
+                        self.__process_add_executable(
+                            args,
+                            cmake_env,
+                            executables,
+                            package)
+                if cmd == "catkin_install_python":
+                    self.__process_python_executables(
+                        raw_args,
                         cmake_env,
                         executables,
-                        package)
-            if cmd == "catkin_install_python":
-                self.__process_python_executables(
-                    args,
-                    cmake_env,
-                    executables,
-                    package,
-                )
-            if cmd == 'add_library' or cmd == 'cuda_add_library':
-                opts, args = cmake_argparse(
-                    args,
-                    {"SHARED": "-",
-                     "STATIC": "-",
-                     "MODULE": "-",
-                     'EXCLUDE_FROM_ALL': "-",
-                     }
-                )
-                if not opts['EXCLUDE_FROM_ALL']:
-                    self.__process_add_library(
-                        args,
-                        cmake_env,
-                        executables,
-                        package)
-            if cmd == "add_subdirectory":
-                opts, args = cmake_argparse(
-                    args,
-                    {"EXCLUDE_FROM_ALL": "-"}
-                )
-                if not opts['EXCLUDE_FROM_ALL']:
-                    executables = self.__process_add_subdirectory(
-                        args,
-                        cmake_env,
-                        executables,
-                        package)
+                        package,
+                    )
+                if cmd == 'add_library' or cmd == 'cuda_add_library':
+                    opts, args = cmake_argparse(
+                        raw_args,
+                        {"SHARED": "-",
+                         "STATIC": "-",
+                         "MODULE": "-",
+                         'EXCLUDE_FROM_ALL': "-",
+                         }
+                    )
+                    if not opts['EXCLUDE_FROM_ALL']:
+                        self.__process_add_library(
+                            args,
+                            cmake_env,
+                            executables,
+                            package)
+                if cmd == "add_subdirectory":
+                    opts, args = cmake_argparse(
+                        raw_args,
+                        {"EXCLUDE_FROM_ALL": "-"}
+                    )
+                    if not opts['EXCLUDE_FROM_ALL']:
+                        executables = self.__process_add_subdirectory(
+                            args,
+                            cmake_env,
+                            executables,
+                            package)
+            except Exception:
+                logger.error(f"Error processing {cmd}({raw_args})")
+                raise
         return CMakeInfo(executables)
 
     def __process_list_directive(
