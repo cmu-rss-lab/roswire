@@ -99,6 +99,6 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
             if self._app_instance.files.exists(workspace_contender):
                 paths.add(workspace_contender)
         assert len(paths) == 1
-        dict_['CATKIN_DEVEL_PREFIX'] = paths.pop()
+        dict_['CATKIN_DEVEL_PREFIX'] = os.path.join(paths.pop(), package.name)
         return dict_
 
