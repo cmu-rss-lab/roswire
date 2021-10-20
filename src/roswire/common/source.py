@@ -363,9 +363,9 @@ class CMakeExtractor(abc.ABC):
         if not opts['GLOB_RECURSE'] and not opts['GLOB']:
             logger.warning(f"Cannot process file({args[0]} ...")
         else:
-            path = package.path
+            path = cmake_env['cwd']
             if opts['RELATIVE']:
-                path = os.path.join(package.path, opts['RELATIVE'])
+                path = os.path.join(cmake_env['cwd'], opts['RELATIVE'])
             # remove . and .. from the path by resolving them
             path = os.path.normpath(path)
             logger.debug(f"Finding files matching {args[1:]} in {path}")
