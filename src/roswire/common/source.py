@@ -396,12 +396,17 @@ class CMakeExtractor(abc.ABC):
         if not self._app_instance.files.isfile(os.path.join(package.path, real_filename)):
             path = Path(real_filename)
             parent = str(path.parent)
-            all_files = self._app_instance.files.listdir(os.path.join(package.path, parent))
-            matching_files = [f for f in all_files if f.startswith(path.name)]
-            if len(matching_files) != 1:
-                raise ValueError(f"Only one file should match '{real_filename}'. "
-                                 f"Currently {len(matching_files)} files do: {matching_files}")
-            real_filename = os.path.join(parent, matching_files[0])
+            try:
+                all_files = self._app_instance.files.listdir(os.path.join(package.path, parent))
+                matching_files = [f for f in all_files if f.startswith(path.name)]
+                if len(matching_files) != 1:
+                    raise ValueError(f"Only one file should match '{real_filename}'. "
+                                     f"Currently {len(matching_files)} files do: {matching_files}")
+                real_filename = os.path.join(parent, matching_files[0])
+            except Exception:
+                logger.error('Error finding real file')
+                logger.error(cmake_env)
+                raise
         return real_filename
 
     def __process_add_library(
