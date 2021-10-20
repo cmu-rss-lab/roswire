@@ -394,7 +394,7 @@ class CMakeExtractor(abc.ABC):
         package: Package,
     ) -> t.Dict[str, CMakeTarget]:
         new_env = cmake_env.copy()
-        new_env['CMAKE_SOURCE_DIR'] = os.path.join(cmake_env.get('CMAKE_SOURCE_DIR', '.'), args[0])
+        new_env['PROJECT_SOURCE_DIR'] = os.path.join(cmake_env.get('CMAKE_SOURCE_DIR', '.'), args[0])
         new_env['CMAKE_CURRENT_SOURCE_DIR'] = new_env['CMAKE_SOURCE_DIR']
         new_env['CMAKE_CURRENT_BINARY_DIR'] = new_env['CMAKE_SOURCE_DIR']
         new_env['CMAKE_BINARY_DIR'] = new_env['CMAKE_SOURCE_DIR']
