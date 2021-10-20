@@ -277,6 +277,10 @@ class CMakeExtractor(abc.ABC):
                                                    'GLOB': '-',
                                                    })
                 self.__process_file_directive(args, cmake_env, opts, package)
+            if cmd == "list":
+                logger.info(f"Processing list directive: {args}")
+                opts, args = cmake_argparse(args, {'APPEND': '-'})
+                self.__process_list_directive(args, cmake_env, opts, package)
             if cmd == "add_executable" or cmd == 'cuda_add_executable':
                 opts, args = cmake_argparse(
                     args,
@@ -322,6 +326,28 @@ class CMakeExtractor(abc.ABC):
                         executables,
                         package)
         return CMakeInfo(executables)
+
+    def __process_list_directive(
+        self,
+        args: t.List[str],
+        cmake_env: t.Dict[str, t.Any],
+        opts: t.Dict[str, t.Any],
+        package: Package
+    ) -> None:
+        if not opts['APPEND']:
+            logger.warning(f"Cannot process list({args[0]} ...)")
+        else:
+            to = cmake_env[args[0]]
+            if not to:
+                cmake_env[args[0]] = []
+                to = cmake_env[args[0]]
+            if isinstance(t, str):
+                to += f";{args[1]}"
+                cmake_env[args[0]] = to
+            elif isinstance(t, list):
+                to.append(args[1])
+            else:
+                logger.error(f"Don't know how to append to type: {type(to)}")
 
     def __process_file_directive(
         self,
