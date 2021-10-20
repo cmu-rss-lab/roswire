@@ -196,6 +196,7 @@ class CMakeExtractor(abc.ABC):
     def _info_from_cmakelists(self, cmakelists_path: str, package: Package) -> CMakeInfo:
         contents = self._app_instance.files.read(cmakelists_path)
         env = self._get_global_cmake_variables(package)
+        env['cmakelists'] = cmakelists_path
         info = self._process_cmake_contents(contents, package, env)
         nodelet_libraries = self.get_nodelet_entrypoints(package)
         # Add in classname as a name that can be referenced in loading nodelets
@@ -328,7 +329,8 @@ class CMakeExtractor(abc.ABC):
                             executables,
                             package)
             except Exception:
-                logger.error(f"Error processing {cmd}({raw_args})")
+                logger.error(f"Error processing {cmd}({raw_args}) in "
+                             f"{cmake_env['cmakelists'] if 'cmakelists' in cmake_env else 'unknown'}")
                 raise
         return CMakeInfo(executables)
 
@@ -405,6 +407,7 @@ class CMakeExtractor(abc.ABC):
         new_env['cwd'] = os.path.join(cmake_env.get('cwd', '.'), args[0])
         join = os.path.join(package.path, new_env['cwd'])
         cmakelists_path = os.path.join(join, 'CMakeLists.txt')
+        new_env['cmakelists'] = cmakelists_path
         logger.debug(f"Processing {cmakelists_path}")
         included_package_info = self._process_cmake_contents(
             self._app_instance.files.read(cmakelists_path),
