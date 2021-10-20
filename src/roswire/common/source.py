@@ -185,7 +185,11 @@ class CMakeExtractor(abc.ABC):
             contents = self._app_instance.files.read(nodelets_xml_path)
             logger.debug(f"Contents of that file: {contents}")
             nodelet_info = NodeletsInfo.from_nodelet_xml(contents)
-            return {info.name.split('/')[1] : info for info in nodelet_info.libraries}
+            # If the name is of the form package/nodelet then just return it keyed by nodelete
+            # otherwise key by the full name
+            entrypoints = {info.name.split('/')[1]: info for info in nodelet_info.libraries if '/' in info.name}
+            entrypoints.update({info.name: info for info in nodelet_info.libraries if '/' not in info.name})
+            return entrypoints
         logger.warning(f"The specified '{nodelets_xml_path}' does not exist.")
         return {}
 
