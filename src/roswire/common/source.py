@@ -368,7 +368,9 @@ class CMakeExtractor(abc.ABC):
             matches = []
             for arg in args[1:]:
                 glob_find = f"/usr/bin/python -c \"import glob; print(glob.glob('{arg}'))\""
+                logger.debug(f"Executing find command:  \"{glob_find}\"")
                 finds_py = self._app_instance.shell.check_output(glob_find, cwd=path)
+                logger.debug(f"Found {finds_py}")
                 finds = [f.strip() for f in re.split(r',|\[|\]', finds_py) if f.strip()]
                 # finds = self._app_instance.files.find(path, arg)
                 logger.debug(f"Found the following matches to {arg} in {path}: {finds}")
