@@ -191,7 +191,7 @@ class CMakeExtractor(abc.ABC):
 
     def _info_from_cmakelists(self, cmakelists_path: str, package: Package) -> CMakeInfo:
         contents = self._app_instance.files.read(cmakelists_path)
-        env = self._get_global_cmake_variables()
+        env = self._get_global_cmake_variables(package)
         info = self._process_cmake_contents(contents, package, env)
         nodelet_libraries = self.get_nodelet_entrypoints(package)
         # Add in classname as a name that can be referenced in loading nodelets
