@@ -418,12 +418,14 @@ class CMakeExtractor(abc.ABC):
     ) -> None:
         name = args[0]
         sources: t.Set[str] = set()
+        throw = False
         for source in args[1:]:
             real_src = self._resolve_to_real_file(source, package, cmake_env)
             if package.name == 'message_relay' and source.endswith('topic_relay_factory.cpp'):
                 logger.error(f"resolveed topic_relay_factory.cpp to {real_src}")
+                throw = True
             sources.add(real_src)
-        if package.name == 'message_relay':
+        if throw:
             logger.error(sources)
             raise NotImplementedError()
         logger.debug(f"Adding C++ library {name}")
