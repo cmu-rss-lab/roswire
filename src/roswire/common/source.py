@@ -144,6 +144,10 @@ class CMakeExtractor(abc.ABC):
     def package_paths(self, package: Package) -> t.Set[str]:
         ...
 
+    @abc.abstractmethod
+    def _get_global_cmake_variables(self, package: Package) -> t.Dict[str, str]:
+        ...
+
     def get_nodelet_entrypoints(self, package: Package) -> t.Mapping[str, NodeletLibrary]:
         """
         Returns the potential nodelet entrypoints and classname for the package.
@@ -187,13 +191,7 @@ class CMakeExtractor(abc.ABC):
 
     def _info_from_cmakelists(self, cmakelists_path: str, package: Package) -> CMakeInfo:
         contents = self._app_instance.files.read(cmakelists_path)
-        env = {
-            'CMAKE_SOURCE_DIR' : './',
-            'CMAKE_CURRENT_SOURCE_DIR': './',
-            'CMAKE_CURRENT_BINARY_DIR': './',
-            'CMAKE_BINARY_DIR': './',
-            'PROJECT_VERSION': DUMMY_VALUE,
-        }
+        env = self._get_global_cmake_variables()
         info = self._process_cmake_contents(contents, package, env)
         nodelet_libraries = self.get_nodelet_entrypoints(package)
         # Add in classname as a name that can be referenced in loading nodelets

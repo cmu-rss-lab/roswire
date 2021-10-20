@@ -52,3 +52,6 @@ class ROS2PackageSourceExtractor(CMakeExtractor):
             os.path.join(package.path, f'../../include/{package.name}')
         )
         return {package.path, include}
+
+    def _get_global_cmake_variables(self, package: Package) -> t.Dict[str, str]:
+        return {}
