@@ -95,7 +95,7 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
                           'install',
                           ):
             workspace_contender = \
-                os.path.join(workspace, contender, package.name)
+                os.path.join(workspace, contender)
             if self._app_instance.files.exists(workspace_contender):
                 paths.add(workspace_contender)
         assert len(paths) == 1
