@@ -278,9 +278,10 @@ class CMakeExtractor(abc.ABC):
                                                    })
                 self.__process_file_directive(args, cmake_env, opts, package)
             if cmd == "list":
-                logger.info(f"Processing list directive: {args}")
-                opts, args = cmake_argparse(args, {'APPEND': '-'})
-                self.__process_list_directive(args, cmake_env, opts, package)
+                pass
+                # logger.info(f"Processing list directive: {args}")
+                # opts, args = cmake_argparse(args, {'APPEND': '-'})
+                # self.__process_list_directive(args, cmake_env, opts, package)
             if cmd == "add_executable" or cmd == 'cuda_add_executable':
                 opts, args = cmake_argparse(
                     args,
