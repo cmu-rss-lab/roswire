@@ -300,6 +300,7 @@ class CMakeExtractor(abc.ABC):
                     args,
                     {"SHARED": "-",
                      "STATIC": "-",
+                     "MODULE": "-",
                      'EXCLUDE_FROM_ALL': "-",
                      }
                 )
