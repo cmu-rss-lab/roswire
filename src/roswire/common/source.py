@@ -299,6 +299,7 @@ class CMakeExtractor(abc.ABC):
                 opts, args = cmake_argparse(
                     args,
                     {"SHARED": "-",
+                     "STATIC": "-",
                      'EXCLUDE_FROM_ALL': "-",
                      }
                 )
