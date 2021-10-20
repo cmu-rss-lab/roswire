@@ -341,10 +341,13 @@ class CMakeExtractor(abc.ABC):
             if not to:
                 cmake_env[args[0]] = []
                 to = cmake_env[args[0]]
-            if isinstance(t, str):
-                to += f";{args[1]}"
+            if isinstance(to, str):
+                if to:
+                    to += f";{args[1]}"
+                else:
+                    to = args[1]
                 cmake_env[args[0]] = to
-            elif isinstance(t, list):
+            elif isinstance(to, list):
                 to.append(args[1])
             else:
                 logger.error(f"Don't know how to append to type: {type(to)}")
