@@ -271,7 +271,7 @@ class ParserContext(object):
                 yield (cmd, args, arg_tokens, loc)
         finally:
             self._call_stack.remove(lname)
-            for key, value in dict.iteritems(save_vars):
+            for key, value in dict.items(save_vars):
                 if value is not None:
                     var[key] = value
                 else:
