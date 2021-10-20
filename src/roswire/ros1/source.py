@@ -101,4 +101,3 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
         assert len(paths) == 1
         dict_['CATKIN_DEVEL_PREFIX'] = os.path.join(paths.pop(), package.name)
         return dict_
-
