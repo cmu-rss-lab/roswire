@@ -8,7 +8,7 @@ import attr
 from loguru import logger
 
 from ..common import Package
-from ..common.source import CMakeExtractor, CMakeInfo
+from ..common.source import CMakeExtractor, CMakeInfo, DUMMY_VALUE
 
 if t.TYPE_CHECKING:
     from ..app.instance import AppInstance
@@ -78,3 +78,26 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
                 paths.add(workspace_contender)
 
         return paths
+
+    def _get_global_cmake_variables(self, package: Package) -> t.Dict[str, str]:
+        dict_ = {
+            'CMAKE_SOURCE_DIR': './',
+            'CMAKE_CURRENT_SOURCE_DIR': './',
+            'CMAKE_CURRENT_BINARY_DIR': './',
+            'CMAKE_BINARY_DIR': './',
+            'PROJECT_VERSION': DUMMY_VALUE,
+            'CATKIN_GLOBAL_INCLUDE_DESTINATION': "/include"
+        }
+        workspace = self._find_package_workspace(package)
+        paths = set()
+        for contender in ('devel',
+                          'devel_isolated',
+                          'install',
+                          ):
+            workspace_contender = \
+                os.path.join(workspace, contender)
+            if self._app_instance.files.exists(workspace_contender):
+                paths.add(workspace_contender)
+        assert len(paths) == 1
+        dict_['CATKIN_DEVEL_PREFIX'] = os.path.join(paths.pop(), package.name)
+        return dict_

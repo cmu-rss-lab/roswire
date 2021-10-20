@@ -144,6 +144,10 @@ class CMakeExtractor(abc.ABC):
     def package_paths(self, package: Package) -> t.Set[str]:
         ...
 
+    @abc.abstractmethod
+    def _get_global_cmake_variables(self, package: Package) -> t.Dict[str, str]:
+        ...
+
     def get_nodelet_entrypoints(self, package: Package) -> t.Mapping[str, NodeletLibrary]:
         """
         Returns the potential nodelet entrypoints and classname for the package.
@@ -187,13 +191,7 @@ class CMakeExtractor(abc.ABC):
 
     def _info_from_cmakelists(self, cmakelists_path: str, package: Package) -> CMakeInfo:
         contents = self._app_instance.files.read(cmakelists_path)
-        env = {
-            'CMAKE_SOURCE_DIR' : './',
-            'CMAKE_CURRENT_SOURCE_DIR': './',
-            'CMAKE_CURRENT_BINARY_DIR': './',
-            'CMAKE_BINARY_DIR': './',
-            'PROJECT_VERSION': DUMMY_VALUE,
-        }
+        env = self._get_global_cmake_variables(package)
         info = self._process_cmake_contents(contents, package, env)
         nodelet_libraries = self.get_nodelet_entrypoints(package)
         # Add in classname as a name that can be referenced in loading nodelets
@@ -398,12 +396,17 @@ class CMakeExtractor(abc.ABC):
         if not self._app_instance.files.isfile(os.path.join(package.path, real_filename)):
             path = Path(real_filename)
             parent = str(path.parent)
-            all_files = self._app_instance.files.listdir(os.path.join(package.path, parent))
-            matching_files = [f for f in all_files if f.startswith(path.name)]
-            if len(matching_files) != 1:
-                raise ValueError(f"Only one file should match '{real_filename}'. "
-                                 f"Currently {len(matching_files)} files do: {matching_files}")
-            real_filename = os.path.join(parent, matching_files[0])
+            try:
+                all_files = self._app_instance.files.listdir(os.path.join(package.path, parent))
+                matching_files = [f for f in all_files if f.startswith(path.name)]
+                if len(matching_files) != 1:
+                    raise ValueError(f"Only one file should match '{real_filename}'. "
+                                     f"Currently {len(matching_files)} files do: {matching_files}")
+                real_filename = os.path.join(parent, matching_files[0])
+            except Exception:
+                logger.error('Error finding real file')
+                logger.error(cmake_env)
+                raise
         return real_filename
 
     def __process_add_library(
