@@ -421,9 +421,6 @@ class CMakeExtractor(abc.ABC):
         throw = False
         for source in args[1:]:
             real_src = self._resolve_to_real_file(source, package, cmake_env)
-            if package.name == 'message_relay' and source.endswith('topic_relay_factory.cpp'):
-                logger.error(f"resolveed topic_relay_factory.cpp to {real_src}")
-                throw = True
             sources.add(real_src)
         if throw:
             logger.error(sources)
