@@ -340,7 +340,10 @@ class CMakeExtractor(abc.ABC):
             logger.debug(f"Finding files matching {args[1:]} in {path}")
             matches = []
             for arg in args[1:]:
-                finds = self._app_instance.files.find(path, arg)
+                glob_find = f"/usr/bin/python -c \"import glob; print(glob.glob('{arg}'))\""
+                finds_py = self._app_instance.shell.check_output(glob_find, cwd=path)
+                finds = [f.strip() for f in finds_py.split(',[]') if f.strip()]
+                # finds = self._app_instance.files.find(path, arg)
                 logger.debug(f"Found the following matches to {arg} in {path}: {finds}")
                 matches.extend(finds)
             if opts['RELATIVE']:
