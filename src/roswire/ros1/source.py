@@ -80,12 +80,25 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
         return paths
 
     def _get_global_cmake_variables(self, package: Package) -> t.Dict[str, str]:
-        return {
+        dict_ = {
             'CMAKE_SOURCE_DIR': './',
             'CMAKE_CURRENT_SOURCE_DIR': './',
             'CMAKE_CURRENT_BINARY_DIR': './',
             'CMAKE_BINARY_DIR': './',
             'PROJECT_VERSION': DUMMY_VALUE,
-            'CATKIN_DEVEL_PREFIX': self._find_package_workspace(package),
-            'CATKIN_GLOBAL_INCLUDE_DESTINATION': package.name + "/include"
+            'CATKIN_GLOBAL_INCLUDE_DESTINATION': "/include"
         }
+        workspace = self._find_package_workspace(package)
+        paths = set()
+        for contender in ('devel',
+                          'devel_isolated',
+                          'install',
+                          ):
+            workspace_contender = \
+                os.path.join(workspace, contender, package.name)
+            if self._app_instance.files.exists(workspace_contender):
+                paths.add(workspace_contender)
+        assert len(paths) == 1
+        dict_['CATKIN_DEVEL_PREFIX'] = paths.pop()
+        return dict_
+
