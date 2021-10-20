@@ -298,19 +298,27 @@ class CMakeExtractor(abc.ABC):
             if cmd == 'add_library' or cmd == 'cuda_add_library':
                 opts, args = cmake_argparse(
                     args,
-                    {"SHARED": "-"}
+                    {"SHARED": "-",
+                     'EXCLUDE_FROM_ALL': "",
+                     }
                 )
-                self.__process_add_library(
-                    args,
-                    cmake_env,
-                    executables,
-                    package)
+                if not opts['EXCLUDE_FROM_ALL']:
+                    self.__process_add_library(
+                        args,
+                        cmake_env,
+                        executables,
+                        package)
             if cmd == "add_subdirectory":
-                executables = self.__process_add_subdirectory(
+                opts, args = cmake_argparse(
                     args,
-                    cmake_env,
-                    executables,
-                    package)
+                    {"EXCLUDE_FROM_ALL": "-"}
+                )
+                if not opts['EXCLUDE_FROM_ALL']:
+                    executables = self.__process_add_subdirectory(
+                        args,
+                        cmake_env,
+                        executables,
+                        package)
         return CMakeInfo(executables)
 
     def __process_file_directive(
