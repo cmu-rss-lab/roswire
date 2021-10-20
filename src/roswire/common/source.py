@@ -418,13 +418,9 @@ class CMakeExtractor(abc.ABC):
     ) -> None:
         name = args[0]
         sources: t.Set[str] = set()
-        throw = False
         for source in args[1:]:
             real_src = self._resolve_to_real_file(source, package, cmake_env)
             sources.add(real_src)
-        if throw:
-            logger.error(sources)
-            raise NotImplementedError()
         logger.debug(f"Adding C++ library {name}")
         executables[name] = CMakeLibraryTarget(
             name,
