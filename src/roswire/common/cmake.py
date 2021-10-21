@@ -66,6 +66,7 @@ def _resolve_vars(s, var, env_var):
                 mo = _find_var(s)
             else:
                 # TODO Need to do something with list vars
+                s = val
                 mo = None
 
     if env_var is not None:
