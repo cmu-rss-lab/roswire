@@ -59,12 +59,9 @@ def _resolve_vars(s, var, env_var):
         mo = _find_var(s)
         while mo is not None:
             key = _unescape(mo.group(1))
-            val = var.get(key, "")
-            value = _escape(val)
+            value = _escape(var.get(key, ""))
             s = s[:mo.start(0)] + value + s[mo.end(0):]
             mo = _find_var(s)
-
-
     if env_var is not None:
         mo = _find_env_var(s)
         while mo is not None:
