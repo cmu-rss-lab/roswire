@@ -248,7 +248,8 @@ class CMakeExtractor(abc.ABC):
         """
         executables: t.Dict[str, CMakeTarget] = {}
         context = ParserContext().parse(file_contents, skip_callable=False, var=cmake_env)
-        for cmd, raw_args, _arg_tokens, (_fname, _line, _column) in context:
+        for cmd, raw_args, _arg_tokens, (_fname, line, _column) in context:
+            cmake_env['cmakelists_line'] = line
             try:
                 cmd = cmd.lower()
                 if cmd == "project":
@@ -455,7 +456,10 @@ class CMakeExtractor(abc.ABC):
             name=name,
             language=SourceLanguage.CXX,
             sources=sources,
-            restrict_to_paths=self.package_paths(package))
+            restrict_to_paths=self.package_paths(package),
+            cmakelists_file=cmake_env['cmakelists'],
+            cmakelists_line=cmake_env['cmakelists_line'],
+        )
 
     def _resolve_to_real_file(
         self,
@@ -499,7 +503,10 @@ class CMakeExtractor(abc.ABC):
             name,
             SourceLanguage.CXX,
             sources,
-            self.package_paths(package))
+            self.package_paths(package),
+            cmakelists_file=cmake_env['cmakelists'],
+            cmakelists_line=cmake_env['cmakelists_line'],
+        )
 
     def __process_python_executables(
         self,
@@ -529,4 +536,7 @@ class CMakeExtractor(abc.ABC):
                 executables[name] = CMakeTarget(name,
                                                 SourceLanguage.PYTHON,
                                                 sources,
-                                                set())
+                                                set(),
+                                                cmakelists_file=cmake_env['cmakelists'],
+                                                cmakelists_line=cmake_env['cmakelists_line'],
+                                                )
