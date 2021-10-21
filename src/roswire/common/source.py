@@ -256,7 +256,7 @@ class CMakeExtractor(abc.ABC):
                     var_name = raw_args[1]
                     dir_name = raw_args[0]
                     path = os.path.join(package.path, cmake_env['cwd'], dir_name) \
-                        if 'cwd' in cmake_env else os.join(package.path, dir_name)
+                        if 'cwd' in cmake_env else os.path.join(package.path, dir_name)
                     values = ";".join(self._app_instance.files.listdir(path))
                     cmake_env[var_name] = values
                 if cmd == "set_target_properties":
@@ -390,7 +390,7 @@ class CMakeExtractor(abc.ABC):
             for arg in args[1:]:
                 glob_find = f"/usr/bin/python -c \"import glob; print(glob.glob('{arg}'))\""
                 logger.debug(f"Executing find command:  \"{glob_find}\" in '{path}")
-                finds_py = self._app_instance.shell.check_output(glob_find, cwd=path, stderr=True)
+                finds_py = self._app_instance.shell.check_output(args=glob_find, cwd=path)
                 logger.debug(f"Found {finds_py}")
                 finds = [f.strip() for f in re.split(r',|\[|\]', finds_py) if f.strip()]
                 # finds = self._app_instance.files.find(path, arg)
