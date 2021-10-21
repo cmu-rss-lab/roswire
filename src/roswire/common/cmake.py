@@ -55,19 +55,16 @@ _find_env_var = re.compile(r'(?<!\\)\$ENV\{([A-Za-z_0-9]+)\}').search
 
 
 def _resolve_vars(s, var, env_var):
+    is_argv = s == '${ARGV}'
     if var is not None:
         mo = _find_var(s)
         while mo is not None:
             key = _unescape(mo.group(1))
             val = var.get(key, "")
-            if isinstance(val, str):
-                value = _escape(val)
-                s = s[:mo.start(0)] + value + s[mo.end(0):]
-                mo = _find_var(s)
-            else:
-                # TODO Need to do something with list vars
-                s = val
-                mo = None
+            value = _escape(val)
+            s = s[:mo.start(0)] + value + s[mo.end(0):]
+            mo = _find_var(s)
+
 
     if env_var is not None:
         mo = _find_env_var(s)
@@ -76,6 +73,8 @@ def _resolve_vars(s, var, env_var):
             value = _escape(env_var.get(key, "$ENV{%s}" % key))
             s = s[:mo.start(0)] + value + s[mo.end(0):]
             mo = _find_env_var(s)
+    if is_argv:
+        s = s.split(' ')
     return s
 
 
@@ -272,7 +271,7 @@ class ParserContext(object):
                     save_vars[key] = var[key] if key in var else None
                     var[key] = value if value is not None else ""
             var["ARGN"] = ';'.join(argn)
-            var["ARGV"] = args
+            var["ARGV"] = " ".joing(args)
             cmds = copy(f.commands)
             self._call_stack.add(lname)
             for cmd, args, arg_tokens, loc in self._yield(cmds, var, env_var, skip_callable):
