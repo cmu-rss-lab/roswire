@@ -55,7 +55,6 @@ _find_env_var = re.compile(r'(?<!\\)\$ENV\{([A-Za-z_0-9]+)\}').search
 
 
 def _resolve_vars(s, var, env_var):
-    is_argv = s == '${ARGV}'
     if var is not None:
         mo = _find_var(s)
         while mo is not None:
@@ -73,8 +72,6 @@ def _resolve_vars(s, var, env_var):
             value = _escape(env_var.get(key, "$ENV{%s}" % key))
             s = s[:mo.start(0)] + value + s[mo.end(0):]
             mo = _find_env_var(s)
-    if is_argv:
-        print("here")
     return s
 
 
