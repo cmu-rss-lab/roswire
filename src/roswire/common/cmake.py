@@ -32,6 +32,8 @@ import re
 from itertools import zip_longest
 from copy import copy
 
+from loguru import logger
+
 
 class CMakeSyntaxError(RuntimeError):
     pass
@@ -293,6 +295,10 @@ class ParserContext(object):
             if not re.match(r'^#?[a-z_][a-z_0-9]*$', cmdname_lower):
                 raise CMakeSyntaxError("%s(%d): invalid command identifier '%s'" % (cmd.filename, cmd.line, cmdname))
             args = _resolve_args(cmd.args, var, env_var)
+            if cmd.name == "add_executable" and "${ARGV}" in cmd.args:
+                logger.error(f"{cmd.name}({cmd.args})")
+                logger.error(var)
+                raise NotImplementedError
             if cmd.name.lower() == "macro":
                 if not args:
                     raise CMakeSyntaxError("%s(%d): malformed macro() definition" % (cmd.filename, cmd.line))
