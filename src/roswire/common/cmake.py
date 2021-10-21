@@ -265,7 +265,7 @@ class ParserContext(object):
                     save_vars[key] = var[key] if key in var else None
                     var[key] = value if value is not None else ""
             var["ARGN"] = ';'.join(argn)
-            var["ARGV"] = " ".join(args)
+            var["ARGV"] = args
             cmds = copy(f.commands)
             self._call_stack.add(lname)
             for cmd, args, arg_tokens, loc in self._yield(cmds, var, env_var, skip_callable):
