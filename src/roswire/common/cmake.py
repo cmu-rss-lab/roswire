@@ -140,7 +140,6 @@ _next_arg = re.compile('|'.join('(?P<%s>%s)' % pair for pair in _arg_spec)).matc
 
 
 def _resolve_args(arg_tokens, var, env_var):
-    logger.error(arg_tokens)
     args = []
     for typ, val in arg_tokens:
         if typ == "STRING":
@@ -282,6 +281,8 @@ class ParserContext(object):
                     del var[key]
             if "ARGN" in var:
                 del var["ARGN"]
+            if "ARGV" in var:
+                del var["ARGV"]
 
     def _yield(self, cmds, var, env_var, skip_callable):
         if var is None:
@@ -296,10 +297,6 @@ class ParserContext(object):
             if not re.match(r'^#?[a-z_][a-z_0-9]*$', cmdname_lower):
                 raise CMakeSyntaxError("%s(%d): invalid command identifier '%s'" % (cmd.filename, cmd.line, cmdname))
             args = _resolve_args(cmd.args, var, env_var)
-            if cmd.name == "add_executable" and "${ARGV}" in cmd.args:
-                logger.error(f"{cmd.name}({cmd.args})")
-                logger.error(var)
-                raise NotImplementedError
             if cmd.name.lower() == "macro":
                 if not args:
                     raise CMakeSyntaxError("%s(%d): malformed macro() definition" % (cmd.filename, cmd.line))
