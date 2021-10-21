@@ -257,7 +257,7 @@ class CMakeExtractor(abc.ABC):
                     dir_name = raw_args[0]
                     path = os.path.join(package.path, cmake_env['cwd'], dir_name) \
                         if 'cwd' in cmake_env else os.join(package.path, dir_name)
-                    values = " ".join(self._app_instance.files.listdir(path))
+                    values = ";".join(self._app_instance.files.listdir(path))
                     cmake_env[var_name] = values
                 if cmd == "set_target_properties":
                     opts, args = cmake_argparse(raw_args, {"PROPERTIES": "*"})
