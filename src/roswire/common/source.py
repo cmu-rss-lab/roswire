@@ -284,11 +284,11 @@ class CMakeExtractor(abc.ABC):
                 if cmd == "file":
                     logger.warning(f'Processing file directive: {raw_args}')
                     opts, args = cmake_argparse(raw_args, {'FOLLOW_SYMLINKS': '-',
-                                                       'LIST_DIRECTORIES': '?',
-                                                       'RELATIVE': '?',
-                                                       'GLOB_RECURSE': '-',
-                                                       'GLOB': '-',
-                                                       })
+                                                           'LIST_DIRECTORIES': '?',
+                                                           'RELATIVE': '?',
+                                                           'GLOB_RECURSE': '-',
+                                                           'GLOB': '-',
+                                                           })
                     self.__process_file_directive(args, cmake_env, opts, package)
                 if cmd == "list":
                     pass
