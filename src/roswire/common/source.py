@@ -45,19 +45,25 @@ class CMakeTarget:
     language: SourceLanguage
     sources: t.Set[str]
     restrict_to_paths: t.Set[str]
+    cmakelists_file: str
+    cmakelists_line: int
 
     def to_dict(self) -> t.Dict[str, t.Any]:
         return {"name": self.name,
                 "language": self.language.value,
                 "sources": list(self.sources),
-                "path_restrictions": list(self.restrict_to_paths)}
+                "path_restrictions": list(self.restrict_to_paths),
+                "cmakelists_file": self.cmakelists_file,
+                "cmakelists_line": self.cmakelists_line}
 
     @classmethod
     def from_dict(cls, info: t.Dict[str, t.Any]) -> "CMakeTarget":
         return CMakeTarget(info["name"],
                            SourceLanguage(info["language"]),
                            set(info["sources"]),
-                           set(info["path_restrictions"]))
+                           set(info["path_restrictions"]),
+                           info["cmakelists_file"],
+                           info["cmakelists_line"])
 
 
 @attr.s(auto_attribs=True)
