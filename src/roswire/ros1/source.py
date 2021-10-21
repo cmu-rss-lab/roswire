@@ -17,18 +17,6 @@ if t.TYPE_CHECKING:
 @attr.s(slots=True)
 class ROS1PackageSourceExtractor(CMakeExtractor):
 
-    _existences: t.Dict[str, bool] = attr.ib(factory=dict)
-
-    def _exists(self, path: str) -> bool:
-        cached = self._existences.get(path, None)
-        if cached:
-            assert isinstance(cached, bool)
-            return cached
-        else:
-            exists = self._app_instance.files.exists(path)
-            self._existences[path] = exists
-            return exists
-
     @classmethod
     def for_app_instance(
         cls,
