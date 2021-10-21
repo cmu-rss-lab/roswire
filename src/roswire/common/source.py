@@ -253,8 +253,8 @@ class CMakeExtractor(abc.ABC):
                     # Collects the names of all the source files in the specified directory and
                     # stores the list in the <variable>
                     # https://cmake.org/cmake/help/latest/command/aux_source_directory.html
-                    var_name = args[1]
-                    dir_name = args[2]
+                    var_name = args[0]
+                    dir_name = args[1]
                     path = os.path.join(package.path, cmake_env['cwd'], dir_name) \
                         if 'cwd' in cmake_env else os.join(package.path, dir_name)
                     values = " ".join(self._app_instance.files.listdir(path))
