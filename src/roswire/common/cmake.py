@@ -74,7 +74,7 @@ def _resolve_vars(s, var, env_var):
             s = s[:mo.start(0)] + value + s[mo.end(0):]
             mo = _find_env_var(s)
     if is_argv:
-        s = s.split(' ')
+        print("here")
     return s
 
 
@@ -271,7 +271,7 @@ class ParserContext(object):
                     save_vars[key] = var[key] if key in var else None
                     var[key] = value if value is not None else ""
             var["ARGN"] = ';'.join(argn)
-            var["ARGV"] = " ".join(args)
+            var["ARGV"] = ";".join(args)
             cmds = copy(f.commands)
             self._call_stack.add(lname)
             for cmd, args, arg_tokens, loc in self._yield(cmds, var, env_var, skip_callable):
