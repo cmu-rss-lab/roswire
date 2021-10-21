@@ -418,8 +418,7 @@ class CMakeExtractor(abc.ABC):
         new_env['CMAKE_CURRENT_BINARY_DIR'] = new_env['CMAKE_SOURCE_DIR']
         new_env['CMAKE_BINARY_DIR'] = new_env['CMAKE_SOURCE_DIR']
         new_env['cwd'] = os.path.join(cmake_env.get('cwd', '.'), args[0])
-        join = os.path.join(package.path, new_env['cwd'])
-        cmakelists_path = os.path.join(join, 'CMakeLists.txt')
+        cmakelists_path = os.path.join(package.path, new_env['cwd'], 'CMakeLists.txt')
         new_env['cmakelists'] = cmakelists_path
         logger.debug(f"Processing {cmakelists_path}")
         included_package_info = self._process_cmake_contents(
