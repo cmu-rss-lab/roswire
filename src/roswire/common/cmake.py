@@ -140,6 +140,7 @@ _next_arg = re.compile('|'.join('(?P<%s>%s)' % pair for pair in _arg_spec)).matc
 
 
 def _resolve_args(arg_tokens, var, env_var):
+    logger.error(arg_tokens)
     args = []
     for typ, val in arg_tokens:
         if typ == "STRING":
