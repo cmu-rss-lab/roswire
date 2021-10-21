@@ -248,6 +248,17 @@ class CMakeExtractor(abc.ABC):
                 if cmd == "project":
                     opts, args = cmake_argparse(raw_args, {})
                     cmake_env["PROJECT_NAME"] = args[0]
+                if cmd == "aux_source_directory":
+                    # aux_source_directory(<dir> <var>)
+                    # Collects the names of all the source files in the specified directory and
+                    # stores the list in the <variable>
+                    # https://cmake.org/cmake/help/latest/command/aux_source_directory.html
+                    var_name = args[1]
+                    dir_name = args[2]
+                    path = os.path.join(package.path, cmake_env['cwd'], dir_name) \
+                        if 'cwd' in cmake_env else os.join(package.path, dir_name)
+                    values = " ".join(self._app_instance.files.listdir(path))
+                    cmake_env[var_name] = values
                 if cmd == "set_target_properties":
                     opts, args = cmake_argparse(raw_args, {"PROPERTIES": "*"})
                     properties = key_val_list_to_dict(opts.get("PROPERTIES", []))
