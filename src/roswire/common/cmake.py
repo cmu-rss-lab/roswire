@@ -32,8 +32,6 @@ import re
 from itertools import zip_longest
 from copy import copy
 
-from loguru import logger
-
 
 class CMakeSyntaxError(RuntimeError):
     pass
