@@ -63,12 +63,12 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
             catkin_marker_path = \
                 os.path.join(workspace_path, ".catkin_workspace")
             logger.debug(f"looking for workspace marker: {catkin_marker_path}")
-            if self._exists(catkin_marker_path):
+            if self._app_instance.files.exists(catkin_marker_path):
                 return workspace_path
 
             catkin_tools_dir = os.path.join(workspace_path, ".catkin_tools")
             logger.debug(f"looking for workspace marker: {catkin_tools_dir}")
-            if self._exists(catkin_tools_dir):
+            if self._app_instance.files.exists(catkin_tools_dir):
                 return workspace_path
 
             workspace_path = os.path.dirname(workspace_path)
@@ -86,7 +86,7 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
                           ):
             workspace_contender = \
                 os.path.join(workspace, contender, package.name)
-            if self._exists(workspace_contender):
+            if self._app_instance.files.exists(workspace_contender):
                 paths.add(workspace_contender)
 
         return paths
@@ -110,7 +110,7 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
                           ):
             workspace_contender = \
                 os.path.join(workspace, contender)
-            if self._exists(workspace_contender):
+            if self._app_instance.files.exists(workspace_contender):
                 paths.add(workspace_contender)
         assert len(paths) == 1
         dict_['CATKIN_DEVEL_PREFIX'] = os.path.join(paths.pop(), package.name)
