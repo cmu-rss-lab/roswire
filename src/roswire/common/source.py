@@ -336,7 +336,12 @@ class CMakeExtractor(abc.ABC):
                 raise
         return CMakeInfo(executables)
 
-    def _process_aux_source_directory(self, cmake_env, package, raw_args):
+    def _process_aux_source_directory(
+        self,
+        cmake_env: t.Dict[str, t.Any],
+        package: Package,
+        raw_args: t.List[str],
+    ) -> None:
         # aux_source_directory(<dir> <var>)
         # Collects the names of all the source files in the specified directory and
         # stores the list in the <variable>
