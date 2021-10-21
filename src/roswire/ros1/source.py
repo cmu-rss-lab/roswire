@@ -86,7 +86,8 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
             'CMAKE_CURRENT_BINARY_DIR': './',
             'CMAKE_BINARY_DIR': './',
             'PROJECT_VERSION': DUMMY_VALUE,
-            'CATKIN_GLOBAL_INCLUDE_DESTINATION': "/include"
+            'CATKIN_GLOBAL_INCLUDE_DESTINATION': "/include",
+            'PYTHON_EXT_SUFFIX': '""',
         }
         workspace = self._find_package_workspace(package)
         paths = set()
