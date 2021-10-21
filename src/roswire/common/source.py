@@ -350,7 +350,7 @@ class CMakeExtractor(abc.ABC):
         dir_name = raw_args[0]
         path = os.path.join(package.path, cmake_env['cwd'], dir_name) \
             if 'cwd' in cmake_env else os.path.join(package.path, dir_name)
-        values = ";".join(self._app_instance.files.listdir(path))
+        values = ";".join(os.path.join(dir_name, f) for f in self._app_instance.files.listdir(path))
         cmake_env[var_name] = values
 
     def __process_list_directive(
