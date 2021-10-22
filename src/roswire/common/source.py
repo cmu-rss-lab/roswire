@@ -127,11 +127,14 @@ class CMakeLibraryTarget(CMakeBinaryTarget):
 @attr.s(auto_attribs=True, slots=True, frozen=True)
 class CMakeInfo:
     targets: t.Dict[str, CMakeTarget]
+    generated_targets: t.Collection[str]
 
 
 @attr.s(auto_attribs=True)
 class CMakeExtractor(abc.ABC):
     _app_instance: "AppInstance"
+
+    _files_generated_by_cmake: t.Set[str] = attr.ib(factory=set)
 
     @classmethod
     @abc.abstractmethod
@@ -347,7 +350,7 @@ class CMakeExtractor(abc.ABC):
                 logger.error(f"Error processing {cmd}({raw_args}) in "
                              f"{cmake_env['cmakelists'] if 'cmakelists' in cmake_env else 'unknown'}")
                 raise
-        return CMakeInfo(executables)
+        return CMakeInfo(executables, self._files_generated_by_cmake)
 
     def _process_aux_source_directory(
         self,
@@ -464,7 +467,8 @@ class CMakeExtractor(abc.ABC):
         sources: t.Set[str] = set()
         for source in args[1:]:
             real_src = self._resolve_to_real_file(source, package, cmake_env)
-            sources.add(real_src)
+            if real_src:
+                sources.add(real_src)
         logger.debug(f"Adding C++ sources for {name}")
         executables[name] = CMakeBinaryTarget(
             name=name,
@@ -480,8 +484,10 @@ class CMakeExtractor(abc.ABC):
         filename: str,
         package: Package,
         cmake_env: t.Dict[str, str],
-    ) -> str:
+    ) -> t.Optional[str]:
         real_filename = filename
+        if real_filename in self._files_generated_by_cmake:
+            return None
         if 'cwd' in cmake_env:
             real_filename = os.path.join(cmake_env['cwd'], filename)
         if not self._app_instance.files.isfile(os.path.join(package.path, real_filename)):
@@ -511,7 +517,8 @@ class CMakeExtractor(abc.ABC):
         sources: t.Set[str] = set()
         for source in args[1:]:
             real_src = self._resolve_to_real_file(source, package, cmake_env)
-            sources.add(real_src)
+            if real_src:
+                sources.add(real_src)
         logger.debug(f"Adding C++ library {name}")
         executables[name] = CMakeLibraryTarget(
             name,
@@ -545,7 +552,8 @@ class CMakeExtractor(abc.ABC):
                 name = Path(program[0]).stem
                 sources: t.Set[str] = set()
                 source = self._resolve_to_real_file(program, package, cmake_env)
-                sources.add(source)
+                if source:
+                    sources.add(source)
                 logger.debug(f"Adding Python sources for {name}")
                 executables[name] = CMakeTarget(name,
                                                 SourceLanguage.PYTHON,
@@ -567,39 +575,43 @@ class CMakeExtractor(abc.ABC):
         package: Package,
         rawargs: t.List[str]
     ) -> None:
-        args, opts = cmake_argparse(rawargs, {'NO_SOURCE_PERMISSIONS': '-',
+        _opts, args = cmake_argparse(rawargs, {'NO_SOURCE_PERMISSIONS': '-',
                                               'USE_SOURCE_PERMISSIONS': '-',
                                               'COPY_ONLY': '-',
                                               'ESCAPE_QUOTES': '-',
                                               '@ONLY': '-',
                                               'NEWLINE_STYLE': '?',
                                               'FILE_PERMISSIONS': '?'})
-        find_dollar_var = re.compile(r'\$\{([a-z_0-9]+)\}', re.IGNORECASE).search
-        find_at_var = re.compile(r'@([a-z_0-9]+)@', re.IGNORECASE).search
-        infile = args[0]
-        outfile = args[1]
-        cwd_ = cmake_env['cwd']
-        if opts['COPY_ONLY']:
-            logger.debug(f"Copying {args[0]} to {args[1]}")
-            self._app_instance.shell.check_output(f"cp {args[0]} {args[1]}", cwd=cwd_, text=True)
-        else:
-            logger.debug(f"Replacing vars in {args[0]} to {args[1]}")
-            contents = self._app_instance.files.read(os.path.join(cwd_, infile))
-            # replace @VAR@
-            vars_in_contents = {}
-            mo = find_at_var(contents)
-            while mo is not None:
-                var = mo.group(1)
-                contents.replace(f"@{var}@", cmake_env.get(var, ""))
-                mo = find_at_var(contents)
-            if not opts['@ONLY']:
-                mo = find_dollar_var(contents)
-                while mo is not None:
-                    var = mo.group(1)
-                    contents.replace("${"+var+"}", cmake_env.get(var, ""))
-                    mo = find_dollar_var(contents)
-            # @Chris: I don't think this is going to work because it is updating the container
-            # When you come to do static analysis, the container will have been reconnected
-            # and so these updates will be discarded, right?
-            self._app_instance.files.makedirs(os.path.dirname(outfile), exist_ok=True)
-            self._app_instance.files.write(outfile, contents)
+        # Writing to the container doesn't persist, and so generated sources
+        # aren't able to be included. Put this in a list so that we can remember them
+        # and not try to resolve them to real files
+        self._files_generated_by_cmake.add(args[1])
+        # find_dollar_var = re.compile(r'\$\{([a-z_0-9]+)\}', re.IGNORECASE).search
+        # find_at_var = re.compile(r'@([a-z_0-9]+)@', re.IGNORECASE).search
+        # infile = args[0]
+        # outfile = args[1]
+        # cwd_ = cmake_env['cwd']
+        # if opts['COPY_ONLY']:
+        #     logger.debug(f"Copying {args[0]} to {args[1]}")
+        #     self._app_instance.shell.check_output(f"cp {args[0]} {args[1]}", cwd=cwd_, text=True)
+        # else:
+        #     logger.debug(f"Replacing vars in {args[0]} to {args[1]}")
+        #     contents = self._app_instance.files.read(os.path.join(cwd_, infile))
+        #     # replace @VAR@
+        #     vars_in_contents = {}
+        #     mo = find_at_var(contents)
+        #     while mo is not None:
+        #         var = mo.group(1)
+        #         contents.replace(f"@{var}@", cmake_env.get(var, ""))
+        #         mo = find_at_var(contents)
+        #     if not opts['@ONLY']:
+        #         mo = find_dollar_var(contents)
+        #         while mo is not None:
+        #             var = mo.group(1)
+        #             contents.replace("${"+var+"}", cmake_env.get(var, ""))
+        #             mo = find_dollar_var(contents)
+        #     # @Chris: I don't think this is going to work because it is updating the container
+        #     # When you come to do static analysis, the container will have been reconnected
+        #     # and so these updates will be discarded, right?
+        #     self._app_instance.files.makedirs(os.path.dirname(outfile), exist_ok=True)
+        #     self._app_instance.files.write(outfile, contents)
