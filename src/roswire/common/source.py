@@ -259,6 +259,8 @@ class CMakeExtractor(abc.ABC):
                     cmake_env = cmake_env.copy()
                     cmake_env["PROJECT_NAME"] = args[0]
                     cmake_env['CMAKE_CURRENT_BINARY_DIR'] = os.path.join(cmake_env['CMAKE_CURRENT_BINARY_DIR'], args[0])
+                elif cmd == "configure_file":
+                    self._process_configure_file(cmake_env, package, raw_args)
                 elif cmd == "aux_source_directory":
                     self._process_aux_source_directory(cmake_env, package, raw_args)
                 elif cmd == "set_target_properties":
@@ -558,3 +560,46 @@ class CMakeExtractor(abc.ABC):
         if (s.startswith("'") and s.endswith("'")) or (s.startswith('"') and s.endswith('"')):
             s = s[1:len(s)-1]
         return s
+
+    def _process_configure_file(
+        self,
+        cmake_env: t.Dict[str, t.Any],
+        package: Package,
+        rawargs: t.List[str]
+    ) -> None:
+        args, opts = cmake_argparse(rawargs, {'NO_SOURCE_PERMISSIONS': '-',
+                                              'USE_SOURCE_PERMISSIONS': '-',
+                                              'COPY_ONLY': '-',
+                                              'ESCAPE_QUOTES': '-',
+                                              '@ONLY': '-',
+                                              'NEWLINE_STYLE': '?',
+                                              'FILE_PERMISSIONS': '?'})
+        find_dollar_var = re.compile(r'\$\{([a-z_0-9]+)\}', re.IGNORECASE).search
+        find_at_var = re.compile(r'@([a-z_0-9]+)@', re.IGNORECASE).search
+        infile = args[0]
+        outfile = args[1]
+        cwd_ = cmake_env['cwd']
+        if opts['COPY_ONLY']:
+            logger.debug(f"Copying {args[0]} to {args[1]}")
+            self._app_instance.shell.check_output(f"cp {args[0]} {args[1]}", cwd=cwd_, text=True)
+        else:
+            logger.debug(f"Replacing vars in {args[0]} to {args[1]}")
+            contents = self._app_instance.files.read(os.path.join(cwd_, infile))
+            # replace @VAR@
+            vars_in_contents = {}
+            mo = find_at_var(contents)
+            while mo is not None:
+                var = mo.group(1)
+                contents.replace(f"@{var}@", cmake_env.get(var, ""))
+                mo = find_at_var(contents)
+            if not opts['@ONLY']:
+                mo = find_dollar_var(contents)
+                while mo is not None:
+                    var = mo.group(1)
+                    contents.replace("${"+var+"}", cmake_env.get(var, ""))
+                    mo = find_dollar_var(contents)
+            # @Chris: I don't think this is going to work because it is updating the container
+            # When you come to do static analysis, the container will have been reconnected
+            # and so these updates will be discarded, right?
+            self._app_instance.files.makedirs(os.path.dirname(outfile), exist_ok=True)
+            self._app_instance.files.write(outfile, contents)
