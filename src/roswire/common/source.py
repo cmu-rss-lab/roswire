@@ -261,7 +261,8 @@ class CMakeExtractor(abc.ABC):
                     opts, args = cmake_argparse(raw_args, {})
                     cmake_env = cmake_env.copy()
                     cmake_env["PROJECT_NAME"] = args[0]
-                    cmake_env['CMAKE_CURRENT_BINARY_DIR'] = os.path.join(cmake_env['CMAKE_CURRENT_BINARY_DIR'], args[0])
+                    cmake_env['CMAKE_CURRENT_BINARY_DIR'] = \
+                        os.path.join(cmake_env['CMAKE_CURRENT_BINARY_DIR'], args[0])
                 elif cmd == "configure_file":
                     self._process_configure_file(cmake_env, package, raw_args)
                 elif cmd == "aux_source_directory":
@@ -502,7 +503,8 @@ class CMakeExtractor(abc.ABC):
                 real_filename = os.path.join(parent, matching_files[0])
             except Exception:
                 logger.error(
-                    f'Error finding real file matching {real_filename} in {os.path.join(package.path, parent)}')
+                    f'Error finding real file matching {real_filename} '
+                    f'in {os.path.join(package.path, parent)}')
                 logger.error(cmake_env)
                 raise
         return real_filename
