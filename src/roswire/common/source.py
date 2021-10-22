@@ -306,7 +306,6 @@ class CMakeExtractor(abc.ABC):
                             cmake_env,
                             executables,
                             package)
-
                 elif cmd == "catkin_install_python":
                     self.__process_python_executables(
                         raw_args,
@@ -410,7 +409,7 @@ class CMakeExtractor(abc.ABC):
                 logger.debug(f"Executing find command:  \"{glob_find}\" in '{path}")
                 finds_py = self._app_instance.shell.check_output(args=glob_find, cwd=path, text=True)
                 logger.debug(f"Found {finds_py}")
-                finds = [f.strip() for f in re.split(r',|\[|\]', finds_py) if f.strip()]
+                finds = [self._trim_and_unquote(f) for f in re.split(r',|\[|\]', finds_py) if f.strip()]
                 logger.debug(f"Found the following matches to {arg} in {path}: {finds}")
                 matches.extend(finds)
             if opts['RELATIVE']:
@@ -550,3 +549,9 @@ class CMakeExtractor(abc.ABC):
                                                 cmakelists_file=cmake_env['cmakelists'],
                                                 cmakelists_line=cmake_env['cmakelists_line'],
                                                 )
+
+    def _trim_and_unquote(self, s: str) -> str:
+        s = s.strip()
+        if (s.startsWith("'") and s.endswith("'")) or (s.startswith('"') and s.endswith('"')):
+            s = s[1:len(s)-1]
+        return s
