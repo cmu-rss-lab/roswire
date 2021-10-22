@@ -586,6 +586,7 @@ class CMakeExtractor(abc.ABC):
         # aren't able to be included. Put this in a list so that we can remember them
         # and not try to resolve them to real files
         self._files_generated_by_cmake.add(args[1])
+        # configure_file_implementation - not used
         # find_dollar_var = re.compile(r'\$\{([a-z_0-9]+)\}', re.IGNORECASE).search
         # find_at_var = re.compile(r'@([a-z_0-9]+)@', re.IGNORECASE).search
         # infile = args[0]
