@@ -490,7 +490,7 @@ class CMakeExtractor(abc.ABC):
                                      f"Currently {len(matching_files)} files do: {matching_files}")
                 real_filename = os.path.join(parent, matching_files[0])
             except Exception:
-                logger.error('Error finding real file')
+                logger.error(f'Error finding real file matching {real_filename} in {os.path.join(package.path, parent)}')
                 logger.error(cmake_env)
                 raise
         return real_filename
