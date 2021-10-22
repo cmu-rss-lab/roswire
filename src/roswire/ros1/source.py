@@ -84,8 +84,6 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
             'CMAKE_SOURCE_DIR': './',
             'PROJECT_SOURCE_DIR': './',
             'CMAKE_CURRENT_SOURCE_DIR': './',
-            'CMAKE_CURRENT_BINARY_DIR': './',
-            'CMAKE_BINARY_DIR': './',
             'PROJECT_VERSION': DUMMY_VALUE,
             'CATKIN_GLOBAL_INCLUDE_DESTINATION': "/include",
             'PYTHON_EXT_SUFFIX': '""',
@@ -102,4 +100,6 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
                 paths.add(workspace_contender)
         assert len(paths) == 1
         dict_['CATKIN_DEVEL_PREFIX'] = os.path.join(paths.pop(), package.name)
+        dict_['CMAKE_BINARY_DIR'] = os.path.join(workspace, 'build')
+        dict_['CMAKE_CURRENT_BINARY_DIR'] = os.path.join(dict_['CMAKE_BINARY_DIR'], package.name)
         return dict_

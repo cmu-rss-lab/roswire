@@ -256,7 +256,9 @@ class CMakeExtractor(abc.ABC):
                 cmd = cmd.lower()
                 if cmd == "project":
                     opts, args = cmake_argparse(raw_args, {})
+                    cmake_env = cmake_env.copy()
                     cmake_env["PROJECT_NAME"] = args[0]
+                    cmake_env['CMAKE_CURRENT_BINARY_DIR'] = os.path.join(cmake_env['CMAKE_CURRENT_BINARY_DIR'], args[0])
                 elif cmd == "aux_source_directory":
                     self._process_aux_source_directory(cmake_env, package, raw_args)
                 elif cmd == "set_target_properties":
@@ -428,11 +430,9 @@ class CMakeExtractor(abc.ABC):
         package: Package,
     ) -> t.Dict[str, CMakeTarget]:
         new_env = cmake_env.copy()
-        new_env['PROJECT_SOURCE_DIR'] = os.path.join(cmake_env.get('CMAKE_SOURCE_DIR', '.'), args[0])
-        new_env['CMAKE_CURRENT_SOURCE_DIR'] = new_env['CMAKE_SOURCE_DIR']
-        new_env['CMAKE_CURRENT_BINARY_DIR'] = new_env['CMAKE_SOURCE_DIR']
-        new_env['CMAKE_BINARY_DIR'] = new_env['CMAKE_SOURCE_DIR']
         new_env['cwd'] = os.path.join(cmake_env.get('cwd', '.'), args[0])
+        new_env['PROJECT_SOURCE_DIR'] = os.path.join(cmake_env.get('CMAKE_SOURCE_DIR', '.'), args[0])
+        new_env['CMAKE_CURRENT_SOURCE_DIR'] = new_env['cwd']
         cmakelists_path = os.path.join(package.path, new_env['cwd'], 'CMakeLists.txt')
         new_env['cmakelists'] = cmakelists_path
         logger.debug(f"Processing {cmakelists_path}")
