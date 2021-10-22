@@ -501,7 +501,8 @@ class CMakeExtractor(abc.ABC):
                                      f"Currently {len(matching_files)} files do: {matching_files}")
                 real_filename = os.path.join(parent, matching_files[0])
             except Exception:
-                logger.error(f'Error finding real file matching {real_filename} in {os.path.join(package.path, parent)}')
+                logger.error(
+                    f'Error finding real file matching {real_filename} in {os.path.join(package.path, parent)}')
                 logger.error(cmake_env)
                 raise
         return real_filename
@@ -566,7 +567,7 @@ class CMakeExtractor(abc.ABC):
     def _trim_and_unquote(self, s: str) -> str:
         s = s.strip()
         if (s.startswith("'") and s.endswith("'")) or (s.startswith('"') and s.endswith('"')):
-            s = s[1:len(s)-1]
+            s = s[1:len(s) - 1]
         return s
 
     def _process_configure_file(
@@ -576,12 +577,12 @@ class CMakeExtractor(abc.ABC):
         rawargs: t.List[str]
     ) -> None:
         _opts, args = cmake_argparse(rawargs, {'NO_SOURCE_PERMISSIONS': '-',
-                                              'USE_SOURCE_PERMISSIONS': '-',
-                                              'COPY_ONLY': '-',
-                                              'ESCAPE_QUOTES': '-',
-                                              '@ONLY': '-',
-                                              'NEWLINE_STYLE': '?',
-                                              'FILE_PERMISSIONS': '?'})
+                                               'USE_SOURCE_PERMISSIONS': '-',
+                                               'COPY_ONLY': '-',
+                                               'ESCAPE_QUOTES': '-',
+                                               '@ONLY': '-',
+                                               'NEWLINE_STYLE': '?',
+                                               'FILE_PERMISSIONS': '?'})
         # Writing to the container doesn't persist, and so generated sources
         # aren't able to be included. Put this in a list so that we can remember them
         # and not try to resolve them to real files
