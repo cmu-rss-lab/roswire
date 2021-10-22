@@ -50,15 +50,15 @@ class NodeletsInfo:
                 'class',
                 library_dom
             )
-            assert len(class_doms) == 1
-            class_dom = class_doms[0]
-            assert isinstance(class_dom, dom.Element)
-            name = class_dom.getAttribute('name')
-            type_ = class_dom.getAttribute('type')
-            libraries.add(NodeletLibrary(path=path,
-                                         name=name,
-                                         type_=type_,
-                                         ))
+            assert len(class_doms) > 1
+            for class_dom in class_doms:
+                assert isinstance(class_dom, dom.Element)
+                name = class_dom.getAttribute('name')
+                type_ = class_dom.getAttribute('type')
+                libraries.add(NodeletLibrary(path=path,
+                                             name=name,
+                                             type_=type_,
+                                             ))
         return NodeletsInfo(libraries=libraries)
 
 
