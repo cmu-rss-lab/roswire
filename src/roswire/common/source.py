@@ -552,6 +552,6 @@ class CMakeExtractor(abc.ABC):
 
     def _trim_and_unquote(self, s: str) -> str:
         s = s.strip()
-        if (s.startsWith("'") and s.endswith("'")) or (s.startswith('"') and s.endswith('"')):
+        if (s.startswith("'") and s.endswith("'")) or (s.startswith('"') and s.endswith('"')):
             s = s[1:len(s)-1]
         return s
