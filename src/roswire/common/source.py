@@ -418,7 +418,8 @@ class CMakeExtractor(abc.ABC):
                 # convert path to be relative
                 relative = os.path.join(package.path, opts['RELATIVE'])
                 relative = os.path.normpath(relative)
-                logger.debug(f"Relative: os.path.relpath({os.path.join(path, matches[0])}, {relative}")
+                if len(matches) > 0:
+                    logger.debug(f"Relative: os.path.relpath({os.path.join(path, matches[0])}, {relative}")
                 matches = [os.path.relpath(os.path.join(path, m), relative) for m in matches]
 
             cmake_env[args[0]] = ';'.join(matches)
