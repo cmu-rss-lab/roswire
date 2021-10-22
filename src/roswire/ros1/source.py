@@ -81,9 +81,9 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
 
     def _get_global_cmake_variables(self, package: Package) -> t.Dict[str, str]:
         dict_ = {
-            'CMAKE_SOURCE_DIR': './',
-            'PROJECT_SOURCE_DIR': './',
-            'CMAKE_CURRENT_SOURCE_DIR': './',
+            'CMAKE_SOURCE_DIR': '',
+            'PROJECT_SOURCE_DIR': '',
+            'CMAKE_CURRENT_SOURCE_DIR': '',
             'PROJECT_VERSION': DUMMY_VALUE,
             'CATKIN_GLOBAL_INCLUDE_DESTINATION': "/include",
             'PYTHON_EXT_SUFFIX': '""',
