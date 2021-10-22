@@ -416,7 +416,7 @@ class CMakeExtractor(abc.ABC):
                 matches.extend(finds)
             if opts['RELATIVE']:
                 # convert path to be relative
-                relative = os.path.join(path, opts['RELATIVE'])
+                relative = os.path.join(package.path, opts['RELATIVE'])
                 relative = os.path.normpath(relative)
                 logger.debug(f"Relative: os.path.relpath({os.path.join(path, matches[0])}, {relative}")
                 matches = [os.path.relpath(os.path.join(path, m), relative) for m in matches]
