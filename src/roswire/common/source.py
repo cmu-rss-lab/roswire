@@ -586,33 +586,3 @@ class CMakeExtractor(abc.ABC):
         # aren't able to be included. Put this in a list so that we can remember them
         # and not try to resolve them to real files
         self._files_generated_by_cmake.add(args[1])
-        # configure_file_implementation - not used
-        # find_dollar_var = re.compile(r'\$\{([a-z_0-9]+)\}', re.IGNORECASE).search
-        # find_at_var = re.compile(r'@([a-z_0-9]+)@', re.IGNORECASE).search
-        # infile = args[0]
-        # outfile = args[1]
-        # cwd_ = cmake_env['cwd']
-        # if opts['COPY_ONLY']:
-        #     logger.debug(f"Copying {args[0]} to {args[1]}")
-        #     self._app_instance.shell.check_output(f"cp {args[0]} {args[1]}", cwd=cwd_, text=True)
-        # else:
-        #     logger.debug(f"Replacing vars in {args[0]} to {args[1]}")
-        #     contents = self._app_instance.files.read(os.path.join(cwd_, infile))
-        #     # replace @VAR@
-        #     vars_in_contents = {}
-        #     mo = find_at_var(contents)
-        #     while mo is not None:
-        #         var = mo.group(1)
-        #         contents.replace(f"@{var}@", cmake_env.get(var, ""))
-        #         mo = find_at_var(contents)
-        #     if not opts['@ONLY']:
-        #         mo = find_dollar_var(contents)
-        #         while mo is not None:
-        #             var = mo.group(1)
-        #             contents.replace("${"+var+"}", cmake_env.get(var, ""))
-        #             mo = find_dollar_var(contents)
-        #     # @Chris: I don't think this is going to work because it is updating the container
-        #     # When you come to do static analysis, the container will have been reconnected
-        #     # and so these updates will be discarded, right?
-        #     self._app_instance.files.makedirs(os.path.dirname(outfile), exist_ok=True)
-        #     self._app_instance.files.write(outfile, contents)
