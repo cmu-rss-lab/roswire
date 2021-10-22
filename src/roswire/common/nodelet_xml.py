@@ -50,7 +50,6 @@ class NodeletsInfo:
                 'class',
                 library_dom
             )
-            assert len(class_doms) > 1
             for class_dom in class_doms:
                 assert isinstance(class_dom, dom.Element)
                 name = class_dom.getAttribute('name')
