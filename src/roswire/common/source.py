@@ -116,6 +116,8 @@ class CMakeLibraryTarget(CMakeBinaryTarget):
                                     SourceLanguage(info["language"]),
                                     set(info["sources"]),
                                     set(info["path_restrictions"]),
+                                    info["cmakelists_file"],
+                                    info["cmakelists_line"],
                                     )
         if 'entrypoint' in info:
             target.entrypoint = info['entrypoint']
@@ -465,7 +467,7 @@ class CMakeExtractor(abc.ABC):
             sources=sources,
             restrict_to_paths=self.package_paths(package),
             cmakelists_file=cmake_env['cmakelists'],
-            cmakelists_line=cmake_env['cmakelists_line'],
+            cmakelists_line=int(cmake_env['cmakelists_line']),
         )
 
     def _resolve_to_real_file(
@@ -512,7 +514,7 @@ class CMakeExtractor(abc.ABC):
             sources,
             self.package_paths(package),
             cmakelists_file=cmake_env['cmakelists'],
-            cmakelists_line=cmake_env['cmakelists_line'],
+            cmakelists_line=int(cmake_env['cmakelists_line']),
         )
 
     def __process_python_executables(
@@ -545,5 +547,5 @@ class CMakeExtractor(abc.ABC):
                                                 sources,
                                                 set(),
                                                 cmakelists_file=cmake_env['cmakelists'],
-                                                cmakelists_line=cmake_env['cmakelists_line'],
+                                                cmakelists_line=int(cmake_env['cmakelists_line']),
                                                 )
