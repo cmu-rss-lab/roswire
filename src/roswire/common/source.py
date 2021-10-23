@@ -45,19 +45,25 @@ class CMakeTarget:
     language: SourceLanguage
     sources: t.Set[str]
     restrict_to_paths: t.Set[str]
+    cmakelists_file: str
+    cmakelists_line: int
 
     def to_dict(self) -> t.Dict[str, t.Any]:
         return {"name": self.name,
                 "language": self.language.value,
                 "sources": list(self.sources),
-                "path_restrictions": list(self.restrict_to_paths)}
+                "path_restrictions": list(self.restrict_to_paths),
+                "cmakelists_file": self.cmakelists_file,
+                "cmakelists_line": self.cmakelists_line}
 
     @classmethod
     def from_dict(cls, info: t.Dict[str, t.Any]) -> "CMakeTarget":
         return CMakeTarget(info["name"],
                            SourceLanguage(info["language"]),
                            set(info["sources"]),
-                           set(info["path_restrictions"]))
+                           set(info["path_restrictions"]),
+                           info["cmakelists_file"],
+                           info["cmakelists_line"])
 
 
 @attr.s(auto_attribs=True)
@@ -110,6 +116,8 @@ class CMakeLibraryTarget(CMakeBinaryTarget):
                                     SourceLanguage(info["language"]),
                                     set(info["sources"]),
                                     set(info["path_restrictions"]),
+                                    info["cmakelists_file"],
+                                    info["cmakelists_line"],
                                     )
         if 'entrypoint' in info:
             target.entrypoint = info['entrypoint']
@@ -242,7 +250,8 @@ class CMakeExtractor(abc.ABC):
         """
         executables: t.Dict[str, CMakeTarget] = {}
         context = ParserContext().parse(file_contents, skip_callable=False, var=cmake_env)
-        for cmd, raw_args, _arg_tokens, (_fname, _line, _column) in context:
+        for cmd, raw_args, _arg_tokens, (_fname, line, _column) in context:
+            cmake_env['cmakelists_line'] = line
             try:
                 cmd = cmd.lower()
                 if cmd == "project":
@@ -297,6 +306,7 @@ class CMakeExtractor(abc.ABC):
                             cmake_env,
                             executables,
                             package)
+
                 elif cmd == "catkin_install_python":
                     self.__process_python_executables(
                         raw_args,
@@ -441,7 +451,7 @@ class CMakeExtractor(abc.ABC):
     def __process_add_executable(
         self,
         args: t.List[str],
-        cmake_env: t.Dict[str, str],
+        cmake_env: t.Dict[str, t.Any],
         executables: t.Dict[str, CMakeTarget],
         package: Package,
     ) -> None:
@@ -455,7 +465,10 @@ class CMakeExtractor(abc.ABC):
             name=name,
             language=SourceLanguage.CXX,
             sources=sources,
-            restrict_to_paths=self.package_paths(package))
+            restrict_to_paths=self.package_paths(package),
+            cmakelists_file=cmake_env['cmakelists'],
+            cmakelists_line=cmake_env['cmakelists_line'],
+        )
 
     def _resolve_to_real_file(
         self,
@@ -485,7 +498,7 @@ class CMakeExtractor(abc.ABC):
     def __process_add_library(
         self,
         args: t.List[str],
-        cmake_env: t.Dict[str, str],
+        cmake_env: t.Dict[str, t.Any],
         executables: t.Dict[str, CMakeTarget],
         package: Package,
     ) -> None:
@@ -499,12 +512,15 @@ class CMakeExtractor(abc.ABC):
             name,
             SourceLanguage.CXX,
             sources,
-            self.package_paths(package))
+            self.package_paths(package),
+            cmakelists_file=cmake_env['cmakelists'],
+            cmakelists_line=cmake_env['cmakelists_line'],
+        )
 
     def __process_python_executables(
         self,
         args: t.List[str],
-        cmake_env: t.Dict[str, str],
+        cmake_env: t.Dict[str, t.Any],
         executables: t.Dict[str, CMakeTarget],
         package: Package,
     ) -> None:
@@ -529,4 +545,7 @@ class CMakeExtractor(abc.ABC):
                 executables[name] = CMakeTarget(name,
                                                 SourceLanguage.PYTHON,
                                                 sources,
-                                                set())
+                                                set(),
+                                                cmakelists_file=cmake_env['cmakelists'],
+                                                cmakelists_line=cmake_env['cmakelists_line'],
+                                                )
