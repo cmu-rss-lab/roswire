@@ -451,7 +451,7 @@ class CMakeExtractor(abc.ABC):
     def __process_add_executable(
         self,
         args: t.List[str],
-        cmake_env: t.Dict[str, str],
+        cmake_env: t.Dict[str, t.Any],
         executables: t.Dict[str, CMakeTarget],
         package: Package,
     ) -> None:
@@ -467,7 +467,7 @@ class CMakeExtractor(abc.ABC):
             sources=sources,
             restrict_to_paths=self.package_paths(package),
             cmakelists_file=cmake_env['cmakelists'],
-            cmakelists_line=int(cmake_env['cmakelists_line']),
+            cmakelists_line=cmake_env['cmakelists_line'],
         )
 
     def _resolve_to_real_file(
@@ -520,7 +520,7 @@ class CMakeExtractor(abc.ABC):
     def __process_python_executables(
         self,
         args: t.List[str],
-        cmake_env: t.Dict[str, str],
+        cmake_env: t.Dict[str, t.Any],
         executables: t.Dict[str, CMakeTarget],
         package: Package,
     ) -> None:
@@ -547,5 +547,5 @@ class CMakeExtractor(abc.ABC):
                                                 sources,
                                                 set(),
                                                 cmakelists_file=cmake_env['cmakelists'],
-                                                cmakelists_line=int(cmake_env['cmakelists_line']),
+                                                cmakelists_line=cmake_env['cmakelists_line'],
                                                 )
