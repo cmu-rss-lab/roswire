@@ -255,18 +255,9 @@ class CMakeExtractor(abc.ABC):
                 if cmd == "project":
                     opts, args = cmake_argparse(raw_args, {})
                     cmake_env["PROJECT_NAME"] = args[0]
-                if cmd == "aux_source_directory":
-                    # aux_source_directory(<dir> <var>)
-                    # Collects the names of all the source files in the specified directory and
-                    # stores the list in the <variable>
-                    # https://cmake.org/cmake/help/latest/command/aux_source_directory.html
-                    var_name = raw_args[1]
-                    dir_name = raw_args[0]
-                    path = os.path.join(package.path, cmake_env['cwd'], dir_name) \
-                        if 'cwd' in cmake_env else os.join(package.path, dir_name)
-                    values = ";".join(self._app_instance.files.listdir(path))
-                    cmake_env[var_name] = values
-                if cmd == "set_target_properties":
+                elif cmd == "aux_source_directory":
+                    self._process_aux_source_directory(cmake_env, package, raw_args)
+                elif cmd == "set_target_properties":
                     opts, args = cmake_argparse(raw_args, {"PROPERTIES": "*"})
                     properties = key_val_list_to_dict(opts.get("PROPERTIES", []))
                     if 'OUTPUT_NAME' in properties:
@@ -279,30 +270,30 @@ class CMakeExtractor(abc.ABC):
                             del executables[args[0]]
                         else:
                             logger.error(f"{args[0]} is not in the list of targets")
-                if cmd == "set":
+                elif cmd == "set":
                     opts, args = cmake_argparse(
                         raw_args,
                         {"PARENT_SCOPE": "-", "FORCE": "-", "CACHE": "*"}
                     )
                     cmake_env[args[0]] = ";".join(args[1:])
-                if cmd == "unset":
+                elif cmd == "unset":
                     opts, args = cmake_argparse(raw_args, {"CACHE": "-"})
                     cmake_env[args[0]] = ""
-                if cmd == "file":
+                elif cmd == "file":
                     logger.warning(f'Processing file directive: {raw_args}')
                     opts, args = cmake_argparse(raw_args, {'FOLLOW_SYMLINKS': '-',
-                                                       'LIST_DIRECTORIES': '?',
-                                                       'RELATIVE': '?',
-                                                       'GLOB_RECURSE': '-',
-                                                       'GLOB': '-',
-                                                       })
+                                                           'LIST_DIRECTORIES': '?',
+                                                           'RELATIVE': '?',
+                                                           'GLOB_RECURSE': '-',
+                                                           'GLOB': '-',
+                                                           })
                     self.__process_file_directive(args, cmake_env, opts, package)
-                if cmd == "list":
+                elif cmd == "list":
                     pass
                     # logger.info(f"Processing list directive: {args}")
                     # opts, args = cmake_argparse(args, {'APPEND': '-'})
                     # self.__process_list_directive(args, cmake_env, opts, package)
-                if cmd == "add_executable" or cmd == 'cuda_add_executable':
+                elif cmd == "add_executable" or cmd == 'cuda_add_executable':
                     opts, args = cmake_argparse(
                         raw_args,
                         {"EXCLUDE_FROM_ALL": "-"}
@@ -313,14 +304,15 @@ class CMakeExtractor(abc.ABC):
                             cmake_env,
                             executables,
                             package)
-                if cmd == "catkin_install_python":
+
+                elif cmd == "catkin_install_python":
                     self.__process_python_executables(
                         raw_args,
                         cmake_env,
                         executables,
                         package,
                     )
-                if cmd == 'add_library' or cmd == 'cuda_add_library':
+                elif cmd == 'add_library' or cmd == 'cuda_add_library':
                     opts, args = cmake_argparse(
                         raw_args,
                         {"SHARED": "-",
@@ -335,7 +327,7 @@ class CMakeExtractor(abc.ABC):
                             cmake_env,
                             executables,
                             package)
-                if cmd == "add_subdirectory":
+                elif cmd == "add_subdirectory":
                     opts, args = cmake_argparse(
                         raw_args,
                         {"EXCLUDE_FROM_ALL": "-"}
@@ -352,6 +344,23 @@ class CMakeExtractor(abc.ABC):
                 raise
         return CMakeInfo(executables)
 
+    def _process_aux_source_directory(
+        self,
+        cmake_env: t.Dict[str, t.Any],
+        package: Package,
+        raw_args: t.List[str],
+    ) -> None:
+        # aux_source_directory(<dir> <var>)
+        # Collects the names of all the source files in the specified directory and
+        # stores the list in the <variable>
+        # https://cmake.org/cmake/help/latest/command/aux_source_directory.html
+        var_name = raw_args[1]
+        dir_name = raw_args[0]
+        path = os.path.join(package.path, cmake_env['cwd'], dir_name) \
+            if 'cwd' in cmake_env else os.path.join(package.path, dir_name)
+        values = ";".join(os.path.join(dir_name, f) for f in self._app_instance.files.listdir(path))
+        cmake_env[var_name] = values
+
     def __process_list_directive(
         self,
         args: t.List[str],
@@ -361,21 +370,21 @@ class CMakeExtractor(abc.ABC):
     ) -> None:
         if not opts['APPEND']:
             logger.warning(f"Cannot process list({args[0]} ...)")
-        else:
-            to = cmake_env[args[0]]
-            if not to:
-                cmake_env[args[0]] = []
-                to = cmake_env[args[0]]
-            if isinstance(to, str):
-                if to:
-                    to += f";{args[1]}"
-                else:
-                    to = args[1]
-                cmake_env[args[0]] = to
-            elif isinstance(to, list):
-                to.append(args[1])
+            return
+        append_to = cmake_env[args[0]]
+        if not append_to:
+            cmake_env[args[0]] = []
+            append_to = cmake_env[args[0]]
+        if isinstance(append_to, str):
+            if append_to:
+                append_to += f";{args[1]}"
             else:
-                logger.error(f"Don't know how to append to type: {type(to)}")
+                append_to = args[1]
+            cmake_env[args[0]] = append_to
+        elif isinstance(append_to, list):
+            append_to.append(args[1])
+        else:
+            logger.error(f"Don't know how append_to append append_to type: {type(append_to)}")
 
     def __process_file_directive(
         self,
@@ -397,10 +406,9 @@ class CMakeExtractor(abc.ABC):
             for arg in args[1:]:
                 glob_find = f"/usr/bin/python -c \"import glob; print(glob.glob('{arg}'))\""
                 logger.debug(f"Executing find command:  \"{glob_find}\" in '{path}")
-                finds_py = self._app_instance.shell.check_output(glob_find, cwd=path, stderr=True)
+                finds_py = self._app_instance.shell.check_output(args=glob_find, cwd=path, text=True)
                 logger.debug(f"Found {finds_py}")
                 finds = [f.strip() for f in re.split(r',|\[|\]', finds_py) if f.strip()]
-                # finds = self._app_instance.files.find(path, arg)
                 logger.debug(f"Found the following matches to {arg} in {path}: {finds}")
                 matches.extend(finds)
             if opts['RELATIVE']:
@@ -423,8 +431,7 @@ class CMakeExtractor(abc.ABC):
         new_env['CMAKE_CURRENT_BINARY_DIR'] = new_env['CMAKE_SOURCE_DIR']
         new_env['CMAKE_BINARY_DIR'] = new_env['CMAKE_SOURCE_DIR']
         new_env['cwd'] = os.path.join(cmake_env.get('cwd', '.'), args[0])
-        join = os.path.join(package.path, new_env['cwd'])
-        cmakelists_path = os.path.join(join, 'CMakeLists.txt')
+        cmakelists_path = os.path.join(package.path, new_env['cwd'], 'CMakeLists.txt')
         new_env['cmakelists'] = cmakelists_path
         logger.debug(f"Processing {cmakelists_path}")
         included_package_info = self._process_cmake_contents(
