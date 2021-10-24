@@ -568,7 +568,7 @@ class CMakeExtractor(abc.ABC):
         s = s.strip()
         if (s.startswith("'") and s.endswith("'")) or (s.startswith('"') and s.endswith('"')):
             logger.debug(f"Trimming {s}")
-            s = s[1:len(s) - 1]
+            s = s[1:len(s)-1]
         return s
 
     def _process_configure_file(
