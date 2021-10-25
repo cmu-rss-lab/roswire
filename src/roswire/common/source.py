@@ -126,7 +126,7 @@ class CMakeLibraryTarget(CMakeBinaryTarget):
 
 @attr.s(auto_attribs=True, slots=True, frozen=True)
 class CMakeInfo:
-    """ Summarizes the source generating parts of a CMakeFile.
+    """Summarizes the source generating parts of a CMakeFile.
 
     Attributes
     ----------
