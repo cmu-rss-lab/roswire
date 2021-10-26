@@ -266,11 +266,10 @@ class CMakeExtractor(abc.ABC):
                 cmd = cmd.lower()
                 if cmd == "project":
                     opts, args = cmake_argparse(raw_args, {})
-                    # cmake_env = cmake_env.copy()
                     cmake_env["PROJECT_NAME"] = args[0]
                     cmake_env['CMAKE_CURRENT_BINARY_DIR'] = \
                         os.path.join(cmake_env['CMAKE_CURRENT_BINARY_DIR'], args[0])
-                    logger.error(f"Setting PROJECT_NAME={args[0]}")
+                    logger.info(f"Setting PROJECT_NAME={args[0]}")
                 elif cmd == "configure_file":
                     self._process_configure_file(cmake_env, package, raw_args)
                 elif cmd == "aux_source_directory":
