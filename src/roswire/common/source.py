@@ -596,4 +596,8 @@ class CMakeExtractor(abc.ABC):
         # Writing to the container doesn't persist, and so generated sources
         # aren't able to be included. Put this in a list so that we can remember them
         # and not try to resolve them to real files
-        self._files_generated_by_cmake.add(args[1])
+        if len(args) >= 2:
+            self._files_generated_by_cmake.add(args[1])
+        else:
+            # We warn because we ignore generated files
+            logger.warning(f"'{cmake_env['cmakelists']}' has no target for 'configure_fle({rawargs})")
