@@ -266,7 +266,7 @@ class CMakeExtractor(abc.ABC):
                 cmd = cmd.lower()
                 if cmd == "project":
                     opts, args = cmake_argparse(raw_args, {})
-                    cmake_env = cmake_env.copy()
+                    # cmake_env = cmake_env.copy()
                     cmake_env["PROJECT_NAME"] = args[0]
                     cmake_env['CMAKE_CURRENT_BINARY_DIR'] = \
                         os.path.join(cmake_env['CMAKE_CURRENT_BINARY_DIR'], args[0])
