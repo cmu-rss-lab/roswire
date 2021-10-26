@@ -187,7 +187,6 @@ class CMakeExtractor(abc.ABC):
         nodelets_xml_path = os.path.join(workspace, 'nodelet_plugins.xml')
         if not self._app_instance.files.isfile(nodelets_xml_path):
             # Read from the package database
-            logger.info("Is nodelet plugin defined in package.xml?")
             try:
                 defn = self._app_instance.description.packages.get_package_definition(package, self._app_instance)
                 for export in defn.exports:
@@ -200,7 +199,6 @@ class CMakeExtractor(abc.ABC):
             except InvalidPackage:
                 logger.warning("Failed to parse package.xml")
 
-        logger.debug(f"Looking for nodelet plugin file: {nodelets_xml_path}")
         if self._app_instance.files.exists(nodelets_xml_path):
             logger.debug(f"Reading plugin information from {nodelets_xml_path}")
             contents = self._app_instance.files.read(nodelets_xml_path)
@@ -211,7 +209,6 @@ class CMakeExtractor(abc.ABC):
             entrypoints = {info.name.split('/')[1]: info for info in nodelet_info.libraries if '/' in info.name}
             entrypoints.update({info.name: info for info in nodelet_info.libraries if '/' not in info.name})
             return entrypoints
-        logger.warning(f"The specified '{nodelets_xml_path}' does not exist.")
         return {}
 
     def _info_from_cmakelists(self, cmakelists_path: str, package: Package) -> CMakeInfo:
@@ -273,6 +270,7 @@ class CMakeExtractor(abc.ABC):
                     cmake_env["PROJECT_NAME"] = args[0]
                     cmake_env['CMAKE_CURRENT_BINARY_DIR'] = \
                         os.path.join(cmake_env['CMAKE_CURRENT_BINARY_DIR'], args[0])
+                    logger.error(f"Setting PROJECT_NAME={args[0]}")
                 elif cmd == "configure_file":
                     self._process_configure_file(cmake_env, package, raw_args)
                 elif cmd == "aux_source_directory":
