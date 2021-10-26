@@ -297,7 +297,7 @@ class CMakeExtractor(abc.ABC):
                     opts, args = cmake_argparse(raw_args, {"CACHE": "-"})
                     cmake_env[args[0]] = ""
                 elif cmd == "file":
-                    logger.warning(f'Processing file directive: {raw_args}')
+                    logger.debug(f'Processing file directive: {raw_args}')
                     opts, args = cmake_argparse(raw_args, {'FOLLOW_SYMLINKS': '-',
                                                            'LIST_DIRECTORIES': '?',
                                                            'RELATIVE': '?',
