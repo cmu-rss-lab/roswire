@@ -4,14 +4,13 @@ __all__ = ("LaunchConfig",)
 import xml.dom.minidom as minidom
 import xml.etree.ElementTree as ET
 from typing import (
-    AbstractSet,
     Any,
     Collection,
     Dict,
+    List,
     Mapping,
     Optional,
     Sequence,
-    Set,
     Tuple,
 )
 
@@ -32,9 +31,7 @@ from ....name import (
 
 @attr.s(frozen=True, slots=True)
 class LaunchConfig:
-    nodes: AbstractSet[NodeConfig] = attr.ib(
-        default=frozenset(), converter=frozenset
-    )
+    nodes: Sequence[NodeConfig] = attr.ib(default=())
     executables: Sequence[str] = attr.ib(default=())
     roslaunch_files: Sequence[str] = attr.ib(default=())
     params: Mapping[str, Any] = attr.ib(factory=dict)
@@ -59,7 +56,7 @@ class LaunchConfig:
         nodes: Dict[str, NodeConfig] = {n.name: n for n in self.nodes}
         for node_name, prefix in prefixes.items():
             nodes[node_name] = nodes[node_name].with_launch_prefix(prefix)
-        return attr.evolve(self, nodes=frozenset(nodes.values()))
+        return attr.evolve(self, nodes=list(nodes.values()))
 
     def with_env(self, name: str, value: str) -> "LaunchConfig":
         """Adds an environment variable to this configuration."""
@@ -117,12 +114,12 @@ class LaunchConfig:
         self,
         node_to_remappings: Mapping[str, Collection[Tuple[str, str]]],  # noqa
     ) -> "LaunchConfig":
-        nodes: Set[NodeConfig] = set()
+        nodes: List[NodeConfig] = []
         for node in self.nodes:
             if node.name in node_to_remappings:
                 node = node.with_remappings(node_to_remappings[node.name])
-            nodes.add(node)
-        return attr.evolve(self, nodes=frozenset(nodes))
+            nodes.append(node)
+        return attr.evolve(self, nodes=nodes)
 
     def with_executable(self, executable: str) -> "LaunchConfig":
         """Specify an executable that should be run at launch."""
@@ -140,7 +137,7 @@ class LaunchConfig:
             m = "multiple definitions of node [{}] in launch configuration"
             m = m.format(node.full_name)
             raise FailedToParseLaunchFile(m)
-        nodes = self.nodes | frozenset({node})
+        nodes = self.nodes | [node]
         return attr.evolve(self, nodes=nodes)
 
     def to_xml_tree(self) -> ET.ElementTree:
