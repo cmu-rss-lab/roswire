@@ -137,7 +137,7 @@ class LaunchConfig:
             m = "multiple definitions of node [{}] in launch configuration"
             m = m.format(node.full_name)
             raise FailedToParseLaunchFile(m)
-        nodes = self.nodes | [node]
+        nodes = self.nodes | list(node)
         return attr.evolve(self, nodes=nodes)
 
     def to_xml_tree(self) -> ET.ElementTree:
