@@ -31,7 +31,7 @@ from ....name import (
 
 @attr.s(frozen=True, slots=True)
 class LaunchConfig:
-    nodes: Sequence[NodeConfig] = attr.ib(default=())
+    nodes: Tuple[NodeConfig, ...] = attr.ib(default=())
     executables: Sequence[str] = attr.ib(default=())
     roslaunch_files: Sequence[str] = attr.ib(default=())
     params: Mapping[str, Any] = attr.ib(factory=dict)
@@ -138,7 +138,7 @@ class LaunchConfig:
             m = m.format(node.full_name)
             raise FailedToParseLaunchFile(m)
         nodes = self.nodes + (node,)
-        return attr.evolve(self, nodes=nodes)
+        return attr.evolve(self, nodes=tuple(nodes))
 
     def to_xml_tree(self) -> ET.ElementTree:
         root = ET.Element("launch")
