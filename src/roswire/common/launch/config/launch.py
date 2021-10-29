@@ -56,7 +56,7 @@ class LaunchConfig:
         nodes: Dict[str, NodeConfig] = {n.name: n for n in self.nodes}
         for node_name, prefix in prefixes.items():
             nodes[node_name] = nodes[node_name].with_launch_prefix(prefix)
-        return attr.evolve(self, nodes=list(nodes.values()))
+        return attr.evolve(self, nodes=tuple(nodes.values()))
 
     def with_env(self, name: str, value: str) -> "LaunchConfig":
         """Adds an environment variable to this configuration."""
@@ -137,7 +137,7 @@ class LaunchConfig:
             m = "multiple definitions of node [{}] in launch configuration"
             m = m.format(node.full_name)
             raise FailedToParseLaunchFile(m)
-        nodes = self.nodes | list(node)
+        nodes = self.nodes + (node,)
         return attr.evolve(self, nodes=nodes)
 
     def to_xml_tree(self) -> ET.ElementTree:
