@@ -30,7 +30,7 @@ from ....name import (
 
 @attr.s(frozen=True, slots=True)
 class LaunchConfig:
-    nodes: Sequence[NodeConfig, ...] = attr.ib(default=())
+    nodes: Sequence[NodeConfig] = attr.ib(default=())
     executables: Sequence[str] = attr.ib(default=())
     roslaunch_files: Sequence[str] = attr.ib(default=())
     params: Mapping[str, Any] = attr.ib(factory=dict)
