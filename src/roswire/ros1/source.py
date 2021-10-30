@@ -102,4 +102,5 @@ class ROS1PackageSourceExtractor(CMakeExtractor):
         dict_['CATKIN_DEVEL_PREFIX'] = os.path.join(paths.pop(), package.name)
         dict_['CMAKE_BINARY_DIR'] = os.path.join(workspace, 'build')
         dict_['CMAKE_CURRENT_BINARY_DIR'] = os.path.join(dict_['CMAKE_BINARY_DIR'], package.name)
+        dict_['PROJECT_NAME'] = package.name  # Put package name as default project, overwritten by project(...)
         return dict_
