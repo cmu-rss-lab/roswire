@@ -11,7 +11,6 @@ from typing import (
     Mapping,
     Optional,
     Sequence,
-    Tuple,
 )
 
 import attr
@@ -31,7 +30,7 @@ from ....name import (
 
 @attr.s(frozen=True, slots=True)
 class LaunchConfig:
-    nodes: Tuple[NodeConfig, ...] = attr.ib(default=())
+    nodes: Sequence[NodeConfig, ...] = attr.ib(default=())
     executables: Sequence[str] = attr.ib(default=())
     roslaunch_files: Sequence[str] = attr.ib(default=())
     params: Mapping[str, Any] = attr.ib(factory=dict)
