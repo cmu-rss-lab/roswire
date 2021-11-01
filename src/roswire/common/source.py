@@ -222,7 +222,7 @@ class CMakeExtractor(abc.ABC):
             if nodelet in info.targets:
                 info.targets[library.name] = info.targets[nodelet]
             else:
-                potential_matches = [key for key in info.keys() if key in library.path or key in library.name]
+                potential_matches = [key for key in info.targets.keys() if key in library.path or key in library.name]
                 if potential_matches:
                     info.targets[library.name.partition('/')[-1]] = info.targets[potential_matches[0].partition('/')[-1]]
 
