@@ -222,6 +222,12 @@ class CMakeExtractor(abc.ABC):
             if nodelet in info.targets:
                 info.targets[library.name] = info.targets[nodelet]
             else:
+                # This is a hack. What really needs to be done is to look through all
+                # the source files in info.targets to find which info.target defines the
+                # class in library.name or library.type, then add that target keyed by
+                # the type as well. This is needed because nodelets can be loaded into
+                # managers by their class name.
+                # TODO: Fix post paper
                 potential_matches = [key for key in info.targets.keys() if key in library.path or key in library.name]
                 if potential_matches:
                     info.targets[library.name.split('/')[-1]] = info.targets[potential_matches[0].split('/')[-1]]
