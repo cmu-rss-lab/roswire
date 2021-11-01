@@ -221,6 +221,11 @@ class CMakeExtractor(abc.ABC):
         for nodelet, library in nodelet_libraries.items():
             if nodelet in info.targets:
                 info.targets[library.name] = info.targets[nodelet]
+            else:
+                potential_matches = [key for key in info.keys() if key in library.path or key in library.name]
+                if potential_matches:
+                    info.targets[library.name.partition('/')[-1]] = info.targets[potential_matches[0].partition('/')[-1]]
+
         for nodelet, library in nodelet_libraries.items():
             if nodelet not in info.targets:
                 logger.warning(f"info.targets={info.targets}")
