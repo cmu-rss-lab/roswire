@@ -570,7 +570,7 @@ class CMakeExtractor(abc.ABC):
             # All others are in scripts/. So just include python installs
             # that are in nodes/
             if program.startswith("nodes/"):
-                name = Path(program[0]).stem
+                name = Path(program).stem
                 sources: t.Set[str] = set()
                 source = self._resolve_to_real_file(program, package, cmake_env)
                 if source:
