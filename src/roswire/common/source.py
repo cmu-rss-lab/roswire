@@ -240,8 +240,10 @@ class CMakeExtractor(abc.ABC):
                                f"CMakeLists.txt.")
             else:
                 target = info.targets[nodelet]
-                assert isinstance(target, CMakeLibraryTarget)
-                target.entrypoint = library.entrypoint
+                if isinstance(target, CMakeLibraryTarget):
+                    target.entrypoint = library.entrypoint
+                else:
+                    logger.error(f"'{nodelet}' does not seem to be nodelet: {type(target)}")
         return info
 
     def _process_cmake_contents(
