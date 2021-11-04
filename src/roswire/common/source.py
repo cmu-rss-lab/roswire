@@ -324,7 +324,9 @@ class CMakeExtractor(abc.ABC):
                 elif cmd == "add_executable" or cmd == 'cuda_add_executable':
                     opts, args = cmake_argparse(
                         raw_args,
-                        {"EXCLUDE_FROM_ALL": "-"}
+                        {"EXCLUDE_FROM_ALL": "-",
+                         "WIN32": "-",
+                         "MACOSX_BUNDLE": "-"}
                     )
                     if not opts['EXCLUDE_FROM_ALL']:
                         self.__process_add_executable(
