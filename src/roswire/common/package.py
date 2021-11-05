@@ -101,7 +101,7 @@ class PackageDatabase(t.Generic[PT], ABC, t.Mapping[str, PT]):
         FileNotFoundError
             if no package is found at a given path.
         """
-        packages: t.List[PT] = []
+        packages: t.Dict[str, PT] = {}
         for p in paths:
             try:
                 package = cls._build_package(app_instance, p)
@@ -110,8 +110,9 @@ class PackageDatabase(t.Generic[PT], ABC, t.Mapping[str, PT]):
                 if not ignore_bad_paths:
                     raise
             else:
-                packages.append(package)
-        return cls.from_packages(packages)
+                if package.name not in packages:
+                    packages[package.name] = package
+        return cls.from_packages(packages.values())
 
     @classmethod
     @abstractmethod
