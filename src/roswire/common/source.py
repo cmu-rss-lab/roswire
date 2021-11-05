@@ -240,10 +240,8 @@ class CMakeExtractor(abc.ABC):
                                f"CMakeLists.txt.")
             else:
                 target = info.targets[nodelet]
-                if isinstance(target, CMakeLibraryTarget):
-                    target.entrypoint = library.entrypoint
-                else:
-                    logger.error(f"'{nodelet}' does not seem to be nodelet: {type(target)}")
+                assert isinstance(target, CMakeLibraryTarget)
+                target.entrypoint = library.entrypoint
         return info
 
     def _process_cmake_contents(
@@ -326,9 +324,7 @@ class CMakeExtractor(abc.ABC):
                 elif cmd == "add_executable" or cmd == 'cuda_add_executable':
                     opts, args = cmake_argparse(
                         raw_args,
-                        {"EXCLUDE_FROM_ALL": "-",
-                         "WIN32": "-",
-                         "MACOSX_BUNDLE": "-"}
+                        {"EXCLUDE_FROM_ALL": "-"}
                     )
                     if not opts['EXCLUDE_FROM_ALL']:
                         self.__process_add_executable(
