@@ -51,7 +51,7 @@ Loader = Callable[
 def _read_contents(tag: ET.Element) -> str:
     """Reads the text contents of an XML element."""
     # FIXME add support for CDATA -- possibly via lxml or xml.dom?
-    return tag.text | ""  # return "".join(t.text for t in tag if t.text)
+    return tag.text if tag.text else ""  # return "".join(t.text for t in tag if t.text)
 
 
 def _parse_bool(attr: str, val: str) -> bool:
