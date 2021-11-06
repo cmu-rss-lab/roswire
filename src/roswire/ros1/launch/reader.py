@@ -38,7 +38,7 @@ from ...name import (
 )
 
 if typing.TYPE_CHECKING:
-    from ... import AppInstance
+    from src import AppInstance
 
 _TAG_TO_LOADER = {}
 
@@ -51,7 +51,7 @@ Loader = Callable[
 def _read_contents(tag: ET.Element) -> str:
     """Reads the text contents of an XML element."""
     # FIXME add support for CDATA -- possibly via lxml or xml.dom?
-    return "".join(t.text for t in tag if t.text)
+    return tag.text  # return "".join(t.text for t in tag if t.text)
 
 
 def _parse_bool(attr: str, val: str) -> bool:
@@ -372,7 +372,10 @@ class ROS1LaunchFileReader(LaunchFileReader):
 
         # locate node executable and determine the type
         executable_path = self.locate_node_binary(package, node_type)
-        executable_type = self._get_executable_type(executable_path)
+        if executable_path != "\\unknown":
+            executable_type = self._get_executable_type(executable_path)
+        else:
+            executable_type = "\\unknown"
 
         node = NodeConfig(
             name=name,
@@ -652,7 +655,8 @@ class ROS1LaunchFileReader(LaunchFileReader):
                 f"unable to locate binary for node_type [{node_type}] "
                 f"in package [{package}]"
             )
-            raise ValueError(m)
+            logger.error(m)
+            return "\\unknown"
 
         logger.debug(
             f"located binary for node_type [{node_type}] "
