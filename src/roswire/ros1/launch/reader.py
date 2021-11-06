@@ -51,7 +51,7 @@ Loader = Callable[
 def _read_contents(tag: ET.Element) -> str:
     """Reads the text contents of an XML element."""
     # FIXME add support for CDATA -- possibly via lxml or xml.dom?
-    return tag.text  # return "".join(t.text for t in tag if t.text)
+    return tag.text  | ""  # return "".join(t.text for t in tag if t.text)
 
 
 def _parse_bool(attr: str, val: str) -> bool:
@@ -375,7 +375,8 @@ class ROS1LaunchFileReader(LaunchFileReader):
         if executable_path != "\\unknown":
             executable_type = self._get_executable_type(executable_path)
         else:
-            executable_type = "\\unknown"
+            # FiXME: should be an unknown
+            executable_type = ExecutableType.PYTHON
 
         node = NodeConfig(
             name=name,
