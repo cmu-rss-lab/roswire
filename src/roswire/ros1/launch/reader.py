@@ -38,7 +38,7 @@ from ...name import (
 )
 
 if typing.TYPE_CHECKING:
-    from src import AppInstance
+    from ... import AppInstance
 
 _TAG_TO_LOADER = {}
 
