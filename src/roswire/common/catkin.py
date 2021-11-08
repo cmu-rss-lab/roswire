@@ -84,7 +84,8 @@ class CatkinInterface(abc.ABC):
             if removing directories fail.
         """
         files = self._files
-        for rm_directory in ["build", "devel", "install"]:
+        for rm_directory in ["build", "devel", "install",
+                             "build_isolated", "devel_isolated"]:
             path = os.path.join(self.directory, rm_directory)
             if files.exists(path):
                 try:
@@ -183,6 +184,7 @@ class CatkinMake(CatkinInterface):
     directory: str
     _shell: dockerblade.shell.Shell
     _files: dockerblade.files.FileSystem
+    _command: str = "catkin_make"
 
     def clean(
         self,
@@ -191,7 +193,7 @@ class CatkinMake(CatkinInterface):
         context: Optional[str] = None,
     ) -> None:
         shell = self._shell
-        command = ["catkin_make", "clean"]
+        command = [self._command, "clean"]
         if orphans:
             raise NotImplementedError
         if packages:
@@ -224,7 +226,7 @@ class CatkinMake(CatkinInterface):
         context: Optional[str] = None,
         time_limit: Optional[int] = None,
     ) -> None:
-        command = ["catkin_make"]
+        command = [self._command]
         if packages:
             command += ["--pkg"]
             command += [shlex.quote(p) for p in packages]
@@ -254,3 +256,51 @@ class CatkinMake(CatkinInterface):
         if result.returncode != 0:
             assert isinstance(result.output, str)
             raise CatkinBuildFailed(result.returncode, result.output)
+
+
+@attr.s(frozen=True, slots=True, auto_attribs=True)
+class CatkinMakeIsolated(CatkinMake):
+    """
+    Provides an interface to a catkin workspace
+    created via catkin_make_isolated.
+    """
+
+    directory: str
+    _shell: dockerblade.shell.Shell
+    _files: dockerblade.files.FileSystem
+    _command: str = "catkin_make_isolated"
+
+    def clean(
+        self,
+        packages: Optional[List[str]] = None,
+        orphans: bool = False,
+        context: Optional[str] = None,
+    ) -> None:
+        shell = self._shell
+        if orphans:
+            raise NotImplementedError
+        if not context:
+            context = self.directory
+
+        def rm_path(path: str) -> None:
+            if self._files.exists(path):
+                try:
+                    command = f"rm -r {path}"
+                    shell.check_output(command, text=True, cwd=context)
+                except dockerblade.exceptions.CalledProcessError as err:
+                    msg = (
+                        f'Failed to remove directory "{path}" '
+                        f"due to {err}"
+                    )
+                    logger.error(msg)
+                    raise CatkinException(msg)
+
+        for directory in ['build_isolated', 'devel_isolated']:
+            if packages:
+                for p in packages:
+                    path = os.path.join(directory, p)
+                    rm_path(path)
+            else:
+                rm_path(directory)
+
+        logger.debug("clean completed")
