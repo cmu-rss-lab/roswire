@@ -23,8 +23,8 @@ import roswire
 # -- Project information -----------------------------------------------------
 
 project = "roswire"
-copyright = "2020, Christopher Steven Timperley"
-author = "Christopher Steven Timperley"
+copyright = "2020, xxxxxxxxx xxxxxxxxxxxx"
+author = "xxxxxxxxxx xxxxxxxxxxx"
 
 # The short X.Y version
 version = roswire.__version__
@@ -101,7 +101,7 @@ html_theme_path = [solar_theme.theme_path]
 html_theme_options = {
     "description": DESCRIPTION,
     "fixed_sidebar": True,
-    "github_user": "ChrisTimperley",
+    "github_user": "xxxxxxxxxxxxx",
     "github_repo": "roswire",
     "github_type": "star",
 }
@@ -156,7 +156,7 @@ latex_documents = [
         master_doc,
         "roswire.tex",
         "ROSWire Documentation",
-        "Christopher Steven Timperley",
+        "xxxxxxxxxxxx",
         "manual",
     ),
 ]
@@ -213,7 +213,7 @@ epub_exclude_files = ["search.html"]
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "docker": ("https://docker-py.readthedocs.io/en/stable/", None),
-    "dockerblade": ("https://christimperley.github.io/dockerblade", None),
+    "dockerblade": ("https://xxxxxxxxxxxxxxxxxxx", None),
 }
 
 # -- Options for todo extension ----------------------------------------------

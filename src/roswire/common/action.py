@@ -16,7 +16,7 @@ MF = TypeVar("MF", bound=MsgFormat)
 @attr.s(frozen=True)
 class ActionFormat(ABC, Generic[MF]):
     """Provides an immutable definition of a
-    `ROS Action <https://www.christimperley.co.uk/roswire/>`_.
+    `ROS Action <https://xxxxxxxxxxxxxxxxxxxxx/roswire/>`_.
 
     Attributes
     ----------
