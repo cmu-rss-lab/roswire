@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 __all__ = ("AppInstance",)
 
-import os
-import shutil
 import typing
 from types import TracebackType
 from typing import Optional, Type
@@ -10,7 +8,6 @@ from typing import Optional, Type
 import attr
 import dockerblade
 from docker.models.images import Image as DockerImage
-from loguru import logger
 
 from ..common import TypeDatabase
 from ..common.catkin import CatkinInterface, CatkinMake, CatkinTools

@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 __all__ = ("App",)
 
-import os
-import tempfile
 import typing
 from typing import Any, Mapping, Optional, Sequence
 
