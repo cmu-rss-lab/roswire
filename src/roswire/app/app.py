@@ -144,11 +144,6 @@ class App:
         environment = dict(environment) if environment else {}
         volumes = dict(volumes) if volumes else {}
 
-        # generate a temporary shared directory
-        dir_containers = os.path.join(self._roswire.workspace, "containers")
-        os.makedirs(dir_containers, exist_ok=True)
-        host_workspace = tempfile.mkdtemp(dir=dir_containers)
-
         container = dockerblade.provision(
             image=self.image,
             command="/bin/sh",
@@ -156,10 +151,7 @@ class App:
             name=name,
             entrypoint="/bin/sh -c",
             environment=environment,
-            volumes={
-                host_workspace: {"bind": "/.roswire", "mode": "rw"},
-                **volumes,
-            },
+            volumes=volumes,
             ports=ports,
         )
 
