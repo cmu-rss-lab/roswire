@@ -158,7 +158,6 @@ class App:
         instance = AppInstance(
             app=self,
             dockerblade=container,
-            host_workspace=host_workspace,
         )
         return instance
 
