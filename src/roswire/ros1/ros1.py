@@ -66,14 +66,14 @@ class ROS1:
 
     @classmethod
     def for_app_instance(cls, instance: "AppInstance", port: int = 11311) -> "ROS1":
-        return ROS1(description=instance.app.description,
-                    shell=instance.shell,
-                    files=instance.files,
-                    ws_host=instance._host_workspace,
-                    ip_address=instance.ip_address,
-                    instance=instance,
-                    port=port,
-                    )
+        return ROS1(
+            description=instance.app.description,
+            shell=instance.shell,
+            files=instance.files,
+            ip_address=instance.ip_address,
+            instance=instance,
+            port=port,
+        )
 
     def __init__(
         self,
@@ -81,7 +81,6 @@ class ROS1:
         description: "AppDescription",
         shell: dockerblade.Shell,
         files: dockerblade.FileSystem,
-        ws_host: Optional[str],
         ip_address: str,
         port: int = 11311,
     ) -> None:
@@ -89,7 +88,7 @@ class ROS1:
         self.__description = description
         self.__shell = shell
         self.__files = files
-        self.__ws_host = ws_host
+        self.__ws_host = None
         assert port > 1023
         self.__port = port
         self.__ip_address = ip_address

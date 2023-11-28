@@ -233,7 +233,10 @@ class ROS1LaunchFileReader(LaunchFileReader):
         if val is not None:
             value = convert_str_to_type(val, typ)
         if textfile is not None:
-            value = self._files.read(textfile)
+            try:
+                value = self._files.read(textfile)
+            except dockerblade.exceptions.ContainerFileNotFound:
+                value = '' #TODO: FIX ME
         if binfile is not None:
             value = self._files.read(binfile, binary=True)
         if command is not None:
